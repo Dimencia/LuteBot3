@@ -1,0 +1,128 @@
+{
+  "Properties": [
+    {
+      "Item": "None",
+      "Value": ""
+    },
+    {
+      "Item": "SoundBoard",
+      "Value": "False"
+    },
+    {
+      "Item": "PlayList",
+      "Value": "False"
+    },
+    {
+      "Item": "TrackSelection",
+      "Value": "False"
+    },
+    {
+      "Item": "OnlineSync",
+      "Value": "False"
+    },
+    {
+      "Item": "LiveMidi",
+      "Value": "False"
+    },
+    {
+      "Item": "SoundEffects",
+      "Value": "True"
+    },
+    {
+      "Item": "ConsoleOpenMode",
+      "Value": "New"
+    },
+    {
+      "Item": "NoteConversionMode",
+      "Value": "0"
+    },
+    {
+      "Item": "LowestNoteId",
+      "Value": "0"
+    },
+    {
+      "Item": "AvaliableNoteCount",
+      "Value": "24"
+    },
+    {
+      "Item": "NoteCooldown",
+      "Value": "30"
+    },
+    {
+      "Item": "DebugMode",
+      "Value": "False"
+    },
+    {
+      "Item": "Play",
+      "Value": "Add"
+    },
+    {
+      "Item": "Next",
+      "Value": "Multiply"
+    },
+    {
+      "Item": "Previous",
+      "Value": "Divide"
+    },
+    {
+      "Item": "Ready",
+      "Value": "Substract"
+    },
+    {
+      "Item": "OpenConsole",
+      "Value": "Next"
+    },
+    {
+      "Item": "MordhauInputIniLocation",
+      "Value": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Mordhau\\Mordhau\\Config\\DefaultInput.ini"
+    },
+    {
+      "Item": "UserSavedConsoleKey",
+      "Value": "Next"
+    },
+    {
+      "Item": "MainWindowPos",
+      "Value": "0|0"
+    },
+    {
+      "Item": "SoundBoardPos",
+      "Value": "0|0"
+    },
+    {
+      "Item": "PlayListPos",
+      "Value": "0|0"
+    },
+    {
+      "Item": "TrackSelectionPos",
+      "Value": "0|0"
+    },
+    {
+      "Item": "LiveMidiPos",
+      "Value": "0|0"
+    },
+    {
+      "Item": "LastPlaylistLocation",
+      "Value": ""
+    },
+    {
+      "Item": "LastSoundBoardLocation",
+      "Value": ""
+    },
+    {
+      "Item": "LastMidiDeviceUsed",
+      "Value": "-1"
+    },
+	{
+      "Item": "LastMidiLowBoundUsed",
+      "Value": "-1"
+    }
+	,{
+      "Item": "VirtualKeyboardBinds",
+      "Value": ""
+    },
+	{
+      "Item": "LiveMidiListen",
+      "Value": "Decimal"
+    }
+  ]
+}

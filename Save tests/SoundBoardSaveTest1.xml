@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ArrayOfSoundBoardItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SoundBoardItem>
+    <Hotkey>NumPad7</Hotkey>
+    <Path>C:\Users\LeMontagnard\Documents\Visual Studio 2017\Projects\LuteBot\dump\ThemeA - Tetris.mid</Path>
+    <Name>ThemeA - Tetris</Name>
+  </SoundBoardItem>
+  <SoundBoardItem>
+    <Hotkey>NumPad8</Hotkey>
+    <Path>C:\Users\LeMontagnard\Documents\Visual Studio 2017\Projects\LuteBot\dump\GameofThrones.mid</Path>
+    <Name>GameofThrones</Name>
+  </SoundBoardItem>
+  <SoundBoardItem>
+    <Hotkey>NumPad9</Hotkey>
+    <Path>C:\Users\LeMontagnard\Documents\Visual Studio 2017\Projects\LuteBot\dump\Skyrim Theme.mid</Path>
+    <Name>Skyrim Theme</Name>
+  </SoundBoardItem>
+  <SoundBoardItem>
+    <Hotkey>NumPad4</Hotkey>
+    <Path>C:\Users\LeMontagnard\Documents\Visual Studio 2017\Projects\LuteBot\dump\The_Legend_of_Zelda_-_Ocarina_of_Time_-_Lost_Woods_by_BlueSCD.mid</Path>
+    <Name>The_Legend_of_Zelda_-_Ocarina_of_Time_-_Lost_Woods_by_BlueSCD</Name>
+  </SoundBoardItem>
+  <SoundBoardItem>
+    <Hotkey>NumPad5</Hotkey>
+  </SoundBoardItem>
+  <SoundBoardItem>
+    <Hotkey>NumPad6</Hotkey>
+  </SoundBoardItem>
+  <SoundBoardItem>
+    <Hotkey>NumPad1</Hotkey>
+  </SoundBoardItem>
+  <SoundBoardItem>
+    <Hotkey>NumPad2</Hotkey>
+  </SoundBoardItem>
+  <SoundBoardItem>
+    <Hotkey>NumPad3</Hotkey>
+    <Path>C:\Users\LeMontagnard\Documents\Visual Studio 2017\Projects\LuteBot\dump\ThomastheTankEngine.mid</Path>
+    <Name>ThomastheTankEngine</Name>
+  </SoundBoardItem>
+</ArrayOfSoundBoardItem>

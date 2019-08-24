@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ArrayOfPlayListItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <PlayListItem>
+    <Name>Mario-Sheet-Music-Overworld-Main-Theme</Name>
+    <Path>C:\Users\LeMontagnard\Documents\Visual Studio 2017\Projects\LuteBot\dump\Mario-Sheet-Music-Overworld-Main-Theme.mid</Path>
+    <IsActive>false</IsActive>
+  </PlayListItem>
+  <PlayListItem>
+    <Name>level1 - Doom</Name>
+    <Path>C:\Users\LeMontagnard\Documents\Visual Studio 2017\Projects\LuteBot\dump\level1 - Doom.mid</Path>
+    <IsActive>false</IsActive>
+  </PlayListItem>
+  <PlayListItem>
+    <Name>Smashmouth_-_All_Star</Name>
+    <Path>C:\Users\LeMontagnard\Documents\Visual Studio 2017\Projects\LuteBot\dump\Smashmouth_-_All_Star.mid</Path>
+    <IsActive>false</IsActive>
+  </PlayListItem>
+</ArrayOfPlayListItem>

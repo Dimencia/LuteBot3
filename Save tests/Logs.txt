@@ -1,0 +1,1044 @@
+[2018/8/27-16:32:42-MS:137] INFO - (LoggerManager):Logger Initialised
+[2018/8/27-16:32:53-MS:697] INFO - (LoggerForm):LoggerForm Initialised
+[2018/8/27-16:33:50-MS:801] INFO - (MordhauControl):Mordhau Note bounds updated. Lowest note : 36 Highest note : 60
+[2018/8/27-16:33:50-MS:803] INFO - (MordhauControl):Mordhau Note bounds updated. Lowest note : 48 Highest note : 72
+[2018/8/27-16:33:50-MS:806] INFO - (LuteBotForm):Loaded Channel profile
+[2018/8/27-16:33:50-MS:834] INFO - (LuteBotForm):Song : Skyrim Themeloaded successfully
+[2018/8/27-16:33:55-MS:249] INFO - (LuteBotForm):Playing now
+[2018/8/27-16:33:55-MS:256] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:33:55-MS:256] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:33:55-MS:284] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:33:56-MS:747] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:33:56-MS:747] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:33:56-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:33:56-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:33:57-MS:47] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:33:57-MS:47] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:33:57-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:33:57-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:33:58-MS:848] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:33:58-MS:848] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:33:58-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:33:58-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:0-MS:348] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:0-MS:348] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:0-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:0-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:0-MS:648] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:0-MS:648] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:0-MS:702] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:0-MS:702] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:2-MS:448] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:2-MS:448] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:2-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 66 ms since last note : 0
+[2018/8/27-16:34:2-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:2-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:2-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:2-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:3-MS:375] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:3-MS:425] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:3-MS:452] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:3-MS:452] WARN - (MordhauControl):Note overload : Couldn't play the midi note 62 ms since last note : 0
+[2018/8/27-16:34:3-MS:452] WARN - (MordhauControl):Note overload : Couldn't play the midi note 67 ms since last note : 0
+[2018/8/27-16:34:3-MS:452] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:3-MS:452] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:3-MS:452] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:3-MS:700] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:3-MS:700] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:4-MS:274] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:4-MS:274] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:4-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:4-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:4-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 69 ms since last note : 0
+[2018/8/27-16:34:4-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:4-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:4-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:4-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:4-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:5-MS:174] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:5-MS:174] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:5-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:5-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:5-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:5-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:5-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:5-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:5-MS:774] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:5-MS:774] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:5-MS:898] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:5-MS:898] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:5-MS:924] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:5-MS:924] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:6-MS:48] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:6-MS:48] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:6-MS:74] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:6-MS:74] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:6-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:6-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 66 ms since last note : 0
+[2018/8/27-16:34:6-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:6-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:6-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:6-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:6-MS:974] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:6-MS:974] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:7-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:7-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 62 ms since last note : 0
+[2018/8/27-16:34:7-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 67 ms since last note : 0
+[2018/8/27-16:34:7-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:7-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:7-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:7-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:7-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:7-MS:874] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:7-MS:874] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:7-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:7-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:7-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 69 ms since last note : 0
+[2018/8/27-16:34:7-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:7-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:7-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:8-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:8-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:8-MS:774] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:8-MS:774] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:8-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:8-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:8-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:8-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:8-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:9-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:9-MS:374] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:9-MS:374] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:9-MS:498] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:9-MS:498] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:9-MS:524] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:9-MS:524] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:9-MS:648] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:9-MS:648] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:9-MS:675] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:9-MS:675] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:9-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:9-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 66 ms since last note : 0
+[2018/8/27-16:34:9-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:9-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:9-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:10-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:10-MS:574] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:10-MS:574] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:10-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:10-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 62 ms since last note : 0
+[2018/8/27-16:34:10-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 67 ms since last note : 0
+[2018/8/27-16:34:10-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:10-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:10-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:10-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:10-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:11-MS:474] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:11-MS:474] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:11-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:11-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:11-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 69 ms since last note : 0
+[2018/8/27-16:34:11-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:11-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:11-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:11-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:11-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:12-MS:374] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:12-MS:374] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:12-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:12-MS:412] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 12
+[2018/8/27-16:34:12-MS:412] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 12
+[2018/8/27-16:34:12-MS:412] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 12
+[2018/8/27-16:34:12-MS:412] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 12
+[2018/8/27-16:34:12-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:12-MS:973] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:12-MS:973] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:13-MS:97] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:13-MS:97] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:13-MS:123] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:13-MS:123] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:13-MS:247] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:13-MS:247] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:13-MS:273] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:13-MS:273] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:13-MS:299] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:13-MS:299] WARN - (MordhauControl):Note overload : Couldn't play the midi note 66 ms since last note : 0
+[2018/8/27-16:34:13-MS:299] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:13-MS:299] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:13-MS:299] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:13-MS:601] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:14-MS:173] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:14-MS:173] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:14-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:14-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 62 ms since last note : 0
+[2018/8/27-16:34:14-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 67 ms since last note : 0
+[2018/8/27-16:34:14-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:14-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:14-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:14-MS:499] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:14-MS:499] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:15-MS:73] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:15-MS:73] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:15-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:15-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:15-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 69 ms since last note : 0
+[2018/8/27-16:34:15-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:15-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:15-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:15-MS:399] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:15-MS:399] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:15-MS:974] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:15-MS:974] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:16-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:16-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:16-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:16-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:16-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:16-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:16-MS:574] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:16-MS:574] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:16-MS:698] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:16-MS:698] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:16-MS:724] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:16-MS:724] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:16-MS:848] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:16-MS:848] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:16-MS:874] INFO - (MordhauControl):Converted the midi note : 40 into mordhau note : 52using OctaveTransposition
+[2018/8/27-16:34:16-MS:874] INFO - (MordhauControl):Will play the note : 4
+[2018/8/27-16:34:16-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:16-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:16-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:16-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:17-MS:174] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:17-MS:174] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:17-MS:298] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:17-MS:298] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:17-MS:324] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:17-MS:324] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:17-MS:448] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:17-MS:448] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:17-MS:474] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:17-MS:474] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:17-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:17-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:17-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:17-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:17-MS:774] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:17-MS:774] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:17-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:17-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:17-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:18-MS:198] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:18-MS:198] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:18-MS:224] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:18-MS:224] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:18-MS:348] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:18-MS:348] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:18-MS:374] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:18-MS:374] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:18-MS:648] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:18-MS:648] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:18-MS:678] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:18-MS:678] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:18-MS:948] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:18-MS:948] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:18-MS:975] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:18-MS:975] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:19-MS:248] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:19-MS:248] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:19-MS:274] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:19-MS:274] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:19-MS:574] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:19-MS:574] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:19-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:19-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:19-MS:998] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:19-MS:998] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:20-MS:24] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:20-MS:24] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:20-MS:148] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:20-MS:148] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:20-MS:174] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:20-MS:174] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:20-MS:448] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:20-MS:448] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:20-MS:474] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:20-MS:474] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:20-MS:748] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:20-MS:748] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:20-MS:774] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:20-MS:774] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:21-MS:48] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:21-MS:48] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:21-MS:75] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:21-MS:75] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:21-MS:374] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:21-MS:374] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:21-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:21-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 62 ms since last note : 0
+[2018/8/27-16:34:21-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:21-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:21-MS:798] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:21-MS:798] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:21-MS:824] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:21-MS:824] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:21-MS:948] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:21-MS:948] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:21-MS:975] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:21-MS:975] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:22-MS:248] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:22-MS:248] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:22-MS:274] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:22-MS:274] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:22-MS:548] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:22-MS:558] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:22-MS:585] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:22-MS:585] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:22-MS:848] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:22-MS:848] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:22-MS:875] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:22-MS:875] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:23-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:23-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:23-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 61 ms since last note : 0
+[2018/8/27-16:34:23-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:23-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 69 ms since last note : 0
+[2018/8/27-16:34:23-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:23-MS:598] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:23-MS:598] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:23-MS:625] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:23-MS:625] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:23-MS:748] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:23-MS:748] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:23-MS:774] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:23-MS:774] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:24-MS:48] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:24-MS:48] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:24-MS:75] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:24-MS:75] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:24-MS:348] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:24-MS:348] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:24-MS:374] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:24-MS:374] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:24-MS:648] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:24-MS:648] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:24-MS:674] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:24-MS:674] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:25-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 69 ms since last note : 0
+[2018/8/27-16:34:25-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:25-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:25-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:25-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:25-MS:398] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:25-MS:398] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:25-MS:424] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:25-MS:424] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:25-MS:548] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:25-MS:548] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:25-MS:574] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:25-MS:574] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:25-MS:848] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:25-MS:848] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:25-MS:874] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:25-MS:874] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:26-MS:148] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:26-MS:148] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:26-MS:174] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:26-MS:174] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:26-MS:448] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:26-MS:448] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:26-MS:474] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:26-MS:474] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:26-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:26-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 64 ms since last note : 0
+[2018/8/27-16:34:26-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:26-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:27-MS:198] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:27-MS:198] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:27-MS:225] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:27-MS:225] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:27-MS:348] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:27-MS:348] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:27-MS:375] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:27-MS:375] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:27-MS:648] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:27-MS:648] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:27-MS:674] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:27-MS:674] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:27-MS:948] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:27-MS:948] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:27-MS:974] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:27-MS:974] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:28-MS:248] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:28-MS:248] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:28-MS:274] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:28-MS:274] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:28-MS:574] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:28-MS:574] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:28-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:28-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:28-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:28-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:28-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:28-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:28-MS:998] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:28-MS:998] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:29-MS:50] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:29-MS:50] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:29-MS:148] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:29-MS:148] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:29-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:29-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:29-MS:448] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:29-MS:448] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:29-MS:501] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:29-MS:501] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:29-MS:748] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:29-MS:748] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:29-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:29-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:30-MS:48] INFO - (MordhauControl):Converted the midi note : 43 into mordhau note : 55using OctaveTransposition
+[2018/8/27-16:34:30-MS:48] INFO - (MordhauControl):Will play the note : 7
+[2018/8/27-16:34:30-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:30-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:30-MS:373] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:30-MS:373] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 73 ms since last note : 0
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:30-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:30-MS:797] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:30-MS:797] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:30-MS:850] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:30-MS:850] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:30-MS:947] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:30-MS:947] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:31-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:31-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:31-MS:247] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:31-MS:247] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:31-MS:299] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:31-MS:299] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:31-MS:547] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:31-MS:547] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:31-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:31-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:31-MS:847] INFO - (MordhauControl):Converted the midi note : 45 into mordhau note : 57using OctaveTransposition
+[2018/8/27-16:34:31-MS:847] INFO - (MordhauControl):Will play the note : 9
+[2018/8/27-16:34:31-MS:899] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:31-MS:899] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:32-MS:147] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:32-MS:147] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:32-MS:173] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:32-MS:173] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:32-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:32-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:32-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:32-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:32-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:32-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:32-MS:199] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:32-MS:447] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:32-MS:447] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:32-MS:474] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:32-MS:474] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:32-MS:597] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:32-MS:597] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:32-MS:623] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:32-MS:623] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:32-MS:747] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:32-MS:747] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:32-MS:774] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:32-MS:774] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:32-MS:897] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:32-MS:897] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:32-MS:923] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:32-MS:923] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:33-MS:47] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:33-MS:47] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:33-MS:73] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:33-MS:73] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:33-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:33-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:33-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:33-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:33-MS:99] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:33-MS:347] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:33-MS:347] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:33-MS:373] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:33-MS:373] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:33-MS:399] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:33-MS:399] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:33-MS:497] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:33-MS:497] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:33-MS:523] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:33-MS:523] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:33-MS:550] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:33-MS:564] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 14
+[2018/8/27-16:34:33-MS:647] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:33-MS:647] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:33-MS:673] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:33-MS:673] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:33-MS:699] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:33-MS:699] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:33-MS:798] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:33-MS:798] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:33-MS:824] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:33-MS:824] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:33-MS:850] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:33-MS:850] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:33-MS:948] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:33-MS:948] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:33-MS:974] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:33-MS:974] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:34-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:34-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:34-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:34-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:34-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:34-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:34-MS:248] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:34-MS:248] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:34-MS:275] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:34-MS:275] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:34-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:34-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:34-MS:548] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:34-MS:548] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:34-MS:574] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:34-MS:574] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:34-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:34-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:34-MS:848] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:34-MS:848] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:34-MS:874] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:34-MS:874] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:34-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:34-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:34-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:34-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:34-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:34-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:35-MS:148] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:35-MS:148] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:35-MS:175] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:35-MS:175] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:35-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:35-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:35-MS:448] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:35-MS:448] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:35-MS:474] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:35-MS:474] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:35-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:35-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:35-MS:748] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:35-MS:748] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:35-MS:774] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:35-MS:774] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:35-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:35-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:35-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:35-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:35-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:36-MS:48] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:48] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:74] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:74] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:198] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:198] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:224] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:224] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:348] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:348] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:374] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:374] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:498] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:498] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:524] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:524] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:648] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:648] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:36-MS:674] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:36-MS:674] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:36-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:36-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:36-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:36-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:36-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:36-MS:948] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:36-MS:948] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:36-MS:974] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:36-MS:974] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:37-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:37-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:37-MS:98] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:37-MS:98] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:37-MS:124] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:37-MS:124] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:37-MS:152] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:37-MS:152] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:37-MS:248] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:37-MS:248] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:37-MS:274] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:37-MS:274] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:37-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:37-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:37-MS:398] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:37-MS:398] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:37-MS:424] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:37-MS:424] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:37-MS:450] WARN - (MordhauControl):Note overload : Couldn't play the midi note 79 ms since last note : 0
+[2018/8/27-16:34:37-MS:450] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:37-MS:548] INFO - (MordhauControl):Converted the midi note : 79 into mordhau note : 67using OctaveTransposition
+[2018/8/27-16:34:37-MS:548] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:34:37-MS:574] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:37-MS:574] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:37-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:37-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:37-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:37-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:37-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:37-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:37-MS:848] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:37-MS:848] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:37-MS:874] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:37-MS:874] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:37-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:37-MS:901] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:38-MS:148] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:38-MS:148] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:38-MS:174] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:38-MS:174] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:38-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:38-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:38-MS:448] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:38-MS:448] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:38-MS:474] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:38-MS:474] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:38-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:38-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:38-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:38-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:38-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:38-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:38-MS:748] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:38-MS:748] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:38-MS:774] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:38-MS:774] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:38-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:38-MS:801] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:39-MS:48] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:39-MS:48] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:39-MS:74] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:39-MS:74] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:39-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:39-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:39-MS:348] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:39-MS:348] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:39-MS:374] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:39-MS:374] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:39-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:39-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:39-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:39-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:39-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:39-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:39-MS:648] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:39-MS:648] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:39-MS:674] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:39-MS:674] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:39-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:39-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:39-MS:798] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:39-MS:798] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:39-MS:824] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:39-MS:824] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:39-MS:850] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:39-MS:850] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:39-MS:948] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:39-MS:948] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:39-MS:974] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:39-MS:974] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:40-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:40-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:40-MS:98] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:40-MS:98] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:40-MS:124] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:40-MS:124] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:40-MS:151] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:40-MS:151] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:40-MS:248] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:40-MS:248] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:40-MS:274] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:40-MS:274] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:40-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:40-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:40-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:40-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:40-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:40-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:40-MS:548] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:40-MS:548] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:40-MS:574] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:40-MS:574] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:40-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:40-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:40-MS:698] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:40-MS:698] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:40-MS:724] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:40-MS:724] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:40-MS:751] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:40-MS:751] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:40-MS:848] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:40-MS:848] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:40-MS:874] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:40-MS:874] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:40-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:40-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:40-MS:998] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:40-MS:998] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:41-MS:24] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:41-MS:24] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:41-MS:50] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:41-MS:50] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:41-MS:148] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:41-MS:148] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:41-MS:174] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:41-MS:174] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:41-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:41-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:41-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:41-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:41-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:41-MS:201] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:41-MS:448] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:41-MS:448] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:41-MS:474] INFO - (MordhauControl):Converted the midi note : 85 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:41-MS:474] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:41-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:41-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:41-MS:748] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:41-MS:748] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:41-MS:774] INFO - (MordhauControl):Converted the midi note : 85 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:41-MS:774] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:41-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:41-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:41-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:41-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:41-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:41-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:42-MS:48] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:42-MS:48] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:42-MS:74] INFO - (MordhauControl):Converted the midi note : 85 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:42-MS:74] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:42-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:42-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:42-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:42-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:42-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:42-MS:100] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:42-MS:348] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:42-MS:348] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:42-MS:374] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:42-MS:374] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:42-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:42-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:42-MS:648] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:42-MS:648] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:42-MS:674] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:42-MS:674] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:42-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:42-MS:701] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:42-MS:948] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:42-MS:948] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:42-MS:974] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:42-MS:974] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:43-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:43-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:43-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:43-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:43-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:43-MS:0] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:43-MS:248] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:43-MS:248] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:43-MS:274] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:43-MS:274] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:43-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:43-MS:300] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:43-MS:398] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:43-MS:398] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:43-MS:425] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:43-MS:425] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:43-MS:455] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:43-MS:455] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:43-MS:548] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:43-MS:548] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:43-MS:574] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:43-MS:574] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:43-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:43-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:43-MS:698] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:43-MS:698] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:43-MS:724] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:43-MS:724] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:43-MS:751] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:43-MS:751] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:43-MS:848] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:43-MS:848] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:43-MS:874] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:43-MS:874] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:43-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:43-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:43-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:43-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:43-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:43-MS:900] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:44-MS:148] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:44-MS:148] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:44-MS:174] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:44-MS:174] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:44-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:44-MS:200] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:44-MS:298] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:44-MS:298] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:44-MS:325] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:44-MS:325] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:44-MS:351] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:44-MS:351] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:44-MS:448] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:44-MS:448] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:44-MS:474] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:44-MS:474] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:44-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:44-MS:500] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:44-MS:598] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:44-MS:598] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:44-MS:624] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:44-MS:624] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:44-MS:651] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:44-MS:651] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:44-MS:748] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:44-MS:748] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:44-MS:774] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:44-MS:774] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:44-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 43 ms since last note : 0
+[2018/8/27-16:34:44-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 55 ms since last note : 0
+[2018/8/27-16:34:44-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:44-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:44-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:44-MS:800] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:45-MS:48] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:45-MS:48] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:45-MS:74] INFO - (MordhauControl):Converted the midi note : 85 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:45-MS:74] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:45-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:45-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:45-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:45-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:45-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:45-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:45-MS:348] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:45-MS:348] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:45-MS:374] INFO - (MordhauControl):Converted the midi note : 85 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:45-MS:374] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:45-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:45-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:45-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 81 ms since last note : 0
+[2018/8/27-16:34:45-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:45-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:45-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:45-MS:648] INFO - (MordhauControl):Converted the midi note : 81 into mordhau note : 69using OctaveTransposition
+[2018/8/27-16:34:45-MS:669] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:34:45-MS:696] INFO - (MordhauControl):Converted the midi note : 85 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:45-MS:696] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:45-MS:722] WARN - (MordhauControl):Note overload : Couldn't play the midi note 45 ms since last note : 0
+[2018/8/27-16:34:45-MS:722] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:34:45-MS:722] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:45-MS:722] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:45-MS:722] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:45-MS:722] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:45-MS:948] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:45-MS:948] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:45-MS:974] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:45-MS:974] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:46-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:46-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:46-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 71 ms since last note : 0
+[2018/8/27-16:34:46-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 83 ms since last note : 0
+[2018/8/27-16:34:46-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:46-MS:1] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:46-MS:275] INFO - (MordhauControl):Converted the midi note : 83 into mordhau note : 71using OctaveTransposition
+[2018/8/27-16:34:46-MS:275] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:34:46-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:46-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:46-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 73 ms since last note : 0
+[2018/8/27-16:34:46-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 85 ms since last note : 0
+[2018/8/27-16:34:46-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:46-MS:301] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:46-MS:548] INFO - (MordhauControl):Converted the midi note : 73 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:46-MS:548] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:46-MS:574] INFO - (MordhauControl):Converted the midi note : 85 into mordhau note : 61using OctaveTransposition
+[2018/8/27-16:34:46-MS:574] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:34:46-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 40 ms since last note : 0
+[2018/8/27-16:34:46-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 52 ms since last note : 0
+[2018/8/27-16:34:46-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 74 ms since last note : 0
+[2018/8/27-16:34:46-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 78 ms since last note : 0
+[2018/8/27-16:34:46-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:46-MS:600] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:46-MS:698] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:46-MS:698] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:47-MS:747] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:47-MS:747] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:47-MS:773] INFO - (MordhauControl):Converted the midi note : 78 into mordhau note : 66using OctaveTransposition
+[2018/8/27-16:34:47-MS:773] INFO - (MordhauControl):Will play the note : 18
+[2018/8/27-16:34:47-MS:799] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:47-MS:799] WARN - (MordhauControl):Note overload : Couldn't play the midi note 66 ms since last note : 0
+[2018/8/27-16:34:47-MS:799] WARN - (MordhauControl):Note overload : Couldn't play the midi note 74 ms since last note : 0
+[2018/8/27-16:34:47-MS:799] WARN - (MordhauControl):Note overload : Couldn't play the midi note 86 ms since last note : 0
+[2018/8/27-16:34:47-MS:799] WARN - (MordhauControl):Note overload : Couldn't play the midi note 62 ms since last note : 0
+[2018/8/27-16:34:48-MS:47] INFO - (MordhauControl):Converted the midi note : 74 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:48-MS:47] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:48-MS:74] INFO - (MordhauControl):Converted the midi note : 86 into mordhau note : 62using OctaveTransposition
+[2018/8/27-16:34:48-MS:74] INFO - (MordhauControl):Will play the note : 14
+[2018/8/27-16:34:48-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 59 ms since last note : 0
+[2018/8/27-16:34:48-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 76 ms since last note : 0
+[2018/8/27-16:34:48-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 88 ms since last note : 0
+[2018/8/27-16:34:48-MS:101] WARN - (MordhauControl):Note overload : Couldn't play the midi note 54 ms since last note : 0
+[2018/8/27-16:34:48-MS:347] INFO - (MordhauControl):Converted the midi note : 76 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:48-MS:347] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:48-MS:374] INFO - (MordhauControl):Converted the midi note : 88 into mordhau note : 64using OctaveTransposition
+[2018/8/27-16:34:48-MS:374] INFO - (MordhauControl):Will play the note : 16
+[2018/8/27-16:34:48-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 50 ms since last note : 0
+[2018/8/27-16:34:48-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 78 ms since last note : 0
+[2018/8/27-16:34:48-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 90 ms since last note : 0
+[2018/8/27-16:34:48-MS:400] WARN - (MordhauControl):Note overload : Couldn't play the midi note 47 ms since last note : 0
+[2018/8/27-16:34:48-MS:497] INFO - (MordhauControl):Converted the midi note : 47 into mordhau note : 59using OctaveTransposition
+[2018/8/27-16:34:48-MS:497] INFO - (MordhauControl):Will play the note : 11
+[2018/8/27-16:34:49-MS:502] INFO - (LuteBotForm):Pausing now
+[2018/8/27-16:35:13-MS:216] INFO - (MordhauControl):Mordhau Note bounds updated. Lowest note : 24 Highest note : 48
+[2018/8/27-16:35:13-MS:216] INFO - (MordhauControl):Mordhau Note bounds updated. Lowest note : 24 Highest note : 48
+[2018/8/27-16:35:13-MS:250] INFO - (LuteBotForm):Loaded Channel profile
+[2018/8/27-16:35:13-MS:261] INFO - (LuteBotForm):Song : ThomastheTankEngineloaded successfully
+[2018/8/27-16:35:29-MS:243] INFO - (LuteBotForm):Playing now
+[2018/8/27-16:35:30-MS:458] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:30-MS:458] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:30-MS:761] INFO - (MordhauControl):Converted the midi note : 57 into mordhau note : 45using OctaveTransposition
+[2018/8/27-16:35:30-MS:761] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:35:31-MS:64] INFO - (MordhauControl):Converted the midi note : 59 into mordhau note : 47using OctaveTransposition
+[2018/8/27-16:35:31-MS:64] INFO - (MordhauControl):Will play the note : 23
+[2018/8/27-16:35:31-MS:367] INFO - (MordhauControl):Converted the midi note : 60 into mordhau note : 48using OctaveTransposition
+[2018/8/27-16:35:31-MS:367] INFO - (MordhauControl):Will play the note : 24
+[2018/8/27-16:35:32-MS:882] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:32-MS:882] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:35:35-MS:306] INFO - (MordhauControl):Converted the midi note : 57 into mordhau note : 45using OctaveTransposition
+[2018/8/27-16:35:35-MS:306] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:35:35-MS:609] INFO - (MordhauControl):Converted the midi note : 53 into mordhau note : 41using OctaveTransposition
+[2018/8/27-16:35:35-MS:609] INFO - (MordhauControl):Will play the note : 17
+[2018/8/27-16:35:35-MS:912] INFO - (MordhauControl):Converted the midi note : 57 into mordhau note : 45using OctaveTransposition
+[2018/8/27-16:35:35-MS:912] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:35:36-MS:215] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:36-MS:215] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:37-MS:707] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:37-MS:707] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:35:37-MS:734] WARN - (MordhauControl):Note overload : Couldn't play the midi note 57 ms since last note : 0
+[2018/8/27-16:35:38-MS:33] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:38-MS:33] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:38-MS:337] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:38-MS:337] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:38-MS:640] INFO - (MordhauControl):Converted the midi note : 57 into mordhau note : 45using OctaveTransposition
+[2018/8/27-16:35:38-MS:640] INFO - (MordhauControl):Will play the note : 21
+[2018/8/27-16:35:38-MS:796] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:38-MS:796] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:39-MS:525] INFO - (MordhauControl):Converted the midi note : 54 into mordhau note : 42using OctaveTransposition
+[2018/8/27-16:35:39-MS:525] INFO - (MordhauControl):Will play the note : 18
+[2018/8/27-16:35:39-MS:552] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:39-MS:552] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:39-MS:700] INFO - (MordhauControl):Converted the midi note : 54 into mordhau note : 42using OctaveTransposition
+[2018/8/27-16:35:39-MS:700] INFO - (MordhauControl):Will play the note : 18
+[2018/8/27-16:35:39-MS:852] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:39-MS:852] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:39-MS:998] INFO - (MordhauControl):Converted the midi note : 54 into mordhau note : 42using OctaveTransposition
+[2018/8/27-16:35:39-MS:998] INFO - (MordhauControl):Will play the note : 18
+[2018/8/27-16:35:40-MS:155] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:40-MS:155] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:40-MS:609] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:40-MS:609] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:41-MS:826] INFO - (MordhauControl):Converted the midi note : 54 into mordhau note : 42using OctaveTransposition
+[2018/8/27-16:35:41-MS:826] INFO - (MordhauControl):Will play the note : 18
+[2018/8/27-16:35:41-MS:973] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:41-MS:973] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:42-MS:124] INFO - (MordhauControl):Converted the midi note : 54 into mordhau note : 42using OctaveTransposition
+[2018/8/27-16:35:42-MS:124] INFO - (MordhauControl):Will play the note : 18
+[2018/8/27-16:35:42-MS:276] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:42-MS:276] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:42-MS:579] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:42-MS:579] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:35:43-MS:33] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:43-MS:33] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:35:43-MS:944] INFO - (MordhauControl):Converted the midi note : 51 into mordhau note : 39using OctaveTransposition
+[2018/8/27-16:35:43-MS:944] INFO - (MordhauControl):Will play the note : 15
+[2018/8/27-16:35:44-MS:398] INFO - (MordhauControl):Converted the midi note : 53 into mordhau note : 41using OctaveTransposition
+[2018/8/27-16:35:44-MS:398] INFO - (MordhauControl):Will play the note : 17
+[2018/8/27-16:35:44-MS:696] INFO - (MordhauControl):Converted the midi note : 54 into mordhau note : 42using OctaveTransposition
+[2018/8/27-16:35:44-MS:696] INFO - (MordhauControl):Will play the note : 18
+[2018/8/27-16:35:45-MS:4] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:45-MS:4] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:45-MS:610] INFO - (MordhauControl):Converted the midi note : 58 into mordhau note : 46using OctaveTransposition
+[2018/8/27-16:35:45-MS:610] INFO - (MordhauControl):Will play the note : 22
+[2018/8/27-16:35:46-MS:216] INFO - (MordhauControl):Converted the midi note : 53 into mordhau note : 41using OctaveTransposition
+[2018/8/27-16:35:46-MS:216] INFO - (MordhauControl):Will play the note : 17
+[2018/8/27-16:35:46-MS:821] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:46-MS:821] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:47-MS:427] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:47-MS:427] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:35:48-MS:782] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:48-MS:782] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:35:49-MS:246] INFO - (MordhauControl):Converted the midi note : 55 into mordhau note : 43using OctaveTransposition
+[2018/8/27-16:35:49-MS:246] INFO - (MordhauControl):Will play the note : 19
+[2018/8/27-16:35:49-MS:549] INFO - (MordhauControl):Converted the midi note : 54 into mordhau note : 42using OctaveTransposition
+[2018/8/27-16:35:49-MS:549] INFO - (MordhauControl):Will play the note : 18
+[2018/8/27-16:35:49-MS:852] INFO - (MordhauControl):Converted the midi note : 53 into mordhau note : 41using OctaveTransposition
+[2018/8/27-16:35:49-MS:852] INFO - (MordhauControl):Will play the note : 17
+[2018/8/27-16:35:50-MS:155] INFO - (MordhauControl):Converted the midi note : 53 into mordhau note : 41using OctaveTransposition
+[2018/8/27-16:35:50-MS:155] INFO - (MordhauControl):Will play the note : 17
+[2018/8/27-16:35:50-MS:462] INFO - (MordhauControl):Converted the midi note : 58 into mordhau note : 46using OctaveTransposition
+[2018/8/27-16:35:50-MS:462] INFO - (MordhauControl):Will play the note : 22
+[2018/8/27-16:35:50-MS:761] INFO - (MordhauControl):Converted the midi note : 58 into mordhau note : 46using OctaveTransposition
+[2018/8/27-16:35:50-MS:761] INFO - (MordhauControl):Will play the note : 22
+[2018/8/27-16:35:52-MS:423] INFO - (MordhauControl):Converted the midi note : 51 into mordhau note : 39using OctaveTransposition
+[2018/8/27-16:35:52-MS:423] INFO - (MordhauControl):Will play the note : 15
+[2018/8/27-16:35:52-MS:730] INFO - (MordhauControl):Converted the midi note : 51 into mordhau note : 39using OctaveTransposition
+[2018/8/27-16:35:52-MS:730] INFO - (MordhauControl):Will play the note : 15
+[2018/8/27-16:35:52-MS:882] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:52-MS:882] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:35:53-MS:190] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:53-MS:190] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:35:53-MS:488] INFO - (MordhauControl):Converted the midi note : 60 into mordhau note : 48using OctaveTransposition
+[2018/8/27-16:35:53-MS:488] INFO - (MordhauControl):Will play the note : 24
+[2018/8/27-16:35:53-MS:640] INFO - (MordhauControl):Converted the midi note : 60 into mordhau note : 48using OctaveTransposition
+[2018/8/27-16:35:53-MS:640] INFO - (MordhauControl):Will play the note : 24
+[2018/8/27-16:35:54-MS:852] INFO - (MordhauControl):Converted the midi note : 49 into mordhau note : 37using OctaveTransposition
+[2018/8/27-16:35:54-MS:852] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:35:55-MS:150] INFO - (MordhauControl):Converted the midi note : 49 into mordhau note : 37using OctaveTransposition
+[2018/8/27-16:35:55-MS:150] INFO - (MordhauControl):Will play the note : 13
+[2018/8/27-16:35:55-MS:306] INFO - (MordhauControl):Converted the midi note : 53 into mordhau note : 41using OctaveTransposition
+[2018/8/27-16:35:55-MS:306] INFO - (MordhauControl):Will play the note : 17
+[2018/8/27-16:35:55-MS:614] INFO - (MordhauControl):Converted the midi note : 53 into mordhau note : 41using OctaveTransposition
+[2018/8/27-16:35:55-MS:614] INFO - (MordhauControl):Will play the note : 17
+[2018/8/27-16:35:55-MS:912] INFO - (MordhauControl):Converted the midi note : 58 into mordhau note : 46using OctaveTransposition
+[2018/8/27-16:35:55-MS:912] INFO - (MordhauControl):Will play the note : 22
+[2018/8/27-16:35:56-MS:64] INFO - (MordhauControl):Converted the midi note : 58 into mordhau note : 46using OctaveTransposition
+[2018/8/27-16:35:56-MS:64] INFO - (MordhauControl):Will play the note : 22
+[2018/8/27-16:35:57-MS:882] INFO - (MordhauControl):Converted the midi note : 60 into mordhau note : 48using OctaveTransposition
+[2018/8/27-16:35:57-MS:882] INFO - (MordhauControl):Will play the note : 24
+[2018/8/27-16:35:58-MS:337] INFO - (MordhauControl):Converted the midi note : 60 into mordhau note : 48using OctaveTransposition
+[2018/8/27-16:35:58-MS:337] INFO - (MordhauControl):Will play the note : 24
+[2018/8/27-16:35:58-MS:943] INFO - (MordhauControl):Converted the midi note : 56 into mordhau note : 44using OctaveTransposition
+[2018/8/27-16:35:58-MS:943] INFO - (MordhauControl):Will play the note : 20
+[2018/8/27-16:36:11-MS:755] INFO - (SettingsForm):SettingsForm Initialised
+[2018/8/27-16:36:13-MS:307] INFO - (LoggerForm):LoggerForm Initialised
