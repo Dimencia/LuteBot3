@@ -45,6 +45,8 @@ namespace LuteBot
             this.onlineSyncToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trackFilteringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.liveInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.guildLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.timeSyncToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.focusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MusicProgressBar = new System.Windows.Forms.TrackBar();
@@ -57,7 +59,6 @@ namespace LuteBot
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.LoadFileButton = new System.Windows.Forms.Button();
             this.EndTimeLabel = new System.Windows.Forms.Label();
-            this.guildLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MusicProgressBar)).BeginInit();
             this.SuspendLayout();
@@ -114,7 +115,8 @@ namespace LuteBot
             this.onlineSyncToolStripMenuItem,
             this.trackFilteringToolStripMenuItem,
             this.liveInputToolStripMenuItem,
-            this.guildLibraryToolStripMenuItem});
+            this.guildLibraryToolStripMenuItem,
+            this.timeSyncToolStripMenuItem});
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "Open";
@@ -154,6 +156,21 @@ namespace LuteBot
             this.liveInputToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.liveInputToolStripMenuItem.Text = "Live Input";
             this.liveInputToolStripMenuItem.Click += new System.EventHandler(this.liveInputToolStripMenuItem_Click);
+            // 
+            // guildLibraryToolStripMenuItem
+            // 
+            this.guildLibraryToolStripMenuItem.Enabled = false;
+            this.guildLibraryToolStripMenuItem.Name = "guildLibraryToolStripMenuItem";
+            this.guildLibraryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.guildLibraryToolStripMenuItem.Text = "Guild Library";
+            this.guildLibraryToolStripMenuItem.Click += new System.EventHandler(this.GuildLibraryToolStripMenuItem_Click);
+            // 
+            // timeSyncToolStripMenuItem
+            // 
+            this.timeSyncToolStripMenuItem.Name = "timeSyncToolStripMenuItem";
+            this.timeSyncToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.timeSyncToolStripMenuItem.Text = "Time Sync";
+            this.timeSyncToolStripMenuItem.Click += new System.EventHandler(this.TimeSyncToolStripMenuItem_Click);
             // 
             // focusToolStripMenuItem
             // 
@@ -259,13 +276,6 @@ namespace LuteBot
             this.EndTimeLabel.TabIndex = 10;
             this.EndTimeLabel.Text = "00:00";
             // 
-            // guildLibraryToolStripMenuItem
-            // 
-            this.guildLibraryToolStripMenuItem.Name = "guildLibraryToolStripMenuItem";
-            this.guildLibraryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.guildLibraryToolStripMenuItem.Text = "Guild Library";
-            this.guildLibraryToolStripMenuItem.Click += new System.EventHandler(this.GuildLibraryToolStripMenuItem_Click);
-            // 
             // LuteBotForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -324,6 +334,7 @@ namespace LuteBot
         private ToolStripMenuItem focusToolStripMenuItem;
         private ToolStripMenuItem liveInputToolStripMenuItem;
         private ToolStripMenuItem guildLibraryToolStripMenuItem;
+        private ToolStripMenuItem timeSyncToolStripMenuItem;
     }
 }
 

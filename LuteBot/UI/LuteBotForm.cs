@@ -399,7 +399,7 @@ namespace LuteBot
             }
         }
 
-        private void Play()
+        public void Play()
         {
             if (ActionManager.AutoConsoleModeFromString(ConfigManager.GetProperty(PropertyItem.ConsoleOpenMode)) == ActionManager.AutoConsoleMode.Old)
             {
@@ -562,6 +562,14 @@ namespace LuteBot
         public static void SetGuildLibraryData(SortableBindingList<Song> songList)
         {
             GuildLibrarySongList = songList;
+        }
+
+        private void TimeSyncToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TimeSyncForm timeSyncForm = new TimeSyncForm(this);
+            
+                timeSyncForm.Show();
+            
         }
     }
 }

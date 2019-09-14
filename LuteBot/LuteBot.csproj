@@ -102,6 +102,12 @@
     <Compile Include="UI\KeyBindingForm.Designer.cs">
       <DependentUpon>KeyBindingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\TimeSyncForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\TimeSyncForm.Designer.cs">
+      <DependentUpon>TimeSyncForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Utils\Song.cs" />
     <Compile Include="UI\Utils\SortableBindingList.cs" />
     <Compile Include="UI\LiveInputForm.cs">
@@ -185,6 +191,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SoundBoardForm.resx">
       <DependentUpon>SoundBoardForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\TimeSyncForm.resx">
+      <DependentUpon>TimeSyncForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\TrackSelectionForm.resx">
       <DependentUpon>TrackSelectionForm.cs</DependentUpon>
