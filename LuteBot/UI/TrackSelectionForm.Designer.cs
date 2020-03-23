@@ -42,6 +42,9 @@ namespace LuteBot.UI
             this.SelectAllTracksCheckBox = new System.Windows.Forms.CheckBox();
             this.TrackListBox = new System.Windows.Forms.CheckedListBox();
             this.OffsetPanel = new System.Windows.Forms.Panel();
+            this.buttonAdvanced = new System.Windows.Forms.Button();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // ChannelsListBox
@@ -90,7 +93,7 @@ namespace LuteBot.UI
             this.AutoActivateCheckBox.AutoSize = true;
             this.AutoActivateCheckBox.Checked = true;
             this.AutoActivateCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.AutoActivateCheckBox.Location = new System.Drawing.Point(186, 540);
+            this.AutoActivateCheckBox.Location = new System.Drawing.Point(191, 602);
             this.AutoActivateCheckBox.Name = "AutoActivateCheckBox";
             this.AutoActivateCheckBox.Size = new System.Drawing.Size(154, 30);
             this.AutoActivateCheckBox.TabIndex = 11;
@@ -144,20 +147,43 @@ namespace LuteBot.UI
             // 
             // OffsetPanel
             // 
-            this.OffsetPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.OffsetPanel.AutoScroll = true;
+            this.OffsetPanel.Location = new System.Drawing.Point(0, 0);
+            this.OffsetPanel.Name = "OffsetPanel";
+            this.OffsetPanel.Size = new System.Drawing.Size(494, 159);
+            this.OffsetPanel.TabIndex = 16;
+            // 
+            // buttonAdvanced
+            // 
+            this.buttonAdvanced.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.buttonAdvanced.Location = new System.Drawing.Point(228, 565);
+            this.buttonAdvanced.Name = "buttonAdvanced";
+            this.buttonAdvanced.Size = new System.Drawing.Size(75, 23);
+            this.buttonAdvanced.TabIndex = 17;
+            this.buttonAdvanced.Text = "Advanced";
+            this.buttonAdvanced.UseVisualStyleBackColor = true;
+            this.buttonAdvanced.Click += new System.EventHandler(this.buttonAdvanced_Click);
+            // 
+            // panel1
+            // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.OffsetPanel.Location = new System.Drawing.Point(12, 398);
-            this.OffsetPanel.Name = "OffsetPanel";
-            this.OffsetPanel.Size = new System.Drawing.Size(513, 136);
-            this.OffsetPanel.TabIndex = 16;
+            this.panel1.AutoScroll = true;
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.OffsetPanel);
+            this.panel1.Location = new System.Drawing.Point(12, 398);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(513, 161);
+            this.panel1.TabIndex = 18;
             // 
             // TrackSelectionForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(537, 582);
-            this.Controls.Add(this.OffsetPanel);
+            this.ClientSize = new System.Drawing.Size(537, 644);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.buttonAdvanced);
             this.Controls.Add(this.TrackListLabel);
             this.Controls.Add(this.SelectAllTracksCheckBox);
             this.Controls.Add(this.TrackListBox);
@@ -168,13 +194,14 @@ namespace LuteBot.UI
             this.Controls.Add(this.SelectAllChannelsCheckBox);
             this.Controls.Add(this.ChannelsListBox);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "TrackSelectionForm";
             this.Text = "Track Selection";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TrackSelectionForm_Closing);
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -191,5 +218,7 @@ namespace LuteBot.UI
         private CheckBox SelectAllTracksCheckBox;
         private CheckedListBox TrackListBox;
         private Panel OffsetPanel;
+        private Button buttonAdvanced;
+        private Panel panel1;
     }
 }

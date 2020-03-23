@@ -6,10 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 
 namespace LuteBot.IO.Files
 {
@@ -145,10 +145,10 @@ namespace LuteBot.IO.Files
                 {
                     using (var stream = File.Open(path, FileMode.OpenOrCreate))
                     {
-                        var serializer = new XmlSerializer(typeof(T));
+                        var serializer = new DataContractSerializer(typeof(T));
                         try
                         {
-                            result = (T)serializer.Deserialize(stream);
+                            result = (T)serializer.ReadObject(stream);
                         }
                         catch (InvalidCastException)
                         {
@@ -168,8 +168,8 @@ namespace LuteBot.IO.Files
                 Directory.CreateDirectory(autoSavePath);
                 using (var stream = File.Create(path))
                 {
-                    var serializer = new XmlSerializer(typeof(T));
-                    serializer.Serialize(stream, target);
+                    var serializer = new DataContractSerializer(typeof(T));
+                    serializer.WriteObject(stream, target);
                 }
             }
         }
@@ -190,8 +190,8 @@ namespace LuteBot.IO.Files
                 }
                 using (var stream = File.Create(path))
                 {
-                    var serializer = new XmlSerializer(typeof(T));
-                    serializer.Serialize(stream, target);
+                    var serializer = new DataContractSerializer(typeof(T));
+                    serializer.WriteObject(stream, target);
                 }
             }
         }
@@ -204,10 +204,10 @@ namespace LuteBot.IO.Files
             {
                 using (var stream = File.Open(path, FileMode.OpenOrCreate))
                 {
-                    var serializer = new XmlSerializer(typeof(T));
+                    var serializer = new DataContractSerializer(typeof(T));
                     try
                     {
-                        result = (T)serializer.Deserialize(stream);
+                        result = (T)serializer.ReadObject(stream);
                         //dirty !!
                         if (typeof(T) == typeof(SoundBoard))
                         {

@@ -213,8 +213,30 @@ namespace LuteBot.Core.Midi
         {
             if (e.Error == null)
             {
-                base.LoadCompleted(this, e);
+                // We need to manually parse out data for Max and Min note for each Channel, in trackSelectionManager
+                trackSelectionManager.MaxNoteByChannel = new Dictionary<int, int>();
+                trackSelectionManager.MinNoteByChannel = new Dictionary<int, int>();
+                foreach(var track in sequence)
+                {
+                    foreach(var midiEvent in track.Iterator())
+                    {
 
+                        if (midiEvent.MidiMessage is ChannelMessage c && c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
+                        {
+                            if (!trackSelectionManager.MaxNoteByChannel.ContainsKey(c.MidiChannel))
+                                trackSelectionManager.MaxNoteByChannel.Add(c.MidiChannel, c.Data1);
+                            else if (trackSelectionManager.MaxNoteByChannel[c.MidiChannel] < c.Data1)
+                                trackSelectionManager.MaxNoteByChannel[c.MidiChannel] = c.Data1;
+
+                            if (!trackSelectionManager.MinNoteByChannel.ContainsKey(c.MidiChannel))
+                                trackSelectionManager.MinNoteByChannel.Add(c.MidiChannel, c.Data1);
+                            else if (trackSelectionManager.MinNoteByChannel[c.MidiChannel] > c.Data1)
+                                trackSelectionManager.MinNoteByChannel[c.MidiChannel] = c.Data1;
+                        }
+                    }
+                }
+
+                base.LoadCompleted(this, e);
                 mordhauOutDevice.HighMidiNoteId = sequence.MaxNoteId;
                 mordhauOutDevice.LowMidiNoteId = sequence.MinNoteId;
                 rustOutDevice.HighMidiNoteId = sequence.MaxNoteId;
@@ -267,7 +289,8 @@ namespace LuteBot.Core.Midi
                     if (!outDevice.IsDisposed) // If they change song prefs while playing, this can fail, so just skip then
                         try
                         {
-                            outDevice.Send(rustOutDevice.FilterNote(filtered, trackSelectionManager.NoteOffset));
+                            outDevice.Send(rustOutDevice.FilterNote(filtered, trackSelectionManager.NoteOffset +
+                                (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0)));
                         }
                         catch (Exception) { } // Ignore exceptions, again, they might edit things while it's trying to play
                     //}
@@ -275,7 +298,8 @@ namespace LuteBot.Core.Midi
                 }
                 else
                 {
-                    mordhauOutDevice.SendNote(trackSelectionManager.FilterMidiEvent(e.Message, e.TrackId), trackSelectionManager.NoteOffset);
+                    mordhauOutDevice.SendNote(trackSelectionManager.FilterMidiEvent(e.Message, e.TrackId), trackSelectionManager.NoteOffset + 
+                       (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0));
                 }
             }
             else

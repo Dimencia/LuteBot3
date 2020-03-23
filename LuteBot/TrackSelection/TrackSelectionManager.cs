@@ -12,9 +12,16 @@ namespace LuteBot.TrackSelection
     {
         private List<MidiChannelItem> midiChannels;
         private List<TrackItem> midiTracks;
+        private Dictionary<int, int> midiChannelOffsets = new Dictionary<int, int>();
+        private Dictionary<int, int> maxNoteByChannel = new Dictionary<int, int>();
+        private Dictionary<int, int> minNoteByChannel = new Dictionary<int, int>();
+
 
         public List<MidiChannelItem> MidiChannels { get => midiChannels; set { midiChannels = value; ResetRequest(); } }
         public List<TrackItem> MidiTracks { get => midiTracks; set { midiTracks = value; ResetRequest(); } }
+        public Dictionary<int, int> MidiChannelOffsets { get => midiChannelOffsets; set { midiChannelOffsets = value; ResetRequest(); } }
+        public Dictionary<int, int> MaxNoteByChannel { get => maxNoteByChannel; set { maxNoteByChannel = value; ResetRequest(); } }
+        public Dictionary<int, int> MinNoteByChannel { get => minNoteByChannel; set { minNoteByChannel = value; ResetRequest(); } }
         public bool ActivateAllChannels { get => activateAllChannels; set { activateAllChannels = value; ResetRequest(); } }
         public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
         public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
@@ -55,6 +62,7 @@ namespace LuteBot.TrackSelection
             data.MidiChannels = MidiChannels;
             data.MidiTracks = MidiTracks;
             data.Offset = NoteOffset;
+            data.MidiChannelOffsets = MidiChannelOffsets;
             SaveManager.SaveTrackSelectionData(data, FileName);
         }
 
@@ -66,6 +74,7 @@ namespace LuteBot.TrackSelection
                 this.midiChannels = data.MidiChannels;
                 this.midiTracks = data.MidiTracks;
                 this.NoteOffset = data.Offset;
+                this.MidiChannelOffsets = data.MidiChannelOffsets;
                 EventHelper();
             }
         }
