@@ -212,6 +212,14 @@ namespace LuteBot.UI
             Rectangle instrumentRect = new Rectangle(rectStartX, 1, (noteCount * columnWidth), rowHeight - 1);
             g.FillRectangle(instrumentBarBrush, instrumentRect);
 
+            int minNote = 0;
+            int maxNote = 127;
+            if (trackSelectionManager.MidiChannels.Count > 0)
+            {
+                minNote = trackSelectionManager.MidiChannels.Min((c) => trackSelectionManager.MinNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0));
+                maxNote = trackSelectionManager.MidiChannels.Max((c) => trackSelectionManager.MaxNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0));
+            }
+
             if (isAdvanced)
             {
                 channelRects = new Dictionary<MidiChannelItem, Rectangle>();
@@ -221,7 +229,7 @@ namespace LuteBot.UI
                 {
                     if (channel.Active)
                     {
-                        var offset = (trackSelectionManager.MidiChannelOffsets.ContainsKey(channel.Id) ?
+                        var offset = trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(channel.Id) ?
                             trackSelectionManager.MidiChannelOffsets[channel.Id] : 0);
                         Rectangle channelRect = new Rectangle(xPad + offset * columnWidth + trackSelectionManager.MinNoteByChannel[channel.Id] * columnWidth, currentY + 1,
                             (trackSelectionManager.MaxNoteByChannel[channel.Id] - trackSelectionManager.MinNoteByChannel[channel.Id]) * columnWidth, rowHeight - 1);
@@ -244,9 +252,14 @@ namespace LuteBot.UI
             }
             else
             {
+                // We're going to need to figure out the note range using adjusted offsets
+                // TODO: These might except if things aren't set for the channel.  Not sure
+                // I could also combine them into one iteration, this is two unnecessarily
+                
+                
                 // Draw draggableRect over the bg grid
                 // So the width is the midi's note range, it starts at offset.  
-                draggableRect = new Rectangle(xPad + trackSelectionManager.NoteOffset * columnWidth + _rustOut.LowMidiNoteId * columnWidth, rowHeight + 1, (_rustOut.HighMidiNoteId - _rustOut.LowMidiNoteId) * columnWidth, rowHeight - 1);
+                draggableRect = new Rectangle(xPad + trackSelectionManager.NoteOffset * columnWidth + minNote * columnWidth, rowHeight + 1, (maxNote - minNote) * columnWidth, rowHeight - 1);
                 g.FillRectangle(draggableRectBrush, draggableRect);
             }
 
@@ -264,7 +277,7 @@ namespace LuteBot.UI
                     int labelY = height + padding + labelHeight;
                     foreach(var kvp in channelRects)
                     {
-                        int offset = trackSelectionManager.MidiChannelOffsets.ContainsKey(kvp.Key.Id) ? trackSelectionManager.MidiChannelOffsets[kvp.Key.Id] : 0;
+                        int offset = trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(kvp.Key.Id) ? trackSelectionManager.MidiChannelOffsets[kvp.Key.Id] : 0);
                         int midiLowest = trackSelectionManager.MinNoteByChannel[kvp.Key.Id] + offset;
                         int midiHighest = trackSelectionManager.MaxNoteByChannel[kvp.Key.Id] + offset;
                         if (note >= midiLowest && note <= midiHighest)
@@ -352,6 +365,11 @@ namespace LuteBot.UI
 
         private void InitLists()
         {
+            foreach (var channel in trackSelectionManager.MidiChannels)
+            { // This should help make sure we don't except if we're irresponsible with it
+                if(!trackSelectionManager.MidiChannelOffsets.ContainsKey(channel.Id))
+                    trackSelectionManager.MidiChannelOffsets[channel.Id] = 0;
+            }
             if (isAdvanced) // Reset size for this new track
             {
                 int numRows = 2; // Default
@@ -468,6 +486,16 @@ namespace LuteBot.UI
                 OffsetPanel.Size = new Size(originalPanelSize.Width, originalPanelSize.Height);
                 //ScrollBarForcer.Location = new Point(OffsetPanel.Location.X, OffsetPanel.Location.Y + OffsetPanel.Height);
                 //ScrollBarForcer.Visible = false;
+            }
+            Refresh();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            trackSelectionManager.NoteOffset = 0;
+            foreach(var channel in trackSelectionManager.MidiChannels)
+            {
+                trackSelectionManager.MidiChannelOffsets[channel.Id] = 0;
             }
             Refresh();
         }

@@ -44,6 +44,7 @@ namespace LuteBot.UI
             this.OffsetPanel = new System.Windows.Forms.Panel();
             this.buttonAdvanced = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -93,7 +94,7 @@ namespace LuteBot.UI
             this.AutoActivateCheckBox.AutoSize = true;
             this.AutoActivateCheckBox.Checked = true;
             this.AutoActivateCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.AutoActivateCheckBox.Location = new System.Drawing.Point(191, 602);
+            this.AutoActivateCheckBox.Location = new System.Drawing.Point(191, 565);
             this.AutoActivateCheckBox.Name = "AutoActivateCheckBox";
             this.AutoActivateCheckBox.Size = new System.Drawing.Size(154, 30);
             this.AutoActivateCheckBox.TabIndex = 11;
@@ -156,7 +157,7 @@ namespace LuteBot.UI
             // buttonAdvanced
             // 
             this.buttonAdvanced.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.buttonAdvanced.Location = new System.Drawing.Point(228, 565);
+            this.buttonAdvanced.Location = new System.Drawing.Point(13, 564);
             this.buttonAdvanced.Name = "buttonAdvanced";
             this.buttonAdvanced.Size = new System.Drawing.Size(75, 23);
             this.buttonAdvanced.TabIndex = 17;
@@ -177,11 +178,23 @@ namespace LuteBot.UI
             this.panel1.Size = new System.Drawing.Size(513, 161);
             this.panel1.TabIndex = 18;
             // 
+            // button1
+            // 
+            this.button1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.button1.Location = new System.Drawing.Point(416, 565);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(109, 23);
+            this.button1.TabIndex = 19;
+            this.button1.Text = "Reset Alignment";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // TrackSelectionForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(537, 644);
+            this.ClientSize = new System.Drawing.Size(537, 603);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.buttonAdvanced);
             this.Controls.Add(this.TrackListLabel);
@@ -220,5 +233,6 @@ namespace LuteBot.UI
         private Panel OffsetPanel;
         private Button buttonAdvanced;
         private Panel panel1;
+        private Button button1;
     }
 }
