@@ -49,6 +49,7 @@ namespace LuteBot.UI
             OffsetPanel.MouseLeave += OffsetPanel_MouseLeave;
             OffsetPanel.MouseCaptureChanged += OffsetPanel_MouseLeave; // These should do the same thing
             OffsetPanel.MouseMove += OffsetPanel_MouseMove;
+            OffsetPanel.MouseEnter += OffsetPanel_MouseEnter;
         }
 
         // This mouse stuff is going to suck
@@ -61,18 +62,21 @@ namespace LuteBot.UI
         {
             return Math.Sqrt(Math.Pow((p2.X - p1.X), 2) + Math.Pow(p2.Y - p1.Y,2));
         }
-
+        private void OffsetPanel_MouseEnter(object sender, EventArgs e) => OffsetPanel.Refresh();
         private void OffsetPanel_MouseMove(object sender, MouseEventArgs e)
         {
             if(dragging)
             {
                 // Set offset to (mousePost - dragStart)/columnWidth/12 (round to octaves...?)
                 int multiplier = (e.Location.X < dragStart.X ? -1 : 1); // Preserve sign
-                trackSelectionManager.NoteOffset = startOffset + (((int)(GetDistance(dragStart, e.Location)*multiplier / columnWidth)) / 12)*12;
+                int oldOffset = trackSelectionManager.NoteOffset;
+                trackSelectionManager.NoteOffset = startOffset + (int)Math.Round(((GetDistance(dragStart, e.Location)*multiplier / columnWidth)) / 12)*12;
+                if (trackSelectionManager.NoteOffset != oldOffset)
+                    Refresh();
             }
 
-            OffsetPanel.Refresh(); // See if this is laggy
-            // nope, it's fine after double buffering
+            //OffsetPanel.Refresh(); // See if this is laggy
+            // Yeah a little
 
         }
         private void OffsetPanel_MouseLeave(object sender, EventArgs e)
@@ -240,7 +244,7 @@ namespace LuteBot.UI
             // So after a timer, we're refreshing our OffsetPanel again
             Timer t = new Timer();
             t.Interval = 100;
-            t.Tick += (object sender, EventArgs e) => Invoke((MethodInvoker) delegate { OffsetPanel.Refresh();  t.Dispose(); });
+            t.Tick += (object sender, EventArgs e) => Invoke((MethodInvoker) delegate { if(this.IsHandleCreated) OffsetPanel.Refresh();  t.Dispose(); });
             t.Start();
         }
 

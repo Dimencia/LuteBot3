@@ -210,16 +210,24 @@ namespace LuteBot.UI
             var ipEndPoint = new IPEndPoint(addresses[0], 123);
             //NTP uses UDP
 
-            using (var socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            try
             {
-                socket.Connect(ipEndPoint);
+                using (var socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+                {
+                    socket.Connect(ipEndPoint);
 
-                //Stops code hang if NTP is blocked
-                socket.ReceiveTimeout = 3000;
+                    //Stops code hang if NTP is blocked
+                    socket.ReceiveTimeout = 3000;
 
-                socket.Send(ntpData);
-                socket.Receive(ntpData);
-                socket.Close();
+                    socket.Send(ntpData);
+                    socket.Receive(ntpData);
+                    socket.Close();
+                }
+            }
+            catch (Exception)
+            {
+                // Connection failed, default it to DateTime.UtcNow
+                return DateTime.UtcNow;
             }
 
             //Offset to get to the "Transmit Timestamp" field (time at which the reply 
