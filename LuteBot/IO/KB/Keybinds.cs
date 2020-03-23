@@ -14,6 +14,7 @@ namespace LuteBot.IO.KB
         Previous = PropertyItem.Previous,
         Ready = PropertyItem.Ready,
         OpenConsole = PropertyItem.OpenConsole,
-        LiveMidiListen = PropertyItem.LiveMidiListen
+        LiveMidiListen = PropertyItem.LiveMidiListen,
+        SynchronizedPlay = PropertyItem.SynchronizedPlay
     }
 }

@@ -66,7 +66,11 @@
     },
     {
       "Item": "Ready",
-      "Value": "Substract"
+      "Value": "Subtract"
+    },
+	{
+      "Item": "SynchronizedPlay",
+      "Value": "End"
     },
     {
       "Item": "OpenConsole",
@@ -123,6 +127,18 @@
 	{
       "Item": "LiveMidiListen",
       "Value": "Decimal"
+    },
+	{
+      "Item": "OutputDevice",
+      "Value": "0"
+    },
+	{
+      "Item": "Instrument",
+      "Value": "0"
+    },
+	{
+      "Item": "Server",
+      "Value": "127.0.0.1"
     }
   ]
 }

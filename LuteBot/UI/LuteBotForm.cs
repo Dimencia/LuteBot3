@@ -16,7 +16,10 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LuteBot
@@ -27,6 +30,8 @@ namespace LuteBot
         private const int WM_KEYDOWN = 0x0100;
         private static LowLevelKeyboardProc _proc = HookCallback;
         private static IntPtr _hookID = IntPtr.Zero;
+
+        public static readonly string libraryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\LuteBot\GuildLibrary\";
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
@@ -48,6 +53,7 @@ namespace LuteBot
         SoundBoardForm soundBoardForm;
         public PlayListForm playListForm;
         LiveInputForm liveInputForm;
+        TimeSyncForm timeSyncForm = null;
 
         Player player;
 
@@ -83,10 +89,11 @@ namespace LuteBot
             hotkeyManager = new HotkeyManager();
             hotkeyManager.NextKeyPressed += new EventHandler(NextButton_Click);
             hotkeyManager.PlayKeyPressed += new EventHandler(PlayButton_Click);
+            hotkeyManager.SynchronizePressed += HotkeyManager_SynchronizePressed;
             hotkeyManager.PreviousKeyPressed += new EventHandler(PreviousButton_Click);
             trackSelectionManager.OutDeviceResetRequest += new EventHandler(ResetDevice);
             trackSelectionManager.ToggleTrackRequest += new EventHandler<TrackItem>(ToggleTrack);
-            liveMidiManager = new LiveMidiManager();
+            liveMidiManager = new LiveMidiManager(trackSelectionManager);
             hotkeyManager.LiveInputManager = liveMidiManager;
 
             PlayButton.Enabled = false;
@@ -101,6 +108,30 @@ namespace LuteBot
             Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos));
             Top = coords.Y;
             Left = coords.X;
+
+            // We may package this with a guild library for now.  Check for it and extract it, if so
+            var files = Directory.GetFiles(Environment.CurrentDirectory, "BGML*.zip", SearchOption.TopDirectoryOnly);
+            if(files.Length > 0)
+            {
+                Task.Run(() =>
+                {
+                    // extract to libraryPath + "\songs\"
+                    try
+                    {
+                        ZipFile.ExtractToDirectory(files[0], libraryPath + @"\songs\");
+                        //File.Delete(files[0]);
+                    }
+                    catch (Exception e) { } // Gross I know, but no reason to do anything
+                });
+            }
+        }
+
+        private void HotkeyManager_SynchronizePressed(object sender, EventArgs e)
+        {
+            if(timeSyncForm != null)
+            {
+                timeSyncForm.StartAtNextInterval(10);
+            }
         }
 
         private void PlayerLoadCompleted(object sender, AsyncCompletedEventArgs e)
@@ -278,7 +309,8 @@ namespace LuteBot
             }
             if (ConfigManager.GetBooleanProperty(PropertyItem.TrackSelection))
             {
-                trackSelectionForm = new TrackSelectionForm(trackSelectionManager);
+                var midiPlayer = player as MidiPlayer;
+                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
                 trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
@@ -307,7 +339,7 @@ namespace LuteBot
 
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (new SettingsForm()).ShowDialog();
+            (new SettingsForm(player as MidiPlayer)).ShowDialog();
             player.Pause();
         }
 
@@ -407,6 +439,7 @@ namespace LuteBot
             }
             PlayButton.Text = playButtonStopString;
             player.Play();
+            
             timer1.Start();
             playButtonIsPlaying = true;
         }
@@ -501,7 +534,8 @@ namespace LuteBot
         {
             if (trackSelectionForm == null || trackSelectionForm.IsDisposed)
             {
-                trackSelectionForm = new TrackSelectionForm(trackSelectionManager);
+                var midiPlayer = player as MidiPlayer;
+                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
                 trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
@@ -566,8 +600,9 @@ namespace LuteBot
 
         private void TimeSyncToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TimeSyncForm timeSyncForm = new TimeSyncForm(this);
-            
+            if (timeSyncForm != null)
+                timeSyncForm.Dispose();
+            timeSyncForm = new TimeSyncForm(this);
                 timeSyncForm.Show();
             
         }

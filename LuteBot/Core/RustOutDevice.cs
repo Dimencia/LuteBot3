@@ -10,8 +10,12 @@ using System.Threading.Tasks;
 
 namespace LuteBot.Core
 {
-    public class MordhauOutDevice
+    public class RustOutDevice
     {
+        // To keep things simple...
+        // Selecting an instrument should simply set the lowNoteId and highNoteId and assume all else is well
+
+
         private int lowNoteId = 0;
         private int highNoteId = 24;
 
@@ -34,30 +38,42 @@ namespace LuteBot.Core
 
         private Stopwatch stopWatch;
 
-        public MordhauOutDevice()
+        public RustOutDevice()
         {
             stopWatch = new Stopwatch();
         }
 
         private void UpdateNoteIdBounds()
         {
+            // First, for these calcs, get the lowest C and highest C+11
+            var highMidiNoteId = HighMidiNoteId - HighMidiNoteId % 12 - 1;
+            var lowMidiNoteId = LowMidiNoteId - LowMidiNoteId % 12; // I remember this being more complicated but I guess not
+            
             int noteRange = highMidiNoteId - lowMidiNoteId;
+            
+
             int luteRange = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
-            if (noteRange > luteRange)
-            {
-                lowNoteId = ((noteRange / 2) + lowMidiNoteId) - (luteRange / 2);
-                highNoteId = ((noteRange / 2) + lowMidiNoteId) + (luteRange / 2);
-                lowNoteId = lowNoteId - (lowNoteId % 12);
-                highNoteId = highNoteId - (highNoteId % 12) - 1;
+            int luteLowestNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
+            //if (noteRange > luteRange)
+            //{
+                //lowNoteId = ((noteRange / 2) + (luteLowestNote - lowMidiNoteId)) - (luteRange / 2);
+                //highNoteId = ((noteRange / 2) + (luteLowestNote - lowMidiNoteId)) + (luteRange / 2);
+                //lowNoteId = lowNoteId - (lowNoteId % 12);
+                //highNoteId = highNoteId - (highNoteId % 12) - 1;
+                // I really don't get the above
+                lowNoteId = luteLowestNote;
+                highNoteId = luteLowestNote + luteRange;
                 conversionNeeded = true;
-            }
-            else
+            //}
+            // We need conversion either way because of the way we're working with offset
+            /*else
             {
                 conversionNeeded = false;
                 //if the note range of the midi is lower than the lute range
                 lowNoteId = lowMidiNoteId;
                 highNoteId = highMidiNoteId;
             }
+            */
         }
 
         private void ForceNoteBounds(int value, bool isLower)
@@ -82,17 +98,20 @@ namespace LuteBot.Core
                 int newData1 = 0;
                 int oldData1 = message.Data1 + offset;
                 int velocity = message.Data2;
-
                 if (oldData1 < lowNoteId)
                 {
-                    newData1 = lowNoteId + (oldData1 % 12);
+                    // We don't know if lowNoteId is a C or not
+                    //newData1 = lowNoteId + (oldData1 % 12); // Keeps the same note but moves to be within an octave of the lowest note
+                    newData1 = lowNoteId + (12 - lowNoteId % 12) + (oldData1 % 12); // Should get the nearest octave to lownote, then add oldData
                     outOfRange = true;
                 }
                 else
                 {
                     if (oldData1 > highNoteId)
                     {
-                        newData1 = (highNoteId - 11) + (oldData1 % 12);
+                        // Don't know if this is C ir not
+                        //newData1 = (highNoteId - 11) + (oldData1 % 12);
+                        newData1 = highNoteId - highNoteId % 12 + (oldData1 % 12);
                         outOfRange = true;
                     }
                     else
@@ -112,46 +131,5 @@ namespace LuteBot.Core
             }
         }
 
-        public void SendNote(ChannelMessage message, int offset)
-        {
-            ChannelMessage filterResult;
-            if (message.Command == ChannelCommand.NoteOn && message.Data2 > 0)
-            {
-                int noteCooldown = int.Parse(ConfigManager.GetProperty(PropertyItem.NoteCooldown));
-                if (cooldownNeeded)
-                {
-                    if (!stopWatch.IsRunning)
-                    {
-                        filterResult = FilterNote(message, offset);
-                        if (message.Data2 > 0)
-                        {
-                            ActionManager.PlayNote(filterResult.Data1 - lowNoteId);
-                        }
-
-                        stopWatch.Start();
-                    }
-                    else
-                    {
-                        if (stopWatch.ElapsedMilliseconds >= noteCooldown)
-                        {
-                            filterResult = FilterNote(message, offset);
-                            if (message.Data2 > 0)
-                            {
-                                ActionManager.PlayNote(filterResult.Data1 - lowNoteId);
-                            }
-                            stopWatch.Reset();
-                        }
-                    }
-                }
-                else
-                {
-                    filterResult = FilterNote(message, offset);
-                    if (message.Data2 > 0)
-                    {
-                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId);
-                    }
-                }
-            }
-        }
     }
 }

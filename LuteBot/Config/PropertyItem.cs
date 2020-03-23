@@ -22,6 +22,8 @@
         AvaliableNoteCount,
         NoteCooldown,
         DebugMode,
+        OutputDevice,
+        Instrument,
 
         //keybinds
         Play,
@@ -29,6 +31,7 @@
         Previous,
         Ready,
         OpenConsole,
+        SynchronizedPlay,
 
         //misc
         MordhauInputIniLocation,
@@ -37,6 +40,7 @@
         LastSoundBoardLocation,
         LastMidiDeviceUsed,
         LastMidiLowBoundUsed,
+        Server,
 
         //window positions
         MainWindowPos,

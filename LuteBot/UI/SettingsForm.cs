@@ -1,5 +1,8 @@
 ﻿using LuteBot.Config;
+using LuteBot.Core.Midi;
 using LuteBot.IO.KB;
+using LuteBot.UI.Utils;
+using Sanford.Multimedia.Midi;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,13 +22,17 @@ namespace LuteBot
     {
         private readonly string versionAvaliable = "A new version is avaliable to download";
         private static string VERSION;
-        private static string THREAD_URL = "https://mordhau.com/forum/topic/13519/mordhau-lute-bot/";
+        private static string VERSION_FILE_URL = "https://raw.githubusercontent.com/Dimencia/LuteBot2.1/master/Version.txt";
+        private static string THREAD_URL = "https://github.com/Dimencia/LuteBot2.1";
+        private static string GUILD_URL = "https://discord.gg/4xnJVuz";
         private string latestVersion;
         private int Timeout = 200;
+        private MidiPlayer player;
 
-        public SettingsForm()
+        public SettingsForm(MidiPlayer player)
         {
             InitializeComponent();
+            this.player = player;
             UpdateLinkLabel.LinkArea = new LinkArea() { Length = 0, Start = 0 };
             SetVersion();
             InitSettings();
@@ -37,7 +44,7 @@ namespace LuteBot
             try
             {
                 Thread latestVersionFetchThread;
-                latestVersionFetchThread = new Thread(() => DownloadUrlSynchronously(THREAD_URL));
+                latestVersionFetchThread = new Thread(() => DownloadUrlSynchronously(VERSION_FILE_URL));
                 latestVersionFetchThread.Start();
                 latestVersionFetchThread.Join(timeout);
 
@@ -79,14 +86,10 @@ namespace LuteBot
             {
                 using (WebClient client = new WebClient())
                 {
-                    string downloadString = client.DownloadString(THREAD_URL);
-                    string pattern = @"Mordhau Lute Bot V\d\.(\d\d|\d)";
-                    Regex r = new Regex(pattern, RegexOptions.IgnoreCase);
-                    Match m = r.Match(downloadString);
-                    if (m.Success)
-                    {
-                        latestVersion = m.ToString().Split('V')[1];
-                    }
+                    //var data = client.DownloadData(url);
+                    //string downloadString = UTF8Encoding.UTF8.GetString(data);
+                    string downloadString = client.DownloadString(url);
+                    latestVersion = downloadString.Trim();
                 }
             }
             catch (WebException ex)
@@ -112,6 +115,8 @@ namespace LuteBot
             }
         }
 
+
+
         private void InitSettings()
         {
             SoundBoardCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.SoundBoard);
@@ -119,6 +124,7 @@ namespace LuteBot
             TrackSelectionCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.TrackSelection);
             OnlineSyncCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.OnlineSync);
             SoundEffectsCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.SoundEffects);
+
             InitRadioButtons();
 
             NoteConversionMode.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.NoteConversionMode);
@@ -126,6 +132,28 @@ namespace LuteBot
             NoteCountNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
             NoteCooldownNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown);
             LiveMidiCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.LiveMidi);
+
+            InitInstruments();
+            InitOutputDevice();
+        }
+
+        private void InitInstruments()
+        {
+            Instrument.Read();
+            instrumentsBox.DisplayMember = "Name";
+            foreach (Instrument i in Instrument.Prefabs)
+                instrumentsBox.Items.Add(i);
+            instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+        }
+
+        private void InitOutputDevice()
+        {
+            // Add each output device to the combobox in order...
+            int numDevices = OutputDevice.DeviceCount;
+            for (int i = 0; i < numDevices; i++)
+                outputDeviceBox.Items.Add(OutputDevice.GetDeviceCapabilities(i).name);
+
+            outputDeviceBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice);
         }
 
         private void SetVersion()
@@ -247,6 +275,45 @@ namespace LuteBot
                 NewAutoConsoleRadio.Checked = false;
                 OldAutoConsoleRadio.Checked = false;
             }
+        }
+
+        private void OutputDeviceBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ConfigManager.SetProperty(PropertyItem.OutputDevice, outputDeviceBox.SelectedIndex.ToString());
+            player.ResetDevice(); // I hate that we had to pass this just to do this, but whatever
+        }
+
+        private void InstrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ConfigManager.SetProperty(PropertyItem.Instrument, instrumentsBox.SelectedIndex.ToString());
+            Instrument target = (Instrument)instrumentsBox.SelectedItem;
+
+            SoundEffectsCheckBox.Checked = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
+            ConfigManager.SetProperty(PropertyItem.SoundEffects, SoundEffectsCheckBox.Checked.ToString());
+
+            LowestNoteNumeric.Value = target.LowestNote;
+            ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestNote.ToString());
+
+            NoteCountNumeric.Value = target.NoteCount;
+            ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
+
+            NoteCooldownNumeric.Value = target.NoteCooldown;
+            ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
+        }
+
+        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(GUILD_URL); // Bard's guild discord link... 
+        }
+
+        private void LinkLabel1_LinkClicked_1(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.tobias-erichsen.de/software/loopmidi.html");
+        }
+
+        private void LinkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.tobias-erichsen.de/software/loopmidi.html");
         }
     }
 }

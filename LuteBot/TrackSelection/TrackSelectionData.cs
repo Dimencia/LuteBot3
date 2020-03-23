@@ -14,6 +14,8 @@ namespace LuteBot.TrackSelection
         public List<MidiChannelItem> MidiChannels { get => midiChannels; set => midiChannels = value; }
         public List<TrackItem> MidiTracks { get => midiTracks; set => midiTracks = value; }
 
+        public int Offset { get; set; }
+
 
     }
 }

@@ -159,7 +159,6 @@ namespace LuteBot
             // 
             // guildLibraryToolStripMenuItem
             // 
-            this.guildLibraryToolStripMenuItem.Enabled = false;
             this.guildLibraryToolStripMenuItem.Name = "guildLibraryToolStripMenuItem";
             this.guildLibraryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.guildLibraryToolStripMenuItem.Text = "Guild Library";

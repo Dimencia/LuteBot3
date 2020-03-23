@@ -1,5 +1,6 @@
 ﻿using LuteBot.Config;
 using LuteBot.Core;
+using LuteBot.TrackSelection;
 using Sanford.Multimedia.Midi;
 using System;
 using System.Collections.Generic;
@@ -28,8 +29,11 @@ namespace LuteBot.LiveInput.Midi
         public bool Recording { get => recording; }
         public EventHandler RecordingStateChanged;
 
-        public LiveMidiManager()
+        private TrackSelectionManager _manager;
+
+        public LiveMidiManager(TrackSelectionManager trackSelectionManager)
         {
+            _manager = trackSelectionManager;
             outDevice = new MordhauOutDevice();
             outDevice.HighMidiNoteId = 127;
             outDevice.LowMidiNoteId = 0;
@@ -47,7 +51,7 @@ namespace LuteBot.LiveInput.Midi
                 int index = binds.IndexOf(key);
                 if (index != -1)
                 {
-                    outDevice.SendNote(new ChannelMessage(ChannelCommand.NoteOn, 1, index + outDevice.LowNoteId, 1));
+                    outDevice.SendNote(new ChannelMessage(ChannelCommand.NoteOn, 1, index + outDevice.LowNoteId, 1),_manager.NoteOffset);
                 }
             }
         }
@@ -93,7 +97,7 @@ namespace LuteBot.LiveInput.Midi
             if (!keyboardMode)
             {
                 ChannelEventReceived.Invoke(sender, e);
-                outDevice.SendNote(e.Message);
+                outDevice.SendNote(e.Message, _manager.NoteOffset);
             }
         }
 

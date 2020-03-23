@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -83,7 +84,7 @@ namespace LuteBot.IO.KB
 
         private static void InputCommand(int noteId)
         {
-            Process[] processes = Process.GetProcessesByName("Mordhau-Win64-Shipping");
+                Process[] processes = Process.GetProcessesByName("Mordhau-Win64-Shipping");
             if (AutoConsoleModeFromString(ConfigManager.GetProperty(PropertyItem.ConsoleOpenMode)) == AutoConsoleMode.New)
             {
                 foreach (Process proc in processes)

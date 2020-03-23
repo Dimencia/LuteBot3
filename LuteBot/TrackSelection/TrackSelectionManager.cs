@@ -17,7 +17,10 @@ namespace LuteBot.TrackSelection
         public List<TrackItem> MidiTracks { get => midiTracks; set { midiTracks = value; ResetRequest(); } }
         public bool ActivateAllChannels { get => activateAllChannels; set { activateAllChannels = value; ResetRequest(); } }
         public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
+        public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
 
+
+        private int noteOffset;
         private bool activateAllChannels;
         private bool activateAllTracks;
 
@@ -51,6 +54,7 @@ namespace LuteBot.TrackSelection
             TrackSelectionData data = new TrackSelectionData();
             data.MidiChannels = MidiChannels;
             data.MidiTracks = MidiTracks;
+            data.Offset = NoteOffset;
             SaveManager.SaveTrackSelectionData(data, FileName);
         }
 
@@ -61,6 +65,7 @@ namespace LuteBot.TrackSelection
             {
                 this.midiChannels = data.MidiChannels;
                 this.midiTracks = data.MidiTracks;
+                this.NoteOffset = data.Offset;
                 EventHelper();
             }
         }
@@ -101,7 +106,8 @@ namespace LuteBot.TrackSelection
                         if (channelItem.Id == message.MidiChannel)
                         {
                             // We're filtering out glockenspiel in a super hacky way here... 
-                            if (!(channelItem.Active || activateAllChannels) || channelItem.Name.ToLower().Equals("glockenspiel"))
+                            // And removed it, because we might want them for things sometimes.   || channelItem.Name.ToLower().Equals("glockenspiel")
+                            if (!(channelItem.Active || activateAllChannels))
                             {
                                 newMessage = new ChannelMessage(ChannelCommand.NoteOn, message.MidiChannel, message.Data1, 0);
                             }

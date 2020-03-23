@@ -14,14 +14,14 @@ using Lutebot.UI;
 using LuteBot.playlist;
 using System.Threading;
 using System.Text.RegularExpressions;
+using CsvHelper;
 
 namespace LuteBot.UI
 {
     public partial class GuildLibraryForm : Form
     {
-        private readonly string appdata_PATH = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\LuteBot\GuildLibrary\";
+        private readonly string appdata_PATH = LuteBotForm.libraryPath;
         private readonly string sheet_ID = "1FLyJ7wpFCCwx6gZ03-CX_S7I9ztqISI9_4mvwu7W2oQ";
-        private readonly string sheet_FILENAME = "LibraryData.tsv";
         private readonly string log_FILENAME = "logs.txt";
         private readonly string songs_FOLDER = @"songs\";
 
@@ -54,12 +54,9 @@ namespace LuteBot.UI
         {
             songGrid.DataSource = typeof(List<Song>);
             songGrid.DataSource = SongsList;
-            // Hide column for Contributor
-            //songGrid.Columns[5].Visible = false;
-            // Hide column for URL
-            songGrid.Columns[6].Visible = false;
-            // Hide column for filename (which we moved to the end)
-            songGrid.Columns[7].Visible = false;
+
+            songGrid.Columns[0].Visible = false; // Hide filename column
+            songGrid.Columns[7].Visible = false; // Hide DiscordUrl column
         }
 
         private void SearchBox_TextChanged(object sender, EventArgs e)
@@ -83,7 +80,7 @@ namespace LuteBot.UI
             x.Title.ToLower().Contains(searchString) ||
             x.Artist.ToLower().Contains(searchString) ||
             x.Tags.ToLower().Contains(searchString) ||
-            x.Contributor.ToLower().Contains(searchString)
+            x.MidiContributor.ToLower().Contains(searchString)
             ).ToList());
 
             if (filteredBindingList.Count == 0)
@@ -92,12 +89,12 @@ namespace LuteBot.UI
                 {
                     Title = $"No songs found, select and add this to try searching Google for {searchString}",
                     Artist = "Make sure to include a full song name and artist for best results, and don't expect good quality",
-                    Contributor = "",
-                    FileName = searchString,
-                    Quality = "",
+                    MidiContributor = "",
+                    Filename = searchString,
+                    Upvotes = "",
                     Tags = "",
-                    Tier = "",
-                    URL = ""
+                    Compatibility = "",
+                    DiscordUrl = ""
                 };
                 filteredBindingList.Add(infoSong);
             }
@@ -215,8 +212,14 @@ namespace LuteBot.UI
                 });
 
             //using (StreamReader reader = new StreamReader(appdata_PATH + sheet_FILENAME))
-            using (StreamReader reader = new StreamReader(new MemoryStream(GuildLibrary)))
+            using (TextReader reader = new StreamReader(new MemoryStream(GuildLibrary)))
             {
+                var csv = new CsvReader(reader, System.Globalization.CultureInfo.InvariantCulture);
+                csv.Configuration.Delimiter = "\t";
+                var records = csv.GetRecords<Song>();
+                newSongs = new SortableBindingList<Song>(records);
+
+                /*
                 // Skip first line, column headers
                 reader.ReadLine();
                 while (!reader.EndOfStream)
@@ -236,11 +239,11 @@ namespace LuteBot.UI
                             currentSong.Title = values[Columns.Filename];
                         currentSong.Artist = values[Columns.Artist];
                         currentSong.Tags = values[Columns.Tags];
-                        currentSong.Tier = values[Columns.Tier];
-                        currentSong.Quality = values[Columns.Quality];
-                        currentSong.Contributor = values[Columns.Contributor];
-                        currentSong.URL = values[Columns.URL];
-                        currentSong.FileName = values[Columns.Filename];
+                        currentSong.Compatibility = values[Columns.Compatibility];
+                        currentSong.Upvotes = values[Columns.Upvotes];
+                        currentSong.MidiContributor = values[Columns.Contributor];
+                        currentSong.DiscordUrl = values[Columns.URL];
+                        currentSong.Filename = values[Columns.Filename];
 
                         newSongs.Add(currentSong);
                     }
@@ -252,6 +255,7 @@ namespace LuteBot.UI
                         continue;
                     }
                 }
+                */
             }
             GuildLibrary = null;
             if (!this.IsDisposed)
@@ -286,32 +290,34 @@ namespace LuteBot.UI
             public static int Artist = 3;
             public static int Tags = 4;
             public static int Contributor = 5;
-            public static int Tier = 6;
-            public static int Quality = 7;
+            public static int Compatibility = 6;
+            public static int Upvotes = 7;
             public static int URL = 8;
+            public static int FileSize = 9;
+            public static int Checksum = 10;
         }
 
         private void downloadAndAddSong(Song song)
         {
             // Downloads midi from the URL, returning the path to the song
-            string path = appdata_PATH + songs_FOLDER + song.FileName;
+            string path = appdata_PATH + songs_FOLDER + song.Filename;
             if (File.Exists(path)) // No need to redownload if we have it
             {
                 AddSongToPlaylist(song, path);
                 return;
             }
 
-            if (song.URL.Equals(string.Empty))
+            if (song.DiscordUrl.Equals(string.Empty))
             {
                 // Indication that we should search google
                 song = GetSongDataFromGoogle(song);
-                path = appdata_PATH + songs_FOLDER + song.FileName;
+                path = appdata_PATH + songs_FOLDER + song.Filename;
             }
 
             // If it's still empty, we need to abort
-            if (song.URL.Equals(string.Empty))
+            if (song.DiscordUrl.Equals(string.Empty))
             {
-                Log($"Unable to find {song.FileName} online");
+                Log($"Unable to find {song.Filename} online");
                 return;
             }
 
@@ -323,7 +329,7 @@ namespace LuteBot.UI
             {
                 try
                 {
-                    wc.DownloadFile(song.URL, path);
+                    wc.DownloadFile(song.DiscordUrl, path);
                     AddSongToPlaylist(song, path);
                 }
                 catch (Exception e)
@@ -347,7 +353,7 @@ namespace LuteBot.UI
             // Otherwise right now, the FileName contains the search query
             System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
             // For now I'll be lazy and we'll just parse the page as a string
-            string searchURL = $@"https://bitmidi.com/search?q={song.FileName}";
+            string searchURL = $@"https://bitmidi.com/search?q={song.Filename}";
             using (WebClient wc = new WebClient())
             {
                 string webData = wc.DownloadString(searchURL);
@@ -369,10 +375,10 @@ namespace LuteBot.UI
                     return song;
                 string filename = match.Groups[1].Value;
                 song.Title = filename.Replace(".mid", "");
-                song.FileName = filename;
-                song.URL = url;
+                song.Filename = filename;
+                song.DiscordUrl = url;
                 song.Artist = "";
-                song.Contributor = "Auto-Generated";
+                song.MidiContributor = "Auto-Generated";
                 Log($"Successfully found {filename} online, downloading...");
             }
             return song;

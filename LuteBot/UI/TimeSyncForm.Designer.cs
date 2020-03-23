@@ -36,10 +36,14 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.serverBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
+            this.ntpPingLabel = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
+            this.serverPingLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -120,41 +124,80 @@
             this.label5.TabIndex = 7;
             this.label5.Text = "Agree upon an exact UTC time to start and set it";
             // 
+            // serverBox
+            // 
+            this.serverBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F);
+            this.serverBox.Location = new System.Drawing.Point(152, 125);
+            this.serverBox.Name = "serverBox";
+            this.serverBox.Size = new System.Drawing.Size(100, 29);
+            this.serverBox.TabIndex = 8;
+            this.serverBox.Text = "127.0.0.1";
+            this.serverBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.serverBox.TextChanged += new System.EventHandler(this.ServerBox_TextChanged);
+            // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(15, 136);
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(12, 128);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(159, 13);
-            this.label6.TabIndex = 8;
-            this.label6.Text = "You may need to adjust for ping.";
+            this.label6.Size = new System.Drawing.Size(91, 24);
+            this.label6.TabIndex = 9;
+            this.label6.Text = "Server IP:";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(15, 149);
+            this.label7.Location = new System.Drawing.Point(13, 167);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(306, 13);
-            this.label7.TabIndex = 9;
-            this.label7.Text = "To do so, add this amount of miliseconds to your individual time:";
+            this.label7.Size = new System.Drawing.Size(302, 13);
+            this.label7.TabIndex = 10;
+            this.label7.Text = "Providing the server IP will let the program calculate for latency";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(56, 172);
+            this.label8.Location = new System.Drawing.Point(13, 180);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(166, 13);
-            this.label8.TabIndex = 10;
-            this.label8.Text = "(HighestPingInGroup) - (YourPing)";
+            this.label8.Size = new System.Drawing.Size(244, 13);
+            this.label8.TabIndex = 11;
+            this.label8.Text = "This updates in realtime and checks every second";
+            // 
+            // ntpPingLabel
+            // 
+            this.ntpPingLabel.AutoSize = true;
+            this.ntpPingLabel.Location = new System.Drawing.Point(295, 17);
+            this.ntpPingLabel.Name = "ntpPingLabel";
+            this.ntpPingLabel.Size = new System.Drawing.Size(19, 13);
+            this.ntpPingLabel.TabIndex = 12;
+            this.ntpPingLabel.Text = "10";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(313, 17);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(20, 13);
+            this.label10.TabIndex = 13;
+            this.label10.Text = "ms";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(18, 192);
+            this.label9.Location = new System.Drawing.Point(313, 136);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(235, 13);
-            this.label9.TabIndex = 11;
-            this.label9.Text = "So if you have the highest ping, you add nothing";
+            this.label9.Size = new System.Drawing.Size(20, 13);
+            this.label9.TabIndex = 15;
+            this.label9.Text = "ms";
+            // 
+            // serverPingLabel
+            // 
+            this.serverPingLabel.AutoSize = true;
+            this.serverPingLabel.Location = new System.Drawing.Point(295, 136);
+            this.serverPingLabel.Name = "serverPingLabel";
+            this.serverPingLabel.Size = new System.Drawing.Size(19, 13);
+            this.serverPingLabel.TabIndex = 14;
+            this.serverPingLabel.Text = "10";
             // 
             // TimeSyncForm
             // 
@@ -162,9 +205,13 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(350, 217);
             this.Controls.Add(this.label9);
+            this.Controls.Add(this.serverPingLabel);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.ntpPingLabel);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
+            this.Controls.Add(this.serverBox);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -190,9 +237,13 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
+        public System.Windows.Forms.TextBox serverBox;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label ntpPingLabel;
+        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label serverPingLabel;
     }
 }

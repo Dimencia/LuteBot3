@@ -21,6 +21,7 @@ namespace LuteBot.IO.KB
         public event EventHandler PreviousKeyPressed;
         public event EventHandler ConsoleKeyPressed;
         public event EventHandler ReadyPressed;
+        public event EventHandler SynchronizePressed;
 
         public void HotkeyPressed(int keyCode)
         {
@@ -68,6 +69,12 @@ namespace LuteBot.IO.KB
                     {
                         liveInputManager.On();
                     }
+                }
+                else
+                if (performedAction == PropertyItem.SynchronizedPlay)
+                {
+                    EventHandler handler = SynchronizePressed;
+                    handler?.Invoke(this, null);
                 }
             }
             else
