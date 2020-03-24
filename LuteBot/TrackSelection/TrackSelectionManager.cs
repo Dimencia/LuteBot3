@@ -32,7 +32,7 @@ namespace LuteBot.TrackSelection
         private bool activateAllTracks;
 
         public bool autoLoadProfile;
-        public string FileName;
+        public string FileName { get; set; }
 
         public event EventHandler TrackChanged;
         public event EventHandler<TrackItem> ToggleTrackRequest;
@@ -76,6 +76,11 @@ namespace LuteBot.TrackSelection
                 this.NoteOffset = data.Offset;
                 this.MidiChannelOffsets = data.MidiChannelOffsets;
                 EventHelper();
+            }
+            else
+            { // Reset these if there's no settings for something
+                this.NoteOffset = 0;
+                this.MidiChannelOffsets = new Dictionary<int, int>();
             }
         }
 

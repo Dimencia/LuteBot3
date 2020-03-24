@@ -209,6 +209,9 @@ namespace LuteBot.Core.Midi
 
         //------------- Handlers -------------
 
+        private int[] drumNoteCounts = new int[128];
+        public List<KeyValuePair<int, int>> DrumNoteCounts = new List<KeyValuePair<int, int>>(128);
+
         private void HandleLoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
             if (e.Error == null)
@@ -223,6 +226,11 @@ namespace LuteBot.Core.Midi
 
                         if (midiEvent.MidiMessage is ChannelMessage c && c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
                         {
+                            if(c.MidiChannel == 6) // Glockenspiel...
+                            {
+                                drumNoteCounts[c.Data1]++; // They're all 0 by default
+                            }
+
                             if (!trackSelectionManager.MaxNoteByChannel.ContainsKey(c.MidiChannel))
                                 trackSelectionManager.MaxNoteByChannel.Add(c.MidiChannel, c.Data1);
                             else if (trackSelectionManager.MaxNoteByChannel[c.MidiChannel] < c.Data1)
@@ -235,6 +243,12 @@ namespace LuteBot.Core.Midi
                         }
                     }
                 }
+                // Now let's get a sorted list of drum note counts
+                // I can't figure out how to do this nicely.
+                for (int i = 0; i < drumNoteCounts.Length; i++) {
+                    DrumNoteCounts.Add(new KeyValuePair<int, int>(i, drumNoteCounts[i]));
+                }
+                DrumNoteCounts = DrumNoteCounts.OrderBy((kvp) => kvp.Value).ToList();
 
                 base.LoadCompleted(this, e);
                 mordhauOutDevice.HighMidiNoteId = sequence.MaxNoteId;
@@ -289,10 +303,39 @@ namespace LuteBot.Core.Midi
                     if (!outDevice.IsDisposed) // If they change song prefs while playing, this can fail, so just skip then
                         try
                         {
-                            var note = rustOutDevice.FilterNote(filtered, trackSelectionManager.NoteOffset +
-                                (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0));
-                            if(note != null)
-                                outDevice.Send(note);
+                            if (ConfigManager.GetIntegerProperty(PropertyItem.Instrument) == 9)
+                            {
+                                // Drums... 
+                                // Ignore any notes that aren't on glockenspiel
+                                if (filtered.MidiChannel == 9) // glocken
+                                {
+                                    // Figure out where it ranks on DrumNoteCounts
+                                    //int drumNote = 0;
+                                    //for(int i = 0; i < DrumNoteCounts.Count(); i++)
+                                    //{ 
+                                    //    if(DrumNoteCounts[i].Key == filtered.Data1)
+                                    //    {
+                                    //        drumNote = i;
+                                    //        break;
+                                    //    }
+                                    //}
+                                    // Assume it's no longer 0 for now...
+                                    // Now just map it to a dictionary of most popular notes on drums
+                                    if(DrumMappings.MidiToRustMap.ContainsKey(filtered.Data1))
+                                    {
+                                        var newNote = new ChannelMessage(filtered.Command, filtered.MidiChannel, DrumMappings.MidiToRustMap[filtered.Data1], filtered.Data2);
+                                        outDevice.Send(newNote);
+                                        return;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var note = rustOutDevice.FilterNote(filtered, trackSelectionManager.NoteOffset +
+                                    (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0));
+                                if (note != null)
+                                    outDevice.Send(note);
+                            }
                         }
                         catch (Exception) { } // Ignore exceptions, again, they might edit things while it's trying to play
                     //}
@@ -317,6 +360,81 @@ namespace LuteBot.Core.Midi
             isPlaying = false;
             outDevice.Reset();            
         }
+    }
+
+    public static class DrumMappings
+    {
+        // These strings represent what Rust wants for each of them
+        public static readonly int Kick = 36;
+        public static readonly int Kick2 = 36;
+        public static readonly int Snare = 38;
+        public static readonly int SnareLight = 38;
+        public static readonly int Snare3 = 38;
+        public static readonly int HiHatOpen = 46;
+        public static readonly int HiHatClosed = 42;
+        public static readonly int TomHigh = 47;
+        public static readonly int Cowbell = 35;
+        public static readonly int TomMid = 48;
+        public static readonly int TomLow = 43;
+        //public static readonly int HiHatStep = 57;
+        public static readonly int Ride = 49;
+        //public static readonly int RideBell = 59;
+        public static readonly int Crash = 55;
+
+
+        /// <summary>
+        /// Note that the key is the midi input, the value is the suggested Rust output
+        /// </summary>
+        public static Dictionary<int, int> MidiToRustMap = new Dictionary<int, int>
+        {
+            {35, Kick },
+            {36, Kick2 },
+            {37, SnareLight },
+            {38, Snare },
+            {39, Snare3 },
+            {40, SnareLight },
+            {41, TomLow },
+            {42, HiHatClosed },
+            {43, TomLow },
+            {44, HiHatClosed },
+            {45, TomLow },
+            {46, HiHatOpen },
+            {47, TomMid },
+            {48, TomMid },
+            {49, Crash },
+            {50, TomHigh },
+            {51, Ride },
+            {52, Crash },
+            {53, Cowbell },
+            {54, HiHatClosed },
+            {55, Crash },
+            {56, Cowbell },
+            {57, Crash },
+            {58, Snare }, // No idea, "Vibraslap"
+            {59, Ride },
+            {60, TomHigh },
+            {61, TomLow },
+            {62, TomHigh },
+            {63, TomHigh },
+            {64, TomLow },
+            {65, TomHigh },
+            {66, TomLow },
+            {67, TomHigh },
+            {68, TomLow },
+            {69, HiHatClosed }, // No idea, "Cabasa
+            {70, HiHatClosed },
+            {71, Cowbell },
+            {72, Cowbell },
+            {73, TomMid },
+            {74, TomMid },
+            {75, TomMid },
+            {76, TomHigh },
+            {77, TomLow },
+            {78, HiHatClosed },
+            {79, HiHatClosed },
+            {80, HiHatClosed },
+            {81, HiHatClosed }
+        };
     }
 }
 

@@ -79,6 +79,7 @@ namespace LuteBot.Core
 
         private void ForceNoteBounds(int value, bool isLower)
         {
+            onNotes = new List<Note>();
             if (isLower)
             {
                 lowNoteId = value;

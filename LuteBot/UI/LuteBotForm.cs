@@ -160,7 +160,7 @@ namespace LuteBot
                 MusicProgressBar.Maximum = player.GetLenght();
                 StartLabel.Text = TimeSpan.FromSeconds(0).ToString(@"mm\:ss");
                 EndTimeLabel.Text = player.GetFormattedLength();
-                CurrentMusicLabel.Text = musicNameLabelHeader + currentTrackName;
+                CurrentMusicLabel.Text = musicNameLabelHeader + Path.GetFileNameWithoutExtension(currentTrackName);
                 if (autoplay)
                 {
                     Play();
@@ -383,16 +383,16 @@ namespace LuteBot
             {
                 string fileName = openMidiFileDialog.FileName;
                 player.LoadFile(fileName);
-                if (fileName.Contains("\\"))
-                {
-                    string[] fileNameSplit = fileName.Split('\\');
-                    string filteredFileName = fileNameSplit[fileNameSplit.Length - 1].Replace(".mid", "");
-                    currentTrackName = filteredFileName;
-                }
-                else
-                {
+                //if (fileName.Contains("\\"))
+                //{
+                //    string[] fileNameSplit = fileName.Split('\\');
+                //    string filteredFileName = fileNameSplit[fileNameSplit.Length - 1].Replace(".mid", "");
+                //    currentTrackName = filteredFileName;
+                //}
+                //else
+                //{
                     currentTrackName = fileName;
-                }
+                //}
             }
         }
 

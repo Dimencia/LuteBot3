@@ -34,6 +34,7 @@ namespace LuteBot.Core
 
         private Stopwatch stopWatch;
 
+
         public MordhauOutDevice()
         {
             stopWatch = new Stopwatch();

@@ -69,12 +69,13 @@ namespace LuteBot.IO.Files
 
         public static void SaveTrackSelectionData(TrackSelectionData data, string fileName)
         {
-            SaveNoDialog(data, autoSavePath + "/" + fileName);
+            SaveNoDialog(data, fileName);
         }
 
         public static TrackSelectionData LoadTrackSelectionData(string fileName)
         {
-            return LoadNoDialog<TrackSelectionData>(autoSavePath + "/" + fileName);
+            //return LoadNoDialog<TrackSelectionData>(autoSavePath + "/" + fileName);
+            return LoadNoDialog<TrackSelectionData>(fileName);
         }
 
         public static string SetMordhauConfigLocation()
@@ -131,12 +132,54 @@ namespace LuteBot.IO.Files
             return content;
         }
 
+        private static Stream GenerateStreamFromString(string s)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            //writer.Dispose(); // This disposes the underlying stream
+            // And writer otherwise has nothing that needs disposing
+            stream.Position = 0;
+            return stream;
+        }
+
         private static T LoadNoDialog<T>(string path)
         {
             T result = default(T);
             if (path != null)
             {
-
+                var serializer = new DataContractSerializer(typeof(T));
+                // Also dirty
+                if (typeof(T) == typeof(TrackSelectionData))
+                {
+                    // We do things totally different here.
+                    // We load from the mid file
+                    // Cut out everything before the first <
+                    // Then parse the rest of the content as our object
+                    // If this doesn't work, we just fall through and try the default
+                    try
+                    {
+                        using (StreamReader reader = new StreamReader(path))
+                        {
+                            string line = reader.ReadLine();
+                            while (line != null && !line.StartsWith("<TrackSelectionData"))
+                                line = reader.ReadLine();
+                            line += "\n" + reader.ReadToEnd(); // This is our entire xml data now...
+                            // Now, because of the way I read this, I can't rewind the stream
+                            // So we need to make a new one with just this data
+                            using (Stream xmlStream = GenerateStreamFromString(line))
+                            {
+                                result = (T)serializer.ReadObject(xmlStream);
+                                return result; // If it fails at any point, it'll drop to old
+                            }
+                        }
+                    }
+                    catch (Exception e) { 
+                        path = "Profiles" + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path); 
+                    }
+                }
+                
                 if (!path.Contains(".xml"))
                 {
                     path = path + ".xml";
@@ -147,8 +190,7 @@ namespace LuteBot.IO.Files
                     bool success = false;
                     using (var stream = File.Open(path, FileMode.OpenOrCreate))
                     {
-                        var serializer = new DataContractSerializer(typeof(T));
-                        
+
                         try
                         {
                             result = (T)serializer.ReadObject(stream);
@@ -160,7 +202,7 @@ namespace LuteBot.IO.Files
                             //MessageBox.Show("Wrong File type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             success = false;
                         }
-                        
+
                     }
                     if (!success)
                         return OldLoadNoDialog<T>(path);
@@ -173,11 +215,52 @@ namespace LuteBot.IO.Files
         {
             if (path != null)
             {
+                var serializer = new DataContractSerializer(typeof(T));
+                // Still dirty
+                if (typeof(T) == typeof(TrackSelectionData))
+                {
+                    try
+                    {
+                        using (MemoryStream stream = new MemoryStream())
+                        {
+                            serializer.WriteObject(stream, target);
+                            // Reset stream...
+                            stream.Seek(0, SeekOrigin.Begin);
+                            // Remove any XML data from the midi file, if any
+                            byte[] midiData;
+                            using (FileStream fs = File.OpenRead(path))
+                            {
+                                midiData = new byte[fs.Length];
+                                fs.Read(midiData, 0, (int)fs.Length);
+                            }
+                            // midiData currently includes both the xml and midi right now
+                            // I need to somehow find out where in the byte array the xml stuff starts
+                            string allData = Encoding.Default.GetString(midiData);
+                            int xmlCutoff = allData.IndexOf("<TrackSelectionData") / 2;
+                            if(xmlCutoff != 0)
+                                midiData = midiData.Take(xmlCutoff).ToArray();
+
+                            // Now we have all the data we need
+                            using (FileStream fs = File.Create(path))
+                            {
+                                fs.Write(midiData, 0, midiData.Length); // Midi data
+                                byte[] xmlData = new byte[stream.Length];
+                                stream.Read(xmlData, 0, (int)stream.Length);
+                                var newline = Encoding.Default.GetBytes("\n");
+                                fs.Write(newline, 0, newline.Length);
+                                fs.Write(xmlData, 0, xmlData.Length);
+                            }
+                        }
+                        return;
+                    }
+                    catch (Exception e) {
+                        path = "Profiles" + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path);
+                    } // If it fails, fallback.
+                }
                 path = path + ".xml";
                 Directory.CreateDirectory(autoSavePath);
                 using (var stream = File.Create(path))
                 {
-                    var serializer = new DataContractSerializer(typeof(T));
                     serializer.WriteObject(stream, target);
                 }
             }
@@ -215,7 +298,7 @@ namespace LuteBot.IO.Files
                 using (var stream = File.Open(path, FileMode.OpenOrCreate))
                 {
                     var serializer = new DataContractSerializer(typeof(T));
-                    
+
                     try
                     {
                         result = (T)serializer.ReadObject(stream);
