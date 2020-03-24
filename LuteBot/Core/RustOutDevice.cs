@@ -45,25 +45,26 @@ namespace LuteBot.Core
 
         private void UpdateNoteIdBounds()
         {
+            onNotes = new List<Note>();
             // First, for these calcs, get the lowest C and highest C+11
             var highMidiNoteId = HighMidiNoteId - HighMidiNoteId % 12 - 1;
             var lowMidiNoteId = LowMidiNoteId - LowMidiNoteId % 12; // I remember this being more complicated but I guess not
-            
+
             int noteRange = highMidiNoteId - lowMidiNoteId;
-            
+
 
             int luteRange = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
             int luteLowestNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
             //if (noteRange > luteRange)
             //{
-                //lowNoteId = ((noteRange / 2) + (luteLowestNote - lowMidiNoteId)) - (luteRange / 2);
-                //highNoteId = ((noteRange / 2) + (luteLowestNote - lowMidiNoteId)) + (luteRange / 2);
-                //lowNoteId = lowNoteId - (lowNoteId % 12);
-                //highNoteId = highNoteId - (highNoteId % 12) - 1;
-                // I really don't get the above
-                lowNoteId = luteLowestNote;
-                highNoteId = luteLowestNote + luteRange;
-                conversionNeeded = true;
+            //lowNoteId = ((noteRange / 2) + (luteLowestNote - lowMidiNoteId)) - (luteRange / 2);
+            //highNoteId = ((noteRange / 2) + (luteLowestNote - lowMidiNoteId)) + (luteRange / 2);
+            //lowNoteId = lowNoteId - (lowNoteId % 12);
+            //highNoteId = highNoteId - (highNoteId % 12) - 1;
+            // I really don't get the above
+            lowNoteId = luteLowestNote;
+            highNoteId = luteLowestNote + luteRange;
+            conversionNeeded = true;
             //}
             // We need conversion either way because of the way we're working with offset
             /*else
@@ -90,10 +91,36 @@ namespace LuteBot.Core
             }
         }
 
+        internal class Note
+        {
+            internal int noteId { get; set; }
+            internal int channelId { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Note n)
+                    return n.channelId == channelId && n.noteId == noteId;
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return noteId ^ channelId;
+            }
+        }
+
+        private List<Note> onNotes = new List<Note>();
+        private List<Note> skippedNotes = new List<Note>();
+
         public ChannelMessage FilterNote(ChannelMessage message, int offset)
         {
-            if (conversionNeeded && (message.Command == ChannelCommand.NoteOn || message.Command == ChannelCommand.NoteOff))
+            int noteCooldown = int.Parse(ConfigManager.GetProperty(PropertyItem.NoteCooldown));
+
+
+            if (conversionNeeded && ((message.Command == ChannelCommand.NoteOn) || message.Command == ChannelCommand.NoteOff))
             {
+                // Try to filter only duplicate notes that match the stopwatch rule
+
                 bool outOfRange = false;
                 int newData1 = 0;
                 int oldData1 = message.Data1 + offset;
@@ -123,12 +150,36 @@ namespace LuteBot.Core
                 {
                     velocity = 0;
                 }
+                //Drop notes that come in while we're still sustaining the same note
+                //Pretend they're all the same channel to make this work... 
+                Note n = new Note { noteId = newData1, channelId = 0 };
+                if (message.Command == ChannelCommand.NoteOn && message.Data2 > 0)
+                {
+                    if (onNotes.Contains(n)) // Then just don't play it... Somehow...
+                    {
+                        //skippedNotes.Add(n);
+                        return null;
+                    }
+                    onNotes.Add(n);
+                    //stopWatch.Restart();
+                }
+                else
+                {
+                    //if(skippedNotes.Contains(newData1)) // Ignore the first NoteOff we get after skipping a note...
+                    //{ // It might not be perfect but it'll probably do
+                    //    skippedNotes.Remove(newData1);
+                    //    return null;
+                    //
+                    //}
+                    onNotes.Remove(n);
+                }
                 return new ChannelMessage(message.Command, message.MidiChannel, newData1, velocity);
             }
             else
             {
                 return message;
             }
+
         }
 
     }

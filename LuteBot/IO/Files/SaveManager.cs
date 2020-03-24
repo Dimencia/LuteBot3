@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace LuteBot.IO.Files
 {
@@ -143,18 +144,26 @@ namespace LuteBot.IO.Files
                 Directory.CreateDirectory(autoSavePath);
                 if (File.Exists(path))
                 {
+                    bool success = false;
                     using (var stream = File.Open(path, FileMode.OpenOrCreate))
                     {
                         var serializer = new DataContractSerializer(typeof(T));
+                        
                         try
                         {
                             result = (T)serializer.ReadObject(stream);
+                            success = true;
                         }
-                        catch (InvalidCastException)
+                        catch (Exception)
                         {
-                            MessageBox.Show("Wrong File type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            // Assume it's an old version and try that
+                            //MessageBox.Show("Wrong File type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            success = false;
                         }
+                        
                     }
+                    if (!success)
+                        return OldLoadNoDialog<T>(path);
                 }
             }
             return result;
@@ -202,12 +211,82 @@ namespace LuteBot.IO.Files
             string path = LoadFileDialogHelper();
             if (path != null)
             {
+                bool success = false;
                 using (var stream = File.Open(path, FileMode.OpenOrCreate))
                 {
                     var serializer = new DataContractSerializer(typeof(T));
+                    
                     try
                     {
                         result = (T)serializer.ReadObject(stream);
+                        //dirty !!
+                        if (typeof(T) == typeof(SoundBoard))
+                        {
+                            (result as SoundBoard).Location = path;
+                        }
+                        if (typeof(T) == typeof(PlayList))
+                        {
+                            (result as PlayList).Path = path;
+                        }
+                        success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Assume it's an old version and try that 
+                        success = false;
+                        //MessageBox.Show("Wrong File type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                if (!success)
+                {
+                    return OldLoadNoDialog<T>(path);
+                }
+            }
+            return result;
+        }
+
+        private static T OldLoadNoDialog<T>(string path)
+        {
+            T result = default(T);
+            if (path != null)
+            {
+
+                if (!path.Contains(".xml"))
+                {
+                    path = path + ".xml";
+                }
+                Directory.CreateDirectory(autoSavePath);
+                if (File.Exists(path))
+                {
+                    using (var stream = File.Open(path, FileMode.OpenOrCreate))
+                    {
+                        var serializer = new XmlSerializer(typeof(T));
+                        try
+                        {
+                            result = (T)serializer.Deserialize(stream);
+                        }
+                        catch (InvalidCastException)
+                        {
+                            MessageBox.Show("Wrong File type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        private static T OldLoad<T>()
+        {
+            T result = default(T);
+            string path = LoadFileDialogHelper();
+            if (path != null)
+            {
+                using (var stream = File.Open(path, FileMode.OpenOrCreate))
+                {
+                    var serializer = new XmlSerializer(typeof(T));
+                    try
+                    {
+                        result = (T)serializer.Deserialize(stream);
                         //dirty !!
                         if (typeof(T) == typeof(SoundBoard))
                         {

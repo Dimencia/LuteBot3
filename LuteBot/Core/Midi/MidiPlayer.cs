@@ -289,8 +289,10 @@ namespace LuteBot.Core.Midi
                     if (!outDevice.IsDisposed) // If they change song prefs while playing, this can fail, so just skip then
                         try
                         {
-                            outDevice.Send(rustOutDevice.FilterNote(filtered, trackSelectionManager.NoteOffset +
-                                (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0)));
+                            var note = rustOutDevice.FilterNote(filtered, trackSelectionManager.NoteOffset +
+                                (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0));
+                            if(note != null)
+                                outDevice.Send(note);
                         }
                         catch (Exception) { } // Ignore exceptions, again, they might edit things while it's trying to play
                     //}

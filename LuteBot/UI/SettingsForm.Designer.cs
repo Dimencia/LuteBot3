@@ -41,12 +41,14 @@
             this.NoteConversionMode = new System.Windows.Forms.ComboBox();
             this.NoteConversionLabel = new System.Windows.Forms.Label();
             this.SettingsGroupBox = new System.Windows.Forms.GroupBox();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.LiveMidiCheckBox = new System.Windows.Forms.CheckBox();
             this.OffAutoConsoleRadio = new System.Windows.Forms.RadioButton();
             this.AutoConsoleLabel = new System.Windows.Forms.Label();
             this.OldAutoConsoleRadio = new System.Windows.Forms.RadioButton();
             this.NewAutoConsoleRadio = new System.Windows.Forms.RadioButton();
             this.AdvancedGroupBox = new System.Windows.Forms.GroupBox();
+            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
             this.label2 = new System.Windows.Forms.Label();
             this.instrumentsBox = new System.Windows.Forms.ComboBox();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -60,8 +62,6 @@
             this.outputDeviceBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.guildLabel = new System.Windows.Forms.LinkLabel();
-            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
             this.SettingsGroupBox.SuspendLayout();
             this.AdvancedGroupBox.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -208,6 +208,17 @@
             this.SettingsGroupBox.TabStop = false;
             this.SettingsGroupBox.Text = "Settings";
             // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Location = new System.Drawing.Point(129, 135);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(50, 13);
+            this.linkLabel1.TabIndex = 15;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "LoopMidi";
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked_1);
+            // 
             // LiveMidiCheckBox
             // 
             this.LiveMidiCheckBox.AutoSize = true;
@@ -280,6 +291,19 @@
             this.AdvancedGroupBox.TabIndex = 13;
             this.AdvancedGroupBox.TabStop = false;
             this.AdvancedGroupBox.Text = "Advanced Parameters";
+            // 
+            // linkLabel2
+            // 
+            this.linkLabel2.AutoSize = true;
+            this.linkLabel2.LinkArea = new System.Windows.Forms.LinkArea(22, 8);
+            this.linkLabel2.Location = new System.Drawing.Point(13, 69);
+            this.linkLabel2.Name = "linkLabel2";
+            this.linkLabel2.Size = new System.Drawing.Size(226, 17);
+            this.linkLabel2.TabIndex = 20;
+            this.linkLabel2.TabStop = true;
+            this.linkLabel2.Text = "Output must be set to LoopMidi port for Rust";
+            this.linkLabel2.UseCompatibleTextRendering = true;
+            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel2_LinkClicked);
             // 
             // label2
             // 
@@ -424,30 +448,6 @@
             this.guildLabel.Text = "With help from THE Bard\'s Guild";
             this.guildLabel.UseCompatibleTextRendering = true;
             this.guildLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked);
-            // 
-            // linkLabel1
-            // 
-            this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(129, 135);
-            this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(50, 13);
-            this.linkLabel1.TabIndex = 15;
-            this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "LoopMidi";
-            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked_1);
-            // 
-            // linkLabel2
-            // 
-            this.linkLabel2.AutoSize = true;
-            this.linkLabel2.LinkArea = new System.Windows.Forms.LinkArea(22, 8);
-            this.linkLabel2.Location = new System.Drawing.Point(13, 69);
-            this.linkLabel2.Name = "linkLabel2";
-            this.linkLabel2.Size = new System.Drawing.Size(226, 17);
-            this.linkLabel2.TabIndex = 20;
-            this.linkLabel2.TabStop = true;
-            this.linkLabel2.Text = "Output must be set to LoopMidi port for Rust";
-            this.linkLabel2.UseCompatibleTextRendering = true;
-            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel2_LinkClicked);
             // 
             // SettingsForm
             // 

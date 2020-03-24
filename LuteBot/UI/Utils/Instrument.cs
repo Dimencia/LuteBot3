@@ -24,15 +24,15 @@ namespace LuteBot.UI.Utils
             if(!File.Exists(path))
             {
                 Prefabs.Add(new Instrument() { LowestNote = 0, NoteCount = 24, NoteCooldown = 18, Name = "Mordhau Lute" });
-                Prefabs.Add(new Instrument() { LowestNote = 46, NoteCount = 32, NoteCooldown = 0, Name = "Rust Trumpet" });
-                Prefabs.Add(new Instrument() { LowestNote = 21, NoteCount = 88, NoteCooldown = 0, Name = "Rust Piano" });
-                Prefabs.Add(new Instrument() { LowestNote = 40, NoteCount = 30, NoteCooldown = 0, Name = "Rust Can Guitar" });
-                Prefabs.Add(new Instrument() { LowestNote = 40, NoteCount = 27, NoteCooldown = 0, Name = "Rust Acoustic Guitar" });
-                Prefabs.Add(new Instrument() { LowestNote = 72, NoteCount = 25, NoteCooldown = 0, Name = "Rust Xylobones" });
-                Prefabs.Add(new Instrument() { LowestNote = 28, NoteCount = 21, NoteCooldown = 0, Name = "Rust Bass" });
-                Prefabs.Add(new Instrument() { LowestNote = 29, NoteCount = 20, NoteCooldown = 0, Name = "Rust Sousaphone" });
-                Prefabs.Add(new Instrument() { LowestNote = 72, NoteCount = 12, NoteCooldown = 0, Name = "Rust Flute" });
-                Prefabs.Add(new Instrument() { LowestNote = 48, NoteCount = 14, NoteCooldown = 0, Name = "Rust Drums (Bad)" });
+                Prefabs.Add(new Instrument() { LowestNote = 46, NoteCount = 32, NoteCooldown = 5, Name = "Rust Trumpet" });
+                Prefabs.Add(new Instrument() { LowestNote = 21, NoteCount = 88, NoteCooldown = 5, Name = "Rust Piano" });
+                Prefabs.Add(new Instrument() { LowestNote = 40, NoteCount = 30, NoteCooldown = 5, Name = "Rust Can Guitar" });
+                Prefabs.Add(new Instrument() { LowestNote = 40, NoteCount = 27, NoteCooldown = 5, Name = "Rust Acoustic Guitar" });
+                Prefabs.Add(new Instrument() { LowestNote = 72, NoteCount = 25, NoteCooldown = 5, Name = "Rust Xylobones" });
+                Prefabs.Add(new Instrument() { LowestNote = 28, NoteCount = 21, NoteCooldown = 5, Name = "Rust Bass" });
+                Prefabs.Add(new Instrument() { LowestNote = 29, NoteCount = 20, NoteCooldown = 5, Name = "Rust Sousaphone" });
+                Prefabs.Add(new Instrument() { LowestNote = 72, NoteCount = 12, NoteCooldown = 5, Name = "Rust Flute" });
+                Prefabs.Add(new Instrument() { LowestNote = 48, NoteCount = 14, NoteCooldown = 5, Name = "Rust Drums (Bad)" });
                 Write();
             }
         }
