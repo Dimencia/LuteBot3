@@ -12,6 +12,8 @@ I had some issues with Git and ended up making a new repo, but this is still mos
 * Automatic search/download of BitMidi when searching for a song not in the Library
 * Ability to visually align songs or individual channels to match your instrument
 * Song preferences are now injected into the midi file, so the mid can be distributed easily with settings intact
+* Automatic drum removal for Mordhau
+* TimeSync option using an NTP server to attempt to synchronize playing with a friend
 
 ## Rust Features v MidiPlayer
 * Drum mapping so any midi with a glockenspiel track is automatically converted (usually)
