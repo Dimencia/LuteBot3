@@ -619,6 +619,7 @@ namespace LuteBot
             var data = trackSelectionManager.GetTrackSelectionData();
             player.LoadFile(currentTrackName);
             trackSelectionManager.SetTrackSelectionData(data);
+            trackSelectionManager.SaveTrackManager();
             if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
                 trackSelectionForm.Invoke((MethodInvoker) delegate { trackSelectionForm.Refresh(); }); // Invoking just in case this is on a diff thread somehow
             Refresh();
