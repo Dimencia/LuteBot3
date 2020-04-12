@@ -53,6 +53,9 @@ namespace LuteBot
             // 
             // HotkeysList
             // 
+            this.HotkeysList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.HotkeysList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.Action,
             this.Key});
@@ -63,7 +66,7 @@ namespace LuteBot
             this.HotkeysList.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.HotkeysList.Location = new System.Drawing.Point(12, 27);
             this.HotkeysList.Name = "HotkeysList";
-            this.HotkeysList.Size = new System.Drawing.Size(600, 152);
+            this.HotkeysList.Size = new System.Drawing.Size(600, 167);
             this.HotkeysList.TabIndex = 1;
             this.HotkeysList.UseCompatibleStateImageBehavior = false;
             this.HotkeysList.View = System.Windows.Forms.View.Details;
@@ -81,7 +84,9 @@ namespace LuteBot
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(12, 198);
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cancelButton.Location = new System.Drawing.Point(12, 213);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(120, 30);
             this.cancelButton.TabIndex = 4;
@@ -91,7 +96,9 @@ namespace LuteBot
             // 
             // applyButton
             // 
-            this.applyButton.Location = new System.Drawing.Point(492, 198);
+            this.applyButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.applyButton.Location = new System.Drawing.Point(492, 213);
             this.applyButton.Name = "applyButton";
             this.applyButton.Size = new System.Drawing.Size(120, 30);
             this.applyButton.TabIndex = 5;
@@ -170,19 +177,21 @@ namespace LuteBot
             // 
             // MordhauConfigLabel
             // 
+            this.MordhauConfigLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.MordhauConfigLabel.AutoSize = true;
-            this.MordhauConfigLabel.Location = new System.Drawing.Point(12, 182);
+            this.MordhauConfigLabel.Location = new System.Drawing.Point(12, 197);
             this.MordhauConfigLabel.Name = "MordhauConfigLabel";
-            this.MordhauConfigLabel.Size = new System.Drawing.Size(470, 13);
+            this.MordhauConfigLabel.Size = new System.Drawing.Size(479, 13);
             this.MordhauConfigLabel.TabIndex = 8;
-            this.MordhauConfigLabel.Text = "Mordhau configuration file not found. Please set the location of DefaultInput.ini" +
-    " in the menu above.";
+            this.MordhauConfigLabel.Text = "Make sure to set your in-game Console key to the one listed here.  It cannot be a" +
+    " key that sends text";
             // 
             // KeyBindingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(624, 238);
+            this.ClientSize = new System.Drawing.Size(624, 253);
             this.Controls.Add(this.MordhauConfigLabel);
             this.Controls.Add(this.applyButton);
             this.Controls.Add(this.cancelButton);

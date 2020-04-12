@@ -56,6 +56,42 @@ namespace LuteBot.TrackSelection
             }
         }
 
+        public void SetTrackSelectionData(TrackSelectionData data)
+        {
+            // So... Channels and tracks might have changed
+            // I think we need to compare current channels and remove any values that aren't in them before storing
+            Dictionary<int, int> newMidiOffsets = new Dictionary<int, int>();
+            foreach (var channel in MidiChannels)
+            {
+                var newChannel = data.MidiChannels.Where(c => c.Id == channel.Id).FirstOrDefault();
+                if (newChannel != null)
+                {
+                    channel.Active = newChannel.Active;
+                    if (data.MidiChannelOffsets.ContainsKey(channel.Id))
+                        newMidiOffsets.Add(channel.Id, data.MidiChannelOffsets[channel.Id]);
+                }
+            }
+            foreach(var track in MidiTracks)
+            {
+                var newTrack = data.MidiTracks.Where(t => t.Id == track.Id).FirstOrDefault();
+                if (newTrack != null)
+                    track.Active = newTrack.Active;
+            }
+
+            NoteOffset = data.Offset;
+            
+        }
+
+        public TrackSelectionData GetTrackSelectionData()
+        {
+            TrackSelectionData data = new TrackSelectionData();
+            data.MidiChannels = MidiChannels;
+            data.MidiTracks = MidiTracks;
+            data.Offset = NoteOffset;
+            data.MidiChannelOffsets = MidiChannelOffsets;
+            return data;
+        }
+
         public void SaveTrackManager()
         {
             TrackSelectionData data = new TrackSelectionData();

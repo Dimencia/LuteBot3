@@ -27,11 +27,13 @@
 
         //keybinds
         Play,
+        Stop,
         Next,
         Previous,
         Ready,
         OpenConsole,
         SynchronizedPlay,
+        
 
         //misc
         MordhauInputIniLocation,

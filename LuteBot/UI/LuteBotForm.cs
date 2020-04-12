@@ -89,6 +89,7 @@ namespace LuteBot
             hotkeyManager = new HotkeyManager();
             hotkeyManager.NextKeyPressed += new EventHandler(NextButton_Click);
             hotkeyManager.PlayKeyPressed += new EventHandler(PlayButton_Click);
+            hotkeyManager.StopKeyPressed += new EventHandler(StopButton_Click);
             hotkeyManager.SynchronizePressed += HotkeyManager_SynchronizePressed;
             hotkeyManager.PreviousKeyPressed += new EventHandler(PreviousButton_Click);
             trackSelectionManager.OutDeviceResetRequest += new EventHandler(ResetDevice);
@@ -488,12 +489,12 @@ namespace LuteBot
             player.Stop();
             timer1.Stop();
             MusicProgressBar.Value = 0;
-            PlayButton.Enabled = false;
-            MusicProgressBar.Enabled = false;
-            StopButton.Enabled = false;
+            //PlayButton.Enabled = false;
+            //MusicProgressBar.Enabled = false;
+            //StopButton.Enabled = false;
             StartLabel.Text = "00:00";
-            EndTimeLabel.Text = "00:00";
-            CurrentMusicLabel.Text = "";
+            //EndTimeLabel.Text = "00:00";
+            //CurrentMusicLabel.Text = "";
             playButtonIsPlaying = false;
             PlayButton.Text = playButtonStartString;
         }
@@ -605,6 +606,22 @@ namespace LuteBot
             timeSyncForm = new TimeSyncForm(this);
                 timeSyncForm.Show();
             
+        }
+
+        private void ReloadButton_Click(object sender, EventArgs e)
+        {
+            // First grab the Track Filtering settings for our current track
+            // Re-load the same midi track from file
+            // And re-apply those settings
+
+            // I don't think getting the settings is that easy but we'll try
+            // Oh hey it can be.
+            var data = trackSelectionManager.GetTrackSelectionData();
+            player.LoadFile(currentTrackName);
+            trackSelectionManager.SetTrackSelectionData(data);
+            if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
+                trackSelectionForm.Invoke((MethodInvoker) delegate { trackSelectionForm.Refresh(); }); // Invoking just in case this is on a diff thread somehow
+            Refresh();
         }
     }
 }
