@@ -90,15 +90,70 @@ namespace LuteBot.Core.Midi
 
         public override string GetFormattedPosition()
         {
+            // Let's try doing this by percentage of sequencer.Position vs formattedLength
+
             TimeSpan time = TimeSpan.FromSeconds(0);
-            time = TimeSpan.FromSeconds((int)((sequencer.Position / sequence.Division) * this.sequence.FirstTempo / 1000000f));
+            if (lastDuration != TimeSpan.Zero && lastLength != 0)
+            {
+                double percentage = (double)sequencer.Position / lastLength; // We don't want to GetLength() every time so this works
+                double totalMinutes = lastDuration.TotalMinutes * percentage;
+                time = TimeSpan.FromMinutes(totalMinutes);
+            }
+            else // Old method, in case something screws up
+                time = TimeSpan.FromSeconds((((double)sequencer.Position / sequence.Division) * this.sequence.FirstTempo / 1000000d));
             return time.ToString(@"mm\:ss");
         }
 
+        private TimeSpan lastDuration = TimeSpan.Zero;
+        private int lastLength = 0;
+
         public override string GetFormattedLength()
         {
-            TimeSpan time = TimeSpan.FromSeconds(0);
-            time = TimeSpan.FromSeconds((int)((sequence.GetLength() / sequence.Division) * this.sequence.FirstTempo / 1000000f));
+            Dictionary<int, int> tempoEvents = new Dictionary<int, int>(); // Ordered by: AbsoluteTicks, Tempo
+            int id = 0;
+            foreach (var t in sequence.Tracks)
+            {
+                foreach (var something in t.Iterator())
+                {
+                    if (something.MidiMessage.MessageType == MessageType.Meta)
+                    {
+                        MetaMessage meta = (MetaMessage)something.MidiMessage;
+                        if (meta.MetaType == MetaType.Tempo)
+                        {
+                            // I think, something.AbsoluteTicks is useful
+                            // As for getting the actual Tempo out of it... 
+                            var bytes = meta.GetBytes();
+                            // Apparently it's... backwards?
+                            byte[] tempoBytes = new byte[4];
+                            tempoBytes[2] = bytes[0];
+                            tempoBytes[1] = bytes[1];
+                            tempoBytes[0] = bytes[2];
+                            int tempo = BitConverter.ToInt32(tempoBytes, 0);
+                            // This seems legit
+                            tempoEvents.Add(something.AbsoluteTicks, tempo);
+                        }
+                    }
+                }
+            }
+            TimeSpan time = TimeSpan.Zero;
+            int lastTempo = sequence.FirstTempo;
+            int lastTime = 0;
+            foreach (var kvp in tempoEvents)
+            {
+                time += TimeSpan.FromSeconds((((double)(kvp.Key - lastTime) / sequence.Division) * lastTempo / 1000000d));
+                lastTempo = kvp.Value;
+                lastTime = kvp.Key;
+            }
+            lastLength = sequence.GetLength();
+            // And then get the rest to the end
+            if (time != TimeSpan.Zero)
+                time += TimeSpan.FromSeconds((((double)(lastLength - lastTime) / sequence.Division) * lastTempo / 1000000d));
+
+
+            //time = TimeSpan.FromSeconds((int)((sequence.GetLength() / sequence.Division) * this.sequence.FirstTempo / 1000000f));
+            if (time == TimeSpan.Zero)
+                time = TimeSpan.FromSeconds((((double)lastLength / sequence.Division) * this.sequence.FirstTempo / 1000000d)); // Old method
+            lastDuration = time;
             return time.ToString(@"mm\:ss");
         }
 
@@ -219,33 +274,41 @@ namespace LuteBot.Core.Midi
                 // We need to manually parse out data for Max and Min note for each Channel, in trackSelectionManager
                 trackSelectionManager.MaxNoteByChannel = new Dictionary<int, int>();
                 trackSelectionManager.MinNoteByChannel = new Dictionary<int, int>();
-                foreach(var track in sequence)
+                for (int i = 0; i < 128; i++)
                 {
-                    foreach(var midiEvent in track.Iterator())
+                    trackSelectionManager.MaxNoteByChannel[i] = 0; // Pre-populate to reduce errors later
+                    trackSelectionManager.MinNoteByChannel[i] = 0;
+                }
+                foreach (var track in sequence)
+                {
+                    foreach (var midiEvent in track.Iterator())
                     {
-
-                        if (midiEvent.MidiMessage is ChannelMessage c && c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
+                        if (midiEvent.MidiMessage is ChannelMessage c)
                         {
-                            if(c.MidiChannel == 6) // Glockenspiel...
+                            if (c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
                             {
-                                drumNoteCounts[c.Data1]++; // They're all 0 by default
+                                if (c.MidiChannel == 6) // Glockenspiel...
+                                {
+                                    drumNoteCounts[c.Data1]++; // They're all 0 by default
+                                }
+
+                                if (!trackSelectionManager.MaxNoteByChannel.ContainsKey(c.MidiChannel))
+                                    trackSelectionManager.MaxNoteByChannel.Add(c.MidiChannel, c.Data1);
+                                else if (trackSelectionManager.MaxNoteByChannel[c.MidiChannel] < c.Data1)
+                                    trackSelectionManager.MaxNoteByChannel[c.MidiChannel] = c.Data1;
+
+                                if (!trackSelectionManager.MinNoteByChannel.ContainsKey(c.MidiChannel))
+                                    trackSelectionManager.MinNoteByChannel.Add(c.MidiChannel, c.Data1);
+                                else if (trackSelectionManager.MinNoteByChannel[c.MidiChannel] > c.Data1)
+                                    trackSelectionManager.MinNoteByChannel[c.MidiChannel] = c.Data1;
                             }
-
-                            if (!trackSelectionManager.MaxNoteByChannel.ContainsKey(c.MidiChannel))
-                                trackSelectionManager.MaxNoteByChannel.Add(c.MidiChannel, c.Data1);
-                            else if (trackSelectionManager.MaxNoteByChannel[c.MidiChannel] < c.Data1)
-                                trackSelectionManager.MaxNoteByChannel[c.MidiChannel] = c.Data1;
-
-                            if (!trackSelectionManager.MinNoteByChannel.ContainsKey(c.MidiChannel))
-                                trackSelectionManager.MinNoteByChannel.Add(c.MidiChannel, c.Data1);
-                            else if (trackSelectionManager.MinNoteByChannel[c.MidiChannel] > c.Data1)
-                                trackSelectionManager.MinNoteByChannel[c.MidiChannel] = c.Data1;
                         }
                     }
                 }
                 // Now let's get a sorted list of drum note counts
                 // I can't figure out how to do this nicely.
-                for (int i = 0; i < drumNoteCounts.Length; i++) {
+                for (int i = 0; i < drumNoteCounts.Length; i++)
+                {
                     DrumNoteCounts.Add(new KeyValuePair<int, int>(i, drumNoteCounts[i]));
                 }
                 DrumNoteCounts = DrumNoteCounts.OrderBy((kvp) => kvp.Value).ToList();
@@ -321,7 +384,7 @@ namespace LuteBot.Core.Midi
                                     //}
                                     // Assume it's no longer 0 for now...
                                     // Now just map it to a dictionary of most popular notes on drums
-                                    if(DrumMappings.MidiToRustMap.ContainsKey(filtered.Data1))
+                                    if (DrumMappings.MidiToRustMap.ContainsKey(filtered.Data1))
                                     {
                                         var newNote = new ChannelMessage(filtered.Command, filtered.MidiChannel, DrumMappings.MidiToRustMap[filtered.Data1], filtered.Data2);
                                         outDevice.Send(newNote);
@@ -343,7 +406,7 @@ namespace LuteBot.Core.Midi
                 }
                 else
                 {
-                    mordhauOutDevice.SendNote(trackSelectionManager.FilterMidiEvent(e.Message, e.TrackId), trackSelectionManager.NoteOffset + 
+                    mordhauOutDevice.SendNote(trackSelectionManager.FilterMidiEvent(e.Message, e.TrackId), trackSelectionManager.NoteOffset +
                        (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0));
                 }
             }
@@ -358,7 +421,7 @@ namespace LuteBot.Core.Midi
             //FinalizeMC();
             //midiOut.Dispose();
             isPlaying = false;
-            outDevice.Reset();            
+            outDevice.Reset();
         }
     }
 

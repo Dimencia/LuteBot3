@@ -217,8 +217,9 @@ namespace LuteBot.UI
             int maxNote = 127;
             if (trackSelectionManager.MidiChannels.Count > 0)
             {
-                minNote = trackSelectionManager.MidiChannels.Min((c) => trackSelectionManager.MinNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0));
-                maxNote = trackSelectionManager.MidiChannels.Max((c) => trackSelectionManager.MaxNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0));
+                // Sometimes, MinNoteByChannel or MaxNoteByChannel may not have value if the track never played any notes
+                minNote = trackSelectionManager.MidiChannels.Min((c) => (trackSelectionManager.MinNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MinNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0):0));
+                maxNote = trackSelectionManager.MidiChannels.Max((c) => (trackSelectionManager.MaxNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MaxNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0):0));
             }
 
             if (isAdvanced)
