@@ -21,9 +21,9 @@ namespace LuteBot
     public partial class SettingsForm : Form
     {
         private readonly string versionAvaliable = "A new version is avaliable to download";
-        private static string VERSION;
-        private static string VERSION_FILE_URL = "https://raw.githubusercontent.com/Dimencia/LuteBot2.1/master/Version.txt";
-        private static string THREAD_URL = "https://github.com/Dimencia/LuteBot2.1";
+        private static string VERSION { get; set; }
+        private static string VERSION_FILE_URL = "https://raw.githubusercontent.com/Dimencia/LuteBot3/master/Version.txt";
+        private static string THREAD_URL = "https://github.com/Dimencia/LuteBot3";
         private static string GUILD_URL = "https://discord.gg/4xnJVuz";
         private string latestVersion;
         private int Timeout = 200;
@@ -285,20 +285,26 @@ namespace LuteBot
 
         private void InstrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ConfigManager.SetProperty(PropertyItem.Instrument, instrumentsBox.SelectedIndex.ToString());
-            Instrument target = (Instrument)instrumentsBox.SelectedItem;
+            // If it's already the instrument we have as our property
+            // Then don't re-set the values
+            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            if (currentInstrument != instrumentsBox.SelectedIndex)
+            {
+                ConfigManager.SetProperty(PropertyItem.Instrument, instrumentsBox.SelectedIndex.ToString());
+                Instrument target = (Instrument)instrumentsBox.SelectedItem;
 
-            SoundEffectsCheckBox.Checked = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
-            ConfigManager.SetProperty(PropertyItem.SoundEffects, SoundEffectsCheckBox.Checked.ToString());
+                SoundEffectsCheckBox.Checked = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
+                ConfigManager.SetProperty(PropertyItem.SoundEffects, SoundEffectsCheckBox.Checked.ToString());
 
-            LowestNoteNumeric.Value = target.LowestNote;
-            ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestNote.ToString());
+                LowestNoteNumeric.Value = target.LowestNote;
+                ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestNote.ToString());
 
-            NoteCountNumeric.Value = target.NoteCount;
-            ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
+                NoteCountNumeric.Value = target.NoteCount;
+                ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
 
-            NoteCooldownNumeric.Value = target.NoteCooldown;
-            ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
+                NoteCooldownNumeric.Value = target.NoteCooldown;
+                ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
+            }
         }
 
         private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

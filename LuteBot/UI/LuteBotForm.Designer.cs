@@ -288,7 +288,7 @@ namespace LuteBot
             this.ReloadButton.Size = new System.Drawing.Size(35, 30);
             this.ReloadButton.TabIndex = 11;
             this.ReloadButton.Text = "♻️";
-            this.toolTip1.SetToolTip(this.ReloadButton, "Re-load song, presumably after editing it");
+            this.toolTip1.SetToolTip(this.ReloadButton, "Reload Song, after changing instruments or editing it");
             this.ReloadButton.UseVisualStyleBackColor = true;
             this.ReloadButton.Click += new System.EventHandler(this.ReloadButton_Click);
             // 

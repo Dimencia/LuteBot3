@@ -130,7 +130,7 @@ namespace LuteBot.Core.Midi
                             tempoBytes[0] = bytes[2];
                             int tempo = BitConverter.ToInt32(tempoBytes, 0);
                             // This seems legit
-                            tempoEvents.Add(something.AbsoluteTicks, tempo);
+                            tempoEvents[something.AbsoluteTicks] = tempo;
                         }
                     }
                 }
