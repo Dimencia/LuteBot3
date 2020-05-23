@@ -37,14 +37,14 @@ namespace LuteBot
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(SaveManager.LoadMordhauConfig(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation))))
+                if (string.IsNullOrWhiteSpace(SaveManager.LoadMordhauConfig(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation)))) // This might need to run
                 {
-                    MordhauConfigLabel.Text = "Mordhau configuration file not found. Please set the location of DefaultInput.ini in the menu above.";
+                    //MordhauConfigLabel.Text = "Mordhau configuration file not found. Please set the location of DefaultInput.ini in the menu above.";
                 }
-                else
-                {
-                    MordhauConfigLabel.Text = "Mordhau configuration file found";
-                }
+                //else
+                //{
+                //    MordhauConfigLabel.Text = "Mordhau configuration file found";
+                //}
             }
             catch (Exception ex)
             {

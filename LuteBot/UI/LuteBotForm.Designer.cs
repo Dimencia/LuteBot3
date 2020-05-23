@@ -68,12 +68,14 @@ namespace LuteBot
             // menuStrip1
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.optionsToolStripMenuItem,
             this.windowToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(462, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(616, 28);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -83,20 +85,20 @@ namespace LuteBot
             this.keyBindingToolStripMenuItem,
             this.settingsToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // keyBindingToolStripMenuItem
             // 
             this.keyBindingToolStripMenuItem.Name = "keyBindingToolStripMenuItem";
-            this.keyBindingToolStripMenuItem.Size = new System.Drawing.Size(137, 22);
+            this.keyBindingToolStripMenuItem.Size = new System.Drawing.Size(171, 26);
             this.keyBindingToolStripMenuItem.Text = "Key Binding";
             this.keyBindingToolStripMenuItem.Click += new System.EventHandler(this.KeyBindingToolStripMenuItem_Click);
             // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(137, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(171, 26);
             this.settingsToolStripMenuItem.Text = "Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.SettingsToolStripMenuItem_Click);
             // 
@@ -106,7 +108,7 @@ namespace LuteBot
             this.openToolStripMenuItem,
             this.focusToolStripMenuItem});
             this.windowToolStripMenuItem.Name = "windowToolStripMenuItem";
-            this.windowToolStripMenuItem.Size = new System.Drawing.Size(63, 20);
+            this.windowToolStripMenuItem.Size = new System.Drawing.Size(78, 24);
             this.windowToolStripMenuItem.Text = "Window";
             // 
             // openToolStripMenuItem
@@ -120,20 +122,20 @@ namespace LuteBot
             this.guildLibraryToolStripMenuItem,
             this.timeSyncToolStripMenuItem});
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.openToolStripMenuItem.Text = "Open";
             // 
             // playListToolStripMenuItem
             // 
             this.playListToolStripMenuItem.Name = "playListToolStripMenuItem";
-            this.playListToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.playListToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.playListToolStripMenuItem.Text = "PlayList";
             this.playListToolStripMenuItem.Click += new System.EventHandler(this.PlayListToolStripMenuItem_Click);
             // 
             // soundBoardToolStripMenuItem
             // 
             this.soundBoardToolStripMenuItem.Name = "soundBoardToolStripMenuItem";
-            this.soundBoardToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.soundBoardToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.soundBoardToolStripMenuItem.Text = "SoundBoard";
             this.soundBoardToolStripMenuItem.Click += new System.EventHandler(this.SoundBoardToolStripMenuItem_Click);
             // 
@@ -141,47 +143,49 @@ namespace LuteBot
             // 
             this.onlineSyncToolStripMenuItem.Enabled = false;
             this.onlineSyncToolStripMenuItem.Name = "onlineSyncToolStripMenuItem";
-            this.onlineSyncToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.onlineSyncToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.onlineSyncToolStripMenuItem.Text = "Online Sync";
             this.onlineSyncToolStripMenuItem.Click += new System.EventHandler(this.OnlineSyncToolStripMenuItem_Click);
             // 
             // trackFilteringToolStripMenuItem
             // 
             this.trackFilteringToolStripMenuItem.Name = "trackFilteringToolStripMenuItem";
-            this.trackFilteringToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.trackFilteringToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.trackFilteringToolStripMenuItem.Text = "Track Filtering";
             this.trackFilteringToolStripMenuItem.Click += new System.EventHandler(this.TrackFilteringToolStripMenuItem_Click);
             // 
             // liveInputToolStripMenuItem
             // 
             this.liveInputToolStripMenuItem.Name = "liveInputToolStripMenuItem";
-            this.liveInputToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.liveInputToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.liveInputToolStripMenuItem.Text = "Live Input";
             this.liveInputToolStripMenuItem.Click += new System.EventHandler(this.liveInputToolStripMenuItem_Click);
             // 
             // guildLibraryToolStripMenuItem
             // 
             this.guildLibraryToolStripMenuItem.Name = "guildLibraryToolStripMenuItem";
-            this.guildLibraryToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.guildLibraryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.guildLibraryToolStripMenuItem.Text = "Guild Library";
             this.guildLibraryToolStripMenuItem.Click += new System.EventHandler(this.GuildLibraryToolStripMenuItem_Click);
             // 
             // timeSyncToolStripMenuItem
             // 
+            this.timeSyncToolStripMenuItem.Enabled = false;
             this.timeSyncToolStripMenuItem.Name = "timeSyncToolStripMenuItem";
-            this.timeSyncToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.timeSyncToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.timeSyncToolStripMenuItem.Text = "Time Sync";
             this.timeSyncToolStripMenuItem.Click += new System.EventHandler(this.TimeSyncToolStripMenuItem_Click);
             // 
             // focusToolStripMenuItem
             // 
             this.focusToolStripMenuItem.Name = "focusToolStripMenuItem";
-            this.focusToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
+            this.focusToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.focusToolStripMenuItem.Text = "Focus";
             this.focusToolStripMenuItem.Click += new System.EventHandler(this.LuteBotForm_Focus);
             // 
             // contextMenuStrip1
             // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
@@ -189,35 +193,39 @@ namespace LuteBot
             // 
             this.MusicProgressBar.BackColor = System.Drawing.SystemColors.ControlLight;
             this.MusicProgressBar.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.MusicProgressBar.Location = new System.Drawing.Point(12, 57);
+            this.MusicProgressBar.Location = new System.Drawing.Point(16, 70);
+            this.MusicProgressBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MusicProgressBar.Maximum = 500;
             this.MusicProgressBar.Name = "MusicProgressBar";
-            this.MusicProgressBar.Size = new System.Drawing.Size(438, 45);
+            this.MusicProgressBar.Size = new System.Drawing.Size(584, 56);
             this.MusicProgressBar.TabIndex = 1;
             this.MusicProgressBar.Scroll += new System.EventHandler(this.MusicProgressBar_Scroll);
             // 
             // CurrentMusicLabel
             // 
             this.CurrentMusicLabel.AutoSize = true;
-            this.CurrentMusicLabel.Location = new System.Drawing.Point(13, 41);
+            this.CurrentMusicLabel.Location = new System.Drawing.Point(17, 50);
+            this.CurrentMusicLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.CurrentMusicLabel.Name = "CurrentMusicLabel";
-            this.CurrentMusicLabel.Size = new System.Drawing.Size(0, 13);
+            this.CurrentMusicLabel.Size = new System.Drawing.Size(0, 17);
             this.CurrentMusicLabel.TabIndex = 2;
             // 
             // StartLabel
             // 
             this.StartLabel.AutoSize = true;
-            this.StartLabel.Location = new System.Drawing.Point(12, 105);
+            this.StartLabel.Location = new System.Drawing.Point(16, 129);
+            this.StartLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.StartLabel.Name = "StartLabel";
-            this.StartLabel.Size = new System.Drawing.Size(34, 13);
+            this.StartLabel.Size = new System.Drawing.Size(44, 17);
             this.StartLabel.TabIndex = 3;
             this.StartLabel.Text = "00:00";
             // 
             // PreviousButton
             // 
-            this.PreviousButton.Location = new System.Drawing.Point(12, 129);
+            this.PreviousButton.Location = new System.Drawing.Point(16, 159);
+            this.PreviousButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.PreviousButton.Name = "PreviousButton";
-            this.PreviousButton.Size = new System.Drawing.Size(75, 23);
+            this.PreviousButton.Size = new System.Drawing.Size(100, 28);
             this.PreviousButton.TabIndex = 5;
             this.PreviousButton.Text = "Previous";
             this.PreviousButton.UseVisualStyleBackColor = true;
@@ -225,9 +233,10 @@ namespace LuteBot
             // 
             // StopButton
             // 
-            this.StopButton.Location = new System.Drawing.Point(93, 128);
+            this.StopButton.Location = new System.Drawing.Point(124, 158);
+            this.StopButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(75, 23);
+            this.StopButton.Size = new System.Drawing.Size(100, 28);
             this.StopButton.TabIndex = 6;
             this.StopButton.Text = "Stop";
             this.StopButton.UseVisualStyleBackColor = true;
@@ -235,9 +244,10 @@ namespace LuteBot
             // 
             // PlayButton
             // 
-            this.PlayButton.Location = new System.Drawing.Point(294, 128);
+            this.PlayButton.Location = new System.Drawing.Point(392, 158);
+            this.PlayButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.PlayButton.Name = "PlayButton";
-            this.PlayButton.Size = new System.Drawing.Size(75, 23);
+            this.PlayButton.Size = new System.Drawing.Size(100, 28);
             this.PlayButton.TabIndex = 7;
             this.PlayButton.Text = "Play";
             this.PlayButton.UseVisualStyleBackColor = true;
@@ -245,9 +255,10 @@ namespace LuteBot
             // 
             // NextButton
             // 
-            this.NextButton.Location = new System.Drawing.Point(375, 128);
+            this.NextButton.Location = new System.Drawing.Point(500, 158);
+            this.NextButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.NextButton.Name = "NextButton";
-            this.NextButton.Size = new System.Drawing.Size(75, 23);
+            this.NextButton.Size = new System.Drawing.Size(100, 28);
             this.NextButton.TabIndex = 8;
             this.NextButton.Text = "Next";
             this.NextButton.UseVisualStyleBackColor = true;
@@ -260,9 +271,10 @@ namespace LuteBot
             // 
             // LoadFileButton
             // 
-            this.LoadFileButton.Location = new System.Drawing.Point(175, 128);
+            this.LoadFileButton.Location = new System.Drawing.Point(233, 158);
+            this.LoadFileButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.LoadFileButton.Name = "LoadFileButton";
-            this.LoadFileButton.Size = new System.Drawing.Size(113, 23);
+            this.LoadFileButton.Size = new System.Drawing.Size(151, 28);
             this.LoadFileButton.TabIndex = 9;
             this.LoadFileButton.Text = "Load Midi File";
             this.LoadFileButton.UseVisualStyleBackColor = true;
@@ -271,9 +283,10 @@ namespace LuteBot
             // EndTimeLabel
             // 
             this.EndTimeLabel.AutoSize = true;
-            this.EndTimeLabel.Location = new System.Drawing.Point(416, 105);
+            this.EndTimeLabel.Location = new System.Drawing.Point(555, 129);
+            this.EndTimeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.EndTimeLabel.Name = "EndTimeLabel";
-            this.EndTimeLabel.Size = new System.Drawing.Size(34, 13);
+            this.EndTimeLabel.Size = new System.Drawing.Size(44, 17);
             this.EndTimeLabel.TabIndex = 10;
             this.EndTimeLabel.Text = "00:00";
             // 
@@ -282,10 +295,10 @@ namespace LuteBot
             this.ReloadButton.FlatAppearance.BorderSize = 0;
             this.ReloadButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ReloadButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ReloadButton.Location = new System.Drawing.Point(415, 24);
+            this.ReloadButton.Location = new System.Drawing.Point(553, 30);
             this.ReloadButton.Margin = new System.Windows.Forms.Padding(0);
             this.ReloadButton.Name = "ReloadButton";
-            this.ReloadButton.Size = new System.Drawing.Size(35, 30);
+            this.ReloadButton.Size = new System.Drawing.Size(47, 37);
             this.ReloadButton.TabIndex = 11;
             this.ReloadButton.Text = "♻️";
             this.toolTip1.SetToolTip(this.ReloadButton, "Reload Song, after changing instruments or editing it");
@@ -294,9 +307,9 @@ namespace LuteBot
             // 
             // LuteBotForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(462, 164);
+            this.ClientSize = new System.Drawing.Size(616, 202);
             this.Controls.Add(this.ReloadButton);
             this.Controls.Add(this.EndTimeLabel);
             this.Controls.Add(this.LoadFileButton);
@@ -311,6 +324,7 @@ namespace LuteBot
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "LuteBotForm";
