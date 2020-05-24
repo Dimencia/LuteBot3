@@ -14,6 +14,7 @@ I had some issues with Git and ended up making a new repo, but this is still mos
 * Song preferences are now injected into the midi file, so the mid can be distributed easily with settings intact
 * Automatic drum removal for Mordhau
 * TimeSync option using an NTP server to attempt to synchronize playing with a friend
+* QOL tweaks, such as a stop hotkey, not unloading song on stop, song reload button
 
 ## Rust Features v MidiPlayer
 * Drum mapping so any midi with a glockenspiel track is automatically converted (usually)
