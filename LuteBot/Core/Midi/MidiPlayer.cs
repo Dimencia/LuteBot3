@@ -15,11 +15,11 @@ namespace LuteBot.Core.Midi
     public class MidiPlayer : Player
     {
         private OutputDevice outDevice;
-        private Sequence sequence;
+        public Sequence sequence;
         private Sequencer sequencer;
         public MordhauOutDevice mordhauOutDevice;
         public RustOutDevice rustOutDevice;
-        private TrackSelectionManager trackSelectionManager;
+        public TrackSelectionManager trackSelectionManager;
 
         private bool isPlaying;
 
@@ -33,7 +33,6 @@ namespace LuteBot.Core.Midi
             {
                 Format = 1
             };
-
             sequencer = new Sequencer
             {
                 Position = 0,
@@ -44,7 +43,7 @@ namespace LuteBot.Core.Midi
             sequencer.SysExMessagePlayed += new System.EventHandler<Sanford.Multimedia.Midi.SysExMessageEventArgs>(this.HandleSysExMessagePlayed);
             sequencer.Chased += new System.EventHandler<Sanford.Multimedia.Midi.ChasedEventArgs>(this.HandleChased);
             sequencer.Stopped += new System.EventHandler<Sanford.Multimedia.Midi.StoppedEventArgs>(this.HandleStopped);
-
+            
             if (!(OutputDevice.DeviceCount == 0))
             {
                 outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));

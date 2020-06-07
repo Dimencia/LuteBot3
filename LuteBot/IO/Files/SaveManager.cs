@@ -221,23 +221,70 @@ namespace LuteBot.IO.Files
                 {
                     try
                     {
+                        Directory.CreateDirectory(autoSavePath);
                         using (MemoryStream stream = new MemoryStream())
                         {
                             serializer.WriteObject(stream, target);
                             // Reset stream...
                             stream.Seek(0, SeekOrigin.Begin);
                             // Remove any XML data from the midi file, if any
+
+                            // First read in the existing data
                             byte[] midiData;
+                            long fsLength;
                             using (FileStream fs = File.OpenRead(path))
                             {
+                                fsLength = fs.Length;
                                 midiData = new byte[fs.Length];
-                                fs.Read(midiData, 0, (int)fs.Length);
+                                for (int i = 0; i < fs.Length; i++)
+                                    midiData[i] = (byte)fs.ReadByte(); // No int overflow issues here vs .Read()
                             }
+                            
+
                             // midiData currently includes both the xml and midi right now
                             // I need to somehow find out where in the byte array the xml stuff starts
-                            string allData = Encoding.Default.GetString(midiData);
-                            int xmlCutoff = allData.IndexOf("<TrackSelectionData") / 2;
-                            if(xmlCutoff != 0)
+
+                            //string allData = Encoding.Default.GetString(midiData);
+                            //int xmlCutoff = allData.IndexOf("<TrackSelectionData") / 2;
+
+                            int xmlCutoff = -1;
+                            byte[] xmlMarker = Encoding.ASCII.GetBytes("\n<TrackSelectionData");
+
+                            // We throw exceptions on these cuz we catch them below and do default saving instead if necessary
+                            if (fsLength + xmlMarker.Length > int.MaxValue) // Handle rare case
+                            {
+                                MessageBox.Show("MIDI byte array value was larger than int maxvalue, writing to separate file instead");
+                                throw new Exception("MIDI byte array value was larger than int maxvalue, writing to separate file instead");
+                            }
+                            if (stream.Length > int.MaxValue)
+                            {
+                                MessageBox.Show("Track Selection byte array value was larger than int maxvalue, writing to separate file instead");
+                                throw new Exception("Track Selection byte array value was larger than int maxvalue, writing to separate file instead");
+                            }
+
+                            // I think we have to do this manually, annoyingly, there's no easy way to find the indexOf a byte array like this
+                            for (int i = 0; (i + xmlMarker.Length) < midiData.Length; i++)
+                            {
+                                var compare = midiData.Skip(i).Take(xmlMarker.Length).ToArray();
+                                // Again it doesn't seem that == works here and we have to do it by hand...
+                                bool success = true;
+                                for(int j = 0; j < xmlMarker.Length; j++)
+                                {
+                                    if (compare[j] != xmlMarker[j])
+                                    {
+                                        success = false;
+                                        break;
+                                    }
+                                }
+                                if (success)
+                                {
+                                    xmlCutoff = i;
+                                    break;
+                                }
+                            }
+                            
+                            // As a safety check - it should never be -1 or 0 or really anything low but whatever
+                            if(xmlCutoff > 0)
                                 midiData = midiData.Take(xmlCutoff).ToArray();
 
                             // Now we have all the data we need
@@ -254,15 +301,16 @@ namespace LuteBot.IO.Files
                         return;
                     }
                     catch (Exception e) {
-                        path = "Profiles" + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path);
-                    } // If it fails, fallback.
+                        MessageBox.Show("Failed to write to midi file - writing to XML file instead");
+                        path = "Profiles" + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path) + ".xml";
+                        Directory.CreateDirectory(path);
+                        using (var stream = File.Create(path))
+                        {
+                            serializer.WriteObject(stream, target);
+                        }
+                    } // If it fails, fallback and write to the old path, and write just the stream
                 }
-                path = path + ".xml";
-                Directory.CreateDirectory(autoSavePath);
-                using (var stream = File.Create(path))
-                {
-                    serializer.WriteObject(stream, target);
-                }
+                
             }
         }
 
@@ -317,7 +365,7 @@ namespace LuteBot.IO.Files
                     {
                         // Assume it's an old version and try that 
                         success = false;
-                        //MessageBox.Show("Wrong File type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Error reading embedded data in file, trying default file");
                     }
                 }
                 if (!success)

@@ -119,6 +119,12 @@
     <Compile Include="UI\KeyBindingForm.Designer.cs">
       <DependentUpon>KeyBindingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\ScrapMechanicConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\ScrapMechanicConfigForm.Designer.cs">
+      <DependentUpon>ScrapMechanicConfigForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\TimeSyncForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -204,6 +210,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\ScrapMechanicConfigForm.resx">
+      <DependentUpon>ScrapMechanicConfigForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>

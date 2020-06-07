@@ -40,7 +40,7 @@ namespace LuteBot.Core
             stopWatch = new Stopwatch();
         }
 
-        private void UpdateNoteIdBounds()
+        public void UpdateNoteIdBounds()
         {
             int noteRange = highMidiNoteId - lowMidiNoteId;
             int luteRange = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);

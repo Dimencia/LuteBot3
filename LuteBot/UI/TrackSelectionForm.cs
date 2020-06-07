@@ -87,14 +87,14 @@ namespace LuteBot.UI
                     int oldOffset = trackSelectionManager.MidiChannelOffsets.ContainsKey(dragTarget.Id) ? trackSelectionManager.MidiChannelOffsets[dragTarget.Id] : 0;
                     trackSelectionManager.MidiChannelOffsets[dragTarget.Id] = startOffset + (int)Math.Round(((GetDistance(dragStart, e.Location) * multiplier / columnWidth)) / 12) * 12;
                     if (trackSelectionManager.MidiChannelOffsets[dragTarget.Id] != oldOffset)
-                        Refresh();
+                        OffsetPanel.Refresh();
                 }
                 else
                 {
                     int oldOffset = trackSelectionManager.NoteOffset;
                     trackSelectionManager.NoteOffset = startOffset + (int)Math.Round(((GetDistance(dragStart, e.Location) * multiplier / columnWidth)) / 12) * 12;
                     if (trackSelectionManager.NoteOffset != oldOffset)
-                        Refresh();
+                        OffsetPanel.Refresh();
                 }
             }
 
@@ -393,7 +393,7 @@ namespace LuteBot.UI
             {
                 TrackListBox.Items.Add(track.Name, track.Active);
             }
-            Refresh();
+            //Refresh();
             // This is a terrible thing to do, but, there's no easy way to hook the right events to make it wait properly
             // So after a timer, we're refreshing our OffsetPanel again
             Timer t = new Timer();
@@ -403,7 +403,7 @@ namespace LuteBot.UI
                 if (this.IsHandleCreated && !this.IsDisposed)
                     Invoke((MethodInvoker)delegate
                     {
-                        OffsetPanel.Refresh();
+                        Refresh();
                         t.Dispose();
                     });
             };
