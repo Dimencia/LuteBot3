@@ -84,6 +84,7 @@ namespace LuteBot
         {
             try
             {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12; // Didn't I already do this?
                 using (WebClient client = new WebClient())
                 {
                     //var data = client.DownloadData(url);
@@ -94,6 +95,7 @@ namespace LuteBot
             }
             catch (WebException ex)
             {
+                Console.WriteLine(ex.Message);
             }
         }
 

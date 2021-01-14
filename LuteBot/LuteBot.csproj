@@ -79,6 +79,7 @@
     <Compile Include="Core\MordhauOutDevice.cs" />
     <Compile Include="Core\Player.cs" />
     <Compile Include="Core\RustOutDevice.cs" />
+    <Compile Include="GuildSong.cs" />
     <Compile Include="IO\KB\Keybinds.cs" />
     <Compile Include="LiveInput\Midi\LiveMidiManager.cs" />
     <Compile Include="LiveInput\Midi\MidiDeviceItem.cs" />

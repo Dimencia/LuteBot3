@@ -62,6 +62,7 @@ namespace LuteBot
             this.EndTimeLabel = new System.Windows.Forms.Label();
             this.ReloadButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.guildLibraryToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MusicProgressBar)).BeginInit();
             this.SuspendLayout();
@@ -72,7 +73,8 @@ namespace LuteBot
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.optionsToolStripMenuItem,
-            this.windowToolStripMenuItem});
+            this.windowToolStripMenuItem,
+            this.guildLibraryToolStripMenuItem1});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(616, 28);
@@ -130,20 +132,20 @@ namespace LuteBot
             this.guildLibraryToolStripMenuItem,
             this.timeSyncToolStripMenuItem});
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(129, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.openToolStripMenuItem.Text = "Open";
             // 
             // playListToolStripMenuItem
             // 
             this.playListToolStripMenuItem.Name = "playListToolStripMenuItem";
-            this.playListToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.playListToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.playListToolStripMenuItem.Text = "PlayList";
             this.playListToolStripMenuItem.Click += new System.EventHandler(this.PlayListToolStripMenuItem_Click);
             // 
             // soundBoardToolStripMenuItem
             // 
             this.soundBoardToolStripMenuItem.Name = "soundBoardToolStripMenuItem";
-            this.soundBoardToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.soundBoardToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.soundBoardToolStripMenuItem.Text = "SoundBoard";
             this.soundBoardToolStripMenuItem.Click += new System.EventHandler(this.SoundBoardToolStripMenuItem_Click);
             // 
@@ -151,42 +153,42 @@ namespace LuteBot
             // 
             this.onlineSyncToolStripMenuItem.Enabled = false;
             this.onlineSyncToolStripMenuItem.Name = "onlineSyncToolStripMenuItem";
-            this.onlineSyncToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.onlineSyncToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.onlineSyncToolStripMenuItem.Text = "Online Sync";
             this.onlineSyncToolStripMenuItem.Click += new System.EventHandler(this.OnlineSyncToolStripMenuItem_Click);
             // 
             // trackFilteringToolStripMenuItem
             // 
             this.trackFilteringToolStripMenuItem.Name = "trackFilteringToolStripMenuItem";
-            this.trackFilteringToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.trackFilteringToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.trackFilteringToolStripMenuItem.Text = "Track Filtering";
             this.trackFilteringToolStripMenuItem.Click += new System.EventHandler(this.TrackFilteringToolStripMenuItem_Click);
             // 
             // liveInputToolStripMenuItem
             // 
             this.liveInputToolStripMenuItem.Name = "liveInputToolStripMenuItem";
-            this.liveInputToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.liveInputToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.liveInputToolStripMenuItem.Text = "Live Input";
             this.liveInputToolStripMenuItem.Click += new System.EventHandler(this.liveInputToolStripMenuItem_Click);
             // 
             // guildLibraryToolStripMenuItem
             // 
             this.guildLibraryToolStripMenuItem.Name = "guildLibraryToolStripMenuItem";
-            this.guildLibraryToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.guildLibraryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.guildLibraryToolStripMenuItem.Text = "Guild Library";
             this.guildLibraryToolStripMenuItem.Click += new System.EventHandler(this.GuildLibraryToolStripMenuItem_Click);
             // 
             // timeSyncToolStripMenuItem
             // 
             this.timeSyncToolStripMenuItem.Name = "timeSyncToolStripMenuItem";
-            this.timeSyncToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.timeSyncToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.timeSyncToolStripMenuItem.Text = "Time Sync";
             this.timeSyncToolStripMenuItem.Click += new System.EventHandler(this.TimeSyncToolStripMenuItem_Click);
             // 
             // focusToolStripMenuItem
             // 
             this.focusToolStripMenuItem.Name = "focusToolStripMenuItem";
-            this.focusToolStripMenuItem.Size = new System.Drawing.Size(129, 26);
+            this.focusToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.focusToolStripMenuItem.Text = "Focus";
             this.focusToolStripMenuItem.Click += new System.EventHandler(this.LuteBotForm_Focus);
             // 
@@ -312,11 +314,19 @@ namespace LuteBot
             this.ReloadButton.UseVisualStyleBackColor = true;
             this.ReloadButton.Click += new System.EventHandler(this.ReloadButton_Click);
             // 
+            // guildLibraryToolStripMenuItem1
+            // 
+            this.guildLibraryToolStripMenuItem1.BackColor = System.Drawing.Color.Gold;
+            this.guildLibraryToolStripMenuItem1.Name = "guildLibraryToolStripMenuItem1";
+            this.guildLibraryToolStripMenuItem1.Size = new System.Drawing.Size(107, 24);
+            this.guildLibraryToolStripMenuItem1.Text = "Guild Library";
+            this.guildLibraryToolStripMenuItem1.Click += new System.EventHandler(this.GuildLibraryToolStripMenuItem_Click);
+            // 
             // LuteBotForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(616, 202);
+            this.ClientSize = new System.Drawing.Size(616, 204);
             this.Controls.Add(this.ReloadButton);
             this.Controls.Add(this.EndTimeLabel);
             this.Controls.Add(this.LoadFileButton);
@@ -376,6 +386,7 @@ namespace LuteBot
         private Button ReloadButton;
         private ToolTip toolTip1;
         private ToolStripMenuItem exportToScrapMechanicToolStripMenuItem;
+        private ToolStripMenuItem guildLibraryToolStripMenuItem1;
     }
 }
 

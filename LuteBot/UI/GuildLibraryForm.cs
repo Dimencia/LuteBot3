@@ -15,6 +15,7 @@ using LuteBot.playlist;
 using System.Threading;
 using System.Text.RegularExpressions;
 using CsvHelper;
+using Newtonsoft.Json;
 
 namespace LuteBot.UI
 {
@@ -25,18 +26,17 @@ namespace LuteBot.UI
         private readonly string log_FILENAME = "logs.txt";
         private readonly string songs_FOLDER = @"songs\";
 
-        private SortableBindingList<Song> SongsList = new SortableBindingList<Song>();
+        private SortableBindingList<GuildSong> SongsList = new SortableBindingList<GuildSong>();
 
         private LuteBotForm mainForm;
 
-        public GuildLibraryForm(LuteBotForm form, SortableBindingList<Song> inputSongList = null)
+        public GuildLibraryForm(LuteBotForm form)
         {
             InitializeComponent();
-            if (inputSongList != null)
-                SongsList = inputSongList;
             InitGridView();
             mainForm = form;
             searchBox.TextChanged += SearchBox_TextChanged;
+            searchBox.KeyPress += SearchBox_KeyPress;
 
             Directory.CreateDirectory(appdata_PATH + songs_FOLDER);
 
@@ -46,55 +46,79 @@ namespace LuteBot.UI
                 // No need to keep backups of the log files really
                 File.Delete(appdata_PATH + log_FILENAME);
             }
-            if (inputSongList == null)
-                DownloadGuildLibrary();
+        }
+
+        private async void SearchBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+            {
+                searchBox.Enabled = false;
+                await UpdateFilteredList().ConfigureAwait(true);
+                searchBox.Enabled = true;
+            }
+        }
+
+        private async void buttonSearch_Click(object sender, EventArgs e)
+        {
+            searchBox.Enabled = false;
+            await UpdateFilteredList().ConfigureAwait(true);
+            searchBox.Enabled = true;
         }
 
         private void InitGridView()
         {
-            songGrid.DataSource = typeof(List<Song>);
+            songGrid.DataSource = typeof(List<GuildSong>);
             songGrid.DataSource = SongsList;
+            songGrid.Columns[0].Visible = false; // Hide checksum column
+            songGrid.Columns[4].Visible = false; // Hide source_url column
 
-            songGrid.Columns[0].Visible = false; // Hide filename column
-            songGrid.Columns[7].Visible = false; // Hide DiscordUrl column
+            songGrid.Columns[1].Name = "Filename";
+            songGrid.Columns[2].Name = "Contributor";
+            songGrid.Columns[3].Name = "Mordhau Score"; // Attribs didn't work... 
+
+            songGrid.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            songGrid.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            songGrid.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells; // Songname fills
+            //songGrid.Columns[0].Visible = false; // Hide filename column
+            //songGrid.Columns[7].Visible = false; // Hide DiscordUrl column
         }
 
         private void SearchBox_TextChanged(object sender, EventArgs e)
         {
-            UpdateFilteredList();
+            //UpdateFilteredList();
         }
 
-        private void UpdateFilteredList()
+        private async Task UpdateFilteredList()
         {
             int previousIndex = songGrid.FirstDisplayedScrollingRowIndex;
             var previousSelected = songGrid.SelectedRows;
-            List<Song> selectedSongs = new List<Song>();
+            List<GuildSong> selectedSongs = new List<GuildSong>();
 
             foreach (DataGridViewRow row in previousSelected)
             {
-                selectedSongs.Add((Song)row.DataBoundItem);
+                selectedSongs.Add((GuildSong)row.DataBoundItem);
             }
 
             string searchString = searchBox.Text.ToLower();
-            var filteredBindingList = new SortableBindingList<Song>(SongsList.Where(x =>
-            x.Title.ToLower().Contains(searchString) ||
-            x.Artist.ToLower().Contains(searchString) ||
-            x.Tags.ToLower().Contains(searchString) ||
-            x.MidiContributor.ToLower().Contains(searchString)
-            ).ToList());
+            SortableBindingList<GuildSong> filteredBindingList;
+
+            // Populate the list with a Guild Library query
+            searchString = WebUtility.UrlEncode(searchString);
+            string url = $"https://us-central1-bards-guild-midi-project.cloudfunctions.net/query?key=A52eAaSKhnQiXyVYtoqZLj4tVycc5U4HtY56S4Ha&find={searchString}";
+            using (WebClient client = new WebClient())
+            {
+                string results = await client.DownloadStringTaskAsync(url).ConfigureAwait(true);
+                var songArray = JsonConvert.DeserializeObject<GuildSong[]>(results);
+                filteredBindingList = new SortableBindingList<GuildSong>(songArray);
+            }
+
 
             if (filteredBindingList.Count == 0)
             {
-                Song infoSong = new Song
+                GuildSong infoSong = new GuildSong
                 {
-                    Title = $"No songs found, select and add this to try searching Google for {searchString}",
-                    Artist = "Make sure to include a full song name and artist for best results, and don't expect good quality",
-                    MidiContributor = "",
-                    Filename = searchString,
-                    Upvotes = "",
-                    Tags = "",
-                    Compatibility = "",
-                    DiscordUrl = ""
+                    filename = $"No songs found, select and add this to try searching Google for {searchString}",
+                    contributor = "Make sure to include a full song name and artist for best results, and don't expect good quality"
                 };
                 filteredBindingList.Add(infoSong);
             }
@@ -105,13 +129,13 @@ namespace LuteBot.UI
             // Seems to always select the first row, let's remove it and re-add if necessary
             if (songGrid.RowCount > 0)
                 songGrid.Rows[0].Selected = false;
-            foreach (Song s in selectedSongs)
+            foreach (GuildSong s in selectedSongs)
             {
                 if (filteredBindingList.Contains(s))
                 {
                     foreach (DataGridViewRow row in songGrid.Rows)
                     {
-                        if ((Song)row.DataBoundItem == s)
+                        if ((GuildSong)row.DataBoundItem == s)
                             row.Selected = true;
                     }
                 }
@@ -119,45 +143,6 @@ namespace LuteBot.UI
 
         }
 
-        private byte[] GuildLibrary;
-
-        private void DownloadGuildLibrary()
-        {
-            // Downloads the excel sheet, reads it, and fills in our songGrid with the data
-
-            string sheet_download_URL = $@"https://docs.google.com/spreadsheets/d/{sheet_ID}/export?format=tsv";
-
-            // Downloads to memory, no longer saves to file so this is no longer necessary
-            /*
-            if (File.Exists(sheet_FILENAME))
-                File.Delete(sheet_FILENAME);
-            */
-
-            Log("Beginning download of Master Guild Library list");
-            using (WebClient wc = new WebClient())
-            {
-                wc.DownloadDataCompleted += Wc_DownloadDataCompleted;
-                wc.DownloadDataAsync(new Uri(sheet_download_URL));
-
-                //wc.DownloadFileCompleted += Wc_DownloadFileCompleted;
-                //wc.DownloadFileAsync(new Uri(sheet_download_URL), appdata_PATH + sheet_FILENAME);
-            }
-        }
-
-        private void Wc_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
-        {
-            GuildLibrary = e.Result;
-            Log("Download completed, reading library");
-            Task.Run(ReadGuildLibrary);
-        }
-
-        /*
-        private void Wc_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            Log("Download completed, reading library");
-            Task.Run(ReadGuildLibrary);
-        }
-        */
 
         private static object locker = new object();
         private delegate void SafeCallDelegate(string text);
@@ -200,79 +185,6 @@ namespace LuteBot.UI
             }
         }
 
-        private void ReadGuildLibrary()
-        {
-            // Reads our appdata_PATH+sheet_FILENAME tsv file and saves the data into a list of Songs
-            SortableBindingList<Song> newSongs = new SortableBindingList<Song>();
-
-            if (InvokeRequired)
-                Invoke((MethodInvoker)delegate
-                {
-                    SongsList.Clear();
-                });
-
-            //using (StreamReader reader = new StreamReader(appdata_PATH + sheet_FILENAME))
-            using (TextReader reader = new StreamReader(new MemoryStream(GuildLibrary)))
-            {
-                var csv = new CsvReader(reader, System.Globalization.CultureInfo.InvariantCulture);
-                csv.Configuration.Delimiter = "\t";
-                var records = csv.GetRecords<Song>();
-                newSongs = new SortableBindingList<Song>(records);
-
-                /*
-                // Skip first line, column headers
-                reader.ReadLine();
-                while (!reader.EndOfStream)
-                {
-                    // Make sure we're not disposed and get out of here if we are
-                    if (this.IsDisposed)
-                    {
-                        break;
-                    }
-                    string line = reader.ReadLine();
-                    string[] values = line.Split('\t');
-                    Song currentSong = new Song();
-                    try
-                    {
-                        currentSong.Title = values[Columns.Title];
-                        if (string.IsNullOrEmpty(currentSong.Title))
-                            currentSong.Title = values[Columns.Filename];
-                        currentSong.Artist = values[Columns.Artist];
-                        currentSong.Tags = values[Columns.Tags];
-                        currentSong.Compatibility = values[Columns.Compatibility];
-                        currentSong.Upvotes = values[Columns.Upvotes];
-                        currentSong.MidiContributor = values[Columns.Contributor];
-                        currentSong.DiscordUrl = values[Columns.URL];
-                        currentSong.Filename = values[Columns.Filename];
-
-                        newSongs.Add(currentSong);
-                    }
-                    catch (Exception e)
-                    {
-                        Log(e.StackTrace);
-                        Log(e.Message);
-                        Log("Failed while parsing song, attempting to continue...");
-                        continue;
-                    }
-                }
-                */
-            }
-            GuildLibrary = null;
-            if (!this.IsDisposed)
-            {
-                Log($"Successfully parsed {newSongs.Count} songs");
-
-                SongsList = newSongs;
-                Invoke((MethodInvoker)delegate
-                {
-                    InitGridView();
-                });
-
-                // If we fully parsed all the songs, we should send it back to the main form to hold on to
-                // In case this form is closed and reopened later
-                AllowColumnSorting();
-            }
-        }
 
         private void AllowColumnSorting()
         {
@@ -283,66 +195,98 @@ namespace LuteBot.UI
             }
         }
 
-        static class Columns
-        {
-            public static int Filename = 1;
-            public static int Title = 2;
-            public static int Artist = 3;
-            public static int Tags = 4;
-            public static int Contributor = 5;
-            public static int Compatibility = 6;
-            public static int Upvotes = 7;
-            public static int URL = 8;
-            public static int FileSize = 9;
-            public static int Checksum = 10;
-        }
 
-        private void downloadAndAddSong(Song song)
+        private void downloadAndPlaySong(GuildSong song)
         {
             // Downloads midi from the URL, returning the path to the song
-            string path = appdata_PATH + songs_FOLDER + song.Filename;
+            string path = appdata_PATH + songs_FOLDER + song.filename;
             if (File.Exists(path)) // No need to redownload if we have it
             {
                 AddSongToPlaylist(song, path);
                 return;
             }
 
-            if (song.DiscordUrl.Equals(string.Empty))
+            if (song.source_url.Equals(string.Empty))
             {
                 // Indication that we should search google
                 song = GetSongDataFromGoogle(song);
-                path = appdata_PATH + songs_FOLDER + song.Filename;
+                path = appdata_PATH + songs_FOLDER + song.filename;
             }
 
             // If it's still empty, we need to abort
-            if (song.DiscordUrl.Equals(string.Empty))
+            if (song.source_url.Equals(string.Empty))
             {
-                Log($"Unable to find {song.Filename} online");
+                Log($"Unable to find {song.filename} online");
                 return;
             }
 
             // We need to pass the song when download is completed
             // So we'll do a Task.Run that handles that... hopefully
             Task.Run(() =>
-        {
-            using (WebClient wc = new WebClient())
             {
-                try
+                using (WebClient wc = new WebClient())
                 {
-                    wc.DownloadFile(song.DiscordUrl, path);
-                    AddSongToPlaylist(song, path);
+                    try
+                    {
+                        wc.DownloadFile(song.source_url, path);
+                        PlaySong(path);
+                    }
+                    catch (Exception e)
+                    {
+                        Log(e.StackTrace);
+                        Log(e.Message);
+                        Log($"Failed to download/add {song.filename}");
+                    }
                 }
-                catch (Exception e)
-                {
-                    Log(e.StackTrace);
-                    Log(e.Message);
-                    Log($"Failed to download/add {song.Title}");
-                }
-            }
-        });
+            });
         }
 
-        private Song GetSongDataFromGoogle(Song song)
+        private void downloadAndAddSong(GuildSong song)
+        {
+            // Downloads midi from the URL, returning the path to the song
+            string path = appdata_PATH + songs_FOLDER + song.filename;
+            if (File.Exists(path)) // No need to redownload if we have it
+            {
+                AddSongToPlaylist(song, path);
+                return;
+            }
+
+            if (song.source_url.Equals(string.Empty))
+            {
+                // Indication that we should search google
+                song = GetSongDataFromGoogle(song);
+                path = appdata_PATH + songs_FOLDER + song.filename;
+            }
+
+            // If it's still empty, we need to abort
+            if (song.source_url.Equals(string.Empty))
+            {
+                Log($"Unable to find {song.filename} online");
+                return;
+            }
+
+            // We need to pass the song when download is completed
+            // So we'll do a Task.Run that handles that... hopefully
+            Task.Run(() =>
+            {
+                using (WebClient wc = new WebClient())
+                {
+                    try
+                    {
+                        wc.DownloadFile(song.source_url, path);
+                        AddSongToPlaylist(song, path);
+                    }
+                    catch (Exception e)
+                    {
+                        Log(e.StackTrace);
+                        Log(e.Message);
+                        Log($"Failed to download/add {song.filename}");
+                    }
+                }
+            });
+        }
+
+        private GuildSong GetSongDataFromGoogle(GuildSong song)
         {
             // Misleading name, for now we're just using bitmidi
             // https://bitmidi.com/search?q=test as a search page
@@ -353,7 +297,7 @@ namespace LuteBot.UI
             // Otherwise right now, the FileName contains the search query
             System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
             // For now I'll be lazy and we'll just parse the page as a string
-            string searchURL = $@"https://bitmidi.com/search?q={song.Filename}";
+            string searchURL = $@"https://bitmidi.com/search?q={song.filename}";
             using (WebClient wc = new WebClient())
             {
                 string webData = wc.DownloadString(searchURL);
@@ -374,32 +318,41 @@ namespace LuteBot.UI
                 if (!match.Success)
                     return song;
                 string filename = match.Groups[1].Value;
-                song.Title = filename.Replace(".mid", "");
-                song.Filename = filename;
-                song.DiscordUrl = url;
-                song.Artist = "";
-                song.MidiContributor = "Auto-Generated";
+                song.filename = filename;
+                song.source_url = url;
+                song.contributor = "BitMidi";
                 Log($"Successfully found {filename} online, downloading...");
             }
             return song;
         }
 
-        private void AddSongToPlaylist(Song song, string path)
+        private void PlaySong(string path)
         {
-            PlayListItem plsong = new PlayListItem { Name = song.Title, Path = path };
-            // If the playlist form isn't open, we can add it to the playlist manager and it will show up when opened
-            if (mainForm.playListForm == null || mainForm.playListForm.IsDisposed)
+            mainForm.Invoke((MethodInvoker)delegate
             {
-                LuteBotForm.playList.AddTrack(plsong);
-            }
-            else // If it is open, we need to add it directly do it, so just pass it to the form
+                mainForm.LoadHelper(path);
+            });
+        }
+
+        private void AddSongToPlaylist(GuildSong song, string path)
+        {
+            mainForm.Invoke((MethodInvoker)delegate
             {
-                mainForm.playListForm.Invoke((MethodInvoker)delegate
+                PlayListItem plsong = new PlayListItem { Name = song.filename, Path = path };
+                // If the playlist form isn't open, we can add it to the playlist manager and it will show up when opened
+                if (mainForm.playListForm == null || mainForm.playListForm.IsDisposed)
                 {
-                    mainForm.playListForm.AddSongToPlaylist(plsong);
-                });                
-            }
-            Log($"Successfully added {song.Title} to current playlist");
+                    LuteBotForm.playList.AddTrack(plsong);
+                }
+                else // If it is open, we need to add it directly do it, so just pass it to the form
+                {
+                    mainForm.playListForm.Invoke((MethodInvoker)delegate
+                    {
+                        mainForm.playListForm.AddSongToPlaylist(plsong);
+                    });
+                }
+                Log($"Successfully added {song.filename} to current playlist");
+            });
         }
 
         private void ButtonAddToPlaylist_Click(object sender, EventArgs e)
@@ -408,7 +361,16 @@ namespace LuteBot.UI
             // Then ... add to current playlist?  
             foreach (DataGridViewRow row in songGrid.SelectedRows)
             {
-                downloadAndAddSong((Song)row.DataBoundItem);
+                downloadAndAddSong((GuildSong)row.DataBoundItem);
+            }
+        }
+
+        private void buttonPlay_Click(object sender, EventArgs e)
+        {
+            if (songGrid.SelectedRows.Count > 0)
+            {
+                GuildSong selectedSong = (GuildSong)songGrid.SelectedRows[0].DataBoundItem;
+                downloadAndPlaySong(selectedSong);
             }
         }
     }

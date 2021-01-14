@@ -106,6 +106,7 @@ namespace LuteBot
             NextButton.Enabled = false;
             MusicProgressBar.Enabled = false;
 
+
             _hookID = SetHook(_proc);
             OpenDialogs();
             this.StartPosition = FormStartPosition.Manual;
@@ -412,6 +413,12 @@ namespace LuteBot
             currentTrackName = item.Name;
         }
 
+        public void LoadHelper(string path)
+        {
+            player.LoadFile(path);
+            currentTrackName = Path.GetFileNameWithoutExtension(path);
+        }
+
         private void PlayButton_Click(object sender, EventArgs e)
         {
             if (PlayButton.Enabled)
@@ -587,20 +594,10 @@ namespace LuteBot
 
         private void GuildLibraryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            GuildLibraryForm guildLibraryForm;
-            if (GuildLibrarySongList == null)
-                guildLibraryForm = new GuildLibraryForm(this);
-            else
-                guildLibraryForm = new GuildLibraryForm(this, GuildLibrarySongList);
+            GuildLibraryForm guildLibraryForm = new GuildLibraryForm(this);
             guildLibraryForm.Show();
         }
 
-        private static SortableBindingList<Song> GuildLibrarySongList = null;
-
-        public static void SetGuildLibraryData(SortableBindingList<Song> songList)
-        {
-            GuildLibrarySongList = songList;
-        }
 
         private void TimeSyncToolStripMenuItem_Click(object sender, EventArgs e)
         {
