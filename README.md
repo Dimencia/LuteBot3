@@ -2,6 +2,14 @@
 Originally forked from https://github.com/MontyLeGueux/Lutebot-2
 I had some issues with Git and ended up making a new repo, but this is still mostly his code
 
+
+## Usage Instructions
+Download the latest Release from https://github.com/Dimencia/LuteBot3/releases
+
+Ignore all old instructions; simply change your Mordhau Console keybinding to PageDown (inside the game), and open Settings to turn off Rust Mode (if you're not playing Rust).  Then select a song, load it, and press + while Mordhau is focused and it should start playing
+
+Further support is provided at the [Bard's Guild Discord](https://discord.gg/MmWbkJK)
+
 ![Track Filtering Example](https://github.com/Dimencia/LuteBot3/blob/master/LutebotExample1.PNG)
 
 ![Guild Library Example](https://github.com/Dimencia/LuteBot3/blob/master/LutebotExample2.PNG)
@@ -24,17 +32,11 @@ I had some issues with Git and ended up making a new repo, but this is still mos
 
 
 ### Guild Library
-You can find this in Window -> Open -> Guild Library
+You can find this new button at the top of the screen in yellow
 
-Currently, you will need to have the Guild Library downloaded and extracted to %appdata%/LuteBot/GuildLibrary/songs
+This allows you to search the entire Bard's Guild Library, courtesy of the Official [Bard's Guild](https://discord.gg/MmWbkJK)
 
-These folders will be created for you when you run LuteBot
-
-The Guild Library can be downloaded from the [Bards Guild Discord](https://discord.gg/MmWbkJK)
-
-Very soon, these songs will support auto-download from the Library
-
-If you do not have the library, it will still attempt to auto-download the songs from the internet, but many songs will fail to be found (and another similar song from bitmidi, usually bad, will be downloaded)
+Songs are automatically downloaded when selected from this library
 
 ### Track Alignment
 New feature lets you align channels individually to the instrument range, as shown in the image
