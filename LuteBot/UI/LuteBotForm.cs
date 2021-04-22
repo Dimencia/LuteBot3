@@ -65,7 +65,7 @@ namespace LuteBot
         string playButtonStopString = "Pause";
         string musicNameLabelHeader = "Playing : ";
         bool playButtonIsPlaying = false;
-        string currentTrackName = "";
+        public string currentTrackName { get; set; } = "";
         bool autoplay = false;
         bool isDonePlaying = false;
 
@@ -404,19 +404,19 @@ namespace LuteBot
         private void LoadHelper(PlayListItem item)
         {
             player.LoadFile(item.Path);
-            currentTrackName = item.Name;
+            currentTrackName = item.Path;
         }
 
         private void LoadHelper(SoundBoardItem item)
         {
             player.LoadFile(item.Path);
-            currentTrackName = item.Name;
+            currentTrackName = item.Path;
         }
 
         public void LoadHelper(string path)
         {
             player.LoadFile(path);
-            currentTrackName = Path.GetFileNameWithoutExtension(path);
+            currentTrackName = path;
         }
 
         private void PlayButton_Click(object sender, EventArgs e)

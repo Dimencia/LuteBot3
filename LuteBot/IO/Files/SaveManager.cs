@@ -180,11 +180,8 @@ namespace LuteBot.IO.Files
                     }
                 }
                 
-                if (!path.Contains(".xml"))
-                {
-                    path = path + ".xml";
-                }
                 Directory.CreateDirectory(autoSavePath);
+                path = Path.Combine(autoSavePath, Path.GetFileNameWithoutExtension(path) + ".xml");
                 if (File.Exists(path))
                 {
                     bool success = false;
@@ -232,7 +229,7 @@ namespace LuteBot.IO.Files
                             // First read in the existing data
                             byte[] midiData;
                             long fsLength;
-                            using (FileStream fs = File.OpenRead(path))
+                            using (FileStream fs = File.OpenRead(path)) 
                             {
                                 fsLength = fs.Length;
                                 midiData = new byte[fs.Length];
@@ -302,8 +299,9 @@ namespace LuteBot.IO.Files
                     }
                     catch (Exception e) {
                         MessageBox.Show("Failed to write to midi file - writing to XML file instead");
-                        path = "Profiles" + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path) + ".xml";
-                        Directory.CreateDirectory(path);
+                        var folderpath = "Profiles";
+                        Directory.CreateDirectory(folderpath);
+                        path = folderpath + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path) + ".xml";
                         using (var stream = File.Create(path))
                         {
                             serializer.WriteObject(stream, target);

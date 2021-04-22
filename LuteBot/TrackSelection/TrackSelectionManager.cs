@@ -1,5 +1,7 @@
 ﻿using LuteBot.IO.Files;
+
 using Sanford.Multimedia.Midi;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,7 +73,7 @@ namespace LuteBot.TrackSelection
                         newMidiOffsets.Add(channel.Id, data.MidiChannelOffsets[channel.Id]);
                 }
             }
-            foreach(var track in MidiTracks)
+            foreach (var track in MidiTracks)
             {
                 var newTrack = data.MidiTracks.Where(t => t.Id == track.Id).FirstOrDefault();
                 if (newTrack != null)
@@ -79,7 +81,6 @@ namespace LuteBot.TrackSelection
             }
 
             NoteOffset = data.Offset;
-            
         }
 
         public TrackSelectionData GetTrackSelectionData()
