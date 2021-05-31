@@ -8,7 +8,7 @@ Download the latest Release from https://github.com/Dimencia/LuteBot3/releases
 
 Ignore all old instructions; simply change your Mordhau Console keybinding to PageDown (inside the game), and open Lutebot Settings to turn off Rust Mode (if you're not playing Rust).  Then select a song, load it, and press + while Mordhau is focused and it should start playing
 
-Further support is provided at the [Bard's Guild Discord](https://discord.gg/MmWbkJK)
+Further support is provided at the [Bard's Guild Discord](https://discord.gg/4xnJVuz)
 
 ![Track Filtering Example](https://github.com/Dimencia/LuteBot3/blob/master/LutebotExample1.PNG)
 
