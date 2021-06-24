@@ -34,7 +34,7 @@ Further support is provided at the [Bard's Guild Discord](https://discord.gg/4xn
 ### Guild Library
 You can find this new button at the top of the screen in yellow
 
-This allows you to search the entire Bard's Guild Library, courtesy of the Official [Bard's Guild](https://discord.gg/MmWbkJK)
+This allows you to search the entire Bard's Guild Library, courtesy of the Official [Bard's Guild](https://discord.gg/4xnJVuz)
 
 Songs are automatically downloaded when selected from this library
 
