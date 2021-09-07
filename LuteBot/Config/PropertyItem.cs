@@ -20,6 +20,7 @@
         NoteConversionMode,
         LowestNoteId,
         AvaliableNoteCount,
+        LowestPlayedNote,
         NoteCooldown,
         DebugMode,
         OutputDevice,

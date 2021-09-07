@@ -70,11 +70,7 @@ namespace LuteBot
                     latestVersionFetchThread.Abort();
                 }
             }
-            catch (WebException ex)
-            {
-                UpdateLinkLabel.Text = "Couldn't retrieve version. Retry";
-            }
-            catch (ThreadInterruptedException ex)
+            catch
             {
                 UpdateLinkLabel.Text = "Couldn't retrieve version. Retry";
             }
@@ -298,14 +294,16 @@ namespace LuteBot
                 SoundEffectsCheckBox.Checked = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
                 ConfigManager.SetProperty(PropertyItem.SoundEffects, SoundEffectsCheckBox.Checked.ToString());
 
-                LowestNoteNumeric.Value = target.LowestNote;
-                ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestNote.ToString());
+                LowestNoteNumeric.Value = target.LowestSentNote;
+                ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
 
                 NoteCountNumeric.Value = target.NoteCount;
                 ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
 
                 NoteCooldownNumeric.Value = target.NoteCooldown;
                 ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
             }
         }
 

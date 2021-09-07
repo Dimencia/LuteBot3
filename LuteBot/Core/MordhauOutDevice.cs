@@ -14,12 +14,13 @@ namespace LuteBot.Core
     {
         private int lowNoteId = 0;
         private int highNoteId = 24;
+        private int luteMin = 0;
 
         private int lowMidiNoteId = 0;
         private int highMidiNoteId = 127;
 
         private bool conversionNeeded;
-        private bool cooldownNeeded = true;
+        private bool cooldownNeeded = false;
         private bool muteOutOfRange = false;
 
         public int LowMidiNoteId { get => lowMidiNoteId; set { lowMidiNoteId = value; UpdateNoteIdBounds(); } }
@@ -44,12 +45,25 @@ namespace LuteBot.Core
         {
             int noteRange = highMidiNoteId - lowMidiNoteId;
             int luteRange = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
-            if (noteRange > luteRange)
+            luteMin = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
+            int lowestPlayed = 24;
+            try
             {
-                lowNoteId = ((noteRange / 2) + lowMidiNoteId) - (luteRange / 2);
-                highNoteId = ((noteRange / 2) + lowMidiNoteId) + (luteRange / 2);
-                lowNoteId = lowNoteId - (lowNoteId % 12);
-                highNoteId = highNoteId - (highNoteId % 12) - 1;
+                lowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
+            }
+            catch
+            {
+                ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, lowestPlayed.ToString()); // Enforce a default if they don't have it
+                ConfigManager.SaveConfig();
+            }
+            if (noteRange > luteRange || lowMidiNoteId < luteMin || highMidiNoteId > luteMin + luteRange)
+            {
+                //lowNoteId = ((noteRange / 2) + lowMidiNoteId) - (luteRange / 2);
+                //highNoteId = ((noteRange / 2) + lowMidiNoteId) + (luteRange / 2);
+                lowNoteId = lowestPlayed + luteMin;
+                highNoteId = lowNoteId + luteRange;
+                //lowNoteId = lowNoteId - (lowNoteId % 12);
+                //highNoteId = highNoteId - (highNoteId % 12);
                 conversionNeeded = true;
             }
             else
@@ -93,7 +107,7 @@ namespace LuteBot.Core
                 {
                     if (oldData1 > highNoteId)
                     {
-                        newData1 = (highNoteId - 11) + (oldData1 % 12);
+                        newData1 = (highNoteId - 12) + (oldData1 % 12);
                         outOfRange = true;
                     }
                     else
@@ -121,13 +135,10 @@ namespace LuteBot.Core
                 int noteCooldown = int.Parse(ConfigManager.GetProperty(PropertyItem.NoteCooldown));
                 if (cooldownNeeded)
                 {
-                    if (!stopWatch.IsRunning)
+                    if (!stopWatch.IsRunning) // If it's not running it's our first note
                     {
                         filterResult = FilterNote(message, offset);
-                        if (message.Data2 > 0)
-                        {
-                            ActionManager.PlayNote(filterResult.Data1 - lowNoteId);
-                        }
+                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId + luteMin);
 
                         stopWatch.Start();
                     }
@@ -138,9 +149,9 @@ namespace LuteBot.Core
                             filterResult = FilterNote(message, offset);
                             if (message.Data2 > 0)
                             {
-                                ActionManager.PlayNote(filterResult.Data1 - lowNoteId);
+                                ActionManager.PlayNote(filterResult.Data1 - lowNoteId + luteMin);
                             }
-                            stopWatch.Reset();
+                            stopWatch.Restart();
                         }
                     }
                 }
@@ -149,7 +160,7 @@ namespace LuteBot.Core
                     filterResult = FilterNote(message, offset);
                     if (message.Data2 > 0)
                     {
-                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId);
+                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId + luteMin);
                     }
                 }
             }
