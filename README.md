@@ -6,9 +6,9 @@ I had some issues with Git and ended up making a new repo, but this is still mos
 ## Usage Instructions
 Download the latest Release from https://github.com/Dimencia/LuteBot3/releases
 
-Ignore all old instructions; simply change your Mordhau Console keybinding to PageDown (inside the game), and open Lutebot Settings to turn off Rust Mode (if you're not playing Rust).  Then select a song, load it, and press + while Mordhau is focused and it should start playing
+Change your Mordhau Console keybinding to PageDown (inside the game).  Load a song, and press + while Mordhau is focused and it should start/pause playing
 
-Further support is provided at the [Bard's Guild Discord](https://discord.gg/MmWbkJK)
+Further support is provided at the [Bard's Guild Discord](https://discord.gg/4xnJVuz)
 
 ![Track Filtering Example](https://github.com/Dimencia/LuteBot3/blob/master/LutebotExample1.PNG)
 
@@ -34,7 +34,7 @@ Further support is provided at the [Bard's Guild Discord](https://discord.gg/MmW
 ### Guild Library
 You can find this new button at the top of the screen in yellow
 
-This allows you to search the entire Bard's Guild Library, courtesy of the Official [Bard's Guild](https://discord.gg/MmWbkJK)
+This allows you to search the entire Bard's Guild Library, courtesy of the Official [Bard's Guild](https://discord.gg/4xnJVuz)
 
 Songs are automatically downloaded when selected from this library
 
