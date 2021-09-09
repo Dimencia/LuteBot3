@@ -133,7 +133,7 @@ namespace LuteBot.Config
 
         public static string GetVersion()
         {
-            return "3.0.7";
+            return "3.0.8";
         }
     }
 }

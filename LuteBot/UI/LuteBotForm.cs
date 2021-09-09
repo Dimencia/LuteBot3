@@ -147,7 +147,7 @@ namespace LuteBot
                 PlayButton.Enabled = true;
                 MusicProgressBar.Enabled = true;
                 StopButton.Enabled = true;
-
+                
                 trackSelectionManager.UnloadTracks();
                 if (player.GetType() == typeof(MidiPlayer))
                 {
@@ -162,7 +162,7 @@ namespace LuteBot
                 }
 
                 MusicProgressBar.Value = 0;
-                MusicProgressBar.Maximum = player.GetLenght();
+                MusicProgressBar.Maximum = player.GetLength();
                 StartLabel.Text = TimeSpan.FromSeconds(0).ToString(@"mm\:ss");
                 EndTimeLabel.Text = player.GetFormattedLength();
                 CurrentMusicLabel.Text = musicNameLabelHeader + Path.GetFileNameWithoutExtension(currentTrackName);
@@ -513,6 +513,9 @@ namespace LuteBot
         {
             if (NextButton.Enabled)
             {
+                PlayButton.Enabled = false;
+                StopButton.Enabled = false;
+                MusicProgressBar.Enabled = false;
                 Pause();
                 playList.Next();
                 autoplay = true;
@@ -526,6 +529,9 @@ namespace LuteBot
         {
             if (PreviousButton.Enabled)
             {
+                PlayButton.Enabled = false;
+                StopButton.Enabled = false;
+                MusicProgressBar.Enabled = false;
                 Pause();
                 playList.Previous();
                 autoplay = true;

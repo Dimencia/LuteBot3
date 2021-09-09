@@ -41,13 +41,17 @@ namespace LuteBot
             // PlayListBox
             // 
             this.PlayListBox.AllowDrop = true;
+            this.PlayListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.PlayListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.PlayListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold);
+            this.PlayListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PlayListBox.FormattingEnabled = true;
-            this.PlayListBox.ItemHeight = 50;
-            this.PlayListBox.Location = new System.Drawing.Point(13, 12);
+            this.PlayListBox.ItemHeight = 25;
+            this.PlayListBox.Location = new System.Drawing.Point(17, 15);
+            this.PlayListBox.Margin = new System.Windows.Forms.Padding(4);
             this.PlayListBox.Name = "PlayListBox";
-            this.PlayListBox.Size = new System.Drawing.Size(532, 504);
+            this.PlayListBox.Size = new System.Drawing.Size(708, 604);
             this.PlayListBox.TabIndex = 0;
             this.PlayListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.List_DrawItem);
             this.PlayListBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.List_DragDrop);
@@ -57,9 +61,11 @@ namespace LuteBot
             // 
             // LoadButton
             // 
-            this.LoadButton.Location = new System.Drawing.Point(12, 520);
+            this.LoadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.LoadButton.Location = new System.Drawing.Point(16, 640);
+            this.LoadButton.Margin = new System.Windows.Forms.Padding(4);
             this.LoadButton.Name = "LoadButton";
-            this.LoadButton.Size = new System.Drawing.Size(150, 28);
+            this.LoadButton.Size = new System.Drawing.Size(200, 34);
             this.LoadButton.TabIndex = 1;
             this.LoadButton.Text = "Add to PlayList";
             this.LoadButton.UseVisualStyleBackColor = true;
@@ -67,9 +73,12 @@ namespace LuteBot
             // 
             // SaveButton
             // 
-            this.SaveButton.Location = new System.Drawing.Point(200, 520);
+            this.SaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveButton.Location = new System.Drawing.Point(267, 640);
+            this.SaveButton.Margin = new System.Windows.Forms.Padding(4);
             this.SaveButton.Name = "SaveButton";
-            this.SaveButton.Size = new System.Drawing.Size(150, 28);
+            this.SaveButton.Size = new System.Drawing.Size(200, 34);
             this.SaveButton.TabIndex = 2;
             this.SaveButton.Text = "Save PlayList";
             this.SaveButton.UseVisualStyleBackColor = true;
@@ -77,9 +86,11 @@ namespace LuteBot
             // 
             // LoadPlayListButton
             // 
-            this.LoadPlayListButton.Location = new System.Drawing.Point(395, 520);
+            this.LoadPlayListButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.LoadPlayListButton.Location = new System.Drawing.Point(527, 640);
+            this.LoadPlayListButton.Margin = new System.Windows.Forms.Padding(4);
             this.LoadPlayListButton.Name = "LoadPlayListButton";
-            this.LoadPlayListButton.Size = new System.Drawing.Size(150, 28);
+            this.LoadPlayListButton.Size = new System.Drawing.Size(200, 34);
             this.LoadPlayListButton.TabIndex = 3;
             this.LoadPlayListButton.Text = "Load PlayList";
             this.LoadPlayListButton.UseVisualStyleBackColor = true;
@@ -87,20 +98,22 @@ namespace LuteBot
             // 
             // PlayListForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(557, 560);
+            this.ClientSize = new System.Drawing.Size(743, 689);
             this.Controls.Add(this.LoadPlayListButton);
             this.Controls.Add(this.SaveButton);
             this.Controls.Add(this.LoadButton);
             this.Controls.Add(this.PlayListBox);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "PlayListForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "Playlist";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PlayListForm_Closing);
+            this.ResizeEnd += new System.EventHandler(this.PlayListForm_ResizeEnd);
             this.ResumeLayout(false);
 
         }

@@ -36,7 +36,7 @@ namespace LuteBot.Core
 
         public abstract int GetPosition();
 
-        public abstract int GetLenght();
+        public abstract int GetLength();
 
         public abstract string GetFormattedPosition();
 

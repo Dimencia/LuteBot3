@@ -43,7 +43,7 @@ namespace LuteBot.Core.Midi
             sequencer.SysExMessagePlayed += new System.EventHandler<Sanford.Multimedia.Midi.SysExMessageEventArgs>(this.HandleSysExMessagePlayed);
             sequencer.Chased += new System.EventHandler<Sanford.Multimedia.Midi.ChasedEventArgs>(this.HandleChased);
             sequencer.Stopped += new System.EventHandler<Sanford.Multimedia.Midi.StoppedEventArgs>(this.HandleStopped);
-            
+
             if (!(OutputDevice.DeviceCount == 0))
             {
                 outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
@@ -82,7 +82,7 @@ namespace LuteBot.Core.Midi
             return sequence.TrackNames();
         }
 
-        public override int GetLenght()
+        public override int GetLength()
         {
             return sequence.GetLength();
         }
@@ -171,9 +171,21 @@ namespace LuteBot.Core.Midi
             outDevice.Reset();
         }
 
+
+        public object loadLock = new object();
+
         public override void LoadFile(string filename)
         {
-            sequence.LoadAsync(filename);
+            lock (loadLock)
+            {
+                // Reset the sequence because we can't cancel the load or detect if one is occurring
+                sequence.LoadCompleted -= HandleLoadCompleted;
+                sequence.Dispose();
+                sequence = new Sequence() { Format = 1 };
+                sequencer.Sequence = sequence;
+                sequence.LoadCompleted += HandleLoadCompleted;
+                sequence.LoadAsync(filename);
+            }
             /*
             if (filename.Contains(@"\"))
             {
@@ -247,7 +259,8 @@ namespace LuteBot.Core.Midi
             //midiOut.Dispose();
             isPlaying = false;
             sequencer.Stop();
-            outDevice.Reset();
+            if (!outDevice.IsDisposed)
+                outDevice.Reset();
         }
 
         public override void Dispose()
@@ -268,55 +281,58 @@ namespace LuteBot.Core.Midi
 
         private void HandleLoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            if (e.Error == null)
+            lock (loadLock)
             {
-                // We need to manually parse out data for Max and Min note for each Channel, in trackSelectionManager
-                trackSelectionManager.MaxNoteByChannel = new Dictionary<int, int>();
-                trackSelectionManager.MinNoteByChannel = new Dictionary<int, int>();
-                for (int i = 0; i < 128; i++)
+                if (e.Error == null)
                 {
-                    trackSelectionManager.MaxNoteByChannel[i] = 0; // Pre-populate to reduce errors later
-                    trackSelectionManager.MinNoteByChannel[i] = 0;
-                }
-                foreach (var track in sequence)
-                {
-                    foreach (var midiEvent in track.Iterator())
+                    // We need to manually parse out data for Max and Min note for each Channel, in trackSelectionManager
+                    trackSelectionManager.MaxNoteByChannel = new Dictionary<int, int>();
+                    trackSelectionManager.MinNoteByChannel = new Dictionary<int, int>();
+                    for (int i = 0; i < 128; i++)
                     {
-                        if (midiEvent.MidiMessage is ChannelMessage c)
+                        trackSelectionManager.MaxNoteByChannel[i] = 0; // Pre-populate to reduce errors later
+                        trackSelectionManager.MinNoteByChannel[i] = 0;
+                    }
+                    foreach (var track in sequence)
+                    {
+                        foreach (var midiEvent in track.Iterator())
                         {
-                            if (c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
+                            if (midiEvent.MidiMessage is ChannelMessage c)
                             {
-                                if (c.MidiChannel == 6) // Glockenspiel...
+                                if (c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
                                 {
-                                    drumNoteCounts[c.Data1]++; // They're all 0 by default
+                                    if (c.MidiChannel == 6) // Glockenspiel...
+                                    {
+                                        drumNoteCounts[c.Data1]++; // They're all 0 by default
+                                    }
+
+                                    if (!trackSelectionManager.MaxNoteByChannel.ContainsKey(c.MidiChannel))
+                                        trackSelectionManager.MaxNoteByChannel.Add(c.MidiChannel, c.Data1);
+                                    else if (trackSelectionManager.MaxNoteByChannel[c.MidiChannel] < c.Data1)
+                                        trackSelectionManager.MaxNoteByChannel[c.MidiChannel] = c.Data1;
+
+                                    if (!trackSelectionManager.MinNoteByChannel.ContainsKey(c.MidiChannel))
+                                        trackSelectionManager.MinNoteByChannel.Add(c.MidiChannel, c.Data1);
+                                    else if (trackSelectionManager.MinNoteByChannel[c.MidiChannel] > c.Data1)
+                                        trackSelectionManager.MinNoteByChannel[c.MidiChannel] = c.Data1;
                                 }
-
-                                if (!trackSelectionManager.MaxNoteByChannel.ContainsKey(c.MidiChannel))
-                                    trackSelectionManager.MaxNoteByChannel.Add(c.MidiChannel, c.Data1);
-                                else if (trackSelectionManager.MaxNoteByChannel[c.MidiChannel] < c.Data1)
-                                    trackSelectionManager.MaxNoteByChannel[c.MidiChannel] = c.Data1;
-
-                                if (!trackSelectionManager.MinNoteByChannel.ContainsKey(c.MidiChannel))
-                                    trackSelectionManager.MinNoteByChannel.Add(c.MidiChannel, c.Data1);
-                                else if (trackSelectionManager.MinNoteByChannel[c.MidiChannel] > c.Data1)
-                                    trackSelectionManager.MinNoteByChannel[c.MidiChannel] = c.Data1;
                             }
                         }
                     }
-                }
-                // Now let's get a sorted list of drum note counts
-                // I can't figure out how to do this nicely.
-                for (int i = 0; i < drumNoteCounts.Length; i++)
-                {
-                    DrumNoteCounts.Add(new KeyValuePair<int, int>(i, drumNoteCounts[i]));
-                }
-                DrumNoteCounts = DrumNoteCounts.OrderBy((kvp) => kvp.Value).ToList();
+                    // Now let's get a sorted list of drum note counts
+                    // I can't figure out how to do this nicely.
+                    for (int i = 0; i < drumNoteCounts.Length; i++)
+                    {
+                        DrumNoteCounts.Add(new KeyValuePair<int, int>(i, drumNoteCounts[i]));
+                    }
+                    DrumNoteCounts = DrumNoteCounts.OrderBy((kvp) => kvp.Value).ToList();
 
-                base.LoadCompleted(this, e);
-                mordhauOutDevice.HighMidiNoteId = sequence.MaxNoteId;
-                mordhauOutDevice.LowMidiNoteId = sequence.MinNoteId;
-                rustOutDevice.HighMidiNoteId = sequence.MaxNoteId;
-                rustOutDevice.LowMidiNoteId = sequence.MinNoteId;
+                    base.LoadCompleted(this, e);
+                    mordhauOutDevice.HighMidiNoteId = sequence.MaxNoteId;
+                    mordhauOutDevice.LowMidiNoteId = sequence.MinNoteId;
+                    rustOutDevice.HighMidiNoteId = sequence.MaxNoteId;
+                    rustOutDevice.LowMidiNoteId = sequence.MinNoteId;
+                }
             }
         }
 

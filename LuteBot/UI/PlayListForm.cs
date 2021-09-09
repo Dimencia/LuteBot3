@@ -186,7 +186,7 @@ namespace LuteBot
                     text = ((PlayListItem)box.Items[e.Index]).Name;
                 }
                 TextRenderer.DrawText(e.Graphics, text,
-                    box.Font, e.Bounds, fore);
+                    box.Font, e.Bounds, fore, TextFormatFlags.Left);
                 e.DrawFocusRectangle();
             }
         }
@@ -209,6 +209,11 @@ namespace LuteBot
         {
             playListManager.LoadPlayList();
             RefreshPlayListBox();
+        }
+
+        private void PlayListForm_ResizeEnd(object sender, EventArgs e)
+        {
+            Refresh();
         }
     }
 }
