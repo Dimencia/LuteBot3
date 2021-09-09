@@ -69,7 +69,7 @@ namespace LuteBot
         bool autoplay = false;
         bool isDonePlaying = false;
 
-        public static PlayListManager playList;
+        public PlayListManager playList;
         static SoundBoardManager soundBoardManager;
         public static TrackSelectionManager trackSelectionManager;
         static OnlineSyncManager onlineManager;
@@ -305,7 +305,7 @@ namespace LuteBot
             }
             if (ConfigManager.GetBooleanProperty(PropertyItem.PlayList))
             {
-                playListForm = new PlayListForm(playList);
+                playListForm = new PlayListForm(this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.PlayListPos));
                 playListForm.Show();
                 playListForm.Top = coords.Y;
@@ -471,7 +471,7 @@ namespace LuteBot
         {
             if (playListForm == null || playListForm.IsDisposed)
             {
-                playListForm = new PlayListForm(playList);
+                playListForm = new PlayListForm(this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.PlayListPos));
                 playListForm.Show();
                 playListForm.Top = coords.Y;

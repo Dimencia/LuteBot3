@@ -55,18 +55,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup />
-  <PropertyGroup>
-    <ManifestCertificateThumbprint>772556D17DA9F9E4F3B53533762117C393819D9A</ManifestCertificateThumbprint>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestKeyFile>LuteBot_TemporaryKey.pfx</ManifestKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignManifests>true</SignManifests>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CsvHelper, Version=15.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>..\packages\CsvHelper.15.0.1\lib\net45\CsvHelper.dll</HintPath>
@@ -255,7 +243,6 @@
       <DependentUpon>TrackSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="LuteBot_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Config\Old\App.config">
       <SubType>Designer</SubType>

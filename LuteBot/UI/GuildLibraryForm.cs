@@ -346,7 +346,7 @@ namespace LuteBot.UI
                 // If the playlist form isn't open, we can add it to the playlist manager and it will show up when opened
                 if (mainForm.playListForm == null || mainForm.playListForm.IsDisposed)
                 {
-                    LuteBotForm.playList.AddTrack(plsong);
+                    mainForm.playList.AddTrack(plsong);
                 }
                 else // If it is open, we need to add it directly do it, so just pass it to the form
                 {

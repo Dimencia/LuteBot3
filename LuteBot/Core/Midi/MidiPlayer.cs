@@ -22,6 +22,7 @@ namespace LuteBot.Core.Midi
         public TrackSelectionManager trackSelectionManager;
 
         private bool isPlaying;
+        private bool isLoaded = true;
 
         public MidiPlayer(TrackSelectionManager trackSelectionManager)
         {
@@ -43,12 +44,18 @@ namespace LuteBot.Core.Midi
             sequencer.SysExMessagePlayed += new System.EventHandler<Sanford.Multimedia.Midi.SysExMessageEventArgs>(this.HandleSysExMessagePlayed);
             sequencer.Chased += new System.EventHandler<Sanford.Multimedia.Midi.ChasedEventArgs>(this.HandleChased);
             sequencer.Stopped += new System.EventHandler<Sanford.Multimedia.Midi.StoppedEventArgs>(this.HandleStopped);
-            
+            sequence.LoadCompleted += Sequence_LoadCompleted;
+
             if (!(OutputDevice.DeviceCount == 0))
             {
                 outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
                 sequence.LoadCompleted += HandleLoadCompleted;
             }
+        }
+
+        private void Sequence_LoadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            isLoaded = true;
         }
 
         public void ResetDevice()
@@ -173,7 +180,24 @@ namespace LuteBot.Core.Midi
 
         public override void LoadFile(string filename)
         {
-            sequence.LoadAsync(filename);
+            if (isLoaded)
+            {
+                try
+                {
+                    isLoaded = false;
+                    sequence.LoadAsync(filename);
+                }
+                catch (Exception)
+                {
+
+                    //throw;
+                }
+            }
+            else
+            {
+                return;
+                //LoadFile(filename);
+            }
             /*
             if (filename.Contains(@"\"))
             {
@@ -247,7 +271,14 @@ namespace LuteBot.Core.Midi
             //midiOut.Dispose();
             isPlaying = false;
             sequencer.Stop();
-            outDevice.Reset();
+            try
+            {
+                outDevice.Reset();
+            }
+            catch (Exception)
+            {
+                //nothing
+            }
         }
 
         public override void Dispose()

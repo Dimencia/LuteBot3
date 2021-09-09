@@ -17,11 +17,13 @@ namespace LuteBot
     {
         private Point mDownPos;
         private PlayListManager playListManager;
+        private LuteBotForm lbf;
 
-        public PlayListForm(PlayListManager playList)
+        public PlayListForm(LuteBotForm lbf)
         {
             InitializeComponent();
-            this.playListManager = playList;
+            this.lbf = lbf;
+            this.playListManager = lbf.playList;
             this.playListManager.PlayListUpdatedEvent += new EventHandler<PlayListEventArgs>(PlayList_Updated);
             var lastPlayListPath = ConfigManager.GetProperty(PropertyItem.LastPlaylistLocation);
             if (lastPlayListPath != null && lastPlayListPath.Length > 0)
