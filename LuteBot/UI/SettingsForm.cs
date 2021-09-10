@@ -23,7 +23,7 @@ namespace LuteBot
         private readonly string versionAvaliable = "A new version is avaliable to download";
         private static string VERSION { get; set; }
         private static string VERSION_FILE_URL = "https://raw.githubusercontent.com/Dimencia/LuteBot3/master/Version.txt";
-        private static string THREAD_URL = "https://github.com/Dimencia/LuteBot3";
+        private static string THREAD_URL = "https://github.com/Dimencia/LuteBot3/releases";
         private static string GUILD_URL = "https://discord.gg/4xnJVuz";
         private string latestVersion;
         private int Timeout = 200;
@@ -50,16 +50,28 @@ namespace LuteBot
 
                 if (!latestVersionFetchThread.IsAlive)
                 {
-                    if (latestVersion.CompareTo(VERSION) <= 0)
+                    try
                     {
-                        UpdateLinkLabel.Text = "You have the latest version avaliable";
-                        UpdateLinkLabel.Links.Clear();
+                        var onlineVersion = latestVersion.Split('.').Select(s => int.Parse(s)).ToArray();
+                        var curVersion = VERSION.Split('.').Select(s => int.Parse(s)).ToArray();
+
+                        if ((onlineVersion[0] > curVersion[0]) || (onlineVersion[0] == curVersion[0] && onlineVersion[1] > curVersion[1]) || (onlineVersion[0] == curVersion[0] && onlineVersion[1] == curVersion[1] && onlineVersion[2] > curVersion[2]))
+                        {
+                            UpdateLinkLabel.Text = "You have the latest version avaliable";
+                            UpdateLinkLabel.Links.Clear();
+                        }
+                        else
+                        {
+                            UpdateLinkLabel.Text = "New version avaliable : Click here";
+                            UpdateLinkLabel.Links.Clear();
+                            UpdateLinkLabel.Links.Add(24, 33, THREAD_URL);
+                        }
                     }
-                    else
+                    catch
                     {
-                        UpdateLinkLabel.Text = "New version avaliable : Click here";
+                        UpdateLinkLabel.Text = "Couldn't retrieve version. Retry";
                         UpdateLinkLabel.Links.Clear();
-                        UpdateLinkLabel.Links.Add(24, 33, THREAD_URL);
+                        UpdateLinkLabel.Links.Add(27, 31, THREAD_URL);
                     }
                 }
                 else
