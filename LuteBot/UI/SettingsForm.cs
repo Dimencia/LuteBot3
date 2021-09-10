@@ -137,7 +137,8 @@ namespace LuteBot
             }
             catch
             {
-                ConfigManager.SetProperty(PropertyItem.NumChords, "2");
+                ConfigManager.SetProperty(PropertyItem.NumChords, "3");
+                ConfigManager.SaveConfig();
                 NotesPerChordNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
             }
 

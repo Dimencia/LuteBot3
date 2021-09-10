@@ -375,13 +375,13 @@
             this.label4.Location = new System.Drawing.Point(8, 106);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(254, 25);
+            this.label4.Size = new System.Drawing.Size(203, 20);
             this.label4.TabIndex = 18;
             this.label4.Text = "Default Notes Per Chord :";
             // 
             // NotesPerChordNumeric
             // 
-            this.NotesPerChordNumeric.Location = new System.Drawing.Point(229, 106);
+            this.NotesPerChordNumeric.Location = new System.Drawing.Point(246, 106);
             this.NotesPerChordNumeric.Margin = new System.Windows.Forms.Padding(4);
             this.NotesPerChordNumeric.Maximum = new decimal(new int[] {
             50,
@@ -406,7 +406,7 @@
             // 
             // LowestNoteNumeric
             // 
-            this.LowestNoteNumeric.Location = new System.Drawing.Point(229, 11);
+            this.LowestNoteNumeric.Location = new System.Drawing.Point(246, 11);
             this.LowestNoteNumeric.Margin = new System.Windows.Forms.Padding(4);
             this.LowestNoteNumeric.Maximum = new decimal(new int[] {
             127,
@@ -442,7 +442,7 @@
             // 
             // NoteCountNumeric
             // 
-            this.NoteCountNumeric.Location = new System.Drawing.Point(229, 43);
+            this.NoteCountNumeric.Location = new System.Drawing.Point(246, 43);
             this.NoteCountNumeric.Margin = new System.Windows.Forms.Padding(4);
             this.NoteCountNumeric.Maximum = new decimal(new int[] {
             128,
@@ -456,7 +456,7 @@
             // 
             // NoteCooldownNumeric
             // 
-            this.NoteCooldownNumeric.Location = new System.Drawing.Point(229, 75);
+            this.NoteCooldownNumeric.Location = new System.Drawing.Point(246, 75);
             this.NoteCooldownNumeric.Margin = new System.Windows.Forms.Padding(4);
             this.NoteCooldownNumeric.Maximum = new decimal(new int[] {
             50,

@@ -163,7 +163,8 @@ namespace LuteBot.Core
                     {
                         filterResult = FilterNote(message, offset);
                         int note = filterResult.Data1 - lowNoteId + luteMin;
-                        if (stopWatch.ElapsedMilliseconds < noteCooldown && notesThisCooldown.Count < numChords && !notesThisCooldown.Contains(note)) // We'll play up to X unique notes inside of a cooldown
+                        // We use numChords-1 because by default we always allow 2 chords by the way the timer resets.  When they enter 3, we really only want to play two notes during cooldown
+                        if (stopWatch.ElapsedMilliseconds < noteCooldown && notesThisCooldown.Count < (numChords - 1) && !notesThisCooldown.Contains(note))
                         {
                             ActionManager.PlayNote(note);
                             notesThisCooldown.Add(note);
