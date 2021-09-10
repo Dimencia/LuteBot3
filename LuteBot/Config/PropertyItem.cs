@@ -22,6 +22,7 @@
         AvaliableNoteCount,
         LowestPlayedNote,
         NoteCooldown,
+        NumChords,
         DebugMode,
         OutputDevice,
         Instrument,

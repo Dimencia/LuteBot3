@@ -131,6 +131,16 @@ namespace LuteBot
             NoteCooldownNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown);
             LiveMidiCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.LiveMidi);
 
+            try
+            {
+                NotesPerChordNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+            }
+            catch
+            {
+                ConfigManager.SetProperty(PropertyItem.NumChords, "2");
+                NotesPerChordNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+            }
+
             InitInstruments();
             InitOutputDevice();
         }
@@ -320,6 +330,11 @@ namespace LuteBot
         private void LinkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://www.tobias-erichsen.de/software/loopmidi.html");
+        }
+
+        private void NotesPerChordNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            ConfigManager.SetProperty(PropertyItem.NumChords, NotesPerChordNumeric.Value.ToString());
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using LuteBot.Config;
 using LuteBot.IO.KB;
+
 using Sanford.Multimedia.Midi;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,7 +22,7 @@ namespace LuteBot.Core
         private int highMidiNoteId = 127;
 
         private bool conversionNeeded;
-        private bool cooldownNeeded = false;
+        private bool cooldownNeeded = true;
         private bool muteOutOfRange = false;
 
         public int LowMidiNoteId { get => lowMidiNoteId; set { lowMidiNoteId = value; UpdateNoteIdBounds(); } }
@@ -127,31 +129,51 @@ namespace LuteBot.Core
             }
         }
 
+
+
+        private List<int> notesThisCooldown = new List<int>();
+
         public void SendNote(ChannelMessage message, int offset)
         {
             ChannelMessage filterResult;
             if (message.Command == ChannelCommand.NoteOn && message.Data2 > 0)
             {
                 int noteCooldown = int.Parse(ConfigManager.GetProperty(PropertyItem.NoteCooldown));
+                int numAllowedChords = 2;
+                try
+                {
+                    numAllowedChords = int.Parse(ConfigManager.GetProperty(PropertyItem.NumChords));
+                }
+                catch // Defaults in case they don't have an updated config
+                {
+                    ConfigManager.SetProperty(PropertyItem.NumChords, numAllowedChords.ToString());
+                    ConfigManager.SaveConfig();
+                }
                 if (cooldownNeeded)
                 {
                     if (!stopWatch.IsRunning) // If it's not running it's our first note
                     {
                         filterResult = FilterNote(message, offset);
-                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId + luteMin);
+                        int note = filterResult.Data1 - lowNoteId + luteMin;
+                        ActionManager.PlayNote(note);
 
                         stopWatch.Start();
+                        notesThisCooldown.Add(note);
                     }
                     else
                     {
-                        if (stopWatch.ElapsedMilliseconds >= noteCooldown)
+                        filterResult = FilterNote(message, offset);
+                        int note = filterResult.Data1 - lowNoteId + luteMin;
+                        if (stopWatch.ElapsedMilliseconds < noteCooldown && !notesThisCooldown.Contains(note) && notesThisCooldown.Count < numAllowedChords) // We'll play up to 2 unique notes inside of a cooldown
                         {
-                            filterResult = FilterNote(message, offset);
-                            if (message.Data2 > 0)
-                            {
-                                ActionManager.PlayNote(filterResult.Data1 - lowNoteId + luteMin);
-                            }
+                            ActionManager.PlayNote(note);
+                            notesThisCooldown.Add(note);
+                        }
+                        else if (stopWatch.ElapsedMilliseconds >= noteCooldown)
+                        {
+                            ActionManager.PlayNote(note);
                             stopWatch.Restart();
+                            notesThisCooldown = new List<int>() { note };
                         }
                     }
                 }
