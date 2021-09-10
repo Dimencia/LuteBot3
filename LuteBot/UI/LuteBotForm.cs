@@ -164,7 +164,7 @@ namespace LuteBot
                 if (player.GetType() == typeof(MidiPlayer))
                 {
                     MidiPlayer midiPlayer = player as MidiPlayer;
-                    trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
+                    trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks(), trackSelectionManager);
                     trackSelectionManager.FileName = currentTrackName;
                 }
 

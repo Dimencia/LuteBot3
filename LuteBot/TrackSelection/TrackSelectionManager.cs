@@ -84,6 +84,7 @@ namespace LuteBot.TrackSelection
             }
 
             NoteOffset = data.Offset;
+            NumChords = data.NumChords;
         }
 
         public TrackSelectionData GetTrackSelectionData()
@@ -93,6 +94,7 @@ namespace LuteBot.TrackSelection
             data.MidiTracks = MidiTracks;
             data.Offset = NoteOffset;
             data.MidiChannelOffsets = MidiChannelOffsets;
+            data.NumChords = NumChords;
             return data;
         }
 
@@ -129,7 +131,7 @@ namespace LuteBot.TrackSelection
             }
         }
 
-        public void LoadTracks(List<int> channels, List<string> tracks)
+        public void LoadTracks(List<int> channels, List<string> tracks, TrackSelectionManager tsm)
         {
             midiChannels.Clear();
             midiTracks.Clear();
@@ -149,6 +151,8 @@ namespace LuteBot.TrackSelection
                     midiChannels.Add(new MidiChannelItem() { Id = channels[i], Active = true });
                 }
             }
+            NoteOffset = tsm.NoteOffset;
+            NumChords = tsm.NumChords;
             EventHelper();
         }
 
@@ -185,6 +189,7 @@ namespace LuteBot.TrackSelection
         {
             midiChannels.Clear();
             midiTracks.Clear();
+            NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
             EventHelper();
         }
 
