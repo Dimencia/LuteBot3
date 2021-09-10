@@ -26,7 +26,7 @@ namespace LuteBot.Core.Midi
         public MidiPlayer(TrackSelectionManager trackSelectionManager)
         {
             isPlaying = false;
-            mordhauOutDevice = new MordhauOutDevice();
+            mordhauOutDevice = new MordhauOutDevice(trackSelectionManager);
             rustOutDevice = new RustOutDevice();
             this.trackSelectionManager = trackSelectionManager;
             sequence = new Sequence

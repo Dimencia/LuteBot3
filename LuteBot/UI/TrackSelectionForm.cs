@@ -36,6 +36,8 @@ namespace LuteBot.UI
             typeof(Panel).InvokeMember("DoubleBuffered", BindingFlags.SetProperty
             | BindingFlags.Instance | BindingFlags.NonPublic, null,
             OffsetPanel, new object[] { true }); // Internet suggested this... 
+
+            textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
         }
 
         private void TrackSelectionForm_Load(object sender, EventArgs e)
@@ -368,6 +370,7 @@ namespace LuteBot.UI
 
         private void InitLists()
         {
+            textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
             foreach (var channel in trackSelectionManager.MidiChannels)
             { // This should help make sure we don't except if we're irresponsible with it
                 if (!trackSelectionManager.MidiChannelOffsets.ContainsKey(channel.Id))
@@ -509,6 +512,15 @@ namespace LuteBot.UI
                 trackSelectionManager.MidiChannelOffsets[channel.Id] = 0;
             }
             Refresh();
+        }
+
+        private void textBoxNotesForChords_TextChanged(object sender, EventArgs e)
+        {
+            if (int.TryParse(textBoxNotesForChords.Text, out int v))
+            {
+                trackSelectionManager.NumChords = v;
+            }
+
         }
     }
 }

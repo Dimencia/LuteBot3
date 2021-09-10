@@ -34,7 +34,7 @@ namespace LuteBot.LiveInput.Midi
         public LiveMidiManager(TrackSelectionManager trackSelectionManager)
         {
             _manager = trackSelectionManager;
-            outDevice = new MordhauOutDevice();
+            outDevice = new MordhauOutDevice(trackSelectionManager);
             outDevice.HighMidiNoteId = 127;
             outDevice.LowMidiNoteId = 0;
             outDevice.CooldownNeeded = false;

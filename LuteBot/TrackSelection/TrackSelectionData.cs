@@ -20,7 +20,8 @@ namespace LuteBot.TrackSelection
         public List<TrackItem> MidiTracks { get => midiTracks; set => midiTracks = value; }
         [DataMember]
         public int Offset { get; set; }
-
+        [DataMember]
+        public int NumChords { get; set; }
 
     }
 }

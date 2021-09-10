@@ -129,6 +129,18 @@ namespace LuteBot
                     catch (Exception e) { } // Gross I know, but no reason to do anything
                 });
             }
+
+
+            // Try to catch issues with mismatches in configs
+            try
+            {
+                int chords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+            }
+            catch
+            {
+                ConfigManager.SetProperty(PropertyItem.NumChords, "2");
+                ConfigManager.SaveConfig();
+            }
         }
 
         private void HotkeyManager_SynchronizePressed(object sender, EventArgs e)

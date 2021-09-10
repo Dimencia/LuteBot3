@@ -1,4 +1,5 @@
-﻿using LuteBot.IO.Files;
+﻿using LuteBot.Config;
+using LuteBot.IO.Files;
 
 using Sanford.Multimedia.Midi;
 
@@ -27,8 +28,9 @@ namespace LuteBot.TrackSelection
         public bool ActivateAllChannels { get => activateAllChannels; set { activateAllChannels = value; ResetRequest(); } }
         public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
         public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
+        public int NumChords { get => numChords; set { numChords = value; ResetRequest(); } }
 
-
+        private int numChords;
         private int noteOffset;
         private bool activateAllChannels;
         private bool activateAllTracks;
@@ -47,6 +49,7 @@ namespace LuteBot.TrackSelection
             activateAllChannels = false;
             activateAllTracks = false;
             autoLoadProfile = true;
+            numChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
         }
 
         public void ToggleChannel(int index, bool active)
@@ -100,6 +103,7 @@ namespace LuteBot.TrackSelection
             data.MidiTracks = MidiTracks;
             data.Offset = NoteOffset;
             data.MidiChannelOffsets = MidiChannelOffsets;
+            data.NumChords = NumChords;
             SaveManager.SaveTrackSelectionData(data, FileName);
         }
 
@@ -110,8 +114,12 @@ namespace LuteBot.TrackSelection
             {
                 this.midiChannels = data.MidiChannels;
                 this.midiTracks = data.MidiTracks;
-                this.NoteOffset = data.Offset;
-                this.MidiChannelOffsets = data.MidiChannelOffsets;
+                this.noteOffset = data.Offset;
+                this.midiChannelOffsets = data.MidiChannelOffsets;
+                if (data.NumChords > 0)
+                    this.NumChords = data.NumChords;
+                else
+                    this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
                 EventHelper();
             }
             else

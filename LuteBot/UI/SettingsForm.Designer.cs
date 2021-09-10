@@ -52,6 +52,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.instrumentsBox = new System.Windows.Forms.ComboBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.NotesPerChordNumeric = new System.Windows.Forms.NumericUpDown();
             this.LowestNoteLabel = new System.Windows.Forms.Label();
             this.LowestNoteNumeric = new System.Windows.Forms.NumericUpDown();
             this.NoteCountLabel = new System.Windows.Forms.Label();
@@ -62,15 +64,13 @@
             this.outputDeviceBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.guildLabel = new System.Windows.Forms.LinkLabel();
-            this.label4 = new System.Windows.Forms.Label();
-            this.NotesPerChordNumeric = new System.Windows.Forms.NumericUpDown();
             this.SettingsGroupBox.SuspendLayout();
             this.AdvancedGroupBox.SuspendLayout();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NotesPerChordNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.LowestNoteNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NoteCountNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NoteCooldownNumeric)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.NotesPerChordNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // VersionLabel
@@ -99,7 +99,7 @@
             // 
             this.PlaylistCheckBox.AutoSize = true;
             this.PlaylistCheckBox.Location = new System.Drawing.Point(8, 23);
-            this.PlaylistCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PlaylistCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.PlaylistCheckBox.Name = "PlaylistCheckBox";
             this.PlaylistCheckBox.Size = new System.Drawing.Size(221, 21);
             this.PlaylistCheckBox.TabIndex = 2;
@@ -111,7 +111,7 @@
             // 
             this.SoundBoardCheckBox.AutoSize = true;
             this.SoundBoardCheckBox.Location = new System.Drawing.Point(8, 52);
-            this.SoundBoardCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.SoundBoardCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.SoundBoardCheckBox.Name = "SoundBoardCheckBox";
             this.SoundBoardCheckBox.Size = new System.Drawing.Size(255, 21);
             this.SoundBoardCheckBox.TabIndex = 3;
@@ -122,7 +122,7 @@
             // ReturnButton
             // 
             this.ReturnButton.Location = new System.Drawing.Point(13, 588);
-            this.ReturnButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ReturnButton.Margin = new System.Windows.Forms.Padding(4);
             this.ReturnButton.Name = "ReturnButton";
             this.ReturnButton.Size = new System.Drawing.Size(160, 37);
             this.ReturnButton.TabIndex = 4;
@@ -133,7 +133,7 @@
             // ApplyButton
             // 
             this.ApplyButton.Location = new System.Drawing.Point(369, 588);
-            this.ApplyButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ApplyButton.Margin = new System.Windows.Forms.Padding(4);
             this.ApplyButton.Name = "ApplyButton";
             this.ApplyButton.Size = new System.Drawing.Size(160, 37);
             this.ApplyButton.TabIndex = 5;
@@ -145,7 +145,7 @@
             // 
             this.SoundEffectsCheckBox.AutoSize = true;
             this.SoundEffectsCheckBox.Location = new System.Drawing.Point(8, 165);
-            this.SoundEffectsCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.SoundEffectsCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.SoundEffectsCheckBox.Name = "SoundEffectsCheckBox";
             this.SoundEffectsCheckBox.Size = new System.Drawing.Size(328, 21);
             this.SoundEffectsCheckBox.TabIndex = 6;
@@ -157,7 +157,7 @@
             // 
             this.TrackSelectionCheckBox.AutoSize = true;
             this.TrackSelectionCheckBox.Location = new System.Drawing.Point(8, 80);
-            this.TrackSelectionCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.TrackSelectionCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.TrackSelectionCheckBox.Name = "TrackSelectionCheckBox";
             this.TrackSelectionCheckBox.Size = new System.Drawing.Size(275, 21);
             this.TrackSelectionCheckBox.TabIndex = 7;
@@ -170,7 +170,7 @@
             this.OnlineSyncCheckBox.AutoSize = true;
             this.OnlineSyncCheckBox.Enabled = false;
             this.OnlineSyncCheckBox.Location = new System.Drawing.Point(8, 108);
-            this.OnlineSyncCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.OnlineSyncCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.OnlineSyncCheckBox.Name = "OnlineSyncCheckBox";
             this.OnlineSyncCheckBox.Size = new System.Drawing.Size(253, 21);
             this.OnlineSyncCheckBox.TabIndex = 8;
@@ -185,7 +185,7 @@
             "2.0",
             "Off"});
             this.NoteConversionMode.Location = new System.Drawing.Point(229, 18);
-            this.NoteConversionMode.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.NoteConversionMode.Margin = new System.Windows.Forms.Padding(4);
             this.NoteConversionMode.Name = "NoteConversionMode";
             this.NoteConversionMode.Size = new System.Drawing.Size(277, 24);
             this.NoteConversionMode.TabIndex = 9;
@@ -216,9 +216,9 @@
             this.SettingsGroupBox.Controls.Add(this.OnlineSyncCheckBox);
             this.SettingsGroupBox.Controls.Add(this.SoundEffectsCheckBox);
             this.SettingsGroupBox.Location = new System.Drawing.Point(13, 15);
-            this.SettingsGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.SettingsGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.SettingsGroupBox.Name = "SettingsGroupBox";
-            this.SettingsGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.SettingsGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.SettingsGroupBox.Size = new System.Drawing.Size(516, 249);
             this.SettingsGroupBox.TabIndex = 12;
             this.SettingsGroupBox.TabStop = false;
@@ -240,7 +240,7 @@
             // 
             this.LiveMidiCheckBox.AutoSize = true;
             this.LiveMidiCheckBox.Location = new System.Drawing.Point(8, 137);
-            this.LiveMidiCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.LiveMidiCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.LiveMidiCheckBox.Name = "LiveMidiCheckBox";
             this.LiveMidiCheckBox.Size = new System.Drawing.Size(267, 21);
             this.LiveMidiCheckBox.TabIndex = 14;
@@ -252,7 +252,7 @@
             // 
             this.OffAutoConsoleRadio.AutoSize = true;
             this.OffAutoConsoleRadio.Location = new System.Drawing.Point(139, 210);
-            this.OffAutoConsoleRadio.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.OffAutoConsoleRadio.Margin = new System.Windows.Forms.Padding(4);
             this.OffAutoConsoleRadio.Name = "OffAutoConsoleRadio";
             this.OffAutoConsoleRadio.Size = new System.Drawing.Size(48, 21);
             this.OffAutoConsoleRadio.TabIndex = 13;
@@ -275,7 +275,7 @@
             // 
             this.OldAutoConsoleRadio.AutoSize = true;
             this.OldAutoConsoleRadio.Location = new System.Drawing.Point(4, 210);
-            this.OldAutoConsoleRadio.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.OldAutoConsoleRadio.Margin = new System.Windows.Forms.Padding(4);
             this.OldAutoConsoleRadio.Name = "OldAutoConsoleRadio";
             this.OldAutoConsoleRadio.Size = new System.Drawing.Size(51, 21);
             this.OldAutoConsoleRadio.TabIndex = 11;
@@ -288,7 +288,7 @@
             // 
             this.NewAutoConsoleRadio.AutoSize = true;
             this.NewAutoConsoleRadio.Location = new System.Drawing.Point(67, 210);
-            this.NewAutoConsoleRadio.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.NewAutoConsoleRadio.Margin = new System.Windows.Forms.Padding(4);
             this.NewAutoConsoleRadio.Name = "NewAutoConsoleRadio";
             this.NewAutoConsoleRadio.Size = new System.Drawing.Size(56, 21);
             this.NewAutoConsoleRadio.TabIndex = 10;
@@ -308,9 +308,9 @@
             this.AdvancedGroupBox.Controls.Add(this.outputDeviceBox);
             this.AdvancedGroupBox.Controls.Add(this.NoteConversionMode);
             this.AdvancedGroupBox.Location = new System.Drawing.Point(13, 272);
-            this.AdvancedGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.AdvancedGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.AdvancedGroupBox.Name = "AdvancedGroupBox";
-            this.AdvancedGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.AdvancedGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.AdvancedGroupBox.Size = new System.Drawing.Size(516, 289);
             this.AdvancedGroupBox.TabIndex = 13;
             this.AdvancedGroupBox.TabStop = false;
@@ -345,7 +345,7 @@
             // 
             this.instrumentsBox.FormattingEnabled = true;
             this.instrumentsBox.Location = new System.Drawing.Point(229, 108);
-            this.instrumentsBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.instrumentsBox.Margin = new System.Windows.Forms.Padding(4);
             this.instrumentsBox.Name = "instrumentsBox";
             this.instrumentsBox.Size = new System.Drawing.Size(277, 24);
             this.instrumentsBox.TabIndex = 17;
@@ -363,10 +363,35 @@
             this.panel1.Controls.Add(this.NoteCountNumeric);
             this.panel1.Controls.Add(this.NoteCooldownNumeric);
             this.panel1.Location = new System.Drawing.Point(8, 138);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(499, 144);
             this.panel1.TabIndex = 19;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(8, 106);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(254, 25);
+            this.label4.TabIndex = 18;
+            this.label4.Text = "Default Notes Per Chord :";
+            // 
+            // NotesPerChordNumeric
+            // 
+            this.NotesPerChordNumeric.Location = new System.Drawing.Point(229, 106);
+            this.NotesPerChordNumeric.Margin = new System.Windows.Forms.Padding(4);
+            this.NotesPerChordNumeric.Maximum = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+            this.NotesPerChordNumeric.Name = "NotesPerChordNumeric";
+            this.NotesPerChordNumeric.Size = new System.Drawing.Size(53, 22);
+            this.NotesPerChordNumeric.TabIndex = 17;
+            this.NotesPerChordNumeric.ValueChanged += new System.EventHandler(this.NotesPerChordNumeric_ValueChanged);
             // 
             // LowestNoteLabel
             // 
@@ -382,7 +407,7 @@
             // LowestNoteNumeric
             // 
             this.LowestNoteNumeric.Location = new System.Drawing.Point(229, 11);
-            this.LowestNoteNumeric.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.LowestNoteNumeric.Margin = new System.Windows.Forms.Padding(4);
             this.LowestNoteNumeric.Maximum = new decimal(new int[] {
             127,
             0,
@@ -418,7 +443,7 @@
             // NoteCountNumeric
             // 
             this.NoteCountNumeric.Location = new System.Drawing.Point(229, 43);
-            this.NoteCountNumeric.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.NoteCountNumeric.Margin = new System.Windows.Forms.Padding(4);
             this.NoteCountNumeric.Maximum = new decimal(new int[] {
             128,
             0,
@@ -432,7 +457,7 @@
             // NoteCooldownNumeric
             // 
             this.NoteCooldownNumeric.Location = new System.Drawing.Point(229, 75);
-            this.NoteCooldownNumeric.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.NoteCooldownNumeric.Margin = new System.Windows.Forms.Padding(4);
             this.NoteCooldownNumeric.Maximum = new decimal(new int[] {
             50,
             0,
@@ -458,7 +483,7 @@
             // 
             this.outputDeviceBox.FormattingEnabled = true;
             this.outputDeviceBox.Location = new System.Drawing.Point(229, 55);
-            this.outputDeviceBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.outputDeviceBox.Margin = new System.Windows.Forms.Padding(4);
             this.outputDeviceBox.Name = "outputDeviceBox";
             this.outputDeviceBox.Size = new System.Drawing.Size(277, 24);
             this.outputDeviceBox.TabIndex = 17;
@@ -489,31 +514,6 @@
             this.guildLabel.UseCompatibleTextRendering = true;
             this.guildLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked);
             // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(8, 106);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(144, 20);
-            this.label4.TabIndex = 18;
-            this.label4.Text = "Notes Per Chord :";
-            // 
-            // NotesPerChordNumeric
-            // 
-            this.NotesPerChordNumeric.Location = new System.Drawing.Point(229, 106);
-            this.NotesPerChordNumeric.Margin = new System.Windows.Forms.Padding(4);
-            this.NotesPerChordNumeric.Maximum = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
-            this.NotesPerChordNumeric.Name = "NotesPerChordNumeric";
-            this.NotesPerChordNumeric.Size = new System.Drawing.Size(53, 22);
-            this.NotesPerChordNumeric.TabIndex = 17;
-            this.NotesPerChordNumeric.ValueChanged += new System.EventHandler(this.NotesPerChordNumeric_ValueChanged);
-            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -529,7 +529,7 @@
             this.Controls.Add(this.VersionLabel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SettingsForm";
@@ -540,10 +540,10 @@
             this.AdvancedGroupBox.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NotesPerChordNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.LowestNoteNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NoteCountNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NoteCooldownNumeric)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.NotesPerChordNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
