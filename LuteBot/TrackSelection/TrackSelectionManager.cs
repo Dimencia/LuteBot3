@@ -1,4 +1,5 @@
 ﻿using LuteBot.Config;
+using LuteBot.Core.Midi;
 using LuteBot.IO.Files;
 
 using Sanford.Multimedia.Midi;
@@ -41,6 +42,8 @@ namespace LuteBot.TrackSelection
         public event EventHandler TrackChanged;
         public event EventHandler<TrackItem> ToggleTrackRequest;
         public event EventHandler OutDeviceResetRequest;
+
+        public MidiPlayer Player { get; set; }
 
         public TrackSelectionManager()
         {
@@ -122,6 +125,11 @@ namespace LuteBot.TrackSelection
                     this.NumChords = data.NumChords;
                 else
                     this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+
+                // Restore any channel names that might be null or incorrect, from older data that got saved
+                foreach(var c in midiChannels)
+                        c.Name = Player.GetChannelName(c.Id);
+
                 EventHelper();
             }
             else
@@ -131,26 +139,19 @@ namespace LuteBot.TrackSelection
             }
         }
 
-        public void LoadTracks(List<int> channels, List<string> tracks, TrackSelectionManager tsm)
+        public void LoadTracks(Dictionary<int, string> channels, Dictionary<int,string> tracks, TrackSelectionManager tsm)
         {
             midiChannels.Clear();
             midiTracks.Clear();
-            int length = channels.Count;
-            if (length < tracks.Count)
-            {
-                length = tracks.Count;
-            }
-            for (int i = 0; i < length; i++)
-            {
-                if (i < tracks.Count)
-                {
-                    midiTracks.Add(new TrackItem() { Id = i, Name = tracks[i], Active = true });
-                }
-                if (i < channels.Count)
-                {
-                    midiChannels.Add(new MidiChannelItem() { Id = channels[i], Active = true });
-                }
-            }
+
+            foreach (var kvp in channels)
+                if(kvp.Key != 9)
+                    midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = true, Name = kvp.Value });
+                else // Automatically disable glockenspiel channel
+                    midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = false, Name = kvp.Value });
+            foreach (var kvp in tracks)
+                midiTracks.Add(new TrackItem() { Id = kvp.Key, Name = kvp.Value, Active = true });
+            
             NoteOffset = tsm.NoteOffset;
             NumChords = tsm.NumChords;
             EventHelper();

@@ -1,6 +1,8 @@
 ﻿using LuteBot.Config;
 using LuteBot.TrackSelection;
+
 using Sanford.Multimedia.Midi;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,9 +24,12 @@ namespace LuteBot.Core.Midi
         public TrackSelectionManager trackSelectionManager;
 
         private bool isPlaying;
+        private Dictionary<int, string> channelNames = new Dictionary<int, string>();
+        private Dictionary<int, string> trackNames = new Dictionary<int, string>();
 
         public MidiPlayer(TrackSelectionManager trackSelectionManager)
         {
+            trackSelectionManager.Player = this;
             isPlaying = false;
             mordhauOutDevice = new MordhauOutDevice(trackSelectionManager);
             rustOutDevice = new RustOutDevice();
@@ -72,14 +77,14 @@ namespace LuteBot.Core.Midi
             outDevice.Reset();
         }
 
-        public List<int> GetMidiChannels()
+        public Dictionary<int, string> GetMidiChannels()
         {
-            return sequence.Channels;
+            return channelNames;
         }
 
-        public List<string> GetMidiTracks()
+        public Dictionary<int, string> GetMidiTracks()
         {
-            return sequence.TrackNames();
+            return trackNames;
         }
 
         public override int GetLength()
@@ -178,6 +183,7 @@ namespace LuteBot.Core.Midi
         {
             lock (loadLock)
             {
+                channelNames = new Dictionary<int, string>();
                 // Reset the sequence because we can't cancel the load or detect if one is occurring
                 sequence.LoadCompleted -= HandleLoadCompleted;
                 sequence.Dispose();
@@ -285,6 +291,14 @@ namespace LuteBot.Core.Midi
             {
                 if (e.Error == null)
                 {
+                    channelNames = new Dictionary<int, string>();
+                    trackNames = new Dictionary<int, string>();
+
+                    // Set default channel names
+                    foreach (var channel in sequence.Channels)
+                        channelNames[channel] = MidiChannelTypes.Names[channel];
+                    foreach (var track in sequence.Tracks)
+                        trackNames[track.Id] = "Untitled Track";
                     // We need to manually parse out data for Max and Min note for each Channel, in trackSelectionManager
                     trackSelectionManager.MaxNoteByChannel = new Dictionary<int, int>();
                     trackSelectionManager.MinNoteByChannel = new Dictionary<int, int>();
@@ -293,6 +307,7 @@ namespace LuteBot.Core.Midi
                         trackSelectionManager.MaxNoteByChannel[i] = 0; // Pre-populate to reduce errors later
                         trackSelectionManager.MinNoteByChannel[i] = 0;
                     }
+                    
                     foreach (var track in sequence)
                     {
                         foreach (var midiEvent in track.Iterator())
@@ -301,7 +316,7 @@ namespace LuteBot.Core.Midi
                             {
                                 if (c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
                                 {
-                                    if (c.MidiChannel == 6) // Glockenspiel...
+                                    if (c.MidiChannel == 9) // Glockenspiel... ohhh it's usually track 6 but not always, and that's track not channel
                                     {
                                         drumNoteCounts[c.Data1]++; // They're all 0 by default
                                     }
@@ -315,6 +330,25 @@ namespace LuteBot.Core.Midi
                                         trackSelectionManager.MinNoteByChannel.Add(c.MidiChannel, c.Data1);
                                     else if (trackSelectionManager.MinNoteByChannel[c.MidiChannel] > c.Data1)
                                         trackSelectionManager.MinNoteByChannel[c.MidiChannel] = c.Data1;
+                                }
+                                else if (c.Command == ChannelCommand.ProgramChange)
+                                {
+                                    string channelName = MidiChannelTypes.Names[c.Data1];
+                                    channelNames[c.MidiChannel] = channelName;
+                                }
+                            }
+                            else if (midiEvent.MidiMessage is MetaMessage meta)
+                            {
+                                if (meta.MetaType == MetaType.TrackName)
+                                {
+                                    var bytes = meta.GetBytes();
+                                    // Byte 3 is the length, bytes 4+ are the text in ascii
+                                    // But apparently the library trims out that for me, and the entire bytes array is what we want
+                                    if (bytes.Length > 0)
+                                    {
+                                        string trackName = ASCIIEncoding.ASCII.GetString(bytes);
+                                        trackNames[track.Id] = trackName;
+                                    }
                                 }
                             }
                         }
@@ -335,6 +369,13 @@ namespace LuteBot.Core.Midi
                 }
             }
         }
+
+
+        public string GetChannelName(int id)
+        {
+            return channelNames[id];
+        }
+
 
         private void HandleStopped(object sender, StoppedEventArgs e)
         {

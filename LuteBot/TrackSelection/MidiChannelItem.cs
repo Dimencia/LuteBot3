@@ -12,7 +12,7 @@ namespace LuteBot.TrackSelection
         private bool active;
 
         public int Id { get => id; set => id = value; }
-        public string Name { get { return MidiChannelTypes.Names[id]; } }
+        public string Name { get; set; }
         public bool Active { get => active; set => active = value; }
     }
 }

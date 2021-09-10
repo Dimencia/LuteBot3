@@ -8,6 +8,7 @@ namespace LuteBot.TrackSelection
 {
     public class MidiChannelTypes
     {
+
         private static string[] names =
         {
             "Acoustic Grand Piano",
@@ -90,30 +91,30 @@ namespace LuteBot.TrackSelection
             "Shakuhachi",
             "Whistle",
             "Ocarina",
-            "Lead \"(square)",
-            "Lead \"(sawtooth)",
-            "Lead \"(calliope)",
-            "Lead \"(chiff)",
-            "Lead \"(charang)",
-            "Lead \"(voice)",
-            "Lead \"(fifths)",
-            "Lead \"(bass + lead)",
-            "Pad \"(new age)",
-            "Pad \"(warm)",
-            "Pad \"(polysynth)",
-            "Pad \"(choir)",
-            "Pad \"(bowed)",
-            "Pad \"(metallic)",
-            "Pad \"(halo)",
-            "Pad \"(sweep)",
-            "FX \"(rain)",
-            "FX \"(soundtrack)",
-            "FX \"(crystal)",
-            "FX \"(atmosphere)",
-            "FX \"(brightness)",
-            "FX \"(goblins)",
-            "FX \"(echoes)",
-            "FX \"(sci-fi)",
+            "Lead (square)",
+            "Lead (sawtooth)",
+            "Lead (calliope)",
+            "Lead (chiff)",
+            "Lead (charang)",
+            "Lead (voice)",
+            "Lead (fifths)",
+            "Lead (bass + lead)",
+            "Pad (new age)",
+            "Pad (warm)",
+            "Pad (polysynth)",
+            "Pad (choir)",
+            "Pad (bowed)",
+            "Pad (metallic)",
+            "Pad (halo)",
+            "Pad (sweep)",
+            "FX (rain)",
+            "FX (soundtrack)",
+            "FX (crystal)",
+            "FX (atmosphere)",
+            "FX (brightness)",
+            "FX (goblins)",
+            "FX (echoes)",
+            "FX (sci-fi)",
             "Sitar",
             "Banjo",
             "Shamisen",
@@ -140,6 +141,6 @@ namespace LuteBot.TrackSelection
             "Gunshot"
         };
 
-        public static string[] Names { get => names;}
+        public static string[] Names { get => names; }
     }
 }
