@@ -57,14 +57,14 @@ namespace LuteBot
 
                         if ((onlineVersion[0] > curVersion[0]) || (onlineVersion[0] == curVersion[0] && onlineVersion[1] > curVersion[1]) || (onlineVersion[0] == curVersion[0] && onlineVersion[1] == curVersion[1] && onlineVersion[2] > curVersion[2]))
                         {
-                            UpdateLinkLabel.Text = "You have the latest version avaliable";
-                            UpdateLinkLabel.Links.Clear();
-                        }
-                        else
-                        {
                             UpdateLinkLabel.Text = "New version avaliable : Click here";
                             UpdateLinkLabel.Links.Clear();
                             UpdateLinkLabel.Links.Add(24, 33, THREAD_URL);
+                        }
+                        else
+                        {
+                            UpdateLinkLabel.Text = "You have the latest version avaliable";
+                            UpdateLinkLabel.Links.Clear();
                         }
                     }
                     catch
