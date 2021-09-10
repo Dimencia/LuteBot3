@@ -55,7 +55,7 @@
     {
       "Item": "NumChords",
       "Value": "2"
-    }
+    },
     {
       "Item": "DebugMode",
       "Value": "False"
