@@ -32,6 +32,8 @@ namespace LuteBot.IO.KB
 
         private static bool consoleOn = false;
 
+        public static event EventHandler<int> NotePlayed;
+
         public static string AutoConsoleModeToString(AutoConsoleMode mode)
         {
             switch (mode)
@@ -86,7 +88,7 @@ namespace LuteBot.IO.KB
 
         private static Keys[] importantModifierKeys = new Keys[] { Keys.Alt, Keys.Control, Keys.ControlKey, Keys.LControlKey, Keys.RControlKey, Keys.Shift, Keys.ShiftKey, Keys.LShiftKey, Keys.RShiftKey };
 
-        private static void InputCommand(int noteId)
+        private static void InputCommand(int noteId, int channel) // Channel is just for identification to invoke a NotePlayed event
         {
             Process[] processes = Process.GetProcessesByName("Mordhau-Win64-Shipping");
             var modKeys = Control.ModifierKeys;
@@ -129,12 +131,13 @@ namespace LuteBot.IO.KB
             {
                 Thread.Sleep(ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown));
                 PostMessage(proc.MainWindowHandle, WM_KEYUP, (int)Keys.Enter, 0);
+                NotePlayed?.Invoke(null, channel);
             }
         }
 
-        public static void PlayNote(int noteId)
+        public static void PlayNote(int noteId, int channel) // Channel is just to identify it for a NotePlayed event
         {
-            InputCommand(noteId);
+            InputCommand(noteId, channel);
         }
 
         private static void InputAngle()

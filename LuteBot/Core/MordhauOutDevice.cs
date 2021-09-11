@@ -40,8 +40,6 @@ namespace LuteBot.Core
         private Stopwatch stopWatch;
 
         private TrackSelectionManager TSM = null;
-
-
         public MordhauOutDevice(TrackSelectionManager tsm)
         {
             stopWatch = new Stopwatch();
@@ -154,7 +152,7 @@ namespace LuteBot.Core
                     {
                         filterResult = FilterNote(message, offset);
                         int note = filterResult.Data1 - lowNoteId + luteMin;
-                        ActionManager.PlayNote(note);
+                        ActionManager.PlayNote(note, message.MidiChannel);
 
                         stopWatch.Start();
                         notesThisCooldown.Add(note);
@@ -166,12 +164,12 @@ namespace LuteBot.Core
                         // We use numChords-1 because by default we always allow 2 chords by the way the timer resets.  When they enter 3, we really only want to play two notes during cooldown
                         if (stopWatch.ElapsedMilliseconds < noteCooldown && notesThisCooldown.Count < (numChords - 1) && !notesThisCooldown.Contains(note))
                         {
-                            ActionManager.PlayNote(note);
+                            ActionManager.PlayNote(note, message.MidiChannel);
                             notesThisCooldown.Add(note);
                         }
                         else if (stopWatch.ElapsedMilliseconds >= noteCooldown)
                         {
-                            ActionManager.PlayNote(note);
+                            ActionManager.PlayNote(note, message.MidiChannel);
                             stopWatch.Reset();
                             notesThisCooldown = new List<int>() { note };
                         }
@@ -182,7 +180,7 @@ namespace LuteBot.Core
                     filterResult = FilterNote(message, offset);
                     if (message.Data2 > 0)
                     {
-                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId + luteMin);
+                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId + luteMin, message.MidiChannel);
                     }
                 }
             }

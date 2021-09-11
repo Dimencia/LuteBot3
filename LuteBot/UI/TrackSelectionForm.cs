@@ -38,6 +38,33 @@ namespace LuteBot.UI
             OffsetPanel, new object[] { true }); // Internet suggested this... 
 
             textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
+
+            IO.KB.ActionManager.NotePlayed += _mordhauOut_notePlayed;
+        }
+
+        private void _mordhauOut_notePlayed(object sender, int channel)
+        {
+            // Mark the channel to flash and redraw the graphic (twice)
+            var original = channelColors[channel];
+            channelColors[channel] = Color.FromArgb(Math.Min(original.R*2,255), Math.Min(original.G*2,255), Math.Min(original.B*2,255));
+            System.Threading.Timer t;
+            t = new System.Threading.Timer(T_Tick, channel, ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown), System.Threading.Timeout.Infinite);
+            BeginInvoke((MethodInvoker)delegate {
+                OffsetPanel.Refresh();
+            });
+            
+        }
+
+        private void T_Tick(object state)
+        {
+            int channel = (int)state;
+            //var original = channelColors[channel];
+            //channelColors[channel] = Color.FromArgb(Math.Min(original.R / 2, 255), Math.Min(original.G / 2, 255), Math.Min(original.B / 2, 255));
+            channelColors[channel] = originalChannelColors[channel];
+            BeginInvoke((MethodInvoker)delegate
+            {
+                OffsetPanel.Refresh();
+            });
         }
 
         private void TrackSelectionForm_Load(object sender, EventArgs e)
@@ -69,7 +96,8 @@ namespace LuteBot.UI
         private Rectangle draggableRect;
         private int startOffset;
         private Dictionary<MidiChannelItem, Rectangle> channelRects = new Dictionary<MidiChannelItem, Rectangle>();
-        private Dictionary<MidiChannelItem, Color> channelColors = new Dictionary<MidiChannelItem, Color>();
+        private Dictionary<int, Color> channelColors = new Dictionary<int, Color>();
+        private Dictionary<int, Color> originalChannelColors = new Dictionary<int, Color>();
         private MidiChannelItem dragTarget;
 
         private double GetDistance(Point p1, Point p2)
@@ -239,13 +267,14 @@ namespace LuteBot.UI
                             (trackSelectionManager.MaxNoteByChannel[channel.Id] - trackSelectionManager.MinNoteByChannel[channel.Id]) * columnWidth, rowHeight - 1);
                         channelRects.Add(channel, channelRect);
 
-                        if (!channelColors.ContainsKey(channel))
+                        if (!channelColors.ContainsKey(channel.Id))
                         {
-                            channelColors[channel] = Color.FromArgb(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255));
+                            channelColors[channel.Id] = Color.FromArgb(random.Next(0, 200), random.Next(0, 200), random.Next(0, 200));
+                            originalChannelColors[channel.Id] = channelColors[channel.Id];
                         }
 
                         // K, draw
-                        g.FillRectangle(new SolidBrush(channelColors[channel]), channelRect);
+                        g.FillRectangle(new SolidBrush(channelColors[channel.Id]), channelRect);
                         // We draw the rest later, after drawing the overlying gold lines...
                         // So, store it all to calc later...
 
@@ -293,7 +322,7 @@ namespace LuteBot.UI
                             int effectiveNote = trackSelectionManager.MinNoteByChannel[kvp.Key.Id] + (note - midiLowest);
                             if (effectiveNote % 12 == 0)
                             {
-                                g.DrawString($"C{effectiveNote / 12 - centerOffset}", gridFont, new SolidBrush(channelColors[kvp.Key]), x - xPad, labelY);
+                                g.DrawString($"C{effectiveNote / 12 - centerOffset}", gridFont, new SolidBrush(channelColors[kvp.Key.Id]), x - xPad, labelY);
                             }
                         }
                         labelY += labelHeight;
@@ -370,6 +399,7 @@ namespace LuteBot.UI
 
         private void InitLists()
         {
+            SuspendLayout();
             textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
             foreach (var channel in trackSelectionManager.MidiChannels)
             { // This should help make sure we don't except if we're irresponsible with it
@@ -396,21 +426,22 @@ namespace LuteBot.UI
             {
                 TrackListBox.Items.Add(track.Name, track.Active);
             }
+            ResumeLayout();
             //Refresh();
             // This is a terrible thing to do, but, there's no easy way to hook the right events to make it wait properly
             // So after a timer, we're refreshing our OffsetPanel again
-            Timer t = new Timer();
-            t.Interval = 100;
-            t.Tick += (object sender, EventArgs e) =>
-            {
-                if (this.IsHandleCreated && !this.IsDisposed)
-                    Invoke((MethodInvoker)delegate
-                    {
-                        Refresh();
-                        t.Dispose();
-                    });
-            };
-            t.Start();
+            //Timer t = new Timer();
+            //t.Interval = 100;
+            //t.Tick += (object sender, EventArgs e) =>
+            //{
+            //    if (this.IsHandleCreated && !this.IsDisposed)
+            //        BeginInvoke((MethodInvoker)delegate
+            //        {
+            //            Refresh();
+            //            t.Dispose();
+            //        });
+            //};
+            //t.Start();
         }
 
         private void TrackChangedHandler(object sender, EventArgs e)
