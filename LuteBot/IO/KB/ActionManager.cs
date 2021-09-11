@@ -1,4 +1,5 @@
 ﻿using LuteBot.Config;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -82,9 +83,21 @@ namespace LuteBot.IO.KB
             }
         }
 
+
+        private static Keys[] importantModifierKeys = new Keys[] { Keys.Alt, Keys.Control, Keys.ControlKey, Keys.LControlKey, Keys.RControlKey, Keys.Shift, Keys.ShiftKey, Keys.LShiftKey, Keys.RShiftKey };
+
         private static void InputCommand(int noteId)
         {
-                Process[] processes = Process.GetProcessesByName("Mordhau-Win64-Shipping");
+            Process[] processes = Process.GetProcessesByName("Mordhau-Win64-Shipping");
+            var modKeys = Control.ModifierKeys;
+
+            foreach (var modKey in importantModifierKeys)
+                if ((modKeys & modKey) == modKey)
+                {
+                    Thread.Sleep(ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown));
+                    return; // Drop notes if they're holding any of the important keys, so Mordhau doesn't go nuts
+                    // But also sleep the expected amount of time to help avoid situations where they let go of the key and mordhau hasn't noticed yet
+                }
             if (AutoConsoleModeFromString(ConfigManager.GetProperty(PropertyItem.ConsoleOpenMode)) == AutoConsoleMode.New)
             {
                 foreach (Process proc in processes)

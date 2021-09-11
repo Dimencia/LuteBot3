@@ -193,7 +193,7 @@ namespace LuteBot.UI
             int width = columnWidth * 10 * 12;
             int height = rowHeight * numRows;
             // Let's go ahead and get the instrument info
-            int lowest = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
+            int lowest = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId) + ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
             int noteCount = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
             // Try to find the center
             var center = lowest + noteCount / 2;
@@ -201,7 +201,7 @@ namespace LuteBot.UI
             center -= center % 12;
             int centerLine = center / 12; // This gives us the octave, like 0, 1, 2 usually
             // Now just take 5 - centerLine
-            int centerOffset = 5 - centerLine;
+            int centerOffset = xPad/2 - centerLine;
             // and do the label as lineNum - that
 
             // We're going to iterate twice so the background grids are behind everything
@@ -220,7 +220,7 @@ namespace LuteBot.UI
             if (trackSelectionManager.MidiChannels.Count > 0)
             {
                 // Sometimes, MinNoteByChannel or MaxNoteByChannel may not have value if the track never played any notes
-                minNote = trackSelectionManager.MidiChannels.Min((c) => (trackSelectionManager.MinNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MinNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0):0));
+                minNote = trackSelectionManager.MidiChannels.Min((c) => (trackSelectionManager.MinNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MinNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0):127));
                 maxNote = trackSelectionManager.MidiChannels.Max((c) => (trackSelectionManager.MaxNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MaxNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0):0));
             }
 
@@ -293,7 +293,7 @@ namespace LuteBot.UI
                             int effectiveNote = trackSelectionManager.MinNoteByChannel[kvp.Key.Id] + (note - midiLowest);
                             if (effectiveNote % 12 == 0)
                             {
-                                g.DrawString($"C{effectiveNote / 12}", gridFont, new SolidBrush(channelColors[kvp.Key]), x - xPad, labelY);
+                                g.DrawString($"C{effectiveNote / 12 - centerOffset}", gridFont, new SolidBrush(channelColors[kvp.Key]), x - xPad, labelY);
                             }
                         }
                         labelY += labelHeight;
@@ -315,7 +315,7 @@ namespace LuteBot.UI
                         int effectiveNote = _rustOut.LowMidiNoteId + (note - midiLowest);
                         if (effectiveNote % 12 == 0)
                         {
-                            g.DrawString($"C{effectiveNote / 12}", gridFont, draggableRectBrush, x - xPad, height + padding + labelHeight);
+                            g.DrawString($"C{effectiveNote / 12 - centerOffset}", gridFont, draggableRectBrush, x - xPad, height + padding + labelHeight);
                         }
                     }
                 }

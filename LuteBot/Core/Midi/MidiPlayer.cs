@@ -305,7 +305,7 @@ namespace LuteBot.Core.Midi
                     for (int i = 0; i < 128; i++)
                     {
                         trackSelectionManager.MaxNoteByChannel[i] = 0; // Pre-populate to reduce errors later
-                        trackSelectionManager.MinNoteByChannel[i] = 0;
+                        trackSelectionManager.MinNoteByChannel[i] = 127;
                     }
                     
                     foreach (var track in sequence)
