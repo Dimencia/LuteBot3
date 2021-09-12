@@ -45,14 +45,17 @@ namespace LuteBot.UI
         private void _mordhauOut_notePlayed(object sender, int channel)
         {
             // Mark the channel to flash and redraw the graphic (twice)
-            var original = channelColors[channel];
-            channelColors[channel] = Color.FromArgb(Math.Min(original.R*2,255), Math.Min(original.G*2,255), Math.Min(original.B*2,255));
-            System.Threading.Timer t;
-            t = new System.Threading.Timer(T_Tick, channel, ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown), System.Threading.Timeout.Infinite);
-            BeginInvoke((MethodInvoker)delegate {
-                OffsetPanel.Refresh();
-            });
-            
+            if (channelColors.ContainsKey(channel)) // If they have not entered advanced mode on this midi at any point, there will not be a color
+            { // And in that case there's no reason to do anything
+                var original = channelColors[channel];
+                channelColors[channel] = Color.FromArgb(Math.Min(original.R * 2, 255), Math.Min(original.G * 2, 255), Math.Min(original.B * 2, 255));
+                System.Threading.Timer t;
+                t = new System.Threading.Timer(T_Tick, channel, ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown), System.Threading.Timeout.Infinite);
+                BeginInvoke((MethodInvoker)delegate
+                {
+                    OffsetPanel.Refresh();
+                });
+            }
         }
 
         private void T_Tick(object state)

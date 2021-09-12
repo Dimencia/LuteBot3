@@ -1216,5 +1216,11 @@ namespace LuteBot
             return sb.ToString();
             */
         }
+
+        private void authToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var authForm = new DiscordAuthForm();
+            authForm.Show(this);
+        }
     }
 }
