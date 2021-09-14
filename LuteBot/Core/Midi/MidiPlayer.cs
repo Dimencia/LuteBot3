@@ -373,7 +373,10 @@ namespace LuteBot.Core.Midi
 
         public string GetChannelName(int id)
         {
-            return channelNames[id];
+            if (channelNames.ContainsKey(id))
+                return channelNames[id];
+            else
+                return "Unknown";
         }
 
 

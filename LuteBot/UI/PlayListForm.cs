@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -87,22 +88,20 @@ namespace LuteBot
             {
                 DefaultExt = "mid",
                 Filter = "MIDI files|*.mid|All files|*.*",
-                Title = "Open MIDI file"
+                Title = "Open MIDI file",
+                Multiselect = true
             };
             if (openMidiFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string fileName = openMidiFileDialog.FileName;
-                string filteredFileName = fileName;
-                if (fileName.Contains("\\"))
+                var fileNames = openMidiFileDialog.FileNames;
+                foreach (var file in fileNames)
                 {
-                    string[] fileNameSplit = fileName.Split('\\');
-                    filteredFileName = fileNameSplit[fileNameSplit.Length - 1].Replace(".mid", "");
+                    PlayListItem music = new PlayListItem();
+                    music.Name = Path.GetFileName(file).Replace(".mid","");
+                    music.Path = file;
+                    PlayListBox.Items.Add(music);
+                    playListManager.AddTrack(music);
                 }
-                PlayListItem music = new PlayListItem();
-                music.Name = filteredFileName;
-                music.Path = fileName;
-                PlayListBox.Items.Add(music);
-                playListManager.AddTrack(music);
             }
         }
 
