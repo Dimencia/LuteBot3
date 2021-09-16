@@ -57,6 +57,7 @@ namespace LuteBot
         public PlayListForm playListForm;
         LiveInputForm liveInputForm;
         TimeSyncForm timeSyncForm = null;
+        PartitionsForm partitionsForm = null;
 
         MidiPlayer player;
 
@@ -1221,6 +1222,13 @@ namespace LuteBot
         {
             var authForm = new DiscordAuthForm();
             authForm.Show(this);
+        }
+
+        private void lutemodPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (partitionsForm == null || partitionsForm.IsDisposed)
+                partitionsForm = new PartitionsForm(trackSelectionManager, player);
+            partitionsForm.Show();
         }
     }
 }

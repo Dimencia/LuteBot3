@@ -482,6 +482,58 @@ namespace LuteBot.Core.Midi
             isPlaying = false;
             outDevice.Reset();
         }
+
+        public List<LuteMod.Sequencing.Note> ExtractMidiContent()
+        {
+            List<LuteMod.Sequencing.Note> result = new List<LuteMod.Sequencing.Note>();
+            Track tempTrack;
+            ChannelMessage tempMessage;
+            MetaMessage tempMetaMessage;
+            int tempTick;
+            bool isChannelActive = false;
+
+            foreach (TrackItem track in trackSelectionManager.MidiTracks)
+            {
+                if (track.Active)
+                {
+                    tempTrack = sequence.ElementAt(track.Id);
+                    for (int i = 0; i < tempTrack.Count; i++)
+                    {
+                        tempTick = tempTrack.GetMidiEvent(i).AbsoluteTicks;
+                        if (tempTrack.GetMidiEvent(i).MidiMessage.MessageType == MessageType.Channel)
+                        {
+                            tempMessage = (ChannelMessage)tempTrack.GetMidiEvent(i).MidiMessage;
+                            foreach (MidiChannelItem item in trackSelectionManager.MidiChannels)
+                            {
+                                isChannelActive = isChannelActive || (item.Id == tempMessage.MidiChannel && item.Active);
+                            }
+                            if (isChannelActive && tempMessage.Command == ChannelCommand.NoteOn)
+                            {
+                                int offset = trackSelectionManager.NoteOffset;
+                                if (trackSelectionManager.MidiChannelOffsets.ContainsKey(tempMessage.MidiChannel))
+                                    offset += trackSelectionManager.MidiChannelOffsets[tempMessage.MidiChannel];
+                                result.Add(new LuteMod.Sequencing.Note() { Tick = tempTick, Tone = tempMessage.Data1 + offset, Type = LuteMod.Sequencing.NoteType.On });
+                            }
+                            isChannelActive = false;
+                        }
+                        if (tempTrack.GetMidiEvent(i).MidiMessage.MessageType == MessageType.Meta)
+                        {
+                            tempMetaMessage = (MetaMessage)tempTrack.GetMidiEvent(i).MidiMessage;
+                            if (tempMetaMessage.MetaType == MetaType.Tempo)
+                            {
+                                result.Add(new LuteMod.Sequencing.Note() { Tick = tempTick, Tone = BytesToInt(tempMetaMessage.GetBytes()), Type = LuteMod.Sequencing.NoteType.Tempo });
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        private int BytesToInt(byte[] bytes)
+        {
+            return (int)((bytes[0] * Math.Pow(2, 16)) + (bytes[1] * Math.Pow(2, 8)) + bytes[2]);
+        }
     }
 
     public static class DrumMappings

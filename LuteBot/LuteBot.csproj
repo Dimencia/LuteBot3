@@ -130,11 +130,18 @@
     <Compile Include="IO\KB\Keybinds.cs" />
     <Compile Include="LiveInput\Midi\LiveMidiManager.cs" />
     <Compile Include="LiveInput\Midi\MidiDeviceItem.cs" />
+    <Compile Include="MordhauConverter.cs" />
     <Compile Include="OnlineSync\AsynchronousClient.cs" />
     <Compile Include="OnlineSync\AsynchronousSocketListener.cs" />
     <Compile Include="OnlineSync\OnlineSyncManager.cs" />
     <Compile Include="OnlineSync\Party.cs" />
     <Compile Include="OnlineSync\PlayerProfile.cs" />
+    <Compile Include="PartitionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PartitionsForm.Designer.cs">
+      <DependentUpon>PartitionsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Playlist\PlayList.cs" />
     <Compile Include="Playlist\PlayListManager.cs" />
     <Compile Include="Playlist\PlayListEventArgs.cs" />
@@ -146,10 +153,21 @@
     <Compile Include="IO\KB\HotkeyManager.cs" />
     <Compile Include="Config\Property.cs" />
     <Compile Include="Config\PropertyItem.cs" />
+    <Compile Include="Sequencing\Note.cs" />
+    <Compile Include="Sequencing\NoteType.cs" />
+    <Compile Include="Sequencing\Partition.cs" />
+    <Compile Include="Sequencing\PartitionIndex.cs" />
+    <Compile Include="Sequencing\Track.cs" />
     <Compile Include="Soundboard\SoundBoard.cs" />
     <Compile Include="Soundboard\SoundBoardEventArgs.cs" />
     <Compile Include="Soundboard\SoundBoardItem.cs" />
     <Compile Include="Soundboard\SoundBoardManager.cs" />
+    <Compile Include="TrackNamingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TrackNamingForm.Designer.cs">
+      <DependentUpon>TrackNamingForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TrackSelection\MidiChannelItem.cs" />
     <Compile Include="TrackSelection\MidiChannelTypes.cs" />
     <Compile Include="TrackSelection\TrackItem.cs" />
@@ -232,6 +250,12 @@
     <Compile Include="UI\Utils\WindowPositionUtils.cs" />
     <EmbeddedResource Include="DiscordAuthForm.resx">
       <DependentUpon>DiscordAuthForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PartitionsForm.resx">
+      <DependentUpon>PartitionsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TrackNamingForm.resx">
+      <DependentUpon>TrackNamingForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\GuildLibraryForm.resx">
       <DependentUpon>GuildLibraryForm.cs</DependentUpon>

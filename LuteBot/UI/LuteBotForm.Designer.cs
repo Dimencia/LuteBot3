@@ -63,6 +63,7 @@ namespace LuteBot
             this.EndTimeLabel = new System.Windows.Forms.Label();
             this.ReloadButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.lutemodPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MusicProgressBar)).BeginInit();
             this.SuspendLayout();
@@ -74,7 +75,8 @@ namespace LuteBot
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.optionsToolStripMenuItem,
             this.windowToolStripMenuItem,
-            this.guildLibraryToolStripMenuItem1});
+            this.guildLibraryToolStripMenuItem1,
+            this.lutemodPartitionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(616, 28);
@@ -322,6 +324,13 @@ namespace LuteBot
             this.ReloadButton.UseVisualStyleBackColor = true;
             this.ReloadButton.Click += new System.EventHandler(this.ReloadButton_Click);
             // 
+            // lutemodPartitionsToolStripMenuItem
+            // 
+            this.lutemodPartitionsToolStripMenuItem.Name = "lutemodPartitionsToolStripMenuItem";
+            this.lutemodPartitionsToolStripMenuItem.Size = new System.Drawing.Size(147, 24);
+            this.lutemodPartitionsToolStripMenuItem.Text = "Lutemod Partitions";
+            this.lutemodPartitionsToolStripMenuItem.Click += new System.EventHandler(this.lutemodPartitionsToolStripMenuItem_Click);
+            // 
             // LuteBotForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -387,6 +396,7 @@ namespace LuteBot
         private ToolTip toolTip1;
         private ToolStripMenuItem exportToScrapMechanicToolStripMenuItem;
         private ToolStripMenuItem guildLibraryToolStripMenuItem1;
+        private ToolStripMenuItem lutemodPartitionsToolStripMenuItem;
     }
 }
 

@@ -11,6 +11,51 @@ namespace LuteBot.IO.Files
 {
     public class FileIO
     {
+        public static void SaveFile(string fileName, byte[] fileContent)
+        {
+            using (var stream = File.Create(fileName))
+            {
+                stream.Write(fileContent, 0, fileContent.Length);
+            }
+        }
+
+        public static bool DeleteFile(string fileName)
+        {
+            if (File.Exists(fileName))
+            {
+                File.Delete(fileName);
+                return true;
+            }
+            return false;
+        }
+
+        public static byte[] LoadFile(string fileName)
+        {
+            byte[] streamResult = null;
+
+            try
+            {
+                using (var stream = File.Open(fileName, FileMode.Open))
+                {
+                    streamResult = new byte[stream.Length];
+                    stream.Read(streamResult, 0, (int)stream.Length);
+                }
+            }
+            catch (Exception ex)
+            {
+                streamResult = null;
+            }
+            return streamResult;
+        }
+
+        public static void CopyPasteFile(string fileName, string newFileName)
+        {
+            if (File.Exists(fileName) && !File.Exists(newFileName))
+            {
+                File.Copy(fileName, newFileName);
+            }
+        }
+
         public static T LoadXML<T>(string path)
         {
             T result = default(T);
