@@ -507,7 +507,7 @@ namespace LuteBot.Core.Midi
                             {
                                 isChannelActive = isChannelActive || (item.Id == tempMessage.MidiChannel && item.Active);
                             }
-                            if (isChannelActive && tempMessage.Command == ChannelCommand.NoteOn)
+                            if (isChannelActive && tempMessage.Command == ChannelCommand.NoteOn && tempMessage.Data2 > 0)
                             {
                                 int offset = trackSelectionManager.NoteOffset;
                                 if (trackSelectionManager.MidiChannelOffsets.ContainsKey(tempMessage.MidiChannel))
