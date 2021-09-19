@@ -37,7 +37,7 @@
             this.ApplyButton = new System.Windows.Forms.Button();
             this.SoundEffectsCheckBox = new System.Windows.Forms.CheckBox();
             this.TrackSelectionCheckBox = new System.Windows.Forms.CheckBox();
-            this.OnlineSyncCheckBox = new System.Windows.Forms.CheckBox();
+            this.PartitionListCheckBox = new System.Windows.Forms.CheckBox();
             this.NoteConversionMode = new System.Windows.Forms.ComboBox();
             this.NoteConversionLabel = new System.Windows.Forms.Label();
             this.SettingsGroupBox = new System.Windows.Forms.GroupBox();
@@ -165,18 +165,17 @@
             this.TrackSelectionCheckBox.UseVisualStyleBackColor = true;
             this.TrackSelectionCheckBox.CheckedChanged += new System.EventHandler(this.TrackSelectionCheckBox_CheckedChanged);
             // 
-            // OnlineSyncCheckBox
+            // PartitionListCheckBox
             // 
-            this.OnlineSyncCheckBox.AutoSize = true;
-            this.OnlineSyncCheckBox.Enabled = false;
-            this.OnlineSyncCheckBox.Location = new System.Drawing.Point(8, 108);
-            this.OnlineSyncCheckBox.Margin = new System.Windows.Forms.Padding(4);
-            this.OnlineSyncCheckBox.Name = "OnlineSyncCheckBox";
-            this.OnlineSyncCheckBox.Size = new System.Drawing.Size(253, 21);
-            this.OnlineSyncCheckBox.TabIndex = 8;
-            this.OnlineSyncCheckBox.Text = "Show Online Sync Menu on Startup";
-            this.OnlineSyncCheckBox.UseVisualStyleBackColor = true;
-            this.OnlineSyncCheckBox.CheckedChanged += new System.EventHandler(this.OnlineSyncCheckBox_CheckedChanged);
+            this.PartitionListCheckBox.AutoSize = true;
+            this.PartitionListCheckBox.Location = new System.Drawing.Point(8, 108);
+            this.PartitionListCheckBox.Margin = new System.Windows.Forms.Padding(4);
+            this.PartitionListCheckBox.Name = "PartitionListCheckBox";
+            this.PartitionListCheckBox.Size = new System.Drawing.Size(216, 21);
+            this.PartitionListCheckBox.TabIndex = 8;
+            this.PartitionListCheckBox.Text = "Show Partition List on Startup";
+            this.PartitionListCheckBox.UseVisualStyleBackColor = true;
+            this.PartitionListCheckBox.CheckedChanged += new System.EventHandler(this.PartitionListCheckBox_CheckedChanged);
             // 
             // NoteConversionMode
             // 
@@ -213,7 +212,7 @@
             this.SettingsGroupBox.Controls.Add(this.PlaylistCheckBox);
             this.SettingsGroupBox.Controls.Add(this.SoundBoardCheckBox);
             this.SettingsGroupBox.Controls.Add(this.TrackSelectionCheckBox);
-            this.SettingsGroupBox.Controls.Add(this.OnlineSyncCheckBox);
+            this.SettingsGroupBox.Controls.Add(this.PartitionListCheckBox);
             this.SettingsGroupBox.Controls.Add(this.SoundEffectsCheckBox);
             this.SettingsGroupBox.Location = new System.Drawing.Point(13, 15);
             this.SettingsGroupBox.Margin = new System.Windows.Forms.Padding(4);
@@ -559,7 +558,7 @@
         private System.Windows.Forms.Button ApplyButton;
         private System.Windows.Forms.CheckBox SoundEffectsCheckBox;
         private System.Windows.Forms.CheckBox TrackSelectionCheckBox;
-        private System.Windows.Forms.CheckBox OnlineSyncCheckBox;
+        private System.Windows.Forms.CheckBox PartitionListCheckBox;
         private System.Windows.Forms.ComboBox NoteConversionMode;
         private System.Windows.Forms.Label NoteConversionLabel;
         private System.Windows.Forms.GroupBox SettingsGroupBox;

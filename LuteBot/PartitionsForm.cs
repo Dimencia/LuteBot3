@@ -1,6 +1,8 @@
-﻿using LuteBot.Core.Midi;
+﻿using LuteBot.Config;
+using LuteBot.Core.Midi;
 using LuteBot.IO.Files;
 using LuteBot.TrackSelection;
+using LuteBot.UI.Utils;
 
 using LuteMod.Indexing;
 using LuteMod.Sequencing;
@@ -207,6 +209,12 @@ namespace LuteBot
                 MessageBox.Show("The partition is empty");
             }
 
+        }
+
+        private void PartitionsForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            WindowPositionUtils.UpdateBounds(PropertyItem.PartitionListPos, new Point() { X = Left, Y = Top });
+            ConfigManager.SaveConfig();
         }
     }
 }

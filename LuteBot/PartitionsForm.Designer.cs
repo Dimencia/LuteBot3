@@ -69,6 +69,7 @@
             this.Controls.Add(this.listBoxPartitions);
             this.Name = "PartitionsForm";
             this.Text = "LuteMod Partitions";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PartitionsForm_FormClosing);
             this.ResumeLayout(false);
 
         }

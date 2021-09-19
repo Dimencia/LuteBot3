@@ -13,6 +13,7 @@
         TrackSelection,
         OnlineSync,
         LiveMidi,
+        PartitionList,
 
         //Settings
         SoundEffects,
@@ -53,6 +54,7 @@
         TrackSelectionPos,
         LiveMidiPos,
         VirtualKeyboardBinds,
-        LiveMidiListen
+        LiveMidiListen,
+        PartitionListPos
     }
 }

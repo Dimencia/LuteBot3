@@ -342,6 +342,14 @@ namespace LuteBot
                 liveInputForm.Top = coords.Y;
                 liveInputForm.Left = coords.X;
             }
+            if (ConfigManager.GetBooleanProperty(PropertyItem.PartitionList))
+            {
+                partitionsForm = new PartitionsForm(trackSelectionManager, player);
+                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.PartitionListPos));
+                partitionsForm.Show();
+                partitionsForm.Top = coords.Y;
+                partitionsForm.Left = coords.X;
+            }
         }
 
         protected override void WndProc(ref Message m)
@@ -380,6 +388,10 @@ namespace LuteBot
             if (liveInputForm != null)
             {
                 liveInputForm.Close();
+            }
+            if (partitionsForm != null)
+            {
+                partitionsForm.Close();
             }
             ConfigManager.SaveConfig();
             base.OnClosing(e);

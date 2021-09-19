@@ -20,6 +20,7 @@ namespace LuteBot.Config
     {
         private static Config configuration;
         private static readonly string autoSavePath;
+        private static Config defaultConfig;
 
         static ConfigManager()
         {
@@ -32,6 +33,7 @@ namespace LuteBot.Config
         /// </summary>
         public static void Refresh()
         {
+            defaultConfig = LoadDefaultConfig();
             configuration = new Config();
             configuration = LoadConfig();
             if (configuration == null)
@@ -49,7 +51,10 @@ namespace LuteBot.Config
 
         public static string GetProperty(PropertyItem item)
         {
-            return configuration.Get(item);
+                var result = configuration.Get(item);
+                if (result == null)
+                    result = defaultConfig.Get(item);
+                return result;
         }
 
         public static void SetProperty(PropertyItem item, string value)
@@ -80,6 +85,11 @@ namespace LuteBot.Config
             {
                 return result;
             }
+            temp = defaultConfig.Get(item); // backwards compat
+            if (bool.TryParse(temp, out result))
+            {
+                return result;
+            }
             else throw new InvalidOperationException("Parsing error on property :" + item.ToString());
         }
 
@@ -94,12 +104,27 @@ namespace LuteBot.Config
                     return new Point() { X = int.Parse(stringItemSplit[0]), Y = int.Parse(stringItemSplit[1]) };
                 }
             }
+
+            stringItem = defaultConfig.Get(item);
+            if (stringItem.Contains('|'))
+            {
+                string[] stringItemSplit = stringItem.Split('|');
+                if (stringItemSplit.Length == 2)
+                {
+                    return new Point() { X = int.Parse(stringItemSplit[0]), Y = int.Parse(stringItemSplit[1]) };
+                }
+            }
+
             throw new InvalidOperationException("Parsing error on property :" + item.ToString());
         }
 
         public static Keys GetKeybindProperty(PropertyItem item)
         {
             if (Enum.TryParse<Keys>(configuration.Get(item), out Keys consoleKey))
+            {
+                return consoleKey;
+            }
+            if (Enum.TryParse<Keys>(defaultConfig.Get(item), out consoleKey))
             {
                 return consoleKey;
             }
@@ -124,6 +149,11 @@ namespace LuteBot.Config
             {
                 return result;
             }
+            temp = defaultConfig.Get(item);
+            if (int.TryParse(temp, out result))
+            {
+                return result;
+            }
             else throw new InvalidOperationException("Parsing error on property :" + item.ToString());
         }
 
@@ -134,7 +164,7 @@ namespace LuteBot.Config
 
         public static string GetVersion()
         {
-            return "3.1.7";
+            return "3.1.8";
         }
     }
 }

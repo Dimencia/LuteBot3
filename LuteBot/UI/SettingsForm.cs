@@ -132,7 +132,7 @@ namespace LuteBot
             SoundBoardCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.SoundBoard);
             PlaylistCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.PlayList);
             TrackSelectionCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.TrackSelection);
-            OnlineSyncCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.OnlineSync);
+            PartitionListCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.PartitionList);
             SoundEffectsCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.SoundEffects);
 
             InitRadioButtons();
@@ -215,9 +215,9 @@ namespace LuteBot
             ConfigManager.SetProperty(PropertyItem.TrackSelection, TrackSelectionCheckBox.Checked.ToString());
         }
 
-        private void OnlineSyncCheckBox_CheckedChanged(object sender, EventArgs e)
+        private void PartitionListCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            ConfigManager.SetProperty(PropertyItem.OnlineSync, OnlineSyncCheckBox.Checked.ToString());
+            ConfigManager.SetProperty(PropertyItem.PartitionList, PartitionListCheckBox.Checked.ToString());
         }
 
         private void NoteConversionMode_SelectedIndexChanged(object sender, EventArgs e)
