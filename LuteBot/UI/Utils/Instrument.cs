@@ -51,6 +51,7 @@ namespace LuteBot.UI.Utils
         public static void Write()
         {
             JsonSerializer serializer = new JsonSerializer();
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
             using (StreamWriter stream = new StreamWriter(path, false))
             {
                 serializer.Serialize(stream, Prefabs);

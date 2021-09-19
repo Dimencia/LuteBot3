@@ -159,12 +159,12 @@ namespace LuteBot.Config
 
         private static string BuildPath(Config config)
         {
-            return autoSavePath + "Configuration";
+            return Path.Combine(autoSavePath,"Configuration");
         }
 
         public static string GetVersion()
         {
-            return "3.1.8";
+            return "3.1.9";
         }
     }
 }
