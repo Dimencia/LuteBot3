@@ -129,18 +129,21 @@ namespace LuteBot
             DragObject obj = e.Data.GetData(typeof(DragObject)) as DragObject;
             int index = PlayListBox.IndexFromPoint(new Point(PlayListBox.PointToClient(Cursor.Position).X, PlayListBox.PointToClient(Cursor.Position).Y));
             int oldIndex = obj.source.Items.IndexOf(obj.item);
-            PlayListItem tempItem = (PlayListItem)obj.item;
-            obj.source.Items.Remove(obj.item);
-            playListManager.Remove(tempItem);
-            if (index < 0 || index >= PlayListBox.Items.Count)
+            if (index != oldIndex)
             {
-                PlayListBox.Items.Add(obj.item);
-                playListManager.AddTrack(tempItem);
-            }
-            else
-            {
-                PlayListBox.Items.Insert(index, obj.item);
-                playListManager.InsertTrack(index, tempItem);
+                PlayListItem tempItem = (PlayListItem)obj.item;
+                obj.source.Items.Remove(obj.item);
+                playListManager.Remove(tempItem);
+                if (index < 0 || index >= PlayListBox.Items.Count)
+                {
+                    PlayListBox.Items.Add(obj.item);
+                    playListManager.AddTrack(tempItem);
+                }
+                else
+                {
+                    PlayListBox.Items.Insert(index, obj.item);
+                    playListManager.InsertTrack(index, tempItem);
+                }
             }
         }
 
@@ -156,12 +159,6 @@ namespace LuteBot
 
         void List_MouseDown(object sender, MouseEventArgs e)
         {
-            mDownPos = e.Location;
-            int index = PlayListBox.IndexFromPoint(new Point(PlayListBox.PointToClient(Cursor.Position).X, PlayListBox.PointToClient(Cursor.Position).Y));
-            if (index >= 0 && index < PlayListBox.Items.Count)
-            {
-                PlayListBox.SelectedIndex = index;
-            }
             ContextMenuHelper();
         }
 
@@ -213,6 +210,45 @@ namespace LuteBot
         private void PlayListForm_ResizeEnd(object sender, EventArgs e)
         {
             Refresh();
+        }
+
+        private void buttonExport_Click(object sender, EventArgs e)
+        {
+            // Iterate every song in the playlist, copy them to a new folder
+            // Let them zip them up however they want
+
+            // First create a folder if there isn't one... 
+            var basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Lutebot", "ExportedPlaylists");
+            var nameForm = new TrackNamingForm("Playlist");
+            nameForm.ShowDialog(this);
+            if (nameForm.DialogResult == DialogResult.OK)
+            {
+                var playlistName = nameForm.textBoxPartName.Text;
+                var currentName = playlistName;
+                int count = 0;
+
+                while (Directory.Exists(Path.Combine(basePath, currentName)))
+                    currentName = $"{playlistName} ({++count})";
+
+                var dirPath = Path.Combine(basePath, currentName);
+
+                Directory.CreateDirectory(dirPath);
+
+
+
+                foreach (var o in PlayListBox.Items)
+                {
+                    if (o is PlayListItem item)
+                    {
+                        if (File.Exists(item.Path))
+                        {
+                            var filename = Path.GetFileName(item.Path);
+                            File.Copy(item.Path, Path.Combine(dirPath, filename), true);
+                        }
+                    }
+                }
+                System.Diagnostics.Process.Start(dirPath);
+            }
         }
     }
 }

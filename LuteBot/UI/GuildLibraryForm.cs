@@ -206,7 +206,7 @@ namespace LuteBot.UI
             string path = appdata_PATH + songs_FOLDER + song.filename;
             if (File.Exists(path)) // No need to redownload if we have it
             {
-                AddSongToPlaylist(song, path);
+                PlaySong(path);
                 return;
             }
 

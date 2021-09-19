@@ -224,6 +224,7 @@ namespace LuteBot.UI
             int width = columnWidth * 10 * 12;
             int height = rowHeight * numRows;
             // Let's go ahead and get the instrument info
+
             int lowest = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId) + ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
             int noteCount = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
             // Try to find the center
@@ -242,7 +243,8 @@ namespace LuteBot.UI
             }
 
             // Draw the instrument bar first so the rest of the grid goes over it
-            int rectStartX = (lowest * columnWidth) + xPad + (centerOffset * 12 * columnWidth);
+            // We use -12 here because all logic and values like LowestPlayedNote assume MIDI0 = C0, but that's wrong, MIDI0=C-1
+            int rectStartX = (lowest * columnWidth) + xPad + (centerOffset * 12 * columnWidth) - 12*columnWidth;
             Rectangle instrumentRect = new Rectangle(rectStartX, 1, (noteCount * columnWidth), rowHeight - 1);
             g.FillRectangle(instrumentBarBrush, instrumentRect);
 

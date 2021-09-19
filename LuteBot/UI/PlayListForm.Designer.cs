@@ -36,6 +36,7 @@ namespace LuteBot
             this.LoadButton = new System.Windows.Forms.Button();
             this.SaveButton = new System.Windows.Forms.Button();
             this.LoadPlayListButton = new System.Windows.Forms.Button();
+            this.buttonExport = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // PlayListBox
@@ -65,7 +66,7 @@ namespace LuteBot
             this.LoadButton.Location = new System.Drawing.Point(16, 640);
             this.LoadButton.Margin = new System.Windows.Forms.Padding(4);
             this.LoadButton.Name = "LoadButton";
-            this.LoadButton.Size = new System.Drawing.Size(200, 34);
+            this.LoadButton.Size = new System.Drawing.Size(148, 34);
             this.LoadButton.TabIndex = 1;
             this.LoadButton.Text = "Add to PlayList";
             this.LoadButton.UseVisualStyleBackColor = true;
@@ -75,10 +76,10 @@ namespace LuteBot
             // 
             this.SaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveButton.Location = new System.Drawing.Point(267, 640);
+            this.SaveButton.Location = new System.Drawing.Point(172, 640);
             this.SaveButton.Margin = new System.Windows.Forms.Padding(4);
             this.SaveButton.Name = "SaveButton";
-            this.SaveButton.Size = new System.Drawing.Size(200, 34);
+            this.SaveButton.Size = new System.Drawing.Size(167, 34);
             this.SaveButton.TabIndex = 2;
             this.SaveButton.Text = "Save PlayList";
             this.SaveButton.UseVisualStyleBackColor = true;
@@ -87,20 +88,33 @@ namespace LuteBot
             // LoadPlayListButton
             // 
             this.LoadPlayListButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.LoadPlayListButton.Location = new System.Drawing.Point(527, 640);
+            this.LoadPlayListButton.Location = new System.Drawing.Point(388, 640);
             this.LoadPlayListButton.Margin = new System.Windows.Forms.Padding(4);
             this.LoadPlayListButton.Name = "LoadPlayListButton";
-            this.LoadPlayListButton.Size = new System.Drawing.Size(200, 34);
+            this.LoadPlayListButton.Size = new System.Drawing.Size(167, 34);
             this.LoadPlayListButton.TabIndex = 3;
             this.LoadPlayListButton.Text = "Load PlayList";
             this.LoadPlayListButton.UseVisualStyleBackColor = true;
             this.LoadPlayListButton.Click += new System.EventHandler(this.LoadPlayListButton_Click);
+            // 
+            // buttonExport
+            // 
+            this.buttonExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonExport.Location = new System.Drawing.Point(563, 640);
+            this.buttonExport.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonExport.Name = "buttonExport";
+            this.buttonExport.Size = new System.Drawing.Size(167, 34);
+            this.buttonExport.TabIndex = 4;
+            this.buttonExport.Text = "Export PlayList";
+            this.buttonExport.UseVisualStyleBackColor = true;
+            this.buttonExport.Click += new System.EventHandler(this.buttonExport_Click);
             // 
             // PlayListForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(743, 689);
+            this.Controls.Add(this.buttonExport);
             this.Controls.Add(this.LoadPlayListButton);
             this.Controls.Add(this.SaveButton);
             this.Controls.Add(this.LoadButton);
@@ -124,5 +138,6 @@ namespace LuteBot
         private System.Windows.Forms.Button LoadButton;
         private Button SaveButton;
         private Button LoadPlayListButton;
+        private Button buttonExport;
     }
 }

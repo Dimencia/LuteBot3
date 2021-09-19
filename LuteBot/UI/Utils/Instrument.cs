@@ -12,14 +12,14 @@ namespace LuteBot.UI.Utils
     public class Instrument
     {
         public string Name { get; set; }
-        public int LowestSentNote { get; set; }// These are for the idea that lute sends a 0, when it's playing a 24
+        public int LowestSentNote { get; set; }// These are for the idea that lute sends a 0, when it's playing a 24... Actually a 36 but all my logic assumes 0 is C0 even though it's not...
         public int NoteCount { get; set; }
         public int NoteCooldown { get; set; }
         public int LowestPlayedNote { get; set; }
         
 
         public static List<Instrument> Prefabs = new List<Instrument>();
-        private static string path = $@"{Environment.CurrentDirectory}\Config\Instruments.json";
+        private static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config","Instruments.json");
 
         static Instrument()
         {

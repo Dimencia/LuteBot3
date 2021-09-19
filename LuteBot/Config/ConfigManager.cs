@@ -19,10 +19,11 @@ namespace LuteBot.Config
     public static class ConfigManager
     {
         private static Config configuration;
-        private const string autoSavePath = @"Config\";
+        private static readonly string autoSavePath;
 
         static ConfigManager()
         {
+            autoSavePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config");
             Refresh();
         }
 
@@ -133,7 +134,7 @@ namespace LuteBot.Config
 
         public static string GetVersion()
         {
-            return "3.1.5";
+            return "3.1.7";
         }
     }
 }

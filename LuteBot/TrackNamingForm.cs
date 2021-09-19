@@ -12,10 +12,15 @@ namespace LuteBot
 {
     public partial class TrackNamingForm : Form
     {
-        public TrackNamingForm(string filename)
+        public TrackNamingForm(string filename, string labelValue = null)
         {
             InitializeComponent();
             textBoxPartName.Text = filename;
+            if (labelValue != null)
+            {
+                this.Text = labelValue;
+                label1.Text = labelValue;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
