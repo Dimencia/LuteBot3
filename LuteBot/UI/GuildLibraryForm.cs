@@ -108,12 +108,20 @@ namespace LuteBot.UI
 
             // Populate the list with a Guild Library query
             searchString = WebUtility.UrlEncode(searchString);
-            string url = $"https://us-central1-bards-guild-midi-project.cloudfunctions.net/query?key=A52eAaSKhnQiXyVYtoqZLj4tVycc5U4HtY56S4Ha&find={searchString}";
-            using (WebClient client = new WebClient())
+            string url = $"http://api.bardsguild.life/?key=0Tk-seyqLFwn5qCH2YzrYA&find={searchString}";
+            try
             {
-                string results = await client.DownloadStringTaskAsync(url).ConfigureAwait(true);
-                var songArray = JsonConvert.DeserializeObject<GuildSong[]>(results);
-                filteredBindingList = new SortableBindingList<GuildSong>(songArray);
+                using (WebClient client = new WebClient())
+                {
+                    string results = await client.DownloadStringTaskAsync(url).ConfigureAwait(true);
+                    var songArray = JsonConvert.DeserializeObject<GuildSong[]>(results);
+                    filteredBindingList = new SortableBindingList<GuildSong>(songArray);
+                }
+            }
+            catch
+            {
+                Log("Failed to query API");
+                return;
             }
 
 
@@ -200,28 +208,23 @@ namespace LuteBot.UI
         }
 
 
-        private void downloadAndPlaySong(GuildSong song)
+        private void downloadSong(GuildSong song, bool play)
         {
-            // Downloads midi from the URL, returning the path to the song
+            // Downloads midi from the URL and plays, or adds to playlist, as appropriate
             string path = appdata_PATH + songs_FOLDER + song.filename;
             if (File.Exists(path)) // No need to redownload if we have it
             {
-                PlaySong(path);
+                if (play)
+                    PlaySong(path);
+                else
+                    AddSongToPlaylist(song, path);
                 return;
             }
 
-            if (song.source_url.Equals(string.Empty))
+            if (song.source_url == null || song.source_url.Equals(string.Empty))
             {
-                // Indication that we should search google
-                song = GetSongDataFromGoogle(song);
-                path = appdata_PATH + songs_FOLDER + song.filename;
-            }
-
-            // If it's still empty, we need to abort
-            if (song.source_url.Equals(string.Empty))
-            {
-                Log($"Unable to find {song.filename} online");
-                return;
+                // Try the CDN
+                song.source_url = $"https://storage.googleapis.com/bgml/mid/{song.checksum}.mid";
             }
 
             // We need to pass the song when download is completed
@@ -233,7 +236,10 @@ namespace LuteBot.UI
                     try
                     {
                         wc.DownloadFile(song.source_url, path);
-                        PlaySong(path);
+                        if (play)
+                            PlaySong(path);
+                        else
+                            AddSongToPlaylist(song, path);
                     }
                     catch (Exception e)
                     {
@@ -243,92 +249,18 @@ namespace LuteBot.UI
                     }
                 }
             });
+        }
+
+        private void downloadAndPlaySong(GuildSong song)
+        {
+            downloadSong(song, true);
         }
 
         private void downloadAndAddSong(GuildSong song)
         {
-            // Downloads midi from the URL, returning the path to the song
-            string path = appdata_PATH + songs_FOLDER + song.filename;
-            if (File.Exists(path)) // No need to redownload if we have it
-            {
-                AddSongToPlaylist(song, path);
-                return;
-            }
-
-            if (song.source_url.Equals(string.Empty))
-            {
-                // Indication that we should search google
-                song = GetSongDataFromGoogle(song);
-                path = appdata_PATH + songs_FOLDER + song.filename;
-            }
-
-            // If it's still empty, we need to abort
-            if (song.source_url.Equals(string.Empty))
-            {
-                Log($"Unable to find {song.filename} online");
-                return;
-            }
-
-            // We need to pass the song when download is completed
-            // So we'll do a Task.Run that handles that... hopefully
-            Task.Run(() =>
-            {
-                using (WebClient wc = new WebClient())
-                {
-                    try
-                    {
-                        wc.DownloadFile(song.source_url, path);
-                        AddSongToPlaylist(song, path);
-                    }
-                    catch (Exception e)
-                    {
-                        Log(e.StackTrace);
-                        Log(e.Message);
-                        Log($"Failed to download/add {song.filename}");
-                    }
-                }
-            });
+            downloadSong(song, false);
         }
 
-        private GuildSong GetSongDataFromGoogle(GuildSong song)
-        {
-            // Misleading name, for now we're just using bitmidi
-            // https://bitmidi.com/search?q=test as a search page
-            // Results are <a class="pointer no-underline fw4 white underline-hover">, which contain a link
-            // Inside that link, a class pointer no-underline fw4 dark-blue underline-hover contains our href to download
-
-            // If we find a download link, we need to set the song's FileName and URL then return it
-            // Otherwise right now, the FileName contains the search query
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-            // For now I'll be lazy and we'll just parse the page as a string
-            string searchURL = $@"https://bitmidi.com/search?q={song.filename}";
-            using (WebClient wc = new WebClient())
-            {
-                string webData = wc.DownloadString(searchURL);
-                // Actually there's some real easy javascript in there that lets us get it directly
-                // "data":{"midis":{ is how it starts, let's cut to after that
-                // Then the first instace of this we find, we take
-                // "downloadUrl":"/uploads/19022.mid"
-                // Hell... we can just take that part
-                Regex reg = new Regex("downloadUrl\":\"([^\"]*)");
-                var match = reg.Match(webData);
-                if (!match.Success)
-                    return song;
-                // So... we have our URL in Groups[1]
-                string url = $@"https://bitmidi.com{match.Groups[1].Value}";
-                // This doesn't give us a name, so we can use this...
-                reg = new Regex(",\"name\":\"([^\"]*)");
-                match = reg.Match(webData);
-                if (!match.Success)
-                    return song;
-                string filename = match.Groups[1].Value;
-                song.filename = filename;
-                song.source_url = url;
-                song.contributor = "BitMidi";
-                Log($"Successfully found {filename} online, downloading...");
-            }
-            return song;
-        }
 
         private void PlaySong(string path)
         {
