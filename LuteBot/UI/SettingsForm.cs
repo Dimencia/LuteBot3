@@ -174,7 +174,11 @@ namespace LuteBot
             for (int i = 0; i < numDevices; i++)
                 outputDeviceBox.Items.Add(OutputDevice.GetDeviceCapabilities(i).name);
 
-            outputDeviceBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice);
+            try
+            {
+                outputDeviceBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice);
+            }
+            catch { } // Some people have no output devices and that's awkward
         }
 
         private void SetVersion()

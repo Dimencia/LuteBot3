@@ -93,9 +93,10 @@
             this.label1.Location = new System.Drawing.Point(12, 26);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(498, 17);
+            this.label1.Size = new System.Drawing.Size(684, 17);
             this.label1.TabIndex = 4;
-            this.label1.Text = "Search the online Bard\'s Guild Library for MIDIs (Only top 20 results returned)";
+            this.label1.Text = "Search the online Bard\'s Guild Library for MIDIs (Only top 20 results returned, s" +
+    "orted by most notes played)";
             // 
             // songGrid
             // 

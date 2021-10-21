@@ -48,19 +48,25 @@ namespace LuteBot.Core.Midi
             sequencer.SysExMessagePlayed += new System.EventHandler<Sanford.Multimedia.Midi.SysExMessageEventArgs>(this.HandleSysExMessagePlayed);
             sequencer.Chased += new System.EventHandler<Sanford.Multimedia.Midi.ChasedEventArgs>(this.HandleChased);
             sequencer.Stopped += new System.EventHandler<Sanford.Multimedia.Midi.StoppedEventArgs>(this.HandleStopped);
+            sequence.LoadCompleted += HandleLoadCompleted;
 
             if (!(OutputDevice.DeviceCount == 0))
             {
                 outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
-                sequence.LoadCompleted += HandleLoadCompleted;
             }
         }
 
         public void ResetDevice()
         {
-            outDevice.Reset();
-            outDevice.Dispose();
-            outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
+            if (outDevice != null) {
+                    outDevice.Reset();
+                    outDevice.Dispose();
+            }
+            try
+            {
+                outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
+            }
+            catch { } // TODO: Somehow alert them that it didn't work
         }
 
         public void UpdateMutedTracks(TrackItem item)
@@ -74,7 +80,8 @@ namespace LuteBot.Core.Midi
             {
                 sequencer.Continue();
             }
-            outDevice.Reset();
+            if (outDevice != null)
+                outDevice.Reset();
         }
 
         public Dictionary<int, string> GetMidiChannels()
@@ -173,7 +180,8 @@ namespace LuteBot.Core.Midi
 
         public override void ResetSoundEffects()
         {
-            outDevice.Reset();
+            if (outDevice != null)
+                outDevice.Reset();
         }
 
 
@@ -237,7 +245,8 @@ namespace LuteBot.Core.Midi
             isPlaying = false;
             sequencer.Stop();
             sequencer.Position = 0;
-            outDevice.Reset();
+            if (outDevice != null)
+                outDevice.Reset();
         }
 
         public override void Play()
@@ -265,7 +274,7 @@ namespace LuteBot.Core.Midi
             //midiOut.Dispose();
             isPlaying = false;
             sequencer.Stop();
-            if (!outDevice.IsDisposed)
+            if (outDevice != null && !outDevice.IsDisposed)
                 outDevice.Reset();
         }
 
@@ -384,7 +393,7 @@ namespace LuteBot.Core.Midi
         {
             foreach (ChannelMessage message in e.Messages)
             {
-                if (ConfigManager.GetBooleanProperty(PropertyItem.SoundEffects) && !disposed)
+                if (ConfigManager.GetBooleanProperty(PropertyItem.SoundEffects) && !disposed && outDevice != null)
                 {
                     outDevice.Send(message);
                 }
@@ -393,7 +402,7 @@ namespace LuteBot.Core.Midi
 
         private void HandleChased(object sender, ChasedEventArgs e)
         {
-            if (ConfigManager.GetBooleanProperty(PropertyItem.SoundEffects) && !disposed)
+            if (ConfigManager.GetBooleanProperty(PropertyItem.SoundEffects) && !disposed && outDevice != null)
             {
                 foreach (ChannelMessage message in e.Messages)
                 {
@@ -422,7 +431,7 @@ namespace LuteBot.Core.Midi
 
                     //midiOut.SendEvent(new Melanchall.DryWetMidi.Core.NoteOnEvent((Melanchall.DryWetMidi.Common.SevenBitNumber)filtered.Data1, (Melanchall.DryWetMidi.Common.SevenBitNumber)filtered.Data2));
                     // Below: Sound to match, then unfiltered sound.  Or leave commented for no sound.
-                    if (!outDevice.IsDisposed) // If they change song prefs while playing, this can fail, so just skip then
+                    if (outDevice != null && !outDevice.IsDisposed) // If they change song prefs while playing, this can fail, so just skip then
                         try
                         {
                             if (ConfigManager.GetIntegerProperty(PropertyItem.Instrument) == 9)
@@ -471,7 +480,8 @@ namespace LuteBot.Core.Midi
             }
             else
             {
-                outDevice.Send(trackSelectionManager.FilterMidiEvent(e.Message, e.TrackId));
+                if (outDevice != null)
+                    outDevice.Send(trackSelectionManager.FilterMidiEvent(e.Message, e.TrackId));
             }
         }
 
@@ -480,7 +490,8 @@ namespace LuteBot.Core.Midi
             //FinalizeMC();
             //midiOut.Dispose();
             isPlaying = false;
-            outDevice.Reset();
+            if (outDevice != null)
+                outDevice.Reset();
         }
 
         public List<LuteMod.Sequencing.Note> ExtractMidiContent()
