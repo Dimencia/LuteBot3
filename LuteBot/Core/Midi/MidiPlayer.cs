@@ -523,7 +523,8 @@ namespace LuteBot.Core.Midi
                                 int offset = trackSelectionManager.NoteOffset;
                                 if (trackSelectionManager.MidiChannelOffsets.ContainsKey(tempMessage.MidiChannel))
                                     offset += trackSelectionManager.MidiChannelOffsets[tempMessage.MidiChannel];
-                                result.Add(new LuteMod.Sequencing.Note() { Tick = tempTick, Tone = tempMessage.Data1 + offset, Type = LuteMod.Sequencing.NoteType.On });
+                                tempMessage = mordhauOutDevice.FilterNote(tempMessage, offset);
+                                result.Add(new LuteMod.Sequencing.Note() { Tick = tempTick, Tone = tempMessage.Data1, Type = LuteMod.Sequencing.NoteType.On });
                             }
                             isChannelActive = false;
                         }

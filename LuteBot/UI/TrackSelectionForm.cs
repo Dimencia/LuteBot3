@@ -233,8 +233,18 @@ namespace LuteBot.UI
             center -= center % 12;
             int centerLine = center / 12; // This gives us the octave, like 0, 1, 2 usually
             // Now just take 5 - centerLine
-            int centerOffset = xPad/2 - centerLine;
+            //int centerOffset = xPad/2 - centerLine;
+            int centerOffset = 0;
             // and do the label as lineNum - that
+
+                // Later notes: I don't know what centerLine and centerOffset are for.  centerLine represents the octave at the center, usually 4 for C4
+                // centerOffset is... idk?  How many octaves we need to offset from 0 on far left, I guess
+                // No idea what xPad has to do with it.
+
+                // Wait what
+                // center is the midi note value for the center of the instrument range (rounded down if not even octave)
+                // centerLine is the octave
+                // centerOffset is ... I still don't know.  
 
             // We're going to iterate twice so the background grids are behind everything
             for (int x = xPad; x <= OffsetPanel.Width; x += columnWidth)
@@ -244,7 +254,7 @@ namespace LuteBot.UI
 
             // Draw the instrument bar first so the rest of the grid goes over it
             // We use -12 here because all logic and values like LowestPlayedNote assume MIDI0 = C0, but that's wrong, MIDI0=C-1
-            int rectStartX = (lowest * columnWidth) + xPad + (centerOffset * 12 * columnWidth) - 12*columnWidth;
+            int rectStartX = (lowest * columnWidth) + xPad;// - 12*columnWidth
             Rectangle instrumentRect = new Rectangle(rectStartX, 1, (noteCount * columnWidth), rowHeight - 1);
             g.FillRectangle(instrumentBarBrush, instrumentRect);
 
@@ -309,7 +319,7 @@ namespace LuteBot.UI
                 // Draw vertical line
 
                 // Put labels at the bottom
-                int note = ((x - xPad) / columnWidth);
+                int note = ((x - xPad) / columnWidth) - centerOffset*12;
 
                 if (isAdvanced)
                 { // For brevity and cuz I think it's safe here, assume the dicts are populated
@@ -327,7 +337,7 @@ namespace LuteBot.UI
                             int effectiveNote = trackSelectionManager.MinNoteByChannel[kvp.Key.Id] + (note - midiLowest);
                             if (effectiveNote % 12 == 0)
                             {
-                                g.DrawString($"C{effectiveNote / 12 - centerOffset}", gridFont, new SolidBrush(channelColors[kvp.Key.Id]), x - xPad, labelY);
+                                g.DrawString($"C{effectiveNote / 12}", gridFont, new SolidBrush(channelColors[kvp.Key.Id]), x - xPad, labelY);
                             }
                         }
                         labelY += labelHeight;
@@ -346,10 +356,12 @@ namespace LuteBot.UI
                         // We can consider showing labels...
                         // So then, (note - midiLowest) is how many notes out we are from midiLowest
                         // So midiLowest + (note - midiLowest) is our effective note here
+
+                        // Also both mordhauOut and rustOut should always have these values set for a loaded song
                         int effectiveNote = _rustOut.LowMidiNoteId + (note - midiLowest);
                         if (effectiveNote % 12 == 0)
                         {
-                            g.DrawString($"C{effectiveNote / 12 - centerOffset}", gridFont, draggableRectBrush, x - xPad, height + padding + labelHeight);
+                            g.DrawString($"C{effectiveNote / 12}", gridFont, draggableRectBrush, x - xPad, height + padding + labelHeight);
                         }
                     }
                 }
@@ -357,7 +369,7 @@ namespace LuteBot.UI
 
                 if (note % 12 == 0)
                 {
-                    g.DrawString($"C{note / 12 - centerOffset}", gridFont, instrumentBarBrush, x - xPad, height + padding);
+                    g.DrawString($"C{note / 12}", gridFont, instrumentBarBrush, x - xPad, height + padding);
                     g.DrawLine(gridHighlightPen, x, 0, x, height);
                 }
 
@@ -406,6 +418,7 @@ namespace LuteBot.UI
         {
             SuspendLayout();
             textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
+            textBoxNotesForChords.Enabled = !ConfigManager.GetBooleanProperty(PropertyItem.ForbidsChords);
             foreach (var channel in trackSelectionManager.MidiChannels)
             { // This should help make sure we don't except if we're irresponsible with it
                 if (!trackSelectionManager.MidiChannelOffsets.ContainsKey(channel.Id))
@@ -557,6 +570,15 @@ namespace LuteBot.UI
                 trackSelectionManager.NumChords = v;
             }
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var result = saveFileDialog1.ShowDialog(this);
+            if (result == DialogResult.OK)
+            {
+                 trackSelectionManager.SaveTrackManager(saveFileDialog1.FileName);
+            }
         }
     }
 }

@@ -46,7 +46,7 @@
     },
     {
       "Item": "AvaliableNoteCount",
-      "Value": "60"
+      "Value": "48"
     },
     {
       "Item": "NoteCooldown",
@@ -54,7 +54,11 @@
     },
     {
       "Item": "LowestPlayedNote",
-      "Value": "24"
+      "Value": "36"
+    },
+    {
+      "Item": "ForbidsChords",
+      "Value": "False"
     },
     {
       "Item": "NumChords",

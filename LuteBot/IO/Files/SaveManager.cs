@@ -192,9 +192,9 @@ namespace LuteBot.IO.Files
             return LoadNoDialog<SoundBoard>(path);
         }
 
-        public static void SaveTrackSelectionData(TrackSelectionData data, string fileName)
+        public static void SaveTrackSelectionData(TrackSelectionData data, string fileName, string targetPath = null)
         {
-            SaveNoDialog(data, fileName);
+            SaveNoDialog(data, fileName, targetPath);
         }
 
         public static TrackSelectionData LoadTrackSelectionData(string fileName)
@@ -333,8 +333,10 @@ namespace LuteBot.IO.Files
             return result;
         }
 
-        private static void SaveNoDialog<T>(T target, string path)
+        private static void SaveNoDialog<T>(T target, string path, string targetPath = null)
         {
+            if (targetPath == null)
+                targetPath = path;
             if (path != null)
             {
                 var serializer = new DataContractSerializer(typeof(T));
@@ -410,7 +412,7 @@ namespace LuteBot.IO.Files
                                 midiData = midiData.Take(xmlCutoff).ToArray();
 
                             // Now we have all the data we need
-                            using (FileStream fs = File.Create(path))
+                            using (FileStream fs = File.Create(targetPath))
                             {
                                 fs.Write(midiData, 0, midiData.Length); // Midi data
                                 byte[] xmlData = new byte[stream.Length];

@@ -331,6 +331,8 @@ namespace LuteBot
                 ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
 
                 ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
             }
         }
 

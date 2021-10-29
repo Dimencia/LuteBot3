@@ -16,6 +16,7 @@ namespace LuteBot.UI.Utils
         public int NoteCount { get; set; }
         public int NoteCooldown { get; set; }
         public int LowestPlayedNote { get; set; }
+        public bool ForbidsChords { get; set; }
         
 
         public static List<Instrument> Prefabs = new List<Instrument>();
@@ -25,7 +26,8 @@ namespace LuteBot.UI.Utils
         {
             if(!File.Exists(path))
             {
-                Prefabs.Add(new Instrument() { LowestSentNote = 0, LowestPlayedNote = 24, NoteCount = 60, NoteCooldown = 18, Name = "Mordhau Lute" });
+                Prefabs.Add(new Instrument() { LowestSentNote = 0, LowestPlayedNote = 36, NoteCount = 48, NoteCooldown = 18, Name = "Mordhau Lute" });
+                Prefabs.Add(new Instrument() { LowestSentNote = 0, LowestPlayedNote = 36, NoteCount = 24, NoteCooldown = 18, Name = "Mordhau Flute", ForbidsChords = true });
                 Prefabs.Add(new Instrument() { LowestSentNote = 45, NoteCount = 32, NoteCooldown = 5, Name = "Rust Trumpet" }); // TODO: Fill out LowestPlayedNotes on Rust instruments
                 Prefabs.Add(new Instrument() { LowestSentNote = 21, NoteCount = 88, NoteCooldown = 5, Name = "Rust Piano" });
                 Prefabs.Add(new Instrument() { LowestSentNote = 40, NoteCount = 30, NoteCooldown = 5, Name = "Rust Can Guitar" });

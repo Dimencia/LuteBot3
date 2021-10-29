@@ -88,6 +88,7 @@ namespace LuteBot.TrackSelection
 
             NoteOffset = data.Offset;
             NumChords = data.NumChords;
+            
         }
 
         public TrackSelectionData GetTrackSelectionData()
@@ -101,7 +102,7 @@ namespace LuteBot.TrackSelection
             return data;
         }
 
-        public void SaveTrackManager()
+        public void SaveTrackManager(string filename = null)
         {
             TrackSelectionData data = new TrackSelectionData();
             data.MidiChannels = MidiChannels;
@@ -109,7 +110,7 @@ namespace LuteBot.TrackSelection
             data.Offset = NoteOffset;
             data.MidiChannelOffsets = MidiChannelOffsets;
             data.NumChords = NumChords;
-            SaveManager.SaveTrackSelectionData(data, FileName);
+            SaveManager.SaveTrackSelectionData(data, FileName, filename);
         }
 
         public void LoadTrackManager()

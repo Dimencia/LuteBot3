@@ -27,6 +27,7 @@
         DebugMode,
         OutputDevice,
         Instrument,
+        ForbidsChords,
 
         //keybinds
         Play,

@@ -37,6 +37,8 @@ namespace LuteBot.Core
         public bool CooldownNeeded { get => cooldownNeeded; set => cooldownNeeded = value; }
         public bool MuteOutOfRange { get => muteOutOfRange; set => muteOutOfRange = value; }
 
+        private bool ForbidsChords = false;
+
         private Stopwatch stopWatch;
 
         private TrackSelectionManager TSM = null;
@@ -51,7 +53,9 @@ namespace LuteBot.Core
             int noteRange = highMidiNoteId - lowMidiNoteId;
             int luteRange = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
             luteMin = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
-            int lowestPlayed = 24;
+            ForbidsChords = ConfigManager.GetBooleanProperty(PropertyItem.ForbidsChords);
+
+            int lowestPlayed = 36;
             try
             {
                 lowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
@@ -148,30 +152,52 @@ namespace LuteBot.Core
                 int noteCooldown = int.Parse(ConfigManager.GetProperty(PropertyItem.NoteCooldown));
                 if (cooldownNeeded)
                 {
-                    if (!stopWatch.IsRunning)
+                    if (!ForbidsChords)
                     {
-                        filterResult = FilterNote(message, offset);
-                        int note = filterResult.Data1 - lowNoteId + luteMin;
-                        ActionManager.PlayNote(note, message.MidiChannel);
+                        if (!stopWatch.IsRunning)
+                        {
+                            filterResult = FilterNote(message, offset);
+                            int note = filterResult.Data1 - lowNoteId + luteMin;
+                            ActionManager.PlayNote(note, message.MidiChannel);
 
-                        stopWatch.Start();
-                        notesThisCooldown.Add(note);
+                            stopWatch.Start();
+                            notesThisCooldown.Add(note);
+                        }
+                        else
+                        {
+                            filterResult = FilterNote(message, offset);
+                            int note = filterResult.Data1 - lowNoteId + luteMin;
+                            // We use numChords-1 because by default we always allow 2 chords by the way the timer resets.  When they enter 3, we really only want to play two notes during cooldown
+                            if (stopWatch.ElapsedMilliseconds < noteCooldown && notesThisCooldown.Count < (numChords - 1) && !notesThisCooldown.Contains(note))
+                            {
+                                ActionManager.PlayNote(note, message.MidiChannel);
+                                notesThisCooldown.Add(note);
+                            }
+                            else if (stopWatch.ElapsedMilliseconds >= noteCooldown)
+                            {
+                                ActionManager.PlayNote(note, message.MidiChannel);
+                                stopWatch.Reset();
+                                notesThisCooldown = new List<int>() { note };
+                            }
+                        }
                     }
                     else
                     {
                         filterResult = FilterNote(message, offset);
                         int note = filterResult.Data1 - lowNoteId + luteMin;
-                        // We use numChords-1 because by default we always allow 2 chords by the way the timer resets.  When they enter 3, we really only want to play two notes during cooldown
-                        if (stopWatch.ElapsedMilliseconds < noteCooldown && notesThisCooldown.Count < (numChords - 1) && !notesThisCooldown.Contains(note))
+                        if (!stopWatch.IsRunning)
                         {
                             ActionManager.PlayNote(note, message.MidiChannel);
-                            notesThisCooldown.Add(note);
+
+                            stopWatch.Start();
                         }
-                        else if (stopWatch.ElapsedMilliseconds >= noteCooldown)
+                        else
                         {
-                            ActionManager.PlayNote(note, message.MidiChannel);
-                            stopWatch.Reset();
-                            notesThisCooldown = new List<int>() { note };
+                            if (stopWatch.ElapsedMilliseconds >= noteCooldown)
+                            {
+                                ActionManager.PlayNote(note, message.MidiChannel);
+                                stopWatch.Restart();
+                            }
                         }
                     }
                 }
