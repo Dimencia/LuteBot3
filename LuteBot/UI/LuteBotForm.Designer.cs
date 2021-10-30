@@ -50,6 +50,7 @@ namespace LuteBot
             this.timeSyncToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.focusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.guildLibraryToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.lutemodPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MusicProgressBar = new System.Windows.Forms.TrackBar();
             this.CurrentMusicLabel = new System.Windows.Forms.Label();
@@ -63,7 +64,7 @@ namespace LuteBot
             this.EndTimeLabel = new System.Windows.Forms.Label();
             this.ReloadButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.lutemodPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.adjustLutemodPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MusicProgressBar)).BeginInit();
             this.SuspendLayout();
@@ -88,7 +89,8 @@ namespace LuteBot
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.keyBindingToolStripMenuItem,
             this.settingsToolStripMenuItem,
-            this.exportToScrapMechanicToolStripMenuItem});
+            this.exportToScrapMechanicToolStripMenuItem,
+            this.adjustLutemodPartitionsToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -201,6 +203,13 @@ namespace LuteBot
             this.guildLibraryToolStripMenuItem1.Size = new System.Drawing.Size(107, 24);
             this.guildLibraryToolStripMenuItem1.Text = "Guild Library";
             this.guildLibraryToolStripMenuItem1.Click += new System.EventHandler(this.GuildLibraryToolStripMenuItem_Click);
+            // 
+            // lutemodPartitionsToolStripMenuItem
+            // 
+            this.lutemodPartitionsToolStripMenuItem.Name = "lutemodPartitionsToolStripMenuItem";
+            this.lutemodPartitionsToolStripMenuItem.Size = new System.Drawing.Size(147, 24);
+            this.lutemodPartitionsToolStripMenuItem.Text = "Lutemod Partitions";
+            this.lutemodPartitionsToolStripMenuItem.Click += new System.EventHandler(this.lutemodPartitionsToolStripMenuItem_Click);
             // 
             // contextMenuStrip1
             // 
@@ -324,12 +333,12 @@ namespace LuteBot
             this.ReloadButton.UseVisualStyleBackColor = true;
             this.ReloadButton.Click += new System.EventHandler(this.ReloadButton_Click);
             // 
-            // lutemodPartitionsToolStripMenuItem
+            // adjustLutemodPartitionsToolStripMenuItem
             // 
-            this.lutemodPartitionsToolStripMenuItem.Name = "lutemodPartitionsToolStripMenuItem";
-            this.lutemodPartitionsToolStripMenuItem.Size = new System.Drawing.Size(147, 24);
-            this.lutemodPartitionsToolStripMenuItem.Text = "Lutemod Partitions";
-            this.lutemodPartitionsToolStripMenuItem.Click += new System.EventHandler(this.lutemodPartitionsToolStripMenuItem_Click);
+            this.adjustLutemodPartitionsToolStripMenuItem.Name = "adjustLutemodPartitionsToolStripMenuItem";
+            this.adjustLutemodPartitionsToolStripMenuItem.Size = new System.Drawing.Size(270, 26);
+            this.adjustLutemodPartitionsToolStripMenuItem.Text = "Adjust Lutemod Partitions";
+            this.adjustLutemodPartitionsToolStripMenuItem.Click += new System.EventHandler(this.adjustLutemodPartitionsToolStripMenuItem_Click);
             // 
             // LuteBotForm
             // 
@@ -397,6 +406,7 @@ namespace LuteBot
         private ToolStripMenuItem exportToScrapMechanicToolStripMenuItem;
         private ToolStripMenuItem guildLibraryToolStripMenuItem1;
         private ToolStripMenuItem lutemodPartitionsToolStripMenuItem;
+        private ToolStripMenuItem adjustLutemodPartitionsToolStripMenuItem;
     }
 }
 

@@ -188,6 +188,8 @@ namespace LuteBot
                                 index.PartitionNames.Add(namingForm.textBoxPartName.Text);
 
                                 var converter = new LuteMod.Converter.MordhauConverter();
+                                converter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
+                                converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
                                 converter.IsConversionEnabled = true;
                                 converter.SetDivision(player.sequence.Division);
                                 converter.AddTrack();

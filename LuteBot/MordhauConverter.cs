@@ -62,6 +62,16 @@ namespace LuteMod.Converter
             partition.Name = name;
         }
 
+        public void SetPartitionTempo(int tempo)
+        {
+            partition.Tempo = tempo;
+        }
+
+        public void SetPartitionNotes(int index, List<Note> notes)
+        {
+            partition.Tracks[index].Notes = notes;
+        }
+
         public bool CanMoveOctave(bool up)
         {
             if (up)

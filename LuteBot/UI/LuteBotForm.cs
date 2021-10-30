@@ -1242,5 +1242,11 @@ namespace LuteBot
                 partitionsForm = new PartitionsForm(trackSelectionManager, player);
             partitionsForm.Show();
         }
+
+        private void adjustLutemodPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var adjustForm = new PartitionAdjustmentForm();
+            adjustForm.Show();
+        }
     }
 }
