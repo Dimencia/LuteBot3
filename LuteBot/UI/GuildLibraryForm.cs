@@ -118,8 +118,9 @@ namespace LuteBot.UI
                     filteredBindingList = new SortableBindingList<GuildSong>(songArray);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 Log("Failed to query API");
                 return;
             }

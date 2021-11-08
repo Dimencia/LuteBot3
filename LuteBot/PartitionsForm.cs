@@ -218,5 +218,30 @@ namespace LuteBot
             WindowPositionUtils.UpdateBounds(PropertyItem.PartitionListPos, new Point() { X = Left, Y = Top });
             ConfigManager.SaveConfig();
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(SaveManager.SaveFilePath);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openSavFileDialog = new OpenFileDialog();
+            string[] fileNames;
+            openSavFileDialog.DefaultExt = "sav";
+            openSavFileDialog.Filter = "SAV files|*.sav";
+            openSavFileDialog.Title = "Open SAV file";
+            openSavFileDialog.Multiselect = true;
+            if (openSavFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                fileNames = openSavFileDialog.FileNames;
+                foreach (string fileName in fileNames)
+                {
+                    index.AddFileInIndex(fileName);
+                }
+                index.SaveIndex();
+                PopulateIndexList();
+            }
+        }
     }
 }

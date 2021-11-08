@@ -23,8 +23,8 @@ namespace LuteMod.Converter
         public MordhauConverter()
         {
             partition = new Partition();
-            range = 60;
-            lowNote = 24;
+            range = 48;
+            lowNote = 36;
         }
 
         public void ClearPartition()
