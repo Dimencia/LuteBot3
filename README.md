@@ -62,3 +62,13 @@ Rust is interesting because there already exists a good solution for playing mid
 So, this now solves those problems, as well as providing the same customization options and Guild Library to Mordhau and Rust users
 
 All instruments are supported and available to select from a dropdown box
+
+
+### Like my work?
+If you want to show appreciation for LuteBot and/or LuteMod, by request I'm now accepting donations at https://www.paypal.com/donate/?hosted_button_id=3PSW26CRK3CKQ 
+
+But, I am an employed software dev, I'm not struggling, and just a thanks in Discord is fine, really.  
+
+Also note that Bardlord is hosting the Guild Library, which has server costs, so he deserves your money more than I do - but doesn't yet have a donation link or I'd put it here.  That's `SpaceBardlord LaserLutemaster#0048` on Discord
+
+And also note that both LuteBot and LuteMod were first created by Monty; I've only been updating them after he stopped working on them.  He deserves some love too - `Monty#2962` on Discord, or his github is linked at the top of the readme
