@@ -20,17 +20,29 @@ namespace LuteBot.UI
         TrackSelectionManager trackSelectionManager;
         MordhauOutDevice _mordhauOut;
         RustOutDevice _rustOut;
+        LuteBotForm mainForm;
 
         // We need only one out device, might as well use rust, but take both for now cuz why not, feels unfair
         // Though they both get updated with the same values at the same time, for what we're doing
-        public TrackSelectionForm(TrackSelectionManager trackSelectionManager, MordhauOutDevice mordhauOut, RustOutDevice rustOut)
+        public TrackSelectionForm(TrackSelectionManager trackSelectionManager, MordhauOutDevice mordhauOut, RustOutDevice rustOut, LuteBotForm mainForm)
         {
             _mordhauOut = mordhauOut;
             _rustOut = rustOut;
+            this.mainForm = mainForm;
             this.trackSelectionManager = trackSelectionManager;
             trackSelectionManager.TrackChanged += new EventHandler(TrackChangedHandler);
             this.Load += TrackSelectionForm_Load;
             InitializeComponent();
+
+            SuspendLayout();
+            Instrument.Read();
+            instrumentsBox.DisplayMember = "Name";
+            foreach (Instrument i in Instrument.Prefabs)
+                instrumentsBox.Items.Add(i);
+            instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            ResumeLayout();
+            
+
             InitLists();
             trackSelectionManager.autoLoadProfile = AutoActivateCheckBox.Checked;
             typeof(Panel).InvokeMember("DoubleBuffered", BindingFlags.SetProperty
@@ -40,6 +52,8 @@ namespace LuteBot.UI
             textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
 
             IO.KB.ActionManager.NotePlayed += _mordhauOut_notePlayed;
+
+            
         }
 
         private void _mordhauOut_notePlayed(object sender, int channel)
@@ -168,6 +182,8 @@ namespace LuteBot.UI
                 startOffset = trackSelectionManager.NoteOffset;
             }
         }
+
+        public void RefreshOffsetPanel() => OffsetPanel.Refresh();
 
         internal class ChannelData
         {
@@ -414,7 +430,7 @@ namespace LuteBot.UI
             }
         }
 
-        private void InitLists()
+        public void InitLists()
         {
             SuspendLayout();
             textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
@@ -444,7 +460,11 @@ namespace LuteBot.UI
             {
                 TrackListBox.Items.Add(track.Name, track.Active);
             }
+
+            instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+
             ResumeLayout();
+            Invalidate();
             //Refresh();
             // This is a terrible thing to do, but, there's no easy way to hook the right events to make it wait properly
             // So after a timer, we're refreshing our OffsetPanel again
@@ -477,13 +497,13 @@ namespace LuteBot.UI
         {
             trackSelectionManager.ActivateAllChannels = SelectAllChannelsCheckBox.Checked;
             ChannelsListBox.Enabled = !SelectAllChannelsCheckBox.Checked;
-            Refresh();
+            Invalidate();
         }
 
         private void ChannelListBox_ItemChecked(object sender, ItemCheckEventArgs e)
         {
             trackSelectionManager.ToggleChannelActivation(!(e.CurrentValue == CheckState.Checked), e.Index);
-            Refresh();
+            Invalidate();
         }
 
         private void SongProfileSaveButton_Click(object sender, EventArgs e)
@@ -506,20 +526,20 @@ namespace LuteBot.UI
         private void AutoActivateCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             trackSelectionManager.autoLoadProfile = AutoActivateCheckBox.Checked;
-            Refresh();
+            Invalidate();
         }
 
         private void SelectAllTracksCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             trackSelectionManager.ActivateAllChannels = SelectAllTracksCheckBox.Checked;
             TrackListBox.Enabled = !SelectAllTracksCheckBox.Checked;
-            Refresh();
+            Invalidate(); 
         }
 
         private void TrackListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             trackSelectionManager.ToggleTrackActivation(!(e.CurrentValue == CheckState.Checked), e.Index);
-            Refresh();
+            Invalidate();
         }
 
         private Size originalPanelSize;
@@ -550,7 +570,7 @@ namespace LuteBot.UI
                 //ScrollBarForcer.Location = new Point(OffsetPanel.Location.X, OffsetPanel.Location.Y + OffsetPanel.Height);
                 //ScrollBarForcer.Visible = false;
             }
-            Refresh();
+            Invalidate();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -560,7 +580,7 @@ namespace LuteBot.UI
             {
                 trackSelectionManager.MidiChannelOffsets[channel.Id] = 0;
             }
-            Refresh();
+            Invalidate();
         }
 
         private void textBoxNotesForChords_TextChanged(object sender, EventArgs e)
@@ -578,6 +598,33 @@ namespace LuteBot.UI
             if (result == DialogResult.OK)
             {
                  trackSelectionManager.SaveTrackManager(saveFileDialog1.FileName);
+            }
+        }
+
+        private void instrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // If it's already the instrument we have as our property
+            // Then don't re-set the values
+            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            if (currentInstrument != instrumentsBox.SelectedIndex)
+            {
+                ConfigManager.SetProperty(PropertyItem.Instrument, instrumentsBox.SelectedIndex.ToString());
+                Instrument target = (Instrument)instrumentsBox.SelectedItem;
+
+                bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
+                ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
+
+                mainForm.OnInstrumentChanged(currentInstrument);
             }
         }
     }

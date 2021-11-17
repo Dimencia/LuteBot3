@@ -45,13 +45,13 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 12);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(126, 21);
+            this.label1.Size = new System.Drawing.Size(101, 17);
             this.label1.TabIndex = 1;
             this.label1.Text = "Partition Name";
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(268, 37);
+            this.button1.Location = new System.Drawing.Point(272, 37);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 2;
@@ -64,7 +64,7 @@
             this.AcceptButton = this.button1;
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(622, 73);
+            this.ClientSize = new System.Drawing.Size(622, 70);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxPartName);

@@ -179,6 +179,7 @@
             // 
             // NoteConversionMode
             // 
+            this.NoteConversionMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.NoteConversionMode.FormattingEnabled = true;
             this.NoteConversionMode.Items.AddRange(new object[] {
             "2.0",
@@ -342,6 +343,7 @@
             // 
             // instrumentsBox
             // 
+            this.instrumentsBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.instrumentsBox.FormattingEnabled = true;
             this.instrumentsBox.Location = new System.Drawing.Point(229, 108);
             this.instrumentsBox.Margin = new System.Windows.Forms.Padding(4);
@@ -480,6 +482,7 @@
             // 
             // outputDeviceBox
             // 
+            this.outputDeviceBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.outputDeviceBox.FormattingEnabled = true;
             this.outputDeviceBox.Location = new System.Drawing.Point(229, 55);
             this.outputDeviceBox.Margin = new System.Windows.Forms.Padding(4);

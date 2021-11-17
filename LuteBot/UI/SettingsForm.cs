@@ -28,11 +28,13 @@ namespace LuteBot
         private string latestVersion;
         private int Timeout = 200;
         private MidiPlayer player;
+        private LuteBotForm mainForm;
 
-        public SettingsForm(MidiPlayer player)
+        public SettingsForm(MidiPlayer player, LuteBotForm mainForm)
         {
             InitializeComponent();
             this.player = player;
+            this.mainForm = mainForm;
             UpdateLinkLabel.LinkArea = new LinkArea() { Length = 0, Start = 0 };
             SetVersion();
             InitSettings();
@@ -333,6 +335,8 @@ namespace LuteBot
                 ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
 
                 ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
+
+                mainForm.OnInstrumentChanged(currentInstrument);
             }
         }
 

@@ -184,6 +184,8 @@ namespace LuteBot
                     Play();
                     autoplay = false;
                 }
+                if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated)
+                    trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.Invalidate(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
             }
             else
             {
@@ -328,7 +330,7 @@ namespace LuteBot
             if (ConfigManager.GetBooleanProperty(PropertyItem.TrackSelection))
             {
                 var midiPlayer = player as MidiPlayer;
-                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice);
+                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice, this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
                 trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
@@ -365,7 +367,7 @@ namespace LuteBot
 
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (new SettingsForm(player as MidiPlayer)).ShowDialog();
+            (new SettingsForm(player as MidiPlayer, this)).ShowDialog();
             player.Pause();
         }
 
@@ -577,7 +579,7 @@ namespace LuteBot
             if (trackSelectionForm == null || trackSelectionForm.IsDisposed)
             {
                 var midiPlayer = player as MidiPlayer;
-                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice);
+                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice, this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
                 trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
@@ -650,10 +652,24 @@ namespace LuteBot
             var data = trackSelectionManager.GetTrackSelectionData();
             player.LoadFile(currentTrackName);
             trackSelectionManager.SetTrackSelectionData(data);
-            trackSelectionManager.SaveTrackManager();
+            //trackSelectionManager.SaveTrackManager(); // Don't save when we reload, that's bad.  
             if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
-                trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.Refresh(); }); // Invoking just in case this is on a diff thread somehow
+                trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.Invalidate(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
             Refresh();
+        }
+
+
+        public void OnInstrumentChanged(int oldInstrument)
+        {
+            // This is called when an instrument is changed.  TrackSelectionManager should be updated with the new config values
+            // Though first we'll have to setup the data to actually have different values based on the currently selected instrument.
+            trackSelectionManager.UpdateTrackSelectionForInstrument(oldInstrument);
+            // MordhauOutDevice should be refreshed
+            player.mordhauOutDevice.UpdateNoteIdBounds();
+            // And TrackSelectionForm should be refreshed
+            if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
+                trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.InitLists(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
+
         }
 
         public enum Totebots

@@ -30,6 +30,7 @@ namespace LuteBot.TrackSelection
         public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
         public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
         public int NumChords { get => numChords; set { numChords = value; ResetRequest(); } }
+        public Dictionary<int, TrackSelectionData> DataDictionary = new Dictionary<int, TrackSelectionData>();
 
         private int numChords;
         private int noteOffset;
@@ -53,6 +54,13 @@ namespace LuteBot.TrackSelection
             activateAllTracks = false;
             autoLoadProfile = true;
             numChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+            TrackSelectionData data = new TrackSelectionData();
+            data.MidiChannels = MidiChannels;
+            data.MidiTracks = MidiTracks;
+            data.Offset = NoteOffset;
+            data.MidiChannelOffsets = MidiChannelOffsets;
+            data.NumChords = NumChords;
+            DataDictionary[0] = data;
         }
 
         public void ToggleChannel(int index, bool active)
@@ -68,75 +76,131 @@ namespace LuteBot.TrackSelection
         {
             // So... Channels and tracks might have changed
             // I think we need to compare current channels and remove any values that aren't in them before storing
-            Dictionary<int, int> newMidiOffsets = new Dictionary<int, int>();
-            foreach (var channel in MidiChannels)
+            //Dictionary<int, int> newMidiOffsets = new Dictionary<int, int>();
+            //foreach (var channel in MidiChannels)
+            //{
+            //    var newChannel = data.MidiChannels.Where(c => c.Id == channel.Id).FirstOrDefault();
+            //    if (newChannel != null)
+            //    {
+            //        channel.Active = newChannel.Active;
+            //        if (data.MidiChannelOffsets.ContainsKey(channel.Id))
+            //            newMidiOffsets.Add(channel.Id, data.MidiChannelOffsets[channel.Id]);
+            //    }
+            //}
+            //foreach (var track in MidiTracks)
+            //{
+            //    var newTrack = data.MidiTracks.Where(t => t.Id == track.Id).FirstOrDefault();
+            //    if (newTrack != null)
+            //        track.Active = newTrack.Active;
+            //}
+            //
+            //NoteOffset = data.Offset;
+            //NumChords = data.NumChords;
+
+            this.MidiChannels = new List<MidiChannelItem>(data.MidiChannels);
+            this.MidiTracks = new List<TrackItem>(data.MidiTracks);
+            this.NoteOffset = data.Offset;
+            this.MidiChannelOffsets = new Dictionary<int, int>(data.MidiChannelOffsets);
+            this.NumChords = data.NumChords;
+
+            DataDictionary[ConfigManager.GetIntegerProperty(PropertyItem.Instrument)] = GetTrackSelectionData();
+        }
+
+
+        public void UpdateTrackSelectionForInstrument(int oldInstrument)
+        {
+            DataDictionary[oldInstrument] = GetTrackSelectionData();
+            int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            if (DataDictionary.ContainsKey(instrumentId))
+                SetTrackSelectionData(DataDictionary[instrumentId]);
+            else if (instrumentId == 3 && DataDictionary.ContainsKey(1))
             {
-                var newChannel = data.MidiChannels.Where(c => c.Id == channel.Id).FirstOrDefault();
-                if (newChannel != null)
+                // If it's duet flute but there is no data for it, and we also have a flute track, copy the flute settings
+                SetTrackSelectionData(DataDictionary[1]);
+            }
+            else if (instrumentId == 2 && DataDictionary.ContainsKey(1))
+            {
+                // If it's duet lute with no data, and there is a flute track, copy the lute track and disable whatever the flute has active
+                SetTrackSelectionData(DataDictionary[0]);
+                var fluteData = DataDictionary[1];
+
+                foreach(var channel in MidiChannels)
                 {
-                    channel.Active = newChannel.Active;
-                    if (data.MidiChannelOffsets.ContainsKey(channel.Id))
-                        newMidiOffsets.Add(channel.Id, data.MidiChannelOffsets[channel.Id]);
+                    // There's no real situation where they should have any disparity between their channels
+                    if (fluteData.MidiChannels.Where(d => d.Id == channel.Id).Single().Active)
+                        channel.Active = false;
                 }
             }
-            foreach (var track in MidiTracks)
-            {
-                var newTrack = data.MidiTracks.Where(t => t.Id == track.Id).FirstOrDefault();
-                if (newTrack != null)
-                    track.Active = newTrack.Active;
-            }
-
-            NoteOffset = data.Offset;
-            NumChords = data.NumChords;
-            
+            else if (DataDictionary.ContainsKey(0))
+                SetTrackSelectionData(DataDictionary[0]);
         }
 
         public TrackSelectionData GetTrackSelectionData()
         {
             TrackSelectionData data = new TrackSelectionData();
-            data.MidiChannels = MidiChannels;
-            data.MidiTracks = MidiTracks;
+            data.MidiChannels = new List<MidiChannelItem>(MidiChannels);
+            data.MidiTracks = new List<TrackItem>(MidiTracks);
             data.Offset = NoteOffset;
-            data.MidiChannelOffsets = MidiChannelOffsets;
+            data.MidiChannelOffsets = new Dictionary<int, int>(MidiChannelOffsets);
             data.NumChords = NumChords;
             return data;
         }
 
         public void SaveTrackManager(string filename = null)
         {
-            TrackSelectionData data = new TrackSelectionData();
-            data.MidiChannels = MidiChannels;
-            data.MidiTracks = MidiTracks;
-            data.Offset = NoteOffset;
-            data.MidiChannelOffsets = MidiChannelOffsets;
-            data.NumChords = NumChords;
-            SaveManager.SaveTrackSelectionData(data, FileName, filename);
+            DataDictionary[ConfigManager.GetIntegerProperty(PropertyItem.Instrument)] = GetTrackSelectionData();
+            SaveManager.SaveTrackSelectionData(DataDictionary, FileName, filename);
         }
 
         public void LoadTrackManager()
         {
-            TrackSelectionData data = SaveManager.LoadTrackSelectionData(FileName);
-            if (data != null)
+            var dataDictionary = SaveManager.LoadTrackSelectionData(FileName);
+            if (dataDictionary != null)
             {
-                this.midiChannels = data.MidiChannels;
-                this.midiTracks = data.MidiTracks;
-                this.noteOffset = data.Offset;
-                this.midiChannelOffsets = data.MidiChannelOffsets;
-                if (data.NumChords > 0)
-                    this.NumChords = data.NumChords;
-                else
-                    this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+                DataDictionary = dataDictionary;
+                TrackSelectionData data = null;
+                int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                if (dataDictionary.ContainsKey(instrumentId))
+                    data = dataDictionary[instrumentId];
+                else if(dataDictionary.ContainsKey(0))
+                    data = dataDictionary[0];
 
-                // Restore any channel names that might be null or incorrect, from older data that got saved
-                foreach(var c in midiChannels)
+                if (data != null)
+                {
+
+                    this.midiChannels = data.MidiChannels;
+                    this.midiTracks = data.MidiTracks;
+                    this.noteOffset = data.Offset;
+                    this.midiChannelOffsets = data.MidiChannelOffsets;
+                    if (data.NumChords > 0)
+                        this.NumChords = data.NumChords;
+                    else
+                        this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+
+                    // Restore any channel names that might be null or incorrect, from older data that got saved
+                    foreach (var c in midiChannels)
                         c.Name = Player.GetChannelName(c.Id);
 
-                EventHelper();
+                    EventHelper();
+                }
+                else
+                { // Reset these if there's no settings for something
+                    this.NoteOffset = 0;
+                    this.MidiChannelOffsets = new Dictionary<int, int>();
+                }
             }
             else
-            { // Reset these if there's no settings for something
+            {
                 this.NoteOffset = 0;
                 this.MidiChannelOffsets = new Dictionary<int, int>();
+                TrackSelectionData data = new TrackSelectionData();
+                data.MidiChannels = MidiChannels;
+                data.MidiTracks = MidiTracks;
+                data.Offset = NoteOffset;
+                data.MidiChannelOffsets = MidiChannelOffsets;
+                data.NumChords = NumChords;
+                DataDictionary.Clear();
+                DataDictionary[0] = data;
             }
         }
 
