@@ -58,15 +58,16 @@ namespace LuteBot.Core.Midi
 
         public void ResetDevice()
         {
-            if (outDevice != null) {
-                    outDevice.Reset();
-                    outDevice.Dispose();
-            }
-            try
+            if (outDevice != null)
             {
-                outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
+                outDevice.Reset();
+                //outDevice.Dispose();
             }
-            catch { } // TODO: Somehow alert them that it didn't work
+            //try
+            //{
+            //    outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
+            //}
+            //catch { } // TODO: Somehow alert them that it didn't work
         }
 
         public void UpdateMutedTracks(TrackItem item)
@@ -296,6 +297,7 @@ namespace LuteBot.Core.Midi
 
         private void HandleLoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
+            var startTime = DateTime.Now;
             lock (loadLock)
             {
                 if (e.Error == null)
@@ -316,7 +318,9 @@ namespace LuteBot.Core.Midi
                         trackSelectionManager.MaxNoteByChannel[i] = 0; // Pre-populate to reduce errors later
                         trackSelectionManager.MinNoteByChannel[i] = 127;
                     }
-                    
+
+                    //Parallel.ForEach(sequence, track =>
+                    //{
                     foreach (var track in sequence)
                     {
                         foreach (var midiEvent in track.Iterator())
@@ -361,14 +365,15 @@ namespace LuteBot.Core.Midi
                                 }
                             }
                         }
-                    }
+                    }//);
+                    Console.WriteLine("Read track data in " + (DateTime.Now - startTime).TotalMilliseconds);
                     // Now let's get a sorted list of drum note counts
                     // I can't figure out how to do this nicely.
-                    for (int i = 0; i < drumNoteCounts.Length; i++)
-                    {
-                        DrumNoteCounts.Add(new KeyValuePair<int, int>(i, drumNoteCounts[i]));
-                    }
-                    DrumNoteCounts = DrumNoteCounts.OrderBy((kvp) => kvp.Value).ToList();
+                    //for (int i = 0; i < drumNoteCounts.Length; i++)
+                    //{
+                    //    DrumNoteCounts.Add(new KeyValuePair<int, int>(i, drumNoteCounts[i]));
+                    //}
+                    //DrumNoteCounts = DrumNoteCounts.OrderBy((kvp) => kvp.Value).ToList();
 
                     base.LoadCompleted(this, e);
                     mordhauOutDevice.HighMidiNoteId = sequence.MaxNoteId;
@@ -377,6 +382,7 @@ namespace LuteBot.Core.Midi
                     rustOutDevice.LowMidiNoteId = sequence.MinNoteId;
                 }
             }
+            
         }
 
 
