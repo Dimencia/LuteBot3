@@ -30,7 +30,7 @@ namespace LuteBot.TrackSelection
         public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
         public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
         public int NumChords { get => numChords; set { numChords = value; ResetRequest(); } }
-        public Dictionary<int, TrackSelectionData> DataDictionary = new Dictionary<int, TrackSelectionData>();
+        public Dictionary<int, TrackSelectionData> DataDictionary { get; set; } = new Dictionary<int, TrackSelectionData>();
 
         private int numChords;
         private int noteOffset;
@@ -54,13 +54,7 @@ namespace LuteBot.TrackSelection
             activateAllTracks = false;
             autoLoadProfile = true;
             numChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
-            TrackSelectionData data = new TrackSelectionData();
-            data.MidiChannels = MidiChannels;
-            data.MidiTracks = MidiTracks;
-            data.Offset = NoteOffset;
-            data.MidiChannelOffsets = MidiChannelOffsets;
-            data.NumChords = NumChords;
-            DataDictionary[0] = data;
+            UpdateTrackSelectionForInstrument(0); // Saves defaults, and also updates us in case lute wasn't the one selected
         }
 
         public void ToggleChannel(int index, bool active)
@@ -97,13 +91,13 @@ namespace LuteBot.TrackSelection
             //NoteOffset = data.Offset;
             //NumChords = data.NumChords;
 
-            this.MidiChannels = new List<MidiChannelItem>(data.MidiChannels);
-            this.MidiTracks = new List<TrackItem>(data.MidiTracks);
+            this.MidiChannels = data.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel));
+            this.MidiTracks = data.MidiTracks.ConvertAll(track => new TrackItem(track));
             this.NoteOffset = data.Offset;
             this.MidiChannelOffsets = new Dictionary<int, int>(data.MidiChannelOffsets);
             this.NumChords = data.NumChords;
 
-            DataDictionary[ConfigManager.GetIntegerProperty(PropertyItem.Instrument)] = GetTrackSelectionData();
+            DataDictionary[ConfigManager.GetIntegerProperty(PropertyItem.Instrument)] = new TrackSelectionData(data);
         }
 
 
@@ -160,18 +154,18 @@ namespace LuteBot.TrackSelection
                 DataDictionary = dataDictionary;
                 TrackSelectionData data = null;
                 int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-                if (dataDictionary.ContainsKey(instrumentId))
-                    data = dataDictionary[instrumentId];
-                else if(dataDictionary.ContainsKey(0))
-                    data = dataDictionary[0];
+                if (DataDictionary.ContainsKey(instrumentId))
+                    data = DataDictionary[instrumentId];
+                else if(DataDictionary.ContainsKey(0))
+                    data = DataDictionary[0];
 
                 if (data != null)
                 {
 
-                    this.midiChannels = data.MidiChannels;
-                    this.midiTracks = data.MidiTracks;
-                    this.noteOffset = data.Offset;
-                    this.midiChannelOffsets = data.MidiChannelOffsets;
+                    this.MidiChannels = new List<MidiChannelItem>(data.MidiChannels);
+                    this.MidiTracks = new List<TrackItem>(data.MidiTracks);
+                    this.NoteOffset = data.Offset;
+                    this.MidiChannelOffsets = new Dictionary<int, int>(data.MidiChannelOffsets);
                     if (data.NumChords > 0)
                         this.NumChords = data.NumChords;
                     else
@@ -180,27 +174,28 @@ namespace LuteBot.TrackSelection
                     // Restore any channel names that might be null or incorrect, from older data that got saved
                     foreach (var c in midiChannels)
                         c.Name = Player.GetChannelName(c.Id);
-
-                    EventHelper();
                 }
                 else
                 { // Reset these if there's no settings for something
+                    DataDictionary.Clear();
                     this.NoteOffset = 0;
-                    this.MidiChannelOffsets = new Dictionary<int, int>();
+                    this.MidiChannelOffsets.Clear();
+                    //this.midiChannels.Clear();
+                    //this.midiTracks.Clear();
+                    this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+                    UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
                 }
+                EventHelper();
             }
             else
             {
-                this.NoteOffset = 0;
-                this.MidiChannelOffsets = new Dictionary<int, int>();
-                TrackSelectionData data = new TrackSelectionData();
-                data.MidiChannels = MidiChannels;
-                data.MidiTracks = MidiTracks;
-                data.Offset = NoteOffset;
-                data.MidiChannelOffsets = MidiChannelOffsets;
-                data.NumChords = NumChords;
                 DataDictionary.Clear();
-                DataDictionary[0] = data;
+                this.NoteOffset = 0;
+                this.MidiChannelOffsets.Clear();
+                //this.midiChannels.Clear();
+                //this.midiTracks.Clear();
+                this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+                UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
             }
         }
 
@@ -219,6 +214,8 @@ namespace LuteBot.TrackSelection
             
             NoteOffset = tsm.NoteOffset;
             NumChords = tsm.NumChords;
+
+            ResetRequest();
             EventHelper();
         }
 
@@ -271,7 +268,7 @@ namespace LuteBot.TrackSelection
         {
             if (index >= 0 && index < midiChannels.Count)
             {
-                midiChannels[index].Active = active;
+                MidiChannels[index].Active = active;
                 ResetRequest();
             }
         }

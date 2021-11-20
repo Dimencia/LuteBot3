@@ -15,5 +15,14 @@ namespace LuteBot.TrackSelection
         public string Name { get => name; set => name = value; }
         public bool Active { get => active; set => active = value; }
         public int Id { get => id; set => id = value; }
+
+        public TrackItem() { }
+
+        public TrackItem(TrackItem old)
+        {
+            this.Name = old.Name;
+            this.Active = old.Active;
+            this.Id = old.Id;
+        }
     }
 }

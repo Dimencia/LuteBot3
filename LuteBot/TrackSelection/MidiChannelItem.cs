@@ -14,5 +14,14 @@ namespace LuteBot.TrackSelection
         public int Id { get => id; set => id = value; }
         public string Name { get; set; }
         public bool Active { get => active; set => active = value; }
+
+        public MidiChannelItem() { }
+
+        public MidiChannelItem(MidiChannelItem old)
+        {
+            this.Id = old.Id;
+            this.Name = old.Name;
+            this.Active = old.Active;
+        }
     }
 }

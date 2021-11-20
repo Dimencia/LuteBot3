@@ -200,31 +200,35 @@ namespace LuteBot
                                 {
                                     int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
-                                    if (oldInstrument != i)
+                                    if (tsm.DataDictionary.ContainsKey(i))
                                     {
-                                        ConfigManager.SetProperty(PropertyItem.Instrument, i.ToString());
-                                        Instrument target = Instrument.Prefabs[i];
 
-                                        bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
-                                        ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
-                                        ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
-                                        ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
-                                        ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
-                                        ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
-                                        ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
-                                        tsm.UpdateTrackSelectionForInstrument(oldInstrument);
-                                        player.mordhauOutDevice.UpdateNoteIdBounds();
+                                        if (oldInstrument != i)
+                                        {
+                                            ConfigManager.SetProperty(PropertyItem.Instrument, i.ToString());
+                                            Instrument target = Instrument.Prefabs[i];
+
+                                            bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
+                                            ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
+                                            ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
+                                            ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
+                                            ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
+                                            ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
+                                            ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
+                                            tsm.UpdateTrackSelectionForInstrument(oldInstrument);
+                                            player.mordhauOutDevice.UpdateNoteIdBounds();
+                                        }
+
+                                        converter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
+                                        converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
+                                        converter.IsConversionEnabled = true;
+                                        converter.SetDivision(player.sequence.Division);
+                                        converter.AddTrack();
+                                        converter.SetEnabledTracksInTrack(i, tsm.MidiTracks);
+                                        converter.SetEnabledMidiChannelsInTrack(i, tsm.MidiChannels);
+
+                                        converter.FillTrack(i, player.ExtractMidiContent());
                                     }
-
-                                    converter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
-                                    converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
-                                    converter.IsConversionEnabled = true;
-                                    converter.SetDivision(player.sequence.Division);
-                                    converter.AddTrack();
-                                    converter.SetEnabledTracksInTrack(i, tsm.MidiTracks);
-                                    converter.SetEnabledMidiChannelsInTrack(i, tsm.MidiChannels);
-
-                                    converter.FillTrack(i, player.ExtractMidiContent());
                                 }
 
                                 SaveManager.WriteSaveFile(SaveManager.SaveFilePath + namingForm.textBoxPartName.Text, converter.GetPartitionToString());

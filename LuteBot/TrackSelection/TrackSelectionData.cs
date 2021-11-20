@@ -23,5 +23,19 @@ namespace LuteBot.TrackSelection
         [DataMember]
         public int NumChords { get; set; }
 
+        public TrackSelectionData()
+        {
+
+        }
+
+        public TrackSelectionData(TrackSelectionData oldData)
+        {
+            MidiChannels = oldData.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel));
+            MidiTracks = oldData.MidiTracks.ConvertAll(track => new TrackItem(track));
+            MidiChannelOffsets = new Dictionary<int, int>(oldData.MidiChannelOffsets);
+            Offset = oldData.Offset;
+            NumChords = oldData.NumChords;
+        }
+
     }
 }
