@@ -194,19 +194,35 @@ namespace LuteBot
                                 //{
                                 var converter = new LuteMod.Converter.MordhauConverter();
                                 int firstInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                                int firstTrack = tsm.TrackToSave;
+
+                                // Dictionary of trackNum:TrackSelectionData
+                                var tracks = tsm.DataDictionary.Keys.Select(k => k).ToArray();
+                                Array.Sort(tracks);
+
+
+
+
+
                                 // Step 1, load solo lute into track 0 - this profile should always exist
                                 // Actually, all of the first 4 instruments get loaded in, under the same ID we use in lutebot.  Convenient.
-                                for (int i = 0; i < 4; i++)
+                                int counter = 0; // If they don't fill intermediate tracks we get bad things so let's use counter
+                                foreach (int i in tracks)
                                 {
                                     int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
                                     if (tsm.DataDictionary.ContainsKey(i))
                                     {
+                                        int instrument;
+                                        if (tsm.DataDictionary[i].Instrument.HasValue)
+                                            instrument = tsm.DataDictionary[i].Instrument.Value;
+                                        else
+                                            instrument = i;
 
-                                        if (oldInstrument != i)
+                                        if (oldInstrument != instrument)
                                         {
-                                            ConfigManager.SetProperty(PropertyItem.Instrument, i.ToString());
-                                            Instrument target = Instrument.Prefabs[i];
+                                            ConfigManager.SetProperty(PropertyItem.Instrument, instrument.ToString());
+                                            Instrument target = Instrument.Prefabs[instrument];
 
                                             bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
                                             ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
@@ -218,16 +234,17 @@ namespace LuteBot
                                             tsm.UpdateTrackSelectionForInstrument(oldInstrument);
                                             player.mordhauOutDevice.UpdateNoteIdBounds();
                                         }
-
+                                        tsm.UpdateTrackSelectionForTrack(i);
                                         converter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
                                         converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
                                         converter.IsConversionEnabled = true;
                                         converter.SetDivision(player.sequence.Division);
                                         converter.AddTrack();
-                                        converter.SetEnabledTracksInTrack(i, tsm.MidiTracks);
-                                        converter.SetEnabledMidiChannelsInTrack(i, tsm.MidiChannels);
+                                        converter.SetEnabledTracksInTrack(counter, tsm.MidiTracks);
+                                        converter.SetEnabledMidiChannelsInTrack(counter, tsm.MidiChannels);
 
-                                        converter.FillTrack(i, player.ExtractMidiContent());
+                                        converter.FillTrack(counter, player.ExtractMidiContent());
+                                        counter++;
                                     }
                                 }
 
@@ -248,7 +265,7 @@ namespace LuteBot
                                     ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
                                     ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
                                     ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
-                                    tsm.UpdateTrackSelectionForInstrument(oldInstrument);
+                                    tsm.UpdateTrackSelectionForInstrument(firstInstrument);
                                     player.mordhauOutDevice.UpdateNoteIdBounds();
                                 }
                                 //}

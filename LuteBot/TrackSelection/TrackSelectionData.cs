@@ -22,6 +22,10 @@ namespace LuteBot.TrackSelection
         public int Offset { get; set; }
         [DataMember]
         public int NumChords { get; set; }
+        [DataMember]
+        public int? TrackToSave { get; set; }
+        [DataMember]
+        public int? Instrument { get; set; }
 
         public TrackSelectionData()
         {

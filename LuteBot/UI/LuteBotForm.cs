@@ -668,7 +668,7 @@ namespace LuteBot
             player.mordhauOutDevice.UpdateNoteIdBounds();
             // And TrackSelectionForm should be refreshed
             if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
-                trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.InitLists(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
+                trackSelectionForm.Invoke((MethodInvoker)delegate { if (!trackSelectionForm.comboBoxTrack.Enabled) trackSelectionForm.setTrackIndex(trackSelectionManager.TrackToSave); else trackSelectionManager.TrackToSave = trackSelectionForm.comboBoxTrack.SelectedIndex; trackSelectionForm.InitLists(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
 
         }
 

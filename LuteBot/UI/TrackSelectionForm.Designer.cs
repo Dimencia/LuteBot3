@@ -51,6 +51,8 @@ namespace LuteBot.UI
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.instrumentsBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.comboBoxTrack = new System.Windows.Forms.ComboBox();
+            this.checkBoxUseTracks = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -167,7 +169,7 @@ namespace LuteBot.UI
             this.OffsetPanel.Location = new System.Drawing.Point(0, 0);
             this.OffsetPanel.Margin = new System.Windows.Forms.Padding(4);
             this.OffsetPanel.Name = "OffsetPanel";
-            this.OffsetPanel.Size = new System.Drawing.Size(659, 196);
+            this.OffsetPanel.Size = new System.Drawing.Size(679, 196);
             this.OffsetPanel.TabIndex = 16;
             // 
             // buttonAdvanced
@@ -210,7 +212,7 @@ namespace LuteBot.UI
             // 
             // textBoxNotesForChords
             // 
-            this.textBoxNotesForChords.Location = new System.Drawing.Point(255, 415);
+            this.textBoxNotesForChords.Location = new System.Drawing.Point(136, 415);
             this.textBoxNotesForChords.Name = "textBoxNotesForChords";
             this.textBoxNotesForChords.Size = new System.Drawing.Size(33, 22);
             this.textBoxNotesForChords.TabIndex = 20;
@@ -219,7 +221,7 @@ namespace LuteBot.UI
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(132, 418);
+            this.label2.Location = new System.Drawing.Point(17, 420);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(113, 17);
             this.label2.TabIndex = 21;
@@ -245,7 +247,7 @@ namespace LuteBot.UI
             // 
             this.instrumentsBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.instrumentsBox.FormattingEnabled = true;
-            this.instrumentsBox.Location = new System.Drawing.Point(466, 415);
+            this.instrumentsBox.Location = new System.Drawing.Point(269, 415);
             this.instrumentsBox.Name = "instrumentsBox";
             this.instrumentsBox.Size = new System.Drawing.Size(230, 24);
             this.instrumentsBox.TabIndex = 23;
@@ -254,17 +256,41 @@ namespace LuteBot.UI
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(380, 420);
+            this.label3.Location = new System.Drawing.Point(183, 420);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(74, 17);
             this.label3.TabIndex = 24;
             this.label3.Text = "Instrument";
+            // 
+            // comboBoxTrack
+            // 
+            this.comboBoxTrack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxTrack.Enabled = false;
+            this.comboBoxTrack.FormattingEnabled = true;
+            this.comboBoxTrack.Location = new System.Drawing.Point(505, 415);
+            this.comboBoxTrack.Name = "comboBoxTrack";
+            this.comboBoxTrack.Size = new System.Drawing.Size(47, 24);
+            this.comboBoxTrack.TabIndex = 25;
+            this.comboBoxTrack.SelectedIndexChanged += new System.EventHandler(this.comboBoxTrack_SelectedIndexChanged);
+            // 
+            // checkBoxUseTracks
+            // 
+            this.checkBoxUseTracks.AutoSize = true;
+            this.checkBoxUseTracks.Location = new System.Drawing.Point(558, 417);
+            this.checkBoxUseTracks.Name = "checkBoxUseTracks";
+            this.checkBoxUseTracks.Size = new System.Drawing.Size(120, 21);
+            this.checkBoxUseTracks.TabIndex = 26;
+            this.checkBoxUseTracks.Text = "Unlock Tracks";
+            this.checkBoxUseTracks.UseVisualStyleBackColor = true;
+            this.checkBoxUseTracks.CheckedChanged += new System.EventHandler(this.checkBoxUseTracks_CheckedChanged);
             // 
             // TrackSelectionForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(716, 742);
+            this.Controls.Add(this.checkBoxUseTracks);
+            this.Controls.Add(this.comboBoxTrack);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.instrumentsBox);
             this.Controls.Add(this.button2);
@@ -317,5 +343,7 @@ namespace LuteBot.UI
         private SaveFileDialog saveFileDialog1;
         private ComboBox instrumentsBox;
         private Label label3;
+        private CheckBox checkBoxUseTracks;
+        public ComboBox comboBoxTrack;
     }
 }

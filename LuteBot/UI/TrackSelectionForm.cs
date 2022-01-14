@@ -2,6 +2,7 @@
 using LuteBot.Core;
 using LuteBot.TrackSelection;
 using LuteBot.UI.Utils;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,11 +38,16 @@ namespace LuteBot.UI
             SuspendLayout();
             Instrument.Read();
             instrumentsBox.DisplayMember = "Name";
+            int trackNum = 0;
             foreach (Instrument i in Instrument.Prefabs)
+            {
                 instrumentsBox.Items.Add(i);
+                comboBoxTrack.Items.Add(trackNum++);
+            }
             instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            comboBoxTrack.SelectedIndex = trackSelectionManager.TrackToSave;
             ResumeLayout();
-            
+
 
             InitLists();
             trackSelectionManager.autoLoadProfile = AutoActivateCheckBox.Checked;
@@ -53,7 +59,7 @@ namespace LuteBot.UI
 
             IO.KB.ActionManager.NotePlayed += _mordhauOut_notePlayed;
 
-            
+
         }
 
         private void _mordhauOut_notePlayed(object sender, int channel)
@@ -253,14 +259,14 @@ namespace LuteBot.UI
             int centerOffset = 0;
             // and do the label as lineNum - that
 
-                // Later notes: I don't know what centerLine and centerOffset are for.  centerLine represents the octave at the center, usually 4 for C4
-                // centerOffset is... idk?  How many octaves we need to offset from 0 on far left, I guess
-                // No idea what xPad has to do with it.
+            // Later notes: I don't know what centerLine and centerOffset are for.  centerLine represents the octave at the center, usually 4 for C4
+            // centerOffset is... idk?  How many octaves we need to offset from 0 on far left, I guess
+            // No idea what xPad has to do with it.
 
-                // Wait what
-                // center is the midi note value for the center of the instrument range (rounded down if not even octave)
-                // centerLine is the octave
-                // centerOffset is ... I still don't know.  
+            // Wait what
+            // center is the midi note value for the center of the instrument range (rounded down if not even octave)
+            // centerLine is the octave
+            // centerOffset is ... I still don't know.  
 
             // We're going to iterate twice so the background grids are behind everything
             for (int x = xPad; x <= OffsetPanel.Width; x += columnWidth)
@@ -279,8 +285,8 @@ namespace LuteBot.UI
             if (trackSelectionManager.MidiChannels.Count > 0)
             {
                 // Sometimes, MinNoteByChannel or MaxNoteByChannel may not have value if the track never played any notes
-                minNote = trackSelectionManager.MidiChannels.Min((c) => (trackSelectionManager.MinNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MinNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0):127));
-                maxNote = trackSelectionManager.MidiChannels.Max((c) => (trackSelectionManager.MaxNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MaxNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0):0));
+                minNote = trackSelectionManager.MidiChannels.Min((c) => (trackSelectionManager.MinNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MinNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0) : 127));
+                maxNote = trackSelectionManager.MidiChannels.Max((c) => (trackSelectionManager.MaxNoteByChannel.ContainsKey(c.Id) ? trackSelectionManager.MaxNoteByChannel[c.Id] + trackSelectionManager.NoteOffset + (trackSelectionManager.MidiChannelOffsets.ContainsKey(c.Id) ? trackSelectionManager.MidiChannelOffsets[c.Id] : 0) : 0));
             }
 
             if (isAdvanced)
@@ -335,7 +341,7 @@ namespace LuteBot.UI
                 // Draw vertical line
 
                 // Put labels at the bottom
-                int note = ((x - xPad) / columnWidth) - centerOffset*12;
+                int note = ((x - xPad) / columnWidth) - centerOffset * 12;
 
                 if (isAdvanced)
                 { // For brevity and cuz I think it's safe here, assume the dicts are populated
@@ -533,7 +539,7 @@ namespace LuteBot.UI
         {
             trackSelectionManager.ActivateAllChannels = SelectAllTracksCheckBox.Checked;
             TrackListBox.Enabled = !SelectAllTracksCheckBox.Checked;
-            Invalidate(); 
+            Invalidate();
         }
 
         private void TrackListBox_ItemCheck(object sender, ItemCheckEventArgs e)
@@ -597,7 +603,7 @@ namespace LuteBot.UI
             var result = saveFileDialog1.ShowDialog(this);
             if (result == DialogResult.OK)
             {
-                 trackSelectionManager.SaveTrackManager(saveFileDialog1.FileName);
+                trackSelectionManager.SaveTrackManager(saveFileDialog1.FileName);
             }
         }
 
@@ -624,8 +630,72 @@ namespace LuteBot.UI
 
                 ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
 
-                mainForm.OnInstrumentChanged(currentInstrument);
+                if (comboBoxTrack.Enabled)
+                {
+                    int track = comboBoxTrack.SelectedIndex;
+                    trackSelectionManager.UpdateTrackSelectionForTrack(track);
+                    _mordhauOut.UpdateNoteIdBounds();
+
+                    InitLists();
+                    RefreshOffsetPanel();
+                }
+                else
+                    mainForm.OnInstrumentChanged(currentInstrument);
+                // As a stupid hack... 
+                
             }
+        }
+
+        private void checkBoxUseTracks_CheckedChanged(object sender, EventArgs e)
+        {
+            comboBoxTrack.Enabled = checkBoxUseTracks.Checked;
+        }
+
+        public void setTrackIndex(int index)
+        {
+            comboBoxTrack.SelectedIndexChanged -= comboBoxTrack_SelectedIndexChanged;
+            comboBoxTrack.SelectedIndex = index;
+            comboBoxTrack.SelectedIndexChanged += comboBoxTrack_SelectedIndexChanged;
+        }
+
+        private void comboBoxTrack_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            comboBoxTrack.SelectedIndexChanged -= comboBoxTrack_SelectedIndexChanged;
+            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            int oldTrack = trackSelectionManager.TrackToSave;
+            int track = comboBoxTrack.SelectedIndex;
+            trackSelectionManager.UpdateTrackSelectionForTrack(track);
+
+            if (currentInstrument != trackSelectionManager.Instrument)
+            {
+                ConfigManager.SetProperty(PropertyItem.Instrument, trackSelectionManager.Instrument.ToString());
+                Instrument target = Instrument.Prefabs[trackSelectionManager.Instrument];
+
+                bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
+                ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
+
+                ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
+
+                
+
+                instrumentsBox.SelectedIndexChanged -= instrumentsBox_SelectedIndexChanged;
+                instrumentsBox.SelectedIndex = trackSelectionManager.Instrument;
+                instrumentsBox.SelectedIndexChanged += instrumentsBox_SelectedIndexChanged;
+
+            }
+            // MordhauOutDevice should be refreshed
+            _mordhauOut.UpdateNoteIdBounds();
+            InitLists();
+            RefreshOffsetPanel();
+            comboBoxTrack.SelectedIndexChanged += comboBoxTrack_SelectedIndexChanged;
         }
     }
 }

@@ -31,6 +31,8 @@ namespace LuteBot.TrackSelection
         public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
         public int NumChords { get => numChords; set { numChords = value; ResetRequest(); } }
         public Dictionary<int, TrackSelectionData> DataDictionary { get; set; } = new Dictionary<int, TrackSelectionData>();
+        public int TrackToSave = 0;
+        public int Instrument = 0;
 
         private int numChords;
         private int noteOffset;
@@ -90,6 +92,7 @@ namespace LuteBot.TrackSelection
             //
             //NoteOffset = data.Offset;
             //NumChords = data.NumChords;
+            int? existingKey = DataDictionary.Where(kvp => kvp.Value == data).Select(v => v.Key).SingleOrDefault();
 
             this.MidiChannels = data.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel));
             this.MidiTracks = data.MidiTracks.ConvertAll(track => new TrackItem(track));
@@ -97,36 +100,71 @@ namespace LuteBot.TrackSelection
             this.MidiChannelOffsets = new Dictionary<int, int>(data.MidiChannelOffsets);
             this.NumChords = data.NumChords;
 
-            DataDictionary[ConfigManager.GetIntegerProperty(PropertyItem.Instrument)] = new TrackSelectionData(data);
+            if (data.Instrument.HasValue)
+                this.Instrument = data.Instrument.Value;
+            else // If there's no Instrument, there's no TrackToSave, and its index in DataDictionary is the Instrument
+            {
+                if (existingKey.HasValue)
+                    this.Instrument = existingKey.Value;
+                else
+                    this.Instrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            }
+
+            if (data.TrackToSave.HasValue)
+                this.TrackToSave = data.TrackToSave.Value;
+            else
+                this.TrackToSave = this.Instrument;
+
+            DataDictionary[TrackToSave] = new TrackSelectionData(data);
         }
 
+        public void UpdateTrackSelectionForTrack(int track)
+        {
+            DataDictionary[TrackToSave] = GetTrackSelectionData();
+            if (DataDictionary.ContainsKey(track))
+                SetTrackSelectionData(DataDictionary[track]);
+            else
+            {
+                SetTrackSelectionData(DataDictionary[0]);
+            }
+            Instrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            TrackToSave = track;
+        }
 
         public void UpdateTrackSelectionForInstrument(int oldInstrument)
         {
-            DataDictionary[oldInstrument] = GetTrackSelectionData();
+            DataDictionary[TrackToSave] = GetTrackSelectionData();
+            DataDictionary[TrackToSave].Instrument = oldInstrument;
             int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-            if (DataDictionary.ContainsKey(instrumentId))
+            var firstMatching = DataDictionary.Where(d => d.Value.Instrument == instrumentId).Select(d => d.Value).FirstOrDefault();
+            if (firstMatching != null)
+                SetTrackSelectionData(firstMatching);
+            else if (DataDictionary.ContainsKey(instrumentId))
                 SetTrackSelectionData(DataDictionary[instrumentId]);
-            else if (instrumentId == 3 && DataDictionary.ContainsKey(1))
-            {
-                // If it's duet flute but there is no data for it, and we also have a flute track, copy the flute settings
-                SetTrackSelectionData(DataDictionary[1]);
-            }
-            else if (instrumentId == 2 && DataDictionary.ContainsKey(1))
-            {
-                // If it's duet lute with no data, and there is a flute track, copy the lute track and disable whatever the flute has active
-                SetTrackSelectionData(DataDictionary[0]);
-                var fluteData = DataDictionary[1];
-
-                foreach(var channel in MidiChannels)
-                {
-                    // There's no real situation where they should have any disparity between their channels
-                    if (fluteData.MidiChannels.Where(d => d.Id == channel.Id).Single().Active)
-                        channel.Active = false;
-                }
-            }
+            //else if (instrumentId == 3 && DataDictionary.ContainsKey(1))
+            //{
+            //    // If it's duet flute but there is no data for it, and we also have a flute track, copy the flute settings
+            //    SetTrackSelectionData(DataDictionary[1]);
+            //}
+            //else if (instrumentId == 2 && DataDictionary.ContainsKey(1))
+            //{
+            //    // If it's duet lute with no data, and there is a flute track, copy the lute track and disable whatever the flute has active
+            //    SetTrackSelectionData(DataDictionary[0]);
+            //    var fluteData = DataDictionary[1];
+            //
+            //    foreach(var channel in MidiChannels)
+            //    {
+            //        // There's no real situation where they should have any disparity between their channels
+            //        if (fluteData.MidiChannels.Where(d => d.Id == channel.Id).Single().Active)
+            //            channel.Active = false;
+            //    }
+            //}
             else if (DataDictionary.ContainsKey(0))
+            {
                 SetTrackSelectionData(DataDictionary[0]);
+                Instrument = instrumentId;
+                TrackToSave = instrumentId;
+            }
         }
 
         public TrackSelectionData GetTrackSelectionData()
@@ -137,27 +175,33 @@ namespace LuteBot.TrackSelection
             data.Offset = NoteOffset;
             data.MidiChannelOffsets = new Dictionary<int, int>(MidiChannelOffsets);
             data.NumChords = NumChords;
+            data.TrackToSave = TrackToSave;
+            data.Instrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
             return data;
         }
 
         public void SaveTrackManager(string filename = null)
         {
-            DataDictionary[ConfigManager.GetIntegerProperty(PropertyItem.Instrument)] = GetTrackSelectionData();
+            DataDictionary[TrackToSave] = GetTrackSelectionData();
             SaveManager.SaveTrackSelectionData(DataDictionary, FileName, filename);
         }
 
         public void LoadTrackManager()
         {
             var dataDictionary = SaveManager.LoadTrackSelectionData(FileName);
-            if (dataDictionary != null)
+            if (dataDictionary != null && dataDictionary.ContainsKey(0) && dataDictionary[0] != null)
             {
                 DataDictionary = dataDictionary;
                 TrackSelectionData data = null;
                 int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-                if (DataDictionary.ContainsKey(instrumentId))
-                    data = DataDictionary[instrumentId];
-                else if(DataDictionary.ContainsKey(0))
+                var firstMatching = DataDictionary.Where(d => d.Value != null && d.Value.Instrument == instrumentId).Select(d => d.Value).FirstOrDefault();
+                if (firstMatching != null)
+                    data = firstMatching;
+                else if (DataDictionary.ContainsKey(0))
+                {
                     data = DataDictionary[0];
+                    data.TrackToSave = instrumentId;
+                }
 
                 if (data != null)
                 {
@@ -171,6 +215,16 @@ namespace LuteBot.TrackSelection
                     else
                         this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
 
+                    if (data.TrackToSave.HasValue)
+                        TrackToSave = data.TrackToSave.Value;
+                    else
+                        TrackToSave = instrumentId;
+
+                    if (data.Instrument.HasValue)
+                        this.Instrument = data.Instrument.Value;
+                    else
+                        this.Instrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+
                     // Restore any channel names that might be null or incorrect, from older data that got saved
                     foreach (var c in midiChannels)
                         c.Name = Player.GetChannelName(c.Id);
@@ -183,6 +237,9 @@ namespace LuteBot.TrackSelection
                     //this.midiChannels.Clear();
                     //this.midiTracks.Clear();
                     this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+                    this.TrackToSave = 0;
+                    Instrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                    DataDictionary[0] = GetTrackSelectionData();
                     UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
                 }
                 EventHelper();
@@ -195,23 +252,26 @@ namespace LuteBot.TrackSelection
                 //this.midiChannels.Clear();
                 //this.midiTracks.Clear();
                 this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+                this.TrackToSave = 0;
+                Instrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                DataDictionary[0] = GetTrackSelectionData();
                 UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
             }
         }
 
-        public void LoadTracks(Dictionary<int, string> channels, Dictionary<int,string> tracks, TrackSelectionManager tsm)
+        public void LoadTracks(Dictionary<int, string> channels, Dictionary<int, string> tracks, TrackSelectionManager tsm)
         {
             midiChannels.Clear();
             midiTracks.Clear();
 
             foreach (var kvp in channels)
-                if(kvp.Key != 9)
+                if (kvp.Key != 9)
                     midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = true, Name = kvp.Value });
                 else // Automatically disable glockenspiel channel
                     midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = false, Name = kvp.Value });
             foreach (var kvp in tracks)
                 midiTracks.Add(new TrackItem() { Id = kvp.Key, Name = kvp.Value, Active = true });
-            
+
             NoteOffset = tsm.NoteOffset;
             NumChords = tsm.NumChords;
 
