@@ -18,7 +18,7 @@ namespace LuteBot.IO.Files
 {
     public class SaveManager
     {
-        private static string autoSavePath = "Profiles";
+        private static string autoSavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"LuteBot","Profiles");
 
         private static int fileSize = 5000;
         private static List<byte> fileHeader;
@@ -221,12 +221,13 @@ namespace LuteBot.IO.Files
                 OpenFileDialog openFileDialog = new OpenFileDialog();
                 openFileDialog.DefaultExt = "ini";
                 openFileDialog.Filter = "INI files|*.ini";
+                openFileDialog.InitialDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Mordhau", "Saved", "Config", "WindowsClient");
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     fileName = openFileDialog.FileName;
-                    if (!fileName.Contains("DefaultInput.ini"))
+                    if (!fileName.Contains("Input.ini"))
                     {
-                        MessageBox.Show("Please select the file \"DefaultInput.ini\"", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Please select the file \"Input.ini\"", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         fileName = null;
                     }
                 }
@@ -251,17 +252,28 @@ namespace LuteBot.IO.Files
             byte[] streamResult;
             string content;
 
+            if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
+                fileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Mordhau", "Saved", "Config", "WindowsClient", "Input.ini");
+            if (!File.Exists(fileName))
+                return null;
+            // If the file exists, save it into config... this doesn't really go here... oh well.
+            Config.ConfigManager.SetProperty(Config.PropertyItem.MordhauInputIniLocation, fileName);
+            // It's really not necessary, either.  Blank defaults to the usual one, that's good.  
+            // Yeah, it's necessary because otherwise I'd have to hunt down everywhere that calls it.  Which isn't that many places but still
+
             try
             {
-                using (var stream = File.Open(fileName, FileMode.Open))
-                {
-                    streamResult = new byte[stream.Length];
-                    stream.Read(streamResult, 0, (int)stream.Length);
-                    content = Encoding.UTF8.GetString(streamResult);
-                }
+                //using (var stream = File.Open(fileName, FileMode.Open))
+                //{
+                //    streamResult = new byte[stream.Length];
+                //    stream.Read(streamResult, 0, (int)stream.Length);
+                //    content = Encoding.UTF8.GetString(streamResult);
+                //}
+                content = File.ReadAllText(fileName);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 content = null;
             }
             return content;
@@ -312,7 +324,7 @@ namespace LuteBot.IO.Files
                     }
                     catch (Exception e)
                     {
-                        path = "Profiles" + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path);
+                        path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"LuteBot","Profiles",Path.GetFileNameWithoutExtension(path));
                     }
                 }
 
@@ -457,7 +469,7 @@ namespace LuteBot.IO.Files
                     catch (Exception e)
                     {
                         MessageBox.Show("Failed to write to midi file - writing to XML file instead");
-                        var folderpath = "Profiles";
+                        var folderpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"LuteBot","Profiles");
                         Directory.CreateDirectory(folderpath);
                         path = folderpath + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path) + ".xml";
                         using (var stream = File.Create(path))

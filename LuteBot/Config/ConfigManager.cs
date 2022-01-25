@@ -24,7 +24,7 @@ namespace LuteBot.Config
 
         static ConfigManager()
         {
-            autoSavePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config");
+            autoSavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Config");
             Refresh();
         }
 
@@ -164,7 +164,7 @@ namespace LuteBot.Config
 
         public static string GetVersion()
         {
-            return "3.2.10";
+            return "3.3";
         }
     }
 }

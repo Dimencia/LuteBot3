@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -25,6 +26,13 @@ namespace LuteBot
             InitializeComponent();
             InitPropertiesList();
             RefreshConfigFoundLabel();
+            this.FormClosing += KeyBindingForm_FormClosing;
+        }
+
+        private void KeyBindingForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
         }
 
         private void SetConfig_Click(object sender, EventArgs e)
@@ -37,14 +45,15 @@ namespace LuteBot
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(SaveManager.LoadMordhauConfig(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation)))) // This might need to run
+                // This should basically always exist - it's a hardcoded location in localappdata.  And since our config folder has moved, they won't have an old config
+                if (string.IsNullOrWhiteSpace(SaveManager.LoadMordhauConfig(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation))))
                 {
-                    //MordhauConfigLabel.Text = "Mordhau configuration file not found. Please set the location of DefaultInput.ini in the menu above.";
+                    MordhauConfigLabel.Text = "Mordhau configuration file not found. Please set the location of Input.ini in your config file";
                 }
-                //else
-                //{
-                //    MordhauConfigLabel.Text = "Mordhau configuration file found";
-                //}
+                else
+                {
+                    MordhauConfigLabel.Text = "Mordhau configuration file found";
+                }
             }
             catch (Exception ex)
             {
@@ -52,7 +61,7 @@ namespace LuteBot
             }
         }
 
-        private void InitPropertiesList()
+        public void InitPropertiesList()
         {
             HotkeysList.Items.Clear();
             var hotkeys = Enum.GetValues(typeof(Keybinds));
@@ -75,6 +84,7 @@ namespace LuteBot
         private void ApplyButton_Click(object sender, EventArgs e)
         {
             ConfigManager.SaveConfig();
+            LuteBotForm.SetConsoleKey(true, true); // Quiet if already set, force mordhau to update if not
             this.Close();
         }
 
@@ -116,37 +126,6 @@ namespace LuteBot
         private void ToggleEnableLists(bool enabled)
         {
             HotkeysList.Enabled = enabled;
-        }
-
-        private void AutoConFigButton_Click(object sender, EventArgs e)
-        {
-            ConfigManager.SetProperty(PropertyItem.UserSavedConsoleKey, ConfigManager.GetProperty(PropertyItem.OpenConsole));
-            ConfigManager.SetProperty(PropertyItem.OpenConsole, "Next");
-            InitPropertiesList();
-            string configLocation = ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation);
-            string configContent = SaveManager.LoadMordhauConfig(configLocation);
-            if (configContent != null)
-            {
-                if (!configContent.Contains("+ConsoleKeys=PageDown"))
-                {
-                    int index = -1;
-                    int length = -1;
-                    foreach (Match match in Regex.Matches(configContent, @"(-|\+|)ConsoleKey(s|)=.*(\s|$)"))
-                    {
-                        index = match.Index;
-                        length = match.Length;
-                    }
-                    if (index >= 0 && length > 0)
-                    {
-                        configContent = configContent.Insert((index + length), "+ConsoleKeys=PageDown\n");
-                        SaveManager.SaveMordhauConfig(configLocation, configContent);
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("Error", "Could not retrieve mordhau config");
-            }
         }
 
         private void RevertAutoConfig_Click(object sender, EventArgs e)

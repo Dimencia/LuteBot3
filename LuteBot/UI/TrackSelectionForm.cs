@@ -399,18 +399,24 @@ namespace LuteBot.UI
             // instrumentRect and draggableRect
             // I'm too lazy to center the labels
             // But fine we need some rects behind them too.  
-            int instrumentLabelWidth = 115;
+            //int instrumentLabelWidth = (int)(115 * (g.DpiX/96f));
+            int instrumentLabelWidth = (int)g.MeasureString("Instrument Range", labelFont).Width + 4;
             Rectangle instrumentLabelRect = new Rectangle(instrumentRect.X + instrumentRect.Width / 2 - instrumentLabelWidth / 2, instrumentRect.Y + rowHeight / 2 - 9, instrumentLabelWidth, 18);
             Rectangle instrumentLabelBgRect = new Rectangle(instrumentLabelRect.X + 1, instrumentLabelRect.Y + 1, instrumentLabelRect.Width + 1, instrumentLabelRect.Height + 1);
             g.FillRectangle(shadowBrush, instrumentLabelBgRect);
             g.FillRectangle(labelBgBrush, instrumentLabelRect);
+            
             g.DrawString("Instrument Range", labelFont, labelBrush, instrumentLabelRect);
             // Also our data, if we're on advanced
             if (isAdvanced)
                 foreach (var kvp in channelRects)
                 {
+                    //dpi/96 should give us a scalar for making the boxes wider.  Unsure if it should be X or Y, but one of those
+                    
                     // We're wildly guessing here... But it's about 7px per char.  Need 8 to prevent trimming
-                    int channelLabelWidth = 8 * kvp.Key.Name.Length;
+                    //int channelLabelWidth = (int)((8 * kvp.Key.Name.Length)*(g.DpiX / 96f));
+                    int channelLabelWidth = (int)g.MeasureString(kvp.Key.Name, labelFont).Width + 4;
+
                     Rectangle channelLabelRect = new Rectangle(kvp.Value.X + kvp.Value.Width / 2 - channelLabelWidth / 2, kvp.Value.Y + rowHeight / 2 - 9, channelLabelWidth, 18);
                     Rectangle channelLabelBgRect = new Rectangle(channelLabelRect.X + 1, channelLabelRect.Y + 1, channelLabelRect.Width + 1, channelLabelRect.Height + 1);
 
@@ -421,7 +427,9 @@ namespace LuteBot.UI
             else
             {
                 // Guess at a width... this can be static
-                int draggableLabelWidth = 190;
+                //int draggableLabelWidth = (int)(190 * (g.DpiX/96f));
+                int draggableLabelWidth = (int)g.MeasureString("Song Range (Click to Drag)", labelFont).Width + 4;
+
                 Rectangle draggableLabelRect = new Rectangle(draggableRect.X + draggableRect.Width / 2 - draggableLabelWidth / 2, draggableRect.Y + rowHeight / 2 - 9, draggableLabelWidth, 18);
                 Rectangle draggableLabelBgRect = new Rectangle(draggableLabelRect.X + 1, draggableLabelRect.Y + 1, draggableLabelRect.Width + 1, draggableLabelRect.Height + 1);
                 g.FillRectangle(shadowBrush, draggableLabelBgRect);

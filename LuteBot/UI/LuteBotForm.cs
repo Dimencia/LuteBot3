@@ -2,6 +2,7 @@
 using LuteBot.Config;
 using LuteBot.Core;
 using LuteBot.Core.Midi;
+using LuteBot.IO.Files;
 using LuteBot.IO.KB;
 using LuteBot.LiveInput.Midi;
 using LuteBot.OnlineSync;
@@ -11,6 +12,9 @@ using LuteBot.TrackSelection;
 using LuteBot.UI;
 using LuteBot.UI.Utils;
 using LuteBot.Utils;
+
+using Microsoft.Win32;
+
 using Sanford.Multimedia.Midi;
 using System;
 using System.Collections.Generic;
@@ -22,6 +26,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -34,7 +39,7 @@ namespace LuteBot
         private static LowLevelKeyboardProc _proc = HookCallback;
         private static IntPtr _hookID = IntPtr.Zero;
 
-        public static readonly string libraryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\LuteBot\GuildLibrary\";
+        public static readonly string libraryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"LuteBot","GuildLibrary");
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
@@ -51,7 +56,7 @@ namespace LuteBot
 
         static HotkeyManager hotkeyManager;
 
-        TrackSelectionForm trackSelectionForm;
+        TrackSelectionForm trackSelectionForm = null;
         OnlineSyncForm onlineSyncForm;
         SoundBoardForm soundBoardForm;
         public PlayListForm playListForm;
@@ -75,8 +80,18 @@ namespace LuteBot
         public static TrackSelectionManager trackSelectionManager;
         static OnlineSyncManager onlineManager;
         static LiveMidiManager liveMidiManager;
+        static KeyBindingForm keyBindingForm = null;
+        
+        private static string lutemodPakName = "FLuteMod_1.3.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string loaderPakName = "AutoLoaderWindowsClient.pak";
+        private static string partitionIndexName = "PartitionIndex[0].sav";
+        private static string loaderString1 = @"[/AutoLoader/BP_AutoLoaderActor.BP_AutoLoaderActor_C]
+ClientMods=/Game/Mordhau/Maps/LuteMod/Client/BP_LuteModClientLoader.BP_LuteModClientLoader_C
+ModListWidgetStayTime=5.0";
+        private static string loaderString2 = @"[Mods]
+ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
 
-        bool closing = false;
+        private static string MordhauPakPath = GetPakPath();
 
         public LuteBotForm()
         {
@@ -109,11 +124,32 @@ namespace LuteBot
 
 
             _hookID = SetHook(_proc);
+
+            SetConsoleKey(); // Sets up an appropriate path for the mordhau ini, and sets the key if necessary.  Only alerts if it changes something
+
             OpenDialogs();
             this.StartPosition = FormStartPosition.Manual;
             Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos));
             Top = coords.Y;
-            Left = coords.X;
+            Left = coords.X; // If we have a proper saved pos, use it unaltered.  If not, we should adjust from screen center, which is what would be returned
+            if (coords != ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos))
+            {
+                Top = coords.Y - Height;
+                Left = coords.X - Width / 2;
+                // If they weren't equal, it's at default pos, so the others should also be set to good default positions
+                if (trackSelectionForm != null)
+                {
+                    ConfigManager.SetProperty(PropertyItem.TrackSelectionPos, $"{ Left + Width}|{Top}");
+                    trackSelectionForm.Left = Left + Width;
+                    trackSelectionForm.Top = Top;
+                }
+                if (partitionsForm != null)
+                {
+                    ConfigManager.SetProperty(PropertyItem.PartitionListPos, $"{ Left - partitionsForm.Width}|{Top}");
+                    partitionsForm.Left = Left - partitionsForm.Width;
+                    partitionsForm.Top = Top;
+                }
+            }
 
             // We may package this with a guild library for now.  Check for it and extract it, if so
             var files = Directory.GetFiles(Environment.CurrentDirectory, "BGML*.zip", SearchOption.TopDirectoryOnly);
@@ -124,7 +160,7 @@ namespace LuteBot
                     // extract to libraryPath + "\songs\"
                     try
                     {
-                        ZipFile.ExtractToDirectory(files[0], libraryPath + @"\songs\");
+                        ZipFile.ExtractToDirectory(files[0], Path.Combine(libraryPath,"songs"));
                         //File.Delete(files[0]);
                     }
                     catch (Exception e) { } // Gross I know, but no reason to do anything
@@ -142,6 +178,248 @@ namespace LuteBot
                 ConfigManager.SetProperty(PropertyItem.NumChords, "3");
                 ConfigManager.SaveConfig();
             }
+
+            // Check for FirstRun, and offer the wiki link and auto-setup
+            if (ConfigManager.GetBooleanProperty(PropertyItem.FirstRun))
+            {
+                ConfigManager.SetProperty(PropertyItem.FirstRun, "False");
+                // TODO: A help window with... just the wiki link?
+                // I guess also link to the Guild's discord and put some credits there, and link to various specific wiki topics
+
+            }
+
+            // If it's not set, it's below 3.3; the rest is also there just for posterity so I can use it in the future
+            if (!string.IsNullOrWhiteSpace(ConfigManager.GetProperty(PropertyItem.LastVersion)))
+            {
+
+                // Parse the version into something we can compare
+                var firstGoodVersions = "3.3".Split('.');
+                var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
+
+
+                for (int i = 0; i < firstGoodVersions.Length; i++)
+                {
+                    // If we've run out of numbers to compare on either side and none have been less yet, or if any of the numbers are less, the version is below our target
+
+                    // I think.  Target: 3.3 vs 3.31, we ran out of numbers but we're above.  So it depends in which direction
+                    // If we run out of numbers in the target, it is not less
+                    // Target: 3.31 vs 3.3, we run out of numbers in the lastversions, so it is less.  Good.  
+
+                    if (i >= lastversions.Length || int.Parse(lastversions[i]) < int.Parse(firstGoodVersions[i]))
+                    {
+                        // The last version ran is below the target, and changes should be applied
+                        Instrument.WriteDefaults();
+                        // The new config data will pull from defaultConfig and should all be OK
+
+                        // We might should messagebox to let them know, but that'd be like a third messagebox for new installs, and that's just annoying at that point
+                    }
+                }
+            }
+            else
+            {
+                Instrument.WriteDefaults();
+            }
+            ConfigManager.SetProperty(PropertyItem.LastVersion, ConfigManager.GetVersion());
+        }
+
+        public static bool IsLuteModInstalled()
+        {
+            // Just check for the lutemod pak in CustomPaks, if they messed it up beyond that they can click the install button themselves, this is just to prompt them to install if necessary
+            var pakPath = Path.Combine(MordhauPakPath, lutemodPakName);
+            return File.Exists(pakPath);
+        }
+
+        public static void InstallLuteMod()
+        {
+            // This may require admin access.  TODO: Detect if we need it and prompt them for it
+            var pakPath = MordhauPakPath;
+            if (string.IsNullOrWhiteSpace(pakPath))
+            { // Shouldn't really happen.  More likely is they have mordhau installed in more than one place and I pick the wrong one.  Might need to let them choose the location
+                // TODO: Swap to something that can show a hyperlink
+                MessageBox.Show("Could not find Steam path - LuteMod auto install not available\nPlease install LuteMod manually using the instructions at https://mordhau.mod.io/lutemod", "Install Failed");
+                return;
+            }
+
+            try
+            {
+
+                Directory.CreateDirectory(pakPath);
+               
+                string lutemodPakTarget = Path.Combine(pakPath, lutemodPakName);
+                if (!File.Exists(lutemodPakTarget))
+                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", lutemodPakName), lutemodPakTarget);
+
+                
+                string loaderPakTarget = Path.Combine(pakPath, loaderPakName);
+                if (!File.Exists(loaderPakTarget))
+                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", loaderPakName), loaderPakTarget);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"Could not copy LuteMod files to {pakPath}\nLuteBot may need to run as Administrator\n\n{e.Message}\n{e.StackTrace}", "Install Failed");
+                return;
+            }
+
+            string gameIniPath = Path.Combine(Path.GetDirectoryName(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation)), "Game.ini");
+
+            try
+            {
+                var content = File.ReadAllText(gameIniPath);
+                
+
+                if (!content.Contains(loaderString1))
+                    content = content + "\n" + loaderString1;
+                if (!content.Contains(loaderString2))
+                    content = content + "\n" + loaderString2;
+
+                File.WriteAllText(gameIniPath, content);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"Could not access Game.ini at {gameIniPath}\nLuteBot may need to run as Administrator\nYou can set a custom path in the Key Bindings menu\n\n{e.Message}\n{e.StackTrace}", "Install Failed");
+                return;
+            }
+
+            // TODO: Testing on this.  Supposedly each user needs to generate their own empty PartitionIndex, but that may have just been some other bug that was fixed since?
+            string partitionIndexTarget = Path.Combine(SaveManager.SaveFilePath, partitionIndexName);
+            if (!File.Exists(partitionIndexTarget))
+                File.Copy(Path.Combine(Application.StartupPath, "LuteMod", partitionIndexName), partitionIndexTarget);
+
+
+            MessageBox.Show("LuteMod Successfully Installed\nSee the wiki for usage information: https://mordhau-bards-guild.fandom.com/wiki/LuteMod \n\nIf Mordhau is open, restart it");
+        }
+
+        private static string GetPakPath()
+        {
+            string mordhauId = "629760";
+            string steam32 = "SOFTWARE\\VALVE\\";
+            string steam64 = "SOFTWARE\\Wow6432Node\\Valve\\";
+            string steam32path;
+            string steam64path;
+            string config32path;
+            string config64path;
+            RegistryKey key32 = Registry.LocalMachine.OpenSubKey(steam32);
+            RegistryKey key64 = Registry.LocalMachine.OpenSubKey(steam64);
+
+            Regex pathReg = new Regex("\"path\"\\s*\"([^\"]*)\"[^}]*\"" + mordhauId + "\""); // Puts the path in group 1
+
+            foreach (string k64subKey in key64.GetSubKeyNames())
+            {
+                using (RegistryKey subKey = key64.OpenSubKey(k64subKey))
+                {
+                    steam64path = subKey.GetValue("InstallPath").ToString();
+                    config64path = steam64path + "/steamapps/libraryfolders.vdf";
+                    if (File.Exists(config64path))
+                    {
+                        string config = File.ReadAllText(config64path);
+                        if (pathReg.IsMatch(config)) // Not sure if this is necessary... 
+                        {
+                            Match m = pathReg.Match(config);
+                            // Stop at the Content folder so other logic can detect and move/remove paks in the wrong folder?
+                            // Nah.  They're not hurting anything there. 
+                            return Path.Combine(m.Groups[1].Value, "steamapps", "common", "Mordhau", "Mordhau", "Content", "CustomPaks");
+                        }
+                    }
+                }
+            }
+
+            foreach (string k32subKey in key32.GetSubKeyNames())
+            {
+                using (RegistryKey subKey = key32.OpenSubKey(k32subKey))
+                {
+                    steam32path = subKey.GetValue("InstallPath").ToString();
+                    config32path = steam32path + "/steamapps/libraryfolders.vdf";
+                    if (File.Exists(config32path))
+                    {
+                        string config = File.ReadAllText(config32path);
+                        if (pathReg.IsMatch(config)) // Not sure if this is necessary... 
+                        {
+                            Match m = pathReg.Match(config);
+                            return Path.Combine(m.Groups[1].Value, "steamapps", "common", "Mordhau", "Mordhau", "Content", "CustomPaks");
+                        }
+                    }
+                }
+            }
+
+            return string.Empty;
+        }
+
+        // Are arrow keys valid?  These names are all good WinForms names, are they good Mordhau names?  
+        private static string[] validConsoleKeys = new string[] { "PageDown", "PageUp", "Home", "End", "Insert", "Delete", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12" };
+
+        // Quiet is to do it automatically and not alert if there were changes.  Clicking the button explicitly makes quiet false
+        // forceMordhau is to force Mordhau to update to LuteBot and not the other way around; used when explicitly applying a new Console Key in LuteBot
+        public static void SetConsoleKey(bool quiet = true, bool forceMordhau = false)
+        {
+            // Checks the contents of the config file for valid console keys
+            // If any match the LuteBot setting, good
+            // If any valid ones are found and none match, set the LuteBot setting to one of the valid ones
+            // If no valid ones are found and no matches, add one
+            string configLocation = ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation);
+            string configContent = SaveManager.LoadMordhauConfig(configLocation);
+            configLocation = ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation); // Loading it may have changed it, make sure we're updated
+            string userKey = ConfigManager.GetProperty(PropertyItem.OpenConsole).Replace("Next", "PageDown"); // I think this is the only bad one
+            string newBind = $"ConsoleKeys={userKey}";
+            if (configContent != null)
+            {
+                if (!configContent.Contains(newBind))
+                {
+                    // The bind we have isn't set.  Check the ones that are set, and see if any are valid
+                    // While also setting up to insert, if we need to
+                    int index = -1;
+                    int length = -1;
+                    foreach (Match match in Regex.Matches(configContent, @"ConsoleKeys=(.*)"))
+                    {
+                        index = match.Index;
+                        length = match.Length;
+                        var detectedKey = match.Groups[1].Value.Trim();
+                        if (!forceMordhau && validConsoleKeys.Contains(detectedKey))
+                        {
+                            // They have a valid key bound, it just doesn't match ours
+                            // So, set ours to match.  Store the old one into UserSavedConsoleKey for reversion
+                            ConfigManager.SetProperty(PropertyItem.UserSavedConsoleKey, ConfigManager.GetProperty(PropertyItem.OpenConsole));
+                            ConfigManager.SetProperty(PropertyItem.OpenConsole, detectedKey);
+                            ConfigManager.SaveConfig();
+                            if (keyBindingForm != null)
+                                keyBindingForm.InitPropertiesList();
+                            MessageBox.Show($"Valid console key already bound in Mordhau: {detectedKey}\nLuteBot will use this console key", "Setup Complete");
+                            return;
+                        }
+                    }
+
+                    // If we get here, there were no valid keys bound.  So we insert the LuteBot key
+                    // TODO: make sure VoteNo is unbound or we might just spam no when playing; we are potentially double-binding
+                    if (index >= 0 && length > 0)
+                    {
+                        configContent = configContent.Insert((index + length), $"\n{newBind}");
+                        SaveManager.SaveMordhauConfig(configLocation, configContent);
+                        MessageBox.Show($"Successfully configured Mordhau Console Key to {userKey}\n\nIf Mordhau is open, you should restart it\nYou can revert this change in the Key Binding window", "Setup Complete");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Could not find existing ConsoleKey binding in config to insert at\nYou will need to set the key yourself inside Mordhau Settings", "Setup Failed");
+                    }
+                }
+                else
+                {
+                    // If it already has the bind, do we alert them?  I think we want to run this automatically on startup and on binding change, so, no if it's already set
+                    // Unless we make this only explicit-run because maybe it could cause issues with localization?  But let's make it auto and if there are problems, fix them
+                    if (!quiet)
+                    {
+                        MessageBox.Show($"Your console key is already correctly bound to {userKey} in Mordhau", "Setup Complete");
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Could not retrieve mordhau config to update your Console Key\nYou will need to set the key yourself inside Mordhau Settings", "Setup Failed");
+            }
+
+        }
+
+        public static void AutoConfigMordhau(object sender, EventArgs e)
+        {
+            SetConsoleKey(true);
         }
 
         private void HotkeyManager_SynchronizePressed(object sender, EventArgs e)
@@ -362,7 +640,10 @@ namespace LuteBot
 
         private void KeyBindingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (new KeyBindingForm()).ShowDialog();
+            if (keyBindingForm == null)
+                keyBindingForm = new KeyBindingForm();
+            keyBindingForm.InitPropertiesList();
+            keyBindingForm.ShowDialog();
         }
 
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1263,6 +1544,11 @@ namespace LuteBot
         {
             var adjustForm = new PartitionAdjustmentForm();
             adjustForm.Show();
+        }
+
+        private void installLuteModToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            InstallLuteMod();
         }
     }
 }

@@ -28,6 +28,14 @@ namespace LuteBot
             this.tsm = tsm;
             this.player = player;
             InitializeComponent();
+            if (!LuteBotForm.IsLuteModInstalled())
+            {
+                var r = MessageBox.Show(this, "LuteMod not detected.  Would you like to install it?", "Install LuteMod", MessageBoxButtons.YesNo);
+                if (r == DialogResult.Yes)
+                    LuteBotForm.InstallLuteMod();
+                else
+                    Close();
+            }
             RefreshPartitionList();
         }
 
@@ -41,7 +49,7 @@ namespace LuteBot
             index.LoadIndex();
             if (!index.Loaded)
             {
-                MessageBox.Show("No partition index found.  Initialize the partition by opening the partition menu in-game with lutemod at least once");
+                MessageBox.Show("No partition index found.  Initialize the partition by opening the partition menu in-game with lutemod at least once\nOr choose Settings -> Install LuteMod");
             }
             PopulateIndexList();
         }

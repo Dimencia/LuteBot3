@@ -24,7 +24,7 @@ namespace LuteBot.UI
         private readonly string appdata_PATH = LuteBotForm.libraryPath;
         private readonly string sheet_ID = "1FLyJ7wpFCCwx6gZ03-CX_S7I9ztqISI9_4mvwu7W2oQ";
         private readonly string log_FILENAME = "logs.txt";
-        private readonly string songs_FOLDER = @"songs\";
+        private readonly string songs_FOLDER = "songs";
 
         private SortableBindingList<GuildSong> SongsList = new SortableBindingList<GuildSong>();
 
@@ -38,13 +38,13 @@ namespace LuteBot.UI
             searchBox.TextChanged += SearchBox_TextChanged;
             searchBox.KeyPress += SearchBox_KeyPress;
 
-            Directory.CreateDirectory(appdata_PATH + songs_FOLDER);
+            Directory.CreateDirectory(Path.Combine(appdata_PATH,songs_FOLDER));
 
-            if (File.Exists(appdata_PATH + log_FILENAME))
+            if (File.Exists(Path.Combine(appdata_PATH,log_FILENAME)))
             {
                 //File.Copy(appdata_PATH + log_FILENAME, appdata_PATH + log_FILENAME + DateTime.Now.ToString("MM.dd-HH.mm.ss") + ".backup");
                 // No need to keep backups of the log files really
-                File.Delete(appdata_PATH + log_FILENAME);
+                File.Delete(Path.Combine(appdata_PATH,log_FILENAME));
             }
         }
 
@@ -184,7 +184,7 @@ namespace LuteBot.UI
                 {
                     lock (locker)
                         using (StreamWriter writer =
-                            File.AppendText(appdata_PATH + log_FILENAME))
+                            File.AppendText(Path.Combine(appdata_PATH,log_FILENAME)))
                         {
                             writer.WriteLine(message);
                         }
@@ -212,7 +212,7 @@ namespace LuteBot.UI
         private void downloadSong(GuildSong song, bool play)
         {
             // Downloads midi from the URL and plays, or adds to playlist, as appropriate
-            string path = appdata_PATH + songs_FOLDER + song.filename;
+            string path = Path.Combine(appdata_PATH,songs_FOLDER,song.filename);
             if (File.Exists(path)) // No need to redownload if we have it
             {
                 if (play)
