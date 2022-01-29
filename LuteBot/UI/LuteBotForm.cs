@@ -236,7 +236,8 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
             if (string.IsNullOrWhiteSpace(pakPath))
             { // Shouldn't really happen.  More likely is they have mordhau installed in more than one place and I pick the wrong one.  Might need to let them choose the location
                 // TODO: Swap to something that can show a hyperlink
-                MessageBox.Show("Could not find Steam path - LuteMod auto install not available\nPlease install LuteMod manually using the instructions at https://mordhau.mod.io/lutemod", "Install Failed");
+                new PopupForm("Install Failed", $"Could not find Steam path", "LuteMod auto install not available\nPlease install LuteMod manually using the following instructions:", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                    .ShowDialog();
                 return;
             }
 
@@ -256,7 +257,8 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
             }
             catch (Exception e)
             {
-                MessageBox.Show($"Could not copy LuteMod files to {pakPath}\nLuteBot may need to run as Administrator\n\n{e.Message}\n{e.StackTrace}", "Install Failed");
+                new PopupForm("Install Failed", $"Could not copy LuteMod files to {pakPath}", $"LuteBot may need to run as Administrator\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                    .ShowDialog();
                 return;
             }
 
@@ -276,7 +278,8 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
             }
             catch (Exception e)
             {
-                MessageBox.Show($"Could not access Game.ini at {gameIniPath}\nLuteBot may need to run as Administrator\nYou can set a custom path in the Key Bindings menu\n\n{e.Message}\n{e.StackTrace}", "Install Failed");
+                new PopupForm("Install Failed", $"Could not access Game.ini at {gameIniPath}", $"LuteBot may need to run as Administrator\nYou can set a custom path in the Key Bindings menu\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                    .ShowDialog();
                 return;
             }
 
@@ -285,8 +288,14 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
             if (!File.Exists(partitionIndexTarget))
                 File.Copy(Path.Combine(Application.StartupPath, "LuteMod", partitionIndexName), partitionIndexTarget);
 
-
-            MessageBox.Show("LuteMod Successfully Installed\nSee the wiki for usage information: https://mordhau-bards-guild.fandom.com/wiki/LuteMod \n\nIf Mordhau is open, restart it");
+            new PopupForm("Install Complete", "LuteMod Successfully Installed", "Use LuteBot to create Partitions out of your songs for LuteMod\n\nUse Kick in-game with a lute to open the LuteMod menu\n\nIf Mordhau is open, restart it", 
+                new Dictionary<string, string>() { 
+                    { "Adding Songs", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Adding_Songs" } ,
+                    { "Playing Songs", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Playing_Songs" },
+                    { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
+                    { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" },
+                })
+                    .ShowDialog();
         }
 
         private static string GetPakPath()

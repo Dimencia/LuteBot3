@@ -200,6 +200,12 @@
     <Compile Include="UI\PartitionAdjustmentForm.Designer.cs">
       <DependentUpon>PartitionAdjustmentForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\PopupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\PopupForm.Designer.cs">
+      <DependentUpon>PopupForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\ScrapMechanicConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -306,6 +312,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\PopupForm.resx">
+      <DependentUpon>PopupForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\ScrapMechanicConfigForm.resx">
       <DependentUpon>ScrapMechanicConfigForm.cs</DependentUpon>
     </EmbeddedResource>
