@@ -1,6 +1,12 @@
 # LuteBot 3
 Originally forked from https://github.com/MontyLeGueux/Lutebot-2
-I had some issues with Git and ended up making a new repo, but this is still mostly his code
+I had some issues with Git and ended up making a new repo, but this is still forked from his code
+
+Now installs lutemod and the mod loader upon prompt
+
+Big thanks to cswic and his modloader, which he allowed me to package here https://mordhau.mod.io/clientside-mod-autoloader
+
+And Monty, for LuteBot2, and LuteMod which he allowed me to package here https://mordhau.mod.io/lutemod
 
 
 ## Usage Instructions
