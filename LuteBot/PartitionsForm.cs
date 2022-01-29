@@ -2,6 +2,7 @@
 using LuteBot.Core.Midi;
 using LuteBot.IO.Files;
 using LuteBot.TrackSelection;
+using LuteBot.UI;
 using LuteBot.UI.Utils;
 
 using LuteMod.Indexing;
@@ -28,7 +29,30 @@ namespace LuteBot
             this.tsm = tsm;
             this.player = player;
             InitializeComponent();
+            this.FormClosing += PartitionsForm_FormClosing1;
+            if (!LuteBotForm.IsLuteModInstalled())
+            {
+                var popup = new PopupForm("Install LuteMod", "Would you like to install LuteMod?", "LuteMod is a Mordhau Mod that lets you manage your songs in game and move freely, and play duets with lute and flute\n\nLuteMod was not detected as installed\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
+                new Dictionary<string, string>() {
+                    { "What is LuteMod", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod" } ,
+                    { "LuteMod mod.io page", "https://mordhau.mod.io/lutemod" },
+                    { "Autoloader mod.io page", "https://mordhau.mod.io/clientside-mod-autoloader" },
+                    { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
+                    { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" },
+                }, MessageBoxButtons.YesNo);
+                popup.ShowDialog(this);
+                if (popup.DialogResult == DialogResult.Yes)
+                    LuteBotForm.InstallLuteMod();
+                else
+                    Hide();
+            }
             RefreshPartitionList();
+        }
+
+        private void PartitionsForm_FormClosing1(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
         }
 
         private MidiPlayer player;
@@ -41,7 +65,8 @@ namespace LuteBot
             index.LoadIndex();
             if (!index.Loaded)
             {
-                MessageBox.Show("No partition index found.  Initialize the partition by opening the partition menu in-game with lutemod at least once");
+                MessageBox.Show("No partition index found.  If LuteMod is installed, you can't add songs until you start Mordhau, go into a game, and kick with a Lute until the menu opens\n\nOr choose Settings -> Install LuteMod, which now includes the partition file, and will update an existing install if necessary");
+                Hide();
             }
             PopulateIndexList();
         }

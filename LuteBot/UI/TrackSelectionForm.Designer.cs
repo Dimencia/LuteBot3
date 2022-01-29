@@ -83,9 +83,9 @@ namespace LuteBot.UI
             this.label1.Location = new System.Drawing.Point(16, 11);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(168, 20);
+            this.label1.Size = new System.Drawing.Size(213, 20);
             this.label1.TabIndex = 9;
-            this.label1.Text = "List of Instruments";
+            this.label1.Text = "List of MIDI Instruments";
             // 
             // SongProfileSaveButton
             // 
@@ -289,7 +289,7 @@ namespace LuteBot.UI
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "TrackSelectionForm";
-            this.Text = "Track Selection";
+            this.Text = "Track Filtering";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TrackSelectionForm_Closing);
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);

@@ -71,6 +71,9 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CefSharp, Version=93.1.111.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
       <HintPath>..\packages\CefSharp.Common.93.1.111\lib\net452\CefSharp.dll</HintPath>
@@ -173,6 +176,12 @@
     <Compile Include="TrackSelection\TrackItem.cs" />
     <Compile Include="TrackSelection\TrackSelectionData.cs" />
     <Compile Include="TrackSelection\TrackSelectionManager.cs" />
+    <Compile Include="UI\FirstTimeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FirstTimeForm.Designer.cs">
+      <DependentUpon>FirstTimeForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\GuildLibraryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -190,6 +199,12 @@
     </Compile>
     <Compile Include="UI\PartitionAdjustmentForm.Designer.cs">
       <DependentUpon>PartitionAdjustmentForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\PopupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\PopupForm.Designer.cs">
+      <DependentUpon>PopupForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\ScrapMechanicConfigForm.cs">
       <SubType>Form</SubType>
@@ -263,6 +278,9 @@
     <EmbeddedResource Include="TrackNamingForm.resx">
       <DependentUpon>TrackNamingForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\FirstTimeForm.resx">
+      <DependentUpon>FirstTimeForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\GuildLibraryForm.resx">
       <DependentUpon>GuildLibraryForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -294,6 +312,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\PopupForm.resx">
+      <DependentUpon>PopupForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\ScrapMechanicConfigForm.resx">
       <DependentUpon>ScrapMechanicConfigForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -310,7 +331,17 @@
       <DependentUpon>TrackSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="app.manifest" />
+    <None Include="LuteMod\AutoLoaderWindowsClient.pak">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="LuteMod\FLuteMod_1.3.pak">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="LuteBot_TemporaryKey.pfx" />
+    <None Include="LuteMod\PartitionIndex[0].sav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Config\Old\App.config">
       <SubType>Designer</SubType>

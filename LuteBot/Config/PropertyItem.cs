@@ -47,6 +47,8 @@
         LastMidiDeviceUsed,
         LastMidiLowBoundUsed,
         Server,
+        FirstRun,
+        LastVersion,
 
         //window positions
         MainWindowPos,

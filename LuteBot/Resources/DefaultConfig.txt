@@ -90,15 +90,15 @@
     },
     {
       "Item": "OpenConsole",
-      "Value": "Next"
+      "Value": "Home"
     },
     {
       "Item": "MordhauInputIniLocation",
-      "Value": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Mordhau\\Mordhau\\Config\\DefaultInput.ini"
+      "Value": ""
     },
     {
       "Item": "UserSavedConsoleKey",
-      "Value": "Next"
+      "Value": "Home"
     },
     {
       "Item": "MainWindowPos",
@@ -159,6 +159,14 @@
 	{
       "Item": "Server",
       "Value": "127.0.0.1"
+    },
+    {
+      "Item": "FirstRun",
+      "Value": "True"
+    },
+    {
+      "Item": "LastVersion",
+      "Value": ""
     }
   ]
 }
