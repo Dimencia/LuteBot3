@@ -41,6 +41,7 @@ namespace LuteBot
         private static LowLevelKeyboardProc _proc = HookCallback;
         private static IntPtr _hookID = IntPtr.Zero;
 
+        public static readonly string lutebotPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot");
         public static readonly string libraryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "GuildLibrary");
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -67,6 +68,7 @@ namespace LuteBot
         PartitionsForm partitionsForm = null;
 
         MidiPlayer player;
+        public static LuteBotForm luteBotForm;
 
 
         string playButtonStartString = "Play";
@@ -100,6 +102,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
         public LuteBotForm()
         {
+            luteBotForm = this;
             InitializeComponent();
 
             onlineManager = new OnlineSyncManager();

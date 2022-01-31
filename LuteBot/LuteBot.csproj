@@ -218,6 +218,9 @@
     <Compile Include="UI\TimeSyncForm.Designer.cs">
       <DependentUpon>TimeSyncForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Utils\CustomListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="UI\Utils\Instrument.cs" />
     <Compile Include="UI\Utils\Song.cs" />
     <Compile Include="UI\Utils\SortableBindingList.cs" />

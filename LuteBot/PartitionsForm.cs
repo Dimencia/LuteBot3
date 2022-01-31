@@ -30,6 +30,8 @@ namespace LuteBot
             this.player = player;
             InitializeComponent();
             this.FormClosing += PartitionsForm_FormClosing1;
+            listBoxPartitions.MouseMove += ListBoxPartitions_MouseMove;
+
             if (!LuteBotForm.IsLuteModInstalled())
             {
                 var popup = new PopupForm("Install LuteMod", "Would you like to update/install LuteMod?", "LuteMod is a Mordhau Mod that lets you manage your songs in game and move freely, and play duets with lute and flute\n\nLuteMod was not detected as installed, or an old version was detected\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
@@ -48,6 +50,36 @@ namespace LuteBot
             }
             RefreshPartitionList();
         }
+
+        private static readonly string partitionMidiPath = Path.Combine(LuteBotForm.lutebotPath, "Partition MIDIs");
+
+        private void ListBoxPartitions_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && listBoxPartitions.SelectedItems.Count > 0)
+            {
+                int mouseIndex = listBoxPartitions.IndexFromPoint(e.Location);
+                if (mouseIndex > -1)
+                {
+                    ListBox.SelectedObjectCollection x = new ListBox.SelectedObjectCollection(listBoxPartitions);
+                    if (Control.ModifierKeys == Keys.Shift)
+                    {
+                        int i1 = Math.Min(listBoxPartitions.SelectedIndex, mouseIndex);
+                        int i2 = Math.Max(listBoxPartitions.SelectedIndex, mouseIndex);
+                        for (int i = i1; i <= i2; ++i)
+                        {
+                            x.Add(listBoxPartitions.Items[i]);
+                        }
+                    }
+                    else
+                    {
+                        x = listBoxPartitions.SelectedItems;
+                    }
+                    var dropResult = DoDragDrop(x, DragDropEffects.Move);
+                }
+            }
+        }
+
+        
 
         private void PartitionsForm_FormClosing1(object sender, FormClosingEventArgs e)
         {
@@ -86,15 +118,36 @@ namespace LuteBot
             {
                 ContextMenu indexContextMenu = new ContextMenu();
 
-                MenuItem deleteItem = indexContextMenu.MenuItems.Add("Delete");
+                string name = (string)listBoxPartitions.SelectedItems[0];
+                if (listBoxPartitions.SelectedItems.Count > 1)
+                    name += " + ...";
+
+                MenuItem deleteItem = indexContextMenu.MenuItems.Add("Delete " + name);
                 deleteItem.Click += new EventHandler(DeleteItem_Click);
-                listBoxPartitions.ContextMenu = indexContextMenu;
+
+                if (listBoxPartitions.SelectedIndices.Count == 1)
+                {
+                    string midiPath = Path.Combine(partitionMidiPath, listBoxPartitions.SelectedItems[0] + ".mid");
+                    if (File.Exists(midiPath))
+                    {
+                        MenuItem editItem = indexContextMenu.MenuItems.Add("Load " + name);
+                        editItem.Click += EditItem_Click;
+                    }
+                }
+                
+                listBoxPartitions.ContextMenu = indexContextMenu; // TODO: I'd love to make it popup at the selected item, not at mouse pos, but whatever
                 indexContextMenu.Show(listBoxPartitions, listBoxPartitions.PointToClient(Cursor.Position));
             }
             else
             {
                 listBoxPartitions.ContextMenu = null;
             }
+        }
+
+        private void EditItem_Click(object sender, EventArgs e)
+        {
+            string midiPath = Path.Combine(partitionMidiPath, listBoxPartitions.SelectedItems[0] + ".mid");
+            LuteBotForm.luteBotForm.LoadHelper(midiPath);
         }
 
         private void PartitionIndexBox_DragOver(object sender, DragEventArgs e)
@@ -104,25 +157,72 @@ namespace LuteBot
 
         private void PartitionIndexBox_DragDrop(object sender, DragEventArgs e)
         {
-            Point point = listBoxPartitions.PointToClient(new Point(e.X, e.Y));
-            int i = this.listBoxPartitions.IndexFromPoint(point);
-            if (i < 0) i = this.listBoxPartitions.Items.Count - 1;
-            object data = e.Data.GetData(typeof(string));
-            if (data != null)
+            try
             {
-                this.listBoxPartitions.Items.Remove(data);
-                this.listBoxPartitions.Items.Insert(i, data);
-                index.PartitionNames.Remove((string)data);
-                index.PartitionNames.Insert(i, (string)data);
-                index.SaveIndex();
+                Point point = listBoxPartitions.PointToClient(new Point(e.X, e.Y));
+                int i = this.listBoxPartitions.IndexFromPoint(point);
+                // Try to handle multi-drag-drop, may reorder things
+                var selectedIndices = listBoxPartitions.SelectedIndices.Cast<int>().ToArray();
+                //var selectedItems = listBoxPartitions.SelectedItems.Cast<string>().ToArray();
+                //int[] selectedIndices = e.Data.GetData(typeof(int[])) as int[];
+                string[] selectedItems = new string[selectedIndices.Length];
+                for (int j = 0; j < selectedIndices.Length; j++)
+                    selectedItems[j] = (string)listBoxPartitions.Items[selectedIndices[j]];
+
+
+                if (selectedItems != null && selectedItems.Length > 0 && i != selectedIndices[0])
+                {
+                    foreach (string data in selectedItems)
+                    {
+                        // First just remove them all
+                        this.listBoxPartitions.Items.Remove(data);
+                        //this.listBoxPartitions.Items.Insert(i, data);
+                        index.PartitionNames.Remove((string)data);
+                        //index.PartitionNames.Insert(i, (string)data);
+
+                    }
+                    if (i < 0 || i >= listBoxPartitions.Items.Count)
+                        i = this.listBoxPartitions.Items.Count - 1;
+                    // Then insert them at i+j in their original order
+                    for (int j = 0; j < selectedItems.Length; j++)
+                    {
+                        this.listBoxPartitions.Items.Insert(i + j, selectedItems[j]);
+                        index.PartitionNames.Insert(i + j, (string)selectedItems[j]);
+                    }
+                    // Then re-select all the same things
+                    listBoxPartitions.ClearSelected();
+                    for (int j = 0; j < selectedItems.Length; j++)
+                    {
+                        listBoxPartitions.SetSelected(i + j, true);
+                    }
+                    index.SaveIndex();
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+
         }
 
         private void PartitionIndexBox_MouseDown(object sender, MouseEventArgs e)
         {
+
             if (this.listBoxPartitions.SelectedItem == null) return;
-            if (Control.ModifierKeys == Keys.None) // Prevents a bug when multi-selecting
-                this.listBoxPartitions.DoDragDrop(this.listBoxPartitions.SelectedItem, DragDropEffects.Move);
+            // If something that's already selected was clicked, keep all selected indices that we detected last time
+            //Point point = listBoxPartitions.PointToClient(new Point(e.X, e.Y));
+            //int i = this.listBoxPartitions.IndexFromPoint(e.Location);
+            //if (lastSelectedIndices.Contains(i))
+            //{
+            //    foreach (var last in lastSelectedIndices)
+            //        listBoxPartitions.SetSelected(last, true);
+            //}
+            // Looked weird and was kindof annoying and not expected behavior.  No longer necessary now that it works without
+
+            // IDK why this works because I supposedly skip if they have a modifier key, but shift+drag to move multi selections is good now
+            if (Control.ModifierKeys == Keys.None && e.Button == MouseButtons.Left) // Prevents a bug when multi-selecting
+                this.listBoxPartitions.DoDragDrop(listBoxPartitions.SelectedIndices, DragDropEffects.Move);
             if (e.Button == MouseButtons.Right)
             {
                 ContextMenuHelper();
@@ -186,7 +286,7 @@ namespace LuteBot
 
         private LuteMod.Converter.MordhauConverter trackConverter = null;
 
-        private void button2_Click(object sender, EventArgs e)
+        private void savePartitionsButton_Click(object sender, EventArgs e)
         {
 
             if (tsm.MidiTracks.Where(t => t.Active).Count() > 0)
@@ -256,7 +356,7 @@ namespace LuteBot
                                     }
                                 }
 
-                                SaveManager.WriteSaveFile(SaveManager.SaveFilePath + namingForm.textBoxPartName.Text, converter.GetPartitionToString());
+                                SaveManager.WriteSaveFile(Path.Combine(SaveManager.SaveFilePath, namingForm.textBoxPartName.Text), converter.GetPartitionToString());
                                 index.SaveIndex();
                                 PopulateIndexList();
                                 // And put the instrument back
@@ -284,6 +384,15 @@ namespace LuteBot
                                 //    PopulateIndexList();
                                 //    trackConverter = null;
                                 //}
+
+                                // Lastly, save the settings in a midi file with the same name, in the same folder, for ease of sharing...
+                                // TODO: Consider storing these in appdata, and providing a button to access them.  Both might get complicated if I make partition playlists
+                                // Actually... I think I will store them in appdata.
+                                var midFileName = Path.Combine(partitionMidiPath, namingForm.textBoxPartName.Text + ".mid");
+                                if (File.Exists(midFileName))
+                                    File.Delete(midFileName);
+                                Directory.CreateDirectory(midFileName);
+                                tsm.SaveTrackManager(midFileName);
                             }
                         }
                     }
