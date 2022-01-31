@@ -42,7 +42,7 @@
             this.titleLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.titleLabel.Location = new System.Drawing.Point(0, 0);
             this.titleLabel.Name = "titleLabel";
-            this.titleLabel.Size = new System.Drawing.Size(603, 38);
+            this.titleLabel.Size = new System.Drawing.Size(640, 38);
             this.titleLabel.TabIndex = 0;
             this.titleLabel.Text = "LuteMod installed successfully";
             this.titleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -53,7 +53,7 @@
             this.contentLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.contentLabel.Location = new System.Drawing.Point(0, 38);
             this.contentLabel.Name = "contentLabel";
-            this.contentLabel.Size = new System.Drawing.Size(603, 395);
+            this.contentLabel.Size = new System.Drawing.Size(640, 395);
             this.contentLabel.TabIndex = 1;
             this.contentLabel.Text = "  When did this get erased?\r\n\r\nSome info\r\n\r\nYou know";
             this.contentLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -67,7 +67,7 @@
             this.bottomPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.bottomPanel.Location = new System.Drawing.Point(0, 433);
             this.bottomPanel.Name = "bottomPanel";
-            this.bottomPanel.Size = new System.Drawing.Size(603, 6);
+            this.bottomPanel.Size = new System.Drawing.Size(640, 6);
             this.bottomPanel.TabIndex = 4;
             // 
             // linkPanel
@@ -76,7 +76,7 @@
             this.linkPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.linkPanel.Location = new System.Drawing.Point(0, 0);
             this.linkPanel.Name = "linkPanel";
-            this.linkPanel.Size = new System.Drawing.Size(603, 6);
+            this.linkPanel.Size = new System.Drawing.Size(640, 6);
             this.linkPanel.TabIndex = 3;
             // 
             // buttonPanel
@@ -91,7 +91,7 @@
             this.buttonPanel.Name = "buttonPanel";
             this.buttonPanel.RowCount = 1;
             this.buttonPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.buttonPanel.Size = new System.Drawing.Size(603, 0);
+            this.buttonPanel.Size = new System.Drawing.Size(640, 0);
             this.buttonPanel.TabIndex = 5;
             // 
             // PopupForm
@@ -99,7 +99,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(603, 439);
+            this.ClientSize = new System.Drawing.Size(640, 439);
             this.Controls.Add(this.contentLabel);
             this.Controls.Add(this.bottomPanel);
             this.Controls.Add(this.titleLabel);

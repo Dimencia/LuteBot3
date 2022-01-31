@@ -1,4 +1,5 @@
 ﻿using Lutebot.UI;
+
 using LuteBot.Config;
 using LuteBot.Core;
 using LuteBot.Core.Midi;
@@ -16,6 +17,7 @@ using LuteBot.Utils;
 using Microsoft.Win32;
 
 using Sanford.Multimedia.Midi;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -39,7 +41,7 @@ namespace LuteBot
         private static LowLevelKeyboardProc _proc = HookCallback;
         private static IntPtr _hookID = IntPtr.Zero;
 
-        public static readonly string libraryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"LuteBot","GuildLibrary");
+        public static readonly string libraryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "GuildLibrary");
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
@@ -81,7 +83,7 @@ namespace LuteBot
         static OnlineSyncManager onlineManager;
         static LiveMidiManager liveMidiManager;
         static KeyBindingForm keyBindingForm = null;
-        
+
         private static string lutemodPakName = "FLuteMod_1.3.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
@@ -90,6 +92,9 @@ ClientMods=/Game/Mordhau/Maps/LuteMod/Client/BP_LuteModClientLoader.BP_LuteModCl
 ModListWidgetStayTime=5.0";
         private static string loaderString2 = @"[Mods]
 ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
+        private static string removeFromEngine = @"[/Script/EngineSettings.GameMapsSettings]
+GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_MainMenu";
+        private static string removeFromPaks = "zz_clientmodloadingmap_425.pak";
 
         private static string MordhauPakPath = GetPakPath();
 
@@ -160,7 +165,7 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
                     // extract to libraryPath + "\songs\"
                     try
                     {
-                        ZipFile.ExtractToDirectory(files[0], Path.Combine(libraryPath,"songs"));
+                        ZipFile.ExtractToDirectory(files[0], Path.Combine(libraryPath, "songs"));
                         //File.Delete(files[0]);
                     }
                     catch (Exception e) { } // Gross I know, but no reason to do anything
@@ -180,45 +185,50 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
             }
 
             // Check for FirstRun, and offer the wiki link and auto-setup
-            if (ConfigManager.GetBooleanProperty(PropertyItem.FirstRun))
-            {
-                ConfigManager.SetProperty(PropertyItem.FirstRun, "False");
-                // TODO: A help window with... just the wiki link?
-                // I guess also link to the Guild's discord and put some credits there, and link to various specific wiki topics
+            //if (ConfigManager.GetBooleanProperty(PropertyItem.FirstRun))
+            //{
+            //    ConfigManager.SetProperty(PropertyItem.FirstRun, "False");
+            //    // TODO: A help window with... just the wiki link?
+            //    // I guess also link to the Guild's discord and put some credits there, and link to various specific wiki topics
+            //    helpToolStripMenuItem_Click(null, null);
+            //}
+            // I think I'm going to skip this; if it's a first run, they already get two popups that it set the console key, and then lutemod install
+            // The lutemod install gives them links, so, they don't need this, but the var is there if I want it later.
 
-            }
+
+            // Again, also removing the following; it's pointless, 3.3.0 was the first version that uses that config path, so it will never need to modify anything for versions below
 
             // If it's not set, it's below 3.3; the rest is also there just for posterity so I can use it in the future
-            if (!string.IsNullOrWhiteSpace(ConfigManager.GetProperty(PropertyItem.LastVersion)))
-            {
-
-                // Parse the version into something we can compare
-                var firstGoodVersions = "3.3".Split('.');
-                var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
-
-
-                for (int i = 0; i < firstGoodVersions.Length; i++)
-                {
-                    // If we've run out of numbers to compare on either side and none have been less yet, or if any of the numbers are less, the version is below our target
-
-                    // I think.  Target: 3.3 vs 3.31, we ran out of numbers but we're above.  So it depends in which direction
-                    // If we run out of numbers in the target, it is not less
-                    // Target: 3.31 vs 3.3, we run out of numbers in the lastversions, so it is less.  Good.  
-
-                    if (i >= lastversions.Length || int.Parse(lastversions[i]) < int.Parse(firstGoodVersions[i]))
-                    {
-                        // The last version ran is below the target, and changes should be applied
-                        Instrument.WriteDefaults();
-                        // The new config data will pull from defaultConfig and should all be OK
-
-                        // We might should messagebox to let them know, but that'd be like a third messagebox for new installs, and that's just annoying at that point
-                    }
-                }
-            }
-            else
-            {
-                Instrument.WriteDefaults();
-            }
+            //if (!string.IsNullOrWhiteSpace(ConfigManager.GetProperty(PropertyItem.LastVersion)))
+            //{
+            //
+            //    // Parse the version into something we can compare
+            //    var firstGoodVersions = "3.3".Split('.');
+            //    var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
+            //
+            //
+            //    for (int i = 0; i < firstGoodVersions.Length; i++)
+            //    {
+            //        // If we've run out of numbers to compare on either side and none have been less yet, or if any of the numbers are less, the version is below our target
+            //
+            //        // I think.  Target: 3.3 vs 3.31, we ran out of numbers but we're above.  So it depends in which direction
+            //        // If we run out of numbers in the target, it is not less
+            //        // Target: 3.31 vs 3.3, we run out of numbers in the lastversions, so it is less.  Good.  
+            //
+            //        if (i >= lastversions.Length || int.Parse(lastversions[i]) < int.Parse(firstGoodVersions[i]))
+            //        {
+            //            // The last version ran is below the target, and changes should be applied
+            //            Instrument.WriteDefaults();
+            //            // The new config data will pull from defaultConfig and should all be OK
+            //
+            //            // We might should messagebox to let them know, but that'd be like a third messagebox for new installs, and that's just annoying at that point
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    Instrument.WriteDefaults();
+            //}
             ConfigManager.SetProperty(PropertyItem.LastVersion, ConfigManager.GetVersion());
         }
 
@@ -226,7 +236,25 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
         {
             // Just check for the lutemod pak in CustomPaks, if they messed it up beyond that they can click the install button themselves, this is just to prompt them to install if necessary
             var pakPath = Path.Combine(MordhauPakPath, lutemodPakName);
-            return File.Exists(pakPath);
+            if (File.Exists(pakPath))
+            {
+                // Actually.  If they have it, we should check engine.ini for the bad line, and if it's there, recommend install
+                string engineIniPath = Path.Combine(Path.GetDirectoryName(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation)), "Engine.ini");
+
+                try
+                {
+                    var content = File.ReadAllText(engineIniPath);
+                    return !content.Contains(removeFromEngine);
+                }
+                catch (Exception e)
+                {
+                    new PopupForm("Mordhau Detection Failed", $"Could not access Engine.ini at {engineIniPath}", $"LuteBot will be unable to fix the LuteMod startup crash from old versions\nThis also indicates something is generally wrong.  You may want to run LuteBot as Administrator\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "LuteMod Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                    .ShowDialog();
+                    return false;
+                }
+            }
+            else
+                return false;
         }
 
         public static void InstallLuteMod()
@@ -235,7 +263,7 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
             var pakPath = MordhauPakPath;
             if (string.IsNullOrWhiteSpace(pakPath))
             { // Shouldn't really happen.  More likely is they have mordhau installed in more than one place and I pick the wrong one.  Might need to let them choose the location
-                // TODO: Swap to something that can show a hyperlink
+
                 new PopupForm("Install Failed", $"Could not find Steam path", "LuteMod auto install not available\nPlease install LuteMod manually using the following instructions:", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
                     .ShowDialog();
                 return;
@@ -245,12 +273,12 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
             {
 
                 Directory.CreateDirectory(pakPath);
-               
+
                 string lutemodPakTarget = Path.Combine(pakPath, lutemodPakName);
                 if (!File.Exists(lutemodPakTarget))
                     File.Copy(Path.Combine(Application.StartupPath, "LuteMod", lutemodPakName), lutemodPakTarget);
 
-                
+
                 string loaderPakTarget = Path.Combine(pakPath, loaderPakName);
                 if (!File.Exists(loaderPakTarget))
                     File.Copy(Path.Combine(Application.StartupPath, "LuteMod", loaderPakName), loaderPakTarget);
@@ -262,12 +290,50 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
                 return;
             }
 
+            try
+            {
+                // Remove the old autoloader pak if it exists, to avoid potential problems like double-loading
+                string removePakTarget = Path.Combine(pakPath, ".." + Path.DirectorySeparatorChar, "Paks", removeFromPaks);
+                if (File.Exists(removePakTarget))
+                    File.Delete(removePakTarget);
+
+                removePakTarget = Path.Combine(pakPath, removeFromPaks);
+                if (File.Exists(removePakTarget))
+                    File.Delete(removePakTarget);
+
+                // Find all instances of old lutemod paks and remove them
+                var files = Directory.GetFiles(pakPath);
+                foreach (var f in files)
+                {
+                    var name = Path.GetFileName(f);
+                    if (Regex.IsMatch(name.ToLower(),"^f?-?lutemod") && name != lutemodPakName)
+                    {
+                        File.Delete(f);
+                    }
+                }
+                files = Directory.GetFiles(Path.Combine(pakPath, ".." + Path.DirectorySeparatorChar, "Paks"));
+                foreach (var f in files)
+                {
+                    var name = Path.GetFileName(f);
+                    if (Regex.IsMatch(name.ToLower(), "^f?-?lutemod") && name != lutemodPakName)
+                    {
+                        File.Delete(f);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                new PopupForm("Could not remove old versions", $"Could not remove old versions of Paks at {pakPath}", $"Install will continue, but you may have conflicts if these files are not removed\n\nLuteBot may need to run as Administrator, or Mordhau may need to be closed\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                    .ShowDialog();
+            }
+
+
             string gameIniPath = Path.Combine(Path.GetDirectoryName(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation)), "Game.ini");
 
             try
             {
                 var content = File.ReadAllText(gameIniPath);
-                
+
 
                 if (!content.Contains(loaderString1))
                     content = content + "\n" + loaderString1;
@@ -283,13 +349,33 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
                 return;
             }
 
+            // removeFromEngine
+            string engineIniPath = Path.Combine(Path.GetDirectoryName(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation)), "Engine.ini");
+
+            try
+            {
+                var content = File.ReadAllText(engineIniPath);
+
+
+                if (content.Contains(removeFromEngine)) // Prevent rewriting the file if we don't change anything
+                {
+                    content = content.Replace(removeFromEngine, "");
+                    File.WriteAllText(engineIniPath, content);
+                }
+            }
+            catch (Exception e)
+            {
+                new PopupForm("Crash Fix Failed", $"Could not access Engine.ini at {engineIniPath}", $"This is not fatal, and install will continue, but if you are experiencing startup crashes from an old version, they will not be fixed\n\nLuteBot may need to run as Administrator\nYou can set a custom path in the Key Bindings menu\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                    .ShowDialog();
+            }
+
             // TODO: Testing on this.  Supposedly each user needs to generate their own empty PartitionIndex, but that may have just been some other bug that was fixed since?
             string partitionIndexTarget = Path.Combine(SaveManager.SaveFilePath, partitionIndexName);
             if (!File.Exists(partitionIndexTarget))
                 File.Copy(Path.Combine(Application.StartupPath, "LuteMod", partitionIndexName), partitionIndexTarget);
 
-            new PopupForm("Install Complete", "LuteMod Successfully Installed", "Use LuteBot to create Partitions out of your songs for LuteMod\n\nUse Kick in-game with a lute to open the LuteMod menu\n\nIf Mordhau is open, restart it", 
-                new Dictionary<string, string>() { 
+            new PopupForm("Install Complete", "LuteMod Successfully Installed", "Use LuteBot to create Partitions out of your songs for LuteMod\n\nUse Kick in-game with a lute to open the LuteMod menu\n\nIf Mordhau is open, restart it",
+                new Dictionary<string, string>() {
                     { "Adding Songs", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Adding_Songs" } ,
                     { "Playing Songs", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Playing_Songs" },
                     { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
@@ -447,7 +533,7 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
                 PlayButton.Enabled = true;
                 MusicProgressBar.Enabled = true;
                 StopButton.Enabled = true;
-                
+
                 trackSelectionManager.UnloadTracks();
                 if (player.GetType() == typeof(MidiPlayer))
                 {
@@ -1558,6 +1644,20 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
         private void installLuteModToolStripMenuItem_Click(object sender, EventArgs e)
         {
             InstallLuteMod();
+        }
+
+        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var popup = new PopupForm("Help", "Useful Links and Info", "The Bard's Guild Wiki contains all information about LuteMod and LuteBot - and if it doesn't, you can add to it\n\nFurther troubleshooting is available in the #mordhau channel of the Bard's Guild Discord",
+                new Dictionary<string, string>() {
+                    { "What is LuteMod", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod" } ,
+                    { "Getting Songs", "https://mordhau-bards-guild.fandom.com/wiki/Getting_Songs" },
+                    { "LuteBot Usage", "https://mordhau-bards-guild.fandom.com/wiki/LuteBot#Usage" },
+                    { "LuteMod Usage", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Playing_Songs" },
+                    { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
+                    { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" },
+                });
+            popup.ShowDialog();
         }
     }
 }
