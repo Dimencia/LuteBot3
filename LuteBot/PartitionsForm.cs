@@ -32,7 +32,7 @@ namespace LuteBot
             this.FormClosing += PartitionsForm_FormClosing1;
             if (!LuteBotForm.IsLuteModInstalled())
             {
-                var popup = new PopupForm("Install LuteMod", "Would you like to install LuteMod?", "LuteMod is a Mordhau Mod that lets you manage your songs in game and move freely, and play duets with lute and flute\n\nLuteMod was not detected as installed\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
+                var popup = new PopupForm("Install LuteMod", "Would you like to update/install LuteMod?", "LuteMod is a Mordhau Mod that lets you manage your songs in game and move freely, and play duets with lute and flute\n\nLuteMod was not detected as installed, or an old version was detected\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
                 new Dictionary<string, string>() {
                     { "What is LuteMod", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod" } ,
                     { "LuteMod mod.io page", "https://mordhau.mod.io/lutemod" },

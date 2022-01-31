@@ -29,7 +29,7 @@ namespace LuteBot.UI
                     linklabel.Click += Linklabel_Click;
                     linklabel.AutoSize = true;
                     linkPanel.Controls.Add(linklabel);
-                    linkPanel.Height = linkPanel.Height + linklabel.Height + linklabel.Padding.Bottom + linklabel.Padding.Top + linkPanel.Margin.Bottom + linkPanel.Margin.Top;
+                    linkPanel.Height = linkPanel.Height + linklabel.Height;
                 }
             }
             switch(buttons)
@@ -54,6 +54,9 @@ namespace LuteBot.UI
                     addButton(nbutton);
                     break;
             }
+
+            this.AutoSize = true;
+            this.AutoSizeMode = AutoSizeMode.GrowOnly;
         }
 
         private int buttonCount = 0; // Janky but oh well
