@@ -164,7 +164,7 @@ namespace LuteBot.Config
 
         public static string GetVersion()
         {
-            return "3.3.1";
+            return "3.3.2";
         }
     }
 }
