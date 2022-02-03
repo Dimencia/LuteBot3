@@ -389,54 +389,99 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
         private static string GetPakPath()
         {
-            string mordhauId = "629760";
-            string steam32 = "SOFTWARE\\VALVE\\";
-            string steam64 = "SOFTWARE\\Wow6432Node\\Valve\\";
-            string steam32path;
-            string steam64path;
-            string config32path;
-            string config64path;
-            RegistryKey key32 = Registry.LocalMachine.OpenSubKey(steam32);
-            RegistryKey key64 = Registry.LocalMachine.OpenSubKey(steam64);
-
-            Regex pathReg = new Regex("\"path\"\\s*\"([^\"]*)\"[^}]*\"" + mordhauId + "\""); // Puts the path in group 1
-
-            foreach (string k64subKey in key64.GetSubKeyNames())
+            try
             {
-                using (RegistryKey subKey = key64.OpenSubKey(k64subKey))
+                string mordhauId = "629760";
+                string steam32 = "SOFTWARE\\VALVE\\";
+                string steam64 = "SOFTWARE\\Wow6432Node\\Valve\\";
+                string steam32path;
+                string steam64path;
+                string config32path;
+                string config64path;
+                RegistryKey key32 = Registry.LocalMachine.OpenSubKey(steam32);
+                RegistryKey key64 = Registry.LocalMachine.OpenSubKey(steam64);
+
+                Regex pathReg = new Regex("\"path\"\\s*\"([^\"]*)\"[^}]*\"" + mordhauId + "\""); // Puts the path in group 1
+
+                if (key64 != null)
                 {
-                    steam64path = subKey.GetValue("InstallPath").ToString();
-                    config64path = steam64path + "/steamapps/libraryfolders.vdf";
-                    if (File.Exists(config64path))
+                    foreach (string k64subKey in key64.GetSubKeyNames())
                     {
-                        string config = File.ReadAllText(config64path);
-                        if (pathReg.IsMatch(config)) // Not sure if this is necessary... 
+                        // Annoying.  So.  Something in here makes it hit that exception - in the one instance I've seen, for a k64subKey "Spacewar"
+                        // Which means, k64subKey isn't null.  We know key64 isn't null.  So how the hell?
+                        // Oh it's probably the subKey.GetValue... but no, that should just, return null.  null.ToString is... wait...
+                        // I guess that's probably it.  
+                        try
                         {
-                            Match m = pathReg.Match(config);
-                            // Stop at the Content folder so other logic can detect and move/remove paks in the wrong folder?
-                            // Nah.  They're not hurting anything there. 
-                            return Path.Combine(m.Groups[1].Value, "steamapps", "common", "Mordhau", "Mordhau", "Content", "CustomPaks");
+                            using (RegistryKey subKey = key64.OpenSubKey(k64subKey))
+                            {
+                                if (subKey != null)
+                                {
+                                    var keyValue = subKey.GetValue("InstallPath");
+                                    if (keyValue != null)
+                                    {
+                                        steam64path = keyValue.ToString();
+                                        config64path = steam64path + "/steamapps/libraryfolders.vdf";
+                                        if (File.Exists(config64path))
+                                        {
+                                            string config = File.ReadAllText(config64path);
+                                            if (pathReg.IsMatch(config)) // Not sure if this is necessary... 
+                                            {
+                                                Match m = pathReg.Match(config);
+                                                // Stop at the Content folder so other logic can detect and move/remove paks in the wrong folder?
+                                                // Nah.  They're not hurting anything there. 
+                                                return Path.Combine(m.Groups[1].Value, "steamapps", "common", "Mordhau", "Mordhau", "Content", "CustomPaks");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show($"Failed to get subKey for {k64subKey} for x64\n{e.Message}\n{e.StackTrace}");
+                        } // Hopefully this never triggers, but if it does, it won't break anything (being inside the loop), and someone can tell me and I can fix it.  
+                    }
+                }
+
+                if (key32 != null)
+                {
+                    foreach (string k32subKey in key32.GetSubKeyNames())
+                    {
+                        try
+                        {
+                            using (RegistryKey subKey = key32.OpenSubKey(k32subKey))
+                            {
+                                if (subKey != null)
+                                {
+                                    var keyValue = subKey.GetValue("InstallPath");
+                                    if (keyValue != null)
+                                    {
+                                        steam32path = keyValue.ToString();
+                                        config32path = steam32path + "/steamapps/libraryfolders.vdf";
+                                        if (File.Exists(config32path))
+                                        {
+                                            string config = File.ReadAllText(config32path);
+                                            if (pathReg.IsMatch(config)) // Not sure if this is necessary... 
+                                            {
+                                                Match m = pathReg.Match(config);
+                                                return Path.Combine(m.Groups[1].Value, "steamapps", "common", "Mordhau", "Mordhau", "Content", "CustomPaks");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show($"Failed to get subKey {k32subKey} for x32\n{e.Message}\n{e.StackTrace}");
                         }
                     }
                 }
             }
-
-            foreach (string k32subKey in key32.GetSubKeyNames())
+            catch (Exception e)
             {
-                using (RegistryKey subKey = key32.OpenSubKey(k32subKey))
-                {
-                    steam32path = subKey.GetValue("InstallPath").ToString();
-                    config32path = steam32path + "/steamapps/libraryfolders.vdf";
-                    if (File.Exists(config32path))
-                    {
-                        string config = File.ReadAllText(config32path);
-                        if (pathReg.IsMatch(config)) // Not sure if this is necessary... 
-                        {
-                            Match m = pathReg.Match(config);
-                            return Path.Combine(m.Groups[1].Value, "steamapps", "common", "Mordhau", "Mordhau", "Content", "CustomPaks");
-                        }
-                    }
-                }
+                MessageBox.Show($"General failure... \n{e.Message}\n{e.StackTrace}");
             }
 
             return string.Empty;
