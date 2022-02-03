@@ -35,7 +35,6 @@ namespace LuteBot
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openSavFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -83,7 +82,6 @@ namespace LuteBot
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importPartitionsToolStripMenuItem,
-            this.exportPartitionsToolStripMenuItem,
             this.openSavFolderToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
@@ -92,20 +90,14 @@ namespace LuteBot
             // importPartitionsToolStripMenuItem
             // 
             this.importPartitionsToolStripMenuItem.Name = "importPartitionsToolStripMenuItem";
-            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(202, 26);
+            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.importPartitionsToolStripMenuItem.Text = "Import Partitions";
             this.importPartitionsToolStripMenuItem.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // exportPartitionsToolStripMenuItem
-            // 
-            this.exportPartitionsToolStripMenuItem.Name = "exportPartitionsToolStripMenuItem";
-            this.exportPartitionsToolStripMenuItem.Size = new System.Drawing.Size(202, 26);
-            this.exportPartitionsToolStripMenuItem.Text = "Export Partitions";
             // 
             // openSavFolderToolStripMenuItem
             // 
             this.openSavFolderToolStripMenuItem.Name = "openSavFolderToolStripMenuItem";
-            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(202, 26);
+            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.openSavFolderToolStripMenuItem.Text = "Open Sav Folder";
             this.openSavFolderToolStripMenuItem.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -135,7 +127,6 @@ namespace LuteBot
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importPartitionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exportPartitionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openSavFolderToolStripMenuItem;
     }
 }
