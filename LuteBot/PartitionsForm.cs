@@ -391,8 +391,8 @@ namespace LuteBot
                                 var midFileName = Path.Combine(partitionMidiPath, namingForm.textBoxPartName.Text + ".mid");
                                 if (File.Exists(midFileName))
                                     File.Delete(midFileName);
-                                Directory.CreateDirectory(midFileName);
-                                tsm.SaveTrackManager(midFileName);
+                                Directory.CreateDirectory(partitionMidiPath);
+                                Task.Run(() => tsm.SaveTrackManager(midFileName)); // Lutebot doesn't need this anytime soon - and shouldn't offer the option to load it until it exists anyway
                             }
                         }
                     }
