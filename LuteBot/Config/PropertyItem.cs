@@ -30,6 +30,7 @@
         ForbidsChords,
         MajorUpdates,
         MinorUpdates,
+        CheckForUpdates,
 
         //keybinds
         Play,

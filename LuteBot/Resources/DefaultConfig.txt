@@ -175,6 +175,10 @@
     {
       "Item": "MinorUpdates",
       "Value": "False"
+    },
+    {
+      "Item": "CheckForUpdates",
+      "Value": "True"
     }
   ]
 }

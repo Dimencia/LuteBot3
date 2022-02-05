@@ -30,7 +30,6 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.VersionLabel = new System.Windows.Forms.Label();
-            this.UpdateLinkLabel = new System.Windows.Forms.LinkLabel();
             this.PlaylistCheckBox = new System.Windows.Forms.CheckBox();
             this.SoundBoardCheckBox = new System.Windows.Forms.CheckBox();
             this.ReturnButton = new System.Windows.Forms.Button();
@@ -64,6 +63,9 @@
             this.outputDeviceBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.guildLabel = new System.Windows.Forms.LinkLabel();
+            this.checkBoxCheckUpdates = new System.Windows.Forms.CheckBox();
+            this.checkBoxMajorUpdates = new System.Windows.Forms.CheckBox();
+            this.checkBoxMinorUpdates = new System.Windows.Forms.CheckBox();
             this.SettingsGroupBox.SuspendLayout();
             this.AdvancedGroupBox.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -75,25 +77,14 @@
             // 
             // VersionLabel
             // 
+            this.VersionLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.VersionLabel.AutoSize = true;
-            this.VersionLabel.Location = new System.Drawing.Point(-1, 629);
+            this.VersionLabel.Location = new System.Drawing.Point(-1, 698);
             this.VersionLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.VersionLabel.Name = "VersionLabel";
             this.VersionLabel.Size = new System.Drawing.Size(294, 17);
             this.VersionLabel.TabIndex = 0;
             this.VersionLabel.Text = "Mordhau Lute Bot [VERSION] made by Monty";
-            // 
-            // UpdateLinkLabel
-            // 
-            this.UpdateLinkLabel.AutoSize = true;
-            this.UpdateLinkLabel.Location = new System.Drawing.Point(305, 629);
-            this.UpdateLinkLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.UpdateLinkLabel.Name = "UpdateLinkLabel";
-            this.UpdateLinkLabel.Size = new System.Drawing.Size(238, 17);
-            this.UpdateLinkLabel.TabIndex = 1;
-            this.UpdateLinkLabel.TabStop = true;
-            this.UpdateLinkLabel.Text = "you have the latest version avaliable";
-            this.UpdateLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.UpdateLinkLabel_LinkClicked);
             // 
             // PlaylistCheckBox
             // 
@@ -121,7 +112,8 @@
             // 
             // ReturnButton
             // 
-            this.ReturnButton.Location = new System.Drawing.Point(13, 588);
+            this.ReturnButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ReturnButton.Location = new System.Drawing.Point(13, 657);
             this.ReturnButton.Margin = new System.Windows.Forms.Padding(4);
             this.ReturnButton.Name = "ReturnButton";
             this.ReturnButton.Size = new System.Drawing.Size(160, 37);
@@ -132,7 +124,8 @@
             // 
             // ApplyButton
             // 
-            this.ApplyButton.Location = new System.Drawing.Point(369, 588);
+            this.ApplyButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ApplyButton.Location = new System.Drawing.Point(369, 657);
             this.ApplyButton.Margin = new System.Windows.Forms.Padding(4);
             this.ApplyButton.Name = "ApplyButton";
             this.ApplyButton.Size = new System.Drawing.Size(160, 37);
@@ -493,8 +486,9 @@
             // 
             // label3
             // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(0, 645);
+            this.label3.Location = new System.Drawing.Point(0, 714);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(140, 17);
@@ -503,10 +497,11 @@
             // 
             // guildLabel
             // 
+            this.guildLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.guildLabel.AutoSize = true;
             this.guildLabel.LinkArea = new System.Windows.Forms.LinkArea(15, 31);
             this.guildLabel.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.guildLabel.Location = new System.Drawing.Point(0, 661);
+            this.guildLabel.Location = new System.Drawing.Point(0, 730);
             this.guildLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.guildLabel.Name = "guildLabel";
             this.guildLabel.Size = new System.Drawing.Size(197, 20);
@@ -516,18 +511,60 @@
             this.guildLabel.UseCompatibleTextRendering = true;
             this.guildLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked);
             // 
+            // checkBoxCheckUpdates
+            // 
+            this.checkBoxCheckUpdates.AutoSize = true;
+            this.checkBoxCheckUpdates.Checked = true;
+            this.checkBoxCheckUpdates.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxCheckUpdates.Location = new System.Drawing.Point(13, 569);
+            this.checkBoxCheckUpdates.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBoxCheckUpdates.Name = "checkBoxCheckUpdates";
+            this.checkBoxCheckUpdates.Size = new System.Drawing.Size(215, 21);
+            this.checkBoxCheckUpdates.TabIndex = 16;
+            this.checkBoxCheckUpdates.Text = "Check for updates on Startup";
+            this.checkBoxCheckUpdates.UseVisualStyleBackColor = true;
+            this.checkBoxCheckUpdates.CheckedChanged += new System.EventHandler(this.checkBoxCheckUpdates_CheckedChanged);
+            // 
+            // checkBoxMajorUpdates
+            // 
+            this.checkBoxMajorUpdates.AutoSize = true;
+            this.checkBoxMajorUpdates.Checked = true;
+            this.checkBoxMajorUpdates.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxMajorUpdates.Location = new System.Drawing.Point(13, 598);
+            this.checkBoxMajorUpdates.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBoxMajorUpdates.Name = "checkBoxMajorUpdates";
+            this.checkBoxMajorUpdates.Size = new System.Drawing.Size(223, 21);
+            this.checkBoxMajorUpdates.TabIndex = 17;
+            this.checkBoxMajorUpdates.Text = "Show popup for major updates";
+            this.checkBoxMajorUpdates.UseVisualStyleBackColor = true;
+            this.checkBoxMajorUpdates.CheckedChanged += new System.EventHandler(this.checkBoxMajorUpdates_CheckedChanged);
+            // 
+            // checkBoxMinorUpdates
+            // 
+            this.checkBoxMinorUpdates.AutoSize = true;
+            this.checkBoxMinorUpdates.Location = new System.Drawing.Point(13, 626);
+            this.checkBoxMinorUpdates.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBoxMinorUpdates.Name = "checkBoxMinorUpdates";
+            this.checkBoxMinorUpdates.Size = new System.Drawing.Size(223, 21);
+            this.checkBoxMinorUpdates.TabIndex = 18;
+            this.checkBoxMinorUpdates.Text = "Show popup for minor updates";
+            this.checkBoxMinorUpdates.UseVisualStyleBackColor = true;
+            this.checkBoxMinorUpdates.CheckedChanged += new System.EventHandler(this.checkBoxMinorUpdates_CheckedChanged);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(545, 688);
+            this.ClientSize = new System.Drawing.Size(545, 757);
+            this.Controls.Add(this.checkBoxCheckUpdates);
+            this.Controls.Add(this.checkBoxMajorUpdates);
+            this.Controls.Add(this.checkBoxMinorUpdates);
             this.Controls.Add(this.guildLabel);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.AdvancedGroupBox);
             this.Controls.Add(this.SettingsGroupBox);
             this.Controls.Add(this.ApplyButton);
             this.Controls.Add(this.ReturnButton);
-            this.Controls.Add(this.UpdateLinkLabel);
             this.Controls.Add(this.VersionLabel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -554,7 +591,6 @@
         #endregion
 
         private System.Windows.Forms.Label VersionLabel;
-        private System.Windows.Forms.LinkLabel UpdateLinkLabel;
         private System.Windows.Forms.CheckBox PlaylistCheckBox;
         private System.Windows.Forms.CheckBox SoundBoardCheckBox;
         private System.Windows.Forms.Button ReturnButton;
@@ -588,5 +624,8 @@
         private System.Windows.Forms.LinkLabel linkLabel2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown NotesPerChordNumeric;
+        private System.Windows.Forms.CheckBox checkBoxCheckUpdates;
+        private System.Windows.Forms.CheckBox checkBoxMajorUpdates;
+        private System.Windows.Forms.CheckBox checkBoxMinorUpdates;
     }
 }

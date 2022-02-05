@@ -250,108 +250,115 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
         public async Task CheckUpdates(bool ignoreSettings = false)
         {
-            // Try to update the version.  This is an async void by necessity, so errors will be dropped if we don't log them - but they get logged in there
-            LatestVersion = await UpdateManager.GetLatestVersion();
-            try
+            if (ConfigManager.GetBooleanProperty(PropertyItem.CheckForUpdates))
             {
-                if (LatestVersion != null && LatestVersion.VersionArray != null)
+                // Try to update the version.  This is an async void by necessity, so errors will be dropped if we don't log them - but they get logged in there
+                LatestVersion = await UpdateManager.GetLatestVersion();
+                try
                 {
-                    var currentVersion = UpdateManager.ConvertVersion(ConfigManager.GetVersion());
-                    PropertyItem updateType = PropertyItem.None;
-                    // Let's dynamically handle any lengths.  'Major' updates, for our purposes, are 0 or 1 (0 will almost never change)
-                    for (int i = 0; i < Math.Max(LatestVersion.VersionArray.Length, currentVersion.Length); i++)
+                    if (LatestVersion != null && LatestVersion.VersionArray != null)
                     {
-                        if (i < currentVersion.Length)
+                        var currentVersion = UpdateManager.ConvertVersion(ConfigManager.GetVersion());
+                        PropertyItem updateType = PropertyItem.None;
+                        // Let's dynamically handle any lengths.  'Major' updates, for our purposes, are 0 or 1 (0 will almost never change)
+                        for (int i = 0; i < Math.Max(LatestVersion.VersionArray.Length, currentVersion.Length); i++)
                         {
-                            if (i < LatestVersion.VersionArray.Length)
+                            if (i < currentVersion.Length)
                             {
-                                if (LatestVersion.VersionArray[i] > currentVersion[i])
+                                if (i < LatestVersion.VersionArray.Length)
                                 {
-                                    if (i < 2)
-                                        updateType = PropertyItem.MajorUpdates;
-                                    else
-                                        updateType = PropertyItem.MinorUpdates;
-                                    break;
+                                    if (LatestVersion.VersionArray[i] > currentVersion[i])
+                                    {
+                                        if (i < 2)
+                                            updateType = PropertyItem.MajorUpdates;
+                                        else
+                                            updateType = PropertyItem.MinorUpdates;
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break; // Out of numbers in latest, theirs is ... newer...
                                 }
                             }
-                            else
+                            else // We're out of numbers in currentVersion, LatestVersion is minorly newer
                             {
-                                break; // Out of numbers in latest, theirs is ... newer...
+                                updateType = PropertyItem.MinorUpdates;
+                                break;
                             }
                         }
-                        else // We're out of numbers in currentVersion, LatestVersion is minorly newer
+                        // Now do what we want to do with this info
+                        if (updateType == PropertyItem.MinorUpdates)
                         {
-                            updateType = PropertyItem.MinorUpdates;
-                            break;
-                        }
-                    }
-                    // Now do what we want to do with this info
-                    if (updateType == PropertyItem.MinorUpdates)
-                    {
-                        this.Text += $"    (Update Available: v{LatestVersion.Version})";
-                        if (ignoreSettings || ConfigManager.GetBooleanProperty(PropertyItem.MinorUpdates))
-                        {
-                            var installForm = new UI.PopupForm("Update LuteBot?", $"A new minor LuteBot version is available: v" + LatestVersion.Version,
-                                $"{LatestVersion.Title}\n\n{LatestVersion.Description}\n\n\n   Would you like to install it?",
-                                new Dictionary<string, string>() { { "Direct Download", LatestVersion.DownloadLink }, { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }
-                                , MessageBoxButtons.YesNoCancel, "Don't ask again for minor updates");
-                            installForm.ShowDialog(this);
-                            if (installForm.DialogResult == DialogResult.Yes)
+                            this.Text += $"    (Update Available: v{LatestVersion.Version})";
+                            if (ignoreSettings || ConfigManager.GetBooleanProperty(PropertyItem.MinorUpdates))
                             {
-                                string assemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                                string updaterPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Updater");
-                                if (Directory.Exists(updaterPath))
-                                    Directory.Delete(updaterPath, true);
-                                Directory.CreateDirectory(updaterPath);
-                                File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.exe"), Path.Combine(updaterPath, "LuteBotUpdater.exe"));
-                                //File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.dll"), Path.Combine(updaterPath, "LuteBotUpdater.dll"));
-                                // Start a separate process to run the updater
-                                Process.Start(Path.Combine(updaterPath, "LuteBotUpdater.exe"), $"{assemblyLocation} {LatestVersion.DownloadLink}");
-                                // And close
-                                Close();
-                            }
-                            else if (installForm.DialogResult == DialogResult.Cancel)
-                            {
-                                ConfigManager.SetProperty(PropertyItem.MinorUpdates, "False");
+                                var installForm = new UI.PopupForm("Update LuteBot?", $"A new minor LuteBot version is available: v" + LatestVersion.Version,
+                                    $"{LatestVersion.Title}\n\n{LatestVersion.Description}\n\n\n   Would you like to install it?",
+                                    new Dictionary<string, string>() { { "Direct Download", LatestVersion.DownloadLink }, { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }
+                                    , MessageBoxButtons.YesNoCancel, "Don't ask again for minor updates");
+                                installForm.ShowDialog(this);
+                                if (installForm.DialogResult == DialogResult.Yes)
+                                {
+                                    string assemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                                    string updaterPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Updater");
+                                    if (Directory.Exists(updaterPath))
+                                        Directory.Delete(updaterPath, true);
+                                    Directory.CreateDirectory(updaterPath);
+                                    File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.exe"), Path.Combine(updaterPath, "LuteBotUpdater.exe"));
+                                    //File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.dll"), Path.Combine(updaterPath, "LuteBotUpdater.dll"));
+                                    // Start a separate process to run the updater
+                                    Process.Start(Path.Combine(updaterPath, "LuteBotUpdater.exe"), $"{assemblyLocation} {LatestVersion.DownloadLink}");
+                                    // And close
+                                    Close();
+                                }
+                                else if (installForm.DialogResult == DialogResult.Cancel)
+                                {
+                                    ConfigManager.SetProperty(PropertyItem.MinorUpdates, "False");
+                                }
                             }
                         }
-                    }
-                    else if (updateType == PropertyItem.MajorUpdates)
-                    {
-                        this.Text += $"    (Major Update Available: v{LatestVersion.Version})";
-                        if (ignoreSettings || ConfigManager.GetBooleanProperty(PropertyItem.MajorUpdates))
+                        else if (updateType == PropertyItem.MajorUpdates)
                         {
-                            var installForm = new UI.PopupForm("Update LuteBot?", $"A new major LuteBot version is available: v" + LatestVersion.Version,
-                                $"{LatestVersion.Title}\n\n{LatestVersion.Description}\n\n\n    Would you like to install it?", new Dictionary<string, string>() { { "Direct Download", LatestVersion.DownloadLink }, { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }
-                                , MessageBoxButtons.YesNoCancel, "Don't ask again for major updates");
-                            installForm.ShowDialog(this);
-                            if (installForm.DialogResult == DialogResult.Yes)
+                            this.Text += $"    (Major Update Available: v{LatestVersion.Version})";
+                            if (ignoreSettings || ConfigManager.GetBooleanProperty(PropertyItem.MajorUpdates))
                             {
-                                string assemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                                string updaterPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Updater");
-                                if (Directory.Exists(updaterPath))
-                                    Directory.Delete(updaterPath, true);
-                                Directory.CreateDirectory(updaterPath);
-                                File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.exe"), Path.Combine(updaterPath, "LuteBotUpdater.exe"));
-                                //File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.dll"), Path.Combine(updaterPath, "LuteBotUpdater.dll"));
-                                // Start a separate process to run the updater
-                                Process.Start(Path.Combine(updaterPath, "LuteBotUpdater.exe"), $"{assemblyLocation} {LatestVersion.DownloadLink}");
-                                // And close
-                                Close();
+                                var installForm = new UI.PopupForm("Update LuteBot?", $"A new major LuteBot version is available: v" + LatestVersion.Version,
+                                    $"{LatestVersion.Title}\n\n{LatestVersion.Description}\n\n\n    Would you like to install it?", new Dictionary<string, string>() { { "Direct Download", LatestVersion.DownloadLink }, { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }
+                                    , MessageBoxButtons.YesNoCancel, "Don't ask again for major updates");
+                                installForm.ShowDialog(this);
+                                if (installForm.DialogResult == DialogResult.Yes)
+                                {
+                                    string assemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                                    string updaterPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Updater");
+                                    if (Directory.Exists(updaterPath))
+                                        Directory.Delete(updaterPath, true);
+                                    Directory.CreateDirectory(updaterPath);
+                                    File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.exe"), Path.Combine(updaterPath, "LuteBotUpdater.exe"));
+                                    //File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.dll"), Path.Combine(updaterPath, "LuteBotUpdater.dll"));
+                                    // Start a separate process to run the updater
+                                    Process.Start(Path.Combine(updaterPath, "LuteBotUpdater.exe"), $"{assemblyLocation} {LatestVersion.DownloadLink}");
+                                    // And close
+                                    Close();
+                                }
+                                else if (installForm.DialogResult == DialogResult.Cancel)
+                                {
+                                    ConfigManager.SetProperty(PropertyItem.MajorUpdates, "False");
+                                }
                             }
-                            else if (installForm.DialogResult == DialogResult.Cancel)
-                            {
-                                ConfigManager.SetProperty(PropertyItem.MajorUpdates, "False");
-                            }
+                        }
+                        else if (updateType == PropertyItem.None)
+                        {
+                            //this.Text += $"    (Up To Date)"; // Nah.  Kinda dumb.  
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                new UI.PopupForm("Version Check/Update Failed", $"Could not determine the latest LuteBot version",
-                    $"Please report this bug in our Discord\nThis is likely not a network issue, and something I did wrong in the code\n\nYou may want to manually check for an updated version at the following link\n\n{ex.Message}\n{ex.StackTrace}", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                catch (Exception ex)
+                {
+                    new UI.PopupForm("Version Check/Update Failed", $"Could not determine the latest LuteBot version",
+                        $"Please report this bug in our Discord\nThis is likely not a network issue, and something I did wrong in the code\n\nYou may want to manually check for an updated version at the following link\n\n{ex.Message}\n{ex.StackTrace}", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                        .ShowDialog();
+                }
             }
         }
 
