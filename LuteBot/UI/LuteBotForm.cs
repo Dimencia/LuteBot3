@@ -347,9 +347,12 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                                 }
                             }
                         }
-                        else if (updateType == PropertyItem.None)
+                        else if (ignoreSettings && updateType == PropertyItem.None)
                         {
                             //this.Text += $"    (Up To Date)"; // Nah.  Kinda dumb.  
+                            // Show them a popup, though, if they explicitly ran it, telling them they're good
+                            // Just a normal one is fine
+                            MessageBox.Show("Your LuteBot is already the most recent version", "LuteBot Up To Date");
                         }
                     }
                 }
