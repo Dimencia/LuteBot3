@@ -147,15 +147,16 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 // If they weren't equal, it's at default pos, so the others should also be set to good default positions
                 if (trackSelectionForm != null)
                 {
-                    ConfigManager.SetProperty(PropertyItem.TrackSelectionPos, $"{ Left + Width}|{Top}");
-                    trackSelectionForm.Left = Left + Width;
-                    trackSelectionForm.Top = Top;
+                    // We should always CheckPosition, just in case something goes weird, so nothing every initializes out of bounds
+                    var tsPos = WindowPositionUtils.CheckPosition(new Point(Left + Width, Top));
+                    WindowPositionUtils.UpdateBounds(PropertyItem.TrackSelectionPos, tsPos);
+                    trackSelectionForm.Location = tsPos;
                 }
                 if (partitionsForm != null)
                 {
-                    ConfigManager.SetProperty(PropertyItem.PartitionListPos, $"{ Left - partitionsForm.Width}|{Top}");
-                    partitionsForm.Left = Left - partitionsForm.Width;
-                    partitionsForm.Top = Top;
+                    var pfPos = WindowPositionUtils.CheckPosition(new Point(Left - partitionsForm.Width, Top));
+                    WindowPositionUtils.UpdateBounds(PropertyItem.PartitionListPos, pfPos);
+                    partitionsForm.Location = pfPos;
                 }
             }
 
@@ -372,10 +373,19 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                     .ShowDialog();
             }
 
-            // TODO: Testing on this.  Supposedly each user needs to generate their own empty PartitionIndex, but that may have just been some other bug that was fixed since?
             string partitionIndexTarget = Path.Combine(SaveManager.SaveFilePath, partitionIndexName);
-            if (!File.Exists(partitionIndexTarget))
-                File.Copy(Path.Combine(Application.StartupPath, "LuteMod", partitionIndexName), partitionIndexTarget);
+            try
+            {
+                Directory.CreateDirectory(SaveManager.SaveFilePath); // Some people don't have one yet apparently
+                                                                     // TODO: Testing on this.  Supposedly each user needs to generate their own empty PartitionIndex, but that may have just been some other bug that was fixed since?
+                if (!File.Exists(partitionIndexTarget))
+                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", partitionIndexName), partitionIndexTarget);
+            }
+            catch (Exception e)
+            {
+                new PopupForm("Could not create PartitionIndex", $"Could not copy to {partitionIndexTarget}", $"This is not fatal, and install will continue\n\nYou must initialize LuteMod yourself by pressing Kick with a Lute until the menu appears\n\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                    .ShowDialog();
+            }
 
             new PopupForm("Install Complete", "LuteMod Successfully Installed", "Use LuteBot to create Partitions out of your songs for LuteMod\n\nUse Kick in-game with a lute to open the LuteMod menu\n\nIf Mordhau is open, restart it",
                 new Dictionary<string, string>() {
@@ -734,6 +744,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             if (ConfigManager.GetBooleanProperty(PropertyItem.SoundBoard))
             {
                 soundBoardForm = new SoundBoardForm(soundBoardManager);
+                soundBoardForm.StartPosition = FormStartPosition.Manual;
+                soundBoardForm.Location = new Point(0, 0);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.SoundBoardPos));
                 soundBoardForm.Show();
                 soundBoardForm.Top = coords.Y;
@@ -742,6 +754,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             if (ConfigManager.GetBooleanProperty(PropertyItem.PlayList))
             {
                 playListForm = new PlayListForm(playList);
+                playListForm.StartPosition = FormStartPosition.Manual;
+                playListForm.Location = new Point(0, 0);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.PlayListPos));
                 playListForm.Show();
                 playListForm.Top = coords.Y;
@@ -752,6 +766,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             {
                 var midiPlayer = player as MidiPlayer;
                 trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice, this);
+                trackSelectionForm.StartPosition = FormStartPosition.Manual;
+                trackSelectionForm.Location = new Point(0, 0);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
                 trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
@@ -760,6 +776,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             if (ConfigManager.GetBooleanProperty(PropertyItem.LiveMidi))
             {
                 liveInputForm = new LiveInputForm(liveMidiManager);
+                liveInputForm.StartPosition = FormStartPosition.Manual;
+                liveInputForm.Location = new Point(0, 0);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.LiveMidiPos));
                 liveInputForm.Show();
                 liveInputForm.Top = coords.Y;
@@ -768,6 +786,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             if (ConfigManager.GetBooleanProperty(PropertyItem.PartitionList))
             {
                 partitionsForm = new PartitionsForm(trackSelectionManager, player);
+                partitionsForm.StartPosition = FormStartPosition.Manual;
+                partitionsForm.Location = new Point(0, 0);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.PartitionListPos));
                 partitionsForm.Show();
                 partitionsForm.Top = coords.Y;
@@ -1005,10 +1025,12 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 var midiPlayer = player as MidiPlayer;
                 trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice, this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
-                trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
                 trackSelectionForm.Left = coords.X;
             }
+            trackSelectionForm.Show();
+            trackSelectionForm.BringToFront();
+            trackSelectionForm.Focus();
         }
 
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
@@ -1053,6 +1075,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
         {
             GuildLibraryForm guildLibraryForm = new GuildLibraryForm(this);
             guildLibraryForm.Show();
+            guildLibraryForm.BringToFront();
+            guildLibraryForm.Focus();
         }
 
 
@@ -1681,6 +1705,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             if (partitionsForm == null || partitionsForm.IsDisposed)
                 partitionsForm = new PartitionsForm(trackSelectionManager, player);
             partitionsForm.Show();
+            partitionsForm.BringToFront();
+            partitionsForm.Focus();
         }
 
         private void adjustLutemodPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
