@@ -123,6 +123,7 @@
     <Compile Include="Core\MordhauOutDevice.cs" />
     <Compile Include="Core\Player.cs" />
     <Compile Include="Core\RustOutDevice.cs" />
+    <Compile Include="Core\UpdateManager.cs" />
     <Compile Include="DiscordAuthForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -377,6 +378,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LuteBotUpdater\LuteBotUpdater.csproj">
+      <Project>{57807dcc-ba9b-45ed-b42a-e61f2ca9d882}</Project>
+      <Name>LuteBotUpdater</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -167,6 +167,14 @@
     {
       "Item": "LastVersion",
       "Value": ""
+    },
+    {
+      "Item": "MajorUpdates",
+      "Value": "True"
+    },
+    {
+      "Item": "MinorUpdates",
+      "Value": "False"
     }
   ]
 }

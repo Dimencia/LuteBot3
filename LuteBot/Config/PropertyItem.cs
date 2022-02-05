@@ -28,6 +28,8 @@
         OutputDevice,
         Instrument,
         ForbidsChords,
+        MajorUpdates,
+        MinorUpdates,
 
         //keybinds
         Play,

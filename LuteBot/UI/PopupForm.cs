@@ -12,7 +12,8 @@ namespace LuteBot.UI
 {
     public partial class PopupForm : Form
     {
-        public PopupForm(string windowTitle, string title, string content, Dictionary<string,string> links = null, MessageBoxButtons buttons = MessageBoxButtons.OK)
+        public Control extraControl;
+        public PopupForm(string windowTitle, string title, string content, Dictionary<string,string> links = null, MessageBoxButtons buttons = MessageBoxButtons.OK, string cancelLabel = "Cancel")
         {
             InitializeComponent();
             this.Text = windowTitle;
@@ -36,33 +37,50 @@ namespace LuteBot.UI
             {
                 case MessageBoxButtons.OK:
                     var button = new Button();
-                    button.Text = "OK";
-                    button.Tag = DialogResult.OK;
-                    button.Click += button_Click;
-                    addButton(button);
+                    addButton(button, "OK", DialogResult.OK);
                     break;
                 case MessageBoxButtons.YesNo:
                     var ybutton = new Button();
-                    ybutton.Text = "Yes";
-                    ybutton.Tag = DialogResult.Yes;
-                    ybutton.Click += button_Click;
-                    addButton(ybutton);
+                    addButton(ybutton, "Yes", DialogResult.Yes);
                     var nbutton = new Button();
-                    nbutton.Text = "No";
-                    nbutton.Tag = DialogResult.No;
-                    nbutton.Click += button_Click;
-                    addButton(nbutton);
+                    addButton(nbutton, "No", DialogResult.No);
+                    break;
+                case MessageBoxButtons.YesNoCancel:
+                    // This is a bit of a jank, because 'Cancel' isn't necessarily going to be labelled Cancel... 
+                    // But it gives us an extra option to allow users to click "Don't show this again" for update prompts
+                    var ybutton2 = new Button();
+                    addButton(ybutton2, "Yes", DialogResult.Yes);
+                    var nbutton2 = new Button();
+                    addButton(nbutton2, "No", DialogResult.No);
+                    var cbutton = new Button();
+                    addButton(cbutton, cancelLabel, DialogResult.Cancel);
                     break;
             }
 
             this.AutoSize = true;
             this.AutoSizeMode = AutoSizeMode.GrowOnly;
+            this.Shown += PopupForm_Shown;
+        }
+
+        private void PopupForm_Shown(object sender, EventArgs e)
+        {
+            using (var g = Graphics.FromHwnd(this.Handle))
+            {
+                var titleWidth = g.MeasureString(titleLabel.Text, titleLabel.Font).Width * g.DpiX/96;
+                this.Width = Math.Max(this.Width, (int)titleWidth + 20);
+                this.Height = (int)((titleLabel.PreferredHeight + contentLabel.PreferredHeight + linkPanel.PreferredSize.Height + buttonPanel.PreferredSize.Height + 200) * g.DpiX/96);
+            }
+            
         }
 
         private int buttonCount = 0; // Janky but oh well
 
-        private void addButton(Button b)
+        private void addButton(Button b, string text, DialogResult tag)
         {
+            b.Text = text;
+            b.Tag = tag;
+            b.Click += button_Click;
+            b.AutoSize = true;
             b.Anchor = AnchorStyles.None;
             buttonPanel.Controls.Add(b);
             buttonPanel.SetRow(b, 0);
