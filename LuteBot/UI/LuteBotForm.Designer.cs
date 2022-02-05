@@ -38,18 +38,15 @@ namespace LuteBot
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.keyBindingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportToScrapMechanicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.adjustLutemodPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.installLuteModToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkInstallUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.soundBoardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.onlineSyncToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trackFilteringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.liveInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.guildLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.timeSyncToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.focusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.guildLibraryToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.lutemodPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,7 +64,6 @@ namespace LuteBot
             this.EndTimeLabel = new System.Windows.Forms.Label();
             this.ReloadButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.checkInstallUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MusicProgressBar)).BeginInit();
             this.SuspendLayout();
@@ -93,8 +89,6 @@ namespace LuteBot
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.keyBindingToolStripMenuItem,
             this.settingsToolStripMenuItem,
-            this.exportToScrapMechanicToolStripMenuItem,
-            this.adjustLutemodPartitionsToolStripMenuItem,
             this.installLuteModToolStripMenuItem,
             this.checkInstallUpdatesToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
@@ -104,37 +98,30 @@ namespace LuteBot
             // keyBindingToolStripMenuItem
             // 
             this.keyBindingToolStripMenuItem.Name = "keyBindingToolStripMenuItem";
-            this.keyBindingToolStripMenuItem.Size = new System.Drawing.Size(270, 26);
+            this.keyBindingToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.keyBindingToolStripMenuItem.Text = "Key Binding";
             this.keyBindingToolStripMenuItem.Click += new System.EventHandler(this.KeyBindingToolStripMenuItem_Click);
             // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(270, 26);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.settingsToolStripMenuItem.Text = "Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.SettingsToolStripMenuItem_Click);
-            // 
-            // exportToScrapMechanicToolStripMenuItem
-            // 
-            this.exportToScrapMechanicToolStripMenuItem.Name = "exportToScrapMechanicToolStripMenuItem";
-            this.exportToScrapMechanicToolStripMenuItem.Size = new System.Drawing.Size(270, 26);
-            this.exportToScrapMechanicToolStripMenuItem.Text = "Export to Scrap Mechanic...";
-            this.exportToScrapMechanicToolStripMenuItem.Click += new System.EventHandler(this.exportToScrapMechanicToolStripMenuItem_Click);
-            // 
-            // adjustLutemodPartitionsToolStripMenuItem
-            // 
-            this.adjustLutemodPartitionsToolStripMenuItem.Name = "adjustLutemodPartitionsToolStripMenuItem";
-            this.adjustLutemodPartitionsToolStripMenuItem.Size = new System.Drawing.Size(270, 26);
-            this.adjustLutemodPartitionsToolStripMenuItem.Text = "Adjust Lutemod Partitions";
-            this.adjustLutemodPartitionsToolStripMenuItem.Click += new System.EventHandler(this.adjustLutemodPartitionsToolStripMenuItem_Click);
             // 
             // installLuteModToolStripMenuItem
             // 
             this.installLuteModToolStripMenuItem.Name = "installLuteModToolStripMenuItem";
-            this.installLuteModToolStripMenuItem.Size = new System.Drawing.Size(270, 26);
+            this.installLuteModToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.installLuteModToolStripMenuItem.Text = "Install LuteMod";
             this.installLuteModToolStripMenuItem.Click += new System.EventHandler(this.installLuteModToolStripMenuItem_Click);
+            // 
+            // checkInstallUpdatesToolStripMenuItem
+            // 
+            this.checkInstallUpdatesToolStripMenuItem.Name = "checkInstallUpdatesToolStripMenuItem";
+            this.checkInstallUpdatesToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.checkInstallUpdatesToolStripMenuItem.Text = "Check/Install Updates";
+            this.checkInstallUpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkInstallUpdatesToolStripMenuItem_Click);
             // 
             // windowToolStripMenuItem
             // 
@@ -150,11 +137,9 @@ namespace LuteBot
             this.openToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.playListToolStripMenuItem,
             this.soundBoardToolStripMenuItem,
-            this.onlineSyncToolStripMenuItem,
             this.trackFilteringToolStripMenuItem,
             this.liveInputToolStripMenuItem,
-            this.guildLibraryToolStripMenuItem,
-            this.timeSyncToolStripMenuItem});
+            this.guildLibraryToolStripMenuItem});
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.openToolStripMenuItem.Text = "Open";
@@ -172,14 +157,6 @@ namespace LuteBot
             this.soundBoardToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.soundBoardToolStripMenuItem.Text = "SoundBoard";
             this.soundBoardToolStripMenuItem.Click += new System.EventHandler(this.SoundBoardToolStripMenuItem_Click);
-            // 
-            // onlineSyncToolStripMenuItem
-            // 
-            this.onlineSyncToolStripMenuItem.Enabled = false;
-            this.onlineSyncToolStripMenuItem.Name = "onlineSyncToolStripMenuItem";
-            this.onlineSyncToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.onlineSyncToolStripMenuItem.Text = "Online Sync";
-            this.onlineSyncToolStripMenuItem.Click += new System.EventHandler(this.OnlineSyncToolStripMenuItem_Click);
             // 
             // trackFilteringToolStripMenuItem
             // 
@@ -201,13 +178,6 @@ namespace LuteBot
             this.guildLibraryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.guildLibraryToolStripMenuItem.Text = "Guild Library";
             this.guildLibraryToolStripMenuItem.Click += new System.EventHandler(this.GuildLibraryToolStripMenuItem_Click);
-            // 
-            // timeSyncToolStripMenuItem
-            // 
-            this.timeSyncToolStripMenuItem.Name = "timeSyncToolStripMenuItem";
-            this.timeSyncToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.timeSyncToolStripMenuItem.Text = "Time Sync";
-            this.timeSyncToolStripMenuItem.Click += new System.EventHandler(this.TimeSyncToolStripMenuItem_Click);
             // 
             // focusToolStripMenuItem
             // 
@@ -361,13 +331,6 @@ namespace LuteBot
             this.ReloadButton.UseVisualStyleBackColor = true;
             this.ReloadButton.Click += new System.EventHandler(this.ReloadButton_Click);
             // 
-            // checkInstallUpdatesToolStripMenuItem
-            // 
-            this.checkInstallUpdatesToolStripMenuItem.Name = "checkInstallUpdatesToolStripMenuItem";
-            this.checkInstallUpdatesToolStripMenuItem.Size = new System.Drawing.Size(270, 26);
-            this.checkInstallUpdatesToolStripMenuItem.Text = "Check/Install Updates";
-            this.checkInstallUpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkInstallUpdatesToolStripMenuItem_Click);
-            // 
             // LuteBotForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -421,20 +384,16 @@ namespace LuteBot
         private ToolStripMenuItem openToolStripMenuItem;
         private ToolStripMenuItem playListToolStripMenuItem;
         private ToolStripMenuItem soundBoardToolStripMenuItem;
-        private ToolStripMenuItem onlineSyncToolStripMenuItem;
         private Button LoadFileButton;
         private Label EndTimeLabel;
         private ToolStripMenuItem trackFilteringToolStripMenuItem;
         private ToolStripMenuItem focusToolStripMenuItem;
         private ToolStripMenuItem liveInputToolStripMenuItem;
         private ToolStripMenuItem guildLibraryToolStripMenuItem;
-        private ToolStripMenuItem timeSyncToolStripMenuItem;
         private Button ReloadButton;
         private ToolTip toolTip1;
-        private ToolStripMenuItem exportToScrapMechanicToolStripMenuItem;
         private ToolStripMenuItem guildLibraryToolStripMenuItem1;
         private ToolStripMenuItem lutemodPartitionsToolStripMenuItem;
-        private ToolStripMenuItem adjustLutemodPartitionsToolStripMenuItem;
         private ToolStripMenuItem installLuteModToolStripMenuItem;
         private ToolStripMenuItem helpToolStripMenuItem;
         private ToolStripMenuItem checkInstallUpdatesToolStripMenuItem;
