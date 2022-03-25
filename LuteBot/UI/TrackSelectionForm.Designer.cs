@@ -31,19 +31,17 @@ namespace LuteBot.UI
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TrackSelectionForm));
+            this.components = new System.ComponentModel.Container();
             this.ChannelsListBox = new System.Windows.Forms.CheckedListBox();
-            this.SelectAllChannelsCheckBox = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.SongProfileSaveButton = new System.Windows.Forms.Button();
             this.AutoActivateCheckBox = new System.Windows.Forms.CheckBox();
             this.LoadProfileButton = new System.Windows.Forms.Button();
             this.TrackListLabel = new System.Windows.Forms.Label();
-            this.SelectAllTracksCheckBox = new System.Windows.Forms.CheckBox();
             this.TrackListBox = new System.Windows.Forms.CheckedListBox();
             this.OffsetPanel = new System.Windows.Forms.Panel();
             this.buttonAdvanced = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel1 = new LuteBot.UI.CustomBufferedPanel();
             this.button1 = new System.Windows.Forms.Button();
             this.textBoxNotesForChords = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -51,30 +49,28 @@ namespace LuteBot.UI
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.instrumentsBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectNoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectInverseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
+            this.contextMenuStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
             // ChannelsListBox
             // 
             this.ChannelsListBox.FormattingEnabled = true;
-            this.ChannelsListBox.Location = new System.Drawing.Point(16, 64);
+            this.ChannelsListBox.Location = new System.Drawing.Point(16, 47);
             this.ChannelsListBox.Margin = new System.Windows.Forms.Padding(4);
             this.ChannelsListBox.Name = "ChannelsListBox";
-            this.ChannelsListBox.Size = new System.Drawing.Size(341, 344);
+            this.ChannelsListBox.Size = new System.Drawing.Size(341, 361);
             this.ChannelsListBox.TabIndex = 3;
             this.ChannelsListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ChannelListBox_ItemChecked);
-            // 
-            // SelectAllChannelsCheckBox
-            // 
-            this.SelectAllChannelsCheckBox.AutoSize = true;
-            this.SelectAllChannelsCheckBox.Location = new System.Drawing.Point(16, 36);
-            this.SelectAllChannelsCheckBox.Margin = new System.Windows.Forms.Padding(4);
-            this.SelectAllChannelsCheckBox.Name = "SelectAllChannelsCheckBox";
-            this.SelectAllChannelsCheckBox.Size = new System.Drawing.Size(88, 21);
-            this.SelectAllChannelsCheckBox.TabIndex = 7;
-            this.SelectAllChannelsCheckBox.Text = "Select All";
-            this.SelectAllChannelsCheckBox.UseVisualStyleBackColor = true;
-            this.SelectAllChannelsCheckBox.CheckedChanged += new System.EventHandler(this.SelectAllChannelsTextBox_CheckedChanged);
             // 
             // label1
             // 
@@ -137,27 +133,14 @@ namespace LuteBot.UI
             this.TrackListLabel.TabIndex = 15;
             this.TrackListLabel.Text = "List of Tracks";
             // 
-            // SelectAllTracksCheckBox
-            // 
-            this.SelectAllTracksCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SelectAllTracksCheckBox.AutoSize = true;
-            this.SelectAllTracksCheckBox.Location = new System.Drawing.Point(372, 36);
-            this.SelectAllTracksCheckBox.Margin = new System.Windows.Forms.Padding(4);
-            this.SelectAllTracksCheckBox.Name = "SelectAllTracksCheckBox";
-            this.SelectAllTracksCheckBox.Size = new System.Drawing.Size(88, 21);
-            this.SelectAllTracksCheckBox.TabIndex = 14;
-            this.SelectAllTracksCheckBox.Text = "Select All";
-            this.SelectAllTracksCheckBox.UseVisualStyleBackColor = true;
-            this.SelectAllTracksCheckBox.CheckedChanged += new System.EventHandler(this.SelectAllTracksCheckBox_CheckedChanged);
-            // 
             // TrackListBox
             // 
             this.TrackListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.TrackListBox.FormattingEnabled = true;
-            this.TrackListBox.Location = new System.Drawing.Point(367, 64);
+            this.TrackListBox.Location = new System.Drawing.Point(367, 47);
             this.TrackListBox.Margin = new System.Windows.Forms.Padding(4);
             this.TrackListBox.Name = "TrackListBox";
-            this.TrackListBox.Size = new System.Drawing.Size(329, 344);
+            this.TrackListBox.Size = new System.Drawing.Size(329, 361);
             this.TrackListBox.TabIndex = 13;
             this.TrackListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.TrackListBox_ItemCheck);
             // 
@@ -167,7 +150,7 @@ namespace LuteBot.UI
             this.OffsetPanel.Location = new System.Drawing.Point(0, 0);
             this.OffsetPanel.Margin = new System.Windows.Forms.Padding(4);
             this.OffsetPanel.Name = "OffsetPanel";
-            this.OffsetPanel.Size = new System.Drawing.Size(659, 196);
+            this.OffsetPanel.Size = new System.Drawing.Size(682, 196);
             this.OffsetPanel.TabIndex = 16;
             // 
             // buttonAdvanced
@@ -260,6 +243,65 @@ namespace LuteBot.UI
             this.label3.TabIndex = 24;
             this.label3.Text = "Instrument";
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.selectAllToolStripMenuItem,
+            this.selectNoneToolStripMenuItem,
+            this.selectInverseToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(169, 76);
+            // 
+            // selectAllToolStripMenuItem
+            // 
+            this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
+            this.selectAllToolStripMenuItem.Text = "Select All";
+            this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
+            // 
+            // selectNoneToolStripMenuItem
+            // 
+            this.selectNoneToolStripMenuItem.Name = "selectNoneToolStripMenuItem";
+            this.selectNoneToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
+            this.selectNoneToolStripMenuItem.Text = "Select None";
+            this.selectNoneToolStripMenuItem.Click += new System.EventHandler(this.selectNoneToolStripMenuItem_Click);
+            // 
+            // selectInverseToolStripMenuItem
+            // 
+            this.selectInverseToolStripMenuItem.Name = "selectInverseToolStripMenuItem";
+            this.selectInverseToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
+            this.selectInverseToolStripMenuItem.Text = "Select Inverse";
+            this.selectInverseToolStripMenuItem.Click += new System.EventHandler(this.selectInverseToolStripMenuItem_Click);
+            // 
+            // contextMenuStrip2
+            // 
+            this.contextMenuStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1,
+            this.toolStripMenuItem2,
+            this.toolStripMenuItem3});
+            this.contextMenuStrip2.Name = "contextMenuStrip1";
+            this.contextMenuStrip2.Size = new System.Drawing.Size(169, 76);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(168, 24);
+            this.toolStripMenuItem1.Text = "Select All";
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(168, 24);
+            this.toolStripMenuItem2.Text = "Select None";
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(168, 24);
+            this.toolStripMenuItem3.Text = "Select Inverse";
+            // 
             // TrackSelectionForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -274,17 +316,14 @@ namespace LuteBot.UI
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.buttonAdvanced);
             this.Controls.Add(this.TrackListLabel);
-            this.Controls.Add(this.SelectAllTracksCheckBox);
             this.Controls.Add(this.TrackListBox);
             this.Controls.Add(this.LoadProfileButton);
             this.Controls.Add(this.AutoActivateCheckBox);
             this.Controls.Add(this.SongProfileSaveButton);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.SelectAllChannelsCheckBox);
             this.Controls.Add(this.ChannelsListBox);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -292,6 +331,8 @@ namespace LuteBot.UI
             this.Text = "Track Filtering";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TrackSelectionForm_Closing);
             this.panel1.ResumeLayout(false);
+            this.contextMenuStrip1.ResumeLayout(false);
+            this.contextMenuStrip2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -299,17 +340,15 @@ namespace LuteBot.UI
 
         #endregion
         private System.Windows.Forms.CheckedListBox ChannelsListBox;
-        private System.Windows.Forms.CheckBox SelectAllChannelsCheckBox;
         private Label label1;
         private Button SongProfileSaveButton;
         private CheckBox AutoActivateCheckBox;
         private Button LoadProfileButton;
         private Label TrackListLabel;
-        private CheckBox SelectAllTracksCheckBox;
         private CheckedListBox TrackListBox;
         private Panel OffsetPanel;
         private Button buttonAdvanced;
-        private Panel panel1;
+        private CustomBufferedPanel panel1;
         private Button button1;
         private TextBox textBoxNotesForChords;
         private Label label2;
@@ -317,5 +356,13 @@ namespace LuteBot.UI
         private SaveFileDialog saveFileDialog1;
         private ComboBox instrumentsBox;
         private Label label3;
+        private ContextMenuStrip contextMenuStrip1;
+        private ToolStripMenuItem selectAllToolStripMenuItem;
+        private ToolStripMenuItem selectNoneToolStripMenuItem;
+        private ToolStripMenuItem selectInverseToolStripMenuItem;
+        private ContextMenuStrip contextMenuStrip2;
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripMenuItem toolStripMenuItem2;
+        private ToolStripMenuItem toolStripMenuItem3;
     }
 }

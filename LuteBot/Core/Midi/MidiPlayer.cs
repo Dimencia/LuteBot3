@@ -24,8 +24,10 @@ namespace LuteBot.Core.Midi
         public TrackSelectionManager trackSelectionManager;
 
         private bool isPlaying;
-        private Dictionary<int, string> channelNames = new Dictionary<int, string>();
-        private Dictionary<int, string> trackNames = new Dictionary<int, string>();
+        private Dictionary<int, MidiChannelItem> channels = new Dictionary<int, MidiChannelItem>();
+        private Dictionary<int, TrackItem> tracks = new Dictionary<int, TrackItem>();
+
+        public Dictionary<int, List<MidiNote>> tickMetaNotes { get; } = new Dictionary<int, List<MidiNote>>();
 
         public MidiPlayer(TrackSelectionManager trackSelectionManager)
         {
@@ -85,14 +87,14 @@ namespace LuteBot.Core.Midi
                 outDevice.Reset();
         }
 
-        public Dictionary<int, string> GetMidiChannels()
+        public Dictionary<int, MidiChannelItem> GetMidiChannels()
         {
-            return channelNames;
+            return channels;
         }
 
-        public Dictionary<int, string> GetMidiTracks()
+        public Dictionary<int, TrackItem> GetMidiTracks()
         {
-            return trackNames;
+            return tracks;
         }
 
         public override int GetLength()
@@ -192,7 +194,8 @@ namespace LuteBot.Core.Midi
         {
             lock (loadLock)
             {
-                channelNames = new Dictionary<int, string>();
+                channels = new Dictionary<int, MidiChannelItem>();
+                tracks = new Dictionary<int, TrackItem>();
                 // Reset the sequence because we can't cancel the load or detect if one is occurring
                 sequence.LoadCompleted -= HandleLoadCompleted;
                 sequence.Dispose();
@@ -295,28 +298,49 @@ namespace LuteBot.Core.Midi
         private int[] drumNoteCounts = new int[128];
         public List<KeyValuePair<int, int>> DrumNoteCounts = new List<KeyValuePair<int, int>>(128);
 
+        // Let's add something new here: Either save data we can use to do it, or do it
+        // Detect the best Flute instrument
+
+        // The best flute instrument: Has many notes, has long notes, covers a large octave area
+        // So while we already track the octaves covered, we should track numNotes and avgNoteLength of each track or channel
+
+        // That also might mean we need to start tracking data for tracks, instead of just channels, and allow a toggle to show those instead
+
         private void HandleLoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
+            tickMetaNotes.Clear();
             var startTime = DateTime.Now;
             lock (loadLock)
             {
                 if (e.Error == null)
                 {
-                    channelNames = new Dictionary<int, string>();
-                    trackNames = new Dictionary<int, string>();
+                    //channelNames = new Dictionary<int, string>();
+                    //trackNames = new Dictionary<int, string>();
+
+                    channels = new Dictionary<int, MidiChannelItem>();
+                    tracks = new Dictionary<int, TrackItem>();
 
                     // Set default channel names
-                    foreach (var channel in sequence.Channels)
-                        channelNames[channel] = MidiChannelTypes.Names[channel];
-                    foreach (var track in sequence.Tracks)
-                        trackNames[track.Id] = "Untitled Track";
-                    // We need to manually parse out data for Max and Min note for each Channel, in trackSelectionManager
-                    trackSelectionManager.MaxNoteByChannel = new Dictionary<int, int>();
-                    trackSelectionManager.MinNoteByChannel = new Dictionary<int, int>();
-                    for (int i = 0; i < 128; i++)
+                    foreach (var channelNum in sequence.Channels)
                     {
-                        trackSelectionManager.MaxNoteByChannel[i] = 0; // Pre-populate to reduce errors later
-                        trackSelectionManager.MinNoteByChannel[i] = 127;
+                        var midiChannel = new MidiChannelItem();
+                        midiChannel.Id = channelNum;
+                        midiChannel.Name = MidiChannelTypes.Names[channelNum];
+                        midiChannel.Active = true;
+                        channels[channelNum] = midiChannel;
+                    }
+                    foreach (var midiTrack in sequence.Tracks)
+                    {
+                        var track = new TrackItem();
+                        track.Id = midiTrack.Id;
+                        if (!string.IsNullOrWhiteSpace(midiTrack.Name))
+                            track.Name = midiTrack.Name;
+                        else
+                            track.Name = "Untitled Track";
+                        track.lowestNote = midiTrack.MinNoteId;
+                        track.highestNote = midiTrack.MaxNoteId;
+                        track.Active = true;
+                        tracks[midiTrack.Id] = track;
                     }
 
                     //Parallel.ForEach(sequence, track =>
@@ -327,27 +351,62 @@ namespace LuteBot.Core.Midi
                         {
                             if (midiEvent.MidiMessage is ChannelMessage c)
                             {
+                                if (!channels.ContainsKey(c.MidiChannel))
+                                {
+                                    var midiChannel = new MidiChannelItem();
+                                    midiChannel.Id = c.MidiChannel;
+                                    midiChannel.Name = MidiChannelTypes.Names[c.MidiChannel];
+                                    midiChannel.Active = true;
+                                    channels[c.MidiChannel] = midiChannel;
+                                }
+
+
                                 if (c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
                                 {
-                                    if (c.MidiChannel == 9) // Glockenspiel... ohhh it's usually track 6 but not always, and that's track not channel
+                                    if (c.MidiChannel == 9) // Glockenspiel - always channel 9
                                     {
                                         drumNoteCounts[c.Data1]++; // They're all 0 by default
+                                        channels[c.MidiChannel].Active = false; // Disabled by default
                                     }
 
-                                    if (!trackSelectionManager.MaxNoteByChannel.ContainsKey(c.MidiChannel))
-                                        trackSelectionManager.MaxNoteByChannel.Add(c.MidiChannel, c.Data1);
-                                    else if (trackSelectionManager.MaxNoteByChannel[c.MidiChannel] < c.Data1)
-                                        trackSelectionManager.MaxNoteByChannel[c.MidiChannel] = c.Data1;
+                                    if (c.Data1 > channels[c.MidiChannel].highestNote)
+                                        channels[c.MidiChannel].highestNote = c.Data1;
+                                    if (c.Data1 < channels[c.MidiChannel].lowestNote)
+                                        channels[c.MidiChannel].lowestNote = c.Data1;
+                                    // Track noteOn events and when we get a noteOff or velocity 0, add up note lengths
+                                    channels[c.MidiChannel].noteTicks[c.Data1] = midiEvent.AbsoluteTicks;
+                                    channels[c.MidiChannel].numNotes++;
 
-                                    if (!trackSelectionManager.MinNoteByChannel.ContainsKey(c.MidiChannel))
-                                        trackSelectionManager.MinNoteByChannel.Add(c.MidiChannel, c.Data1);
-                                    else if (trackSelectionManager.MinNoteByChannel[c.MidiChannel] > c.Data1)
-                                        trackSelectionManager.MinNoteByChannel[c.MidiChannel] = c.Data1;
+                                    if (!channels[c.MidiChannel].tickNotes.ContainsKey(midiEvent.AbsoluteTicks))
+                                        channels[c.MidiChannel].tickNotes[midiEvent.AbsoluteTicks] = new List<MidiNote>();
+
+                                    channels[c.MidiChannel].tickNotes[midiEvent.AbsoluteTicks].Add(new MidiNote() { note = c.Data1, tickNumber = midiEvent.AbsoluteTicks, track = track.Id, channel = c.MidiChannel });
+                                    // Ideally I'd like to parse out chords of size 3 or more, using some setting like RemoveLowest, RemoveHighest, RemoveMiddle
+                                    // Though I'm unsure how I'd really do that to anything except lutemod; lutebot is reading straight from the midi data isn't it?
                                 }
                                 else if (c.Command == ChannelCommand.ProgramChange)
                                 {
                                     string channelName = MidiChannelTypes.Names[c.Data1];
-                                    channelNames[c.MidiChannel] = channelName;
+                                    channels[c.MidiChannel].Name = channelName;
+                                }
+                                else if (c.Command == ChannelCommand.NoteOff || (c.Command == ChannelCommand.NoteOn && c.Data2 == 0))
+                                {
+
+                                    if (channels[c.MidiChannel].noteTicks.ContainsKey(c.Data1))
+                                    {
+                                        // Find the original note...
+                                        var startTick = channels[c.MidiChannel].noteTicks[c.Data1];
+                                        var length = midiEvent.AbsoluteTicks - startTick;
+                                        var note = channels[c.MidiChannel].tickNotes[startTick].Where(n => n.note == c.Data1).FirstOrDefault();
+                                        note.length = length;
+                                        // If we already have a note with a length on this same tick, we don't need to add to totalNoteLength...?
+                                        // I want to avoid a chord of 3 having 3x the detected total length... 
+                                        // I'll just have to deal with that later, and we won't bother tracking totalLength here
+
+                                        // Just add all the lengths, we'll divide after we read everything
+                                        channels[c.MidiChannel].avgNoteLength += length;
+                                        channels[c.MidiChannel].noteTicks.Remove(c.Data1);
+                                    }
                                 }
                             }
                             else if (midiEvent.MidiMessage is MetaMessage meta)
@@ -360,12 +419,67 @@ namespace LuteBot.Core.Midi
                                     if (bytes.Length > 0)
                                     {
                                         string trackName = ASCIIEncoding.ASCII.GetString(bytes);
-                                        trackNames[track.Id] = trackName;
+                                        tracks[track.Id].Name = trackName;
                                     }
+                                }
+                                else if (meta.MetaType == MetaType.Tempo)
+                                {
+                                    var newTempo = BytesToInt(meta.GetBytes()); // We divide by division when converting for lutemod only, apparently
+
+                                    if (!tickMetaNotes.ContainsKey(midiEvent.AbsoluteTicks))
+                                        tickMetaNotes[midiEvent.AbsoluteTicks] = new List<MidiNote>();
+
+                                    tickMetaNotes[midiEvent.AbsoluteTicks].Add(new MidiNote() { note = newTempo, tickNumber = midiEvent.AbsoluteTicks, track = track.Id });
+
                                 }
                             }
                         }
                     }//);
+
+                    // So, now we have a totalNoteLength... except, no.  That's not quite useful
+                    // We do have the list of all notes with lengths on them, though.  
+                    // So we can get a total length of parts by, for each tick/entry, take the longest length for that tick
+                    // And then only count new notes if their start+length > thatTick+thatLength
+
+
+                    // Compile noteLengths of channels
+                    foreach (var kvp in channels)
+                    {
+                        var channel = kvp.Value;
+                        if (channel.numNotes > 0)
+                            channel.avgNoteLength = channel.avgNoteLength / channel.numNotes;
+
+                        int nextValidTick = 0;
+
+                        foreach (var noteKvp in channel.tickNotes.OrderBy(n => n.Key))
+                        {
+                            var noteList = noteKvp.Value;
+                            var note = noteList.OrderByDescending(n => n.length).First();
+
+                            if (note.tickNumber > nextValidTick)
+                            {
+                                channel.totalNoteLength += note.length;
+                                nextValidTick = note.tickNumber + note.length;
+                            }
+                            else if (note.tickNumber + note.length > nextValidTick)
+                            {
+                                var diff = (note.tickNumber + note.length) - nextValidTick;
+                                channel.totalNoteLength += diff;
+                                nextValidTick = nextValidTick + diff;
+                            }
+                        }
+
+                        if (channel.tickNotes.Count > 0)
+                            channel.maxChordSize = channel.tickNotes.Max(t => t.Value.Count);
+                    }
+
+                    // Add a note on the drum channel
+                    if (channels.ContainsKey(9))
+                        channels[9].Name += " (DRUMS)";
+
+                    // Remove any channels or tracks that don't contain any notes
+                    channels = channels.Values.Where(c => c.numNotes > 0).ToDictionary(c => c.Id);
+
                     Console.WriteLine("Read track data in " + (DateTime.Now - startTime).TotalMilliseconds);
                     // Now let's get a sorted list of drum note counts
                     // I can't figure out how to do this nicely.
@@ -376,20 +490,21 @@ namespace LuteBot.Core.Midi
                     //DrumNoteCounts = DrumNoteCounts.OrderBy((kvp) => kvp.Value).ToList();
 
                     base.LoadCompleted(this, e);
+
                     mordhauOutDevice.HighMidiNoteId = sequence.MaxNoteId;
                     mordhauOutDevice.LowMidiNoteId = sequence.MinNoteId;
                     rustOutDevice.HighMidiNoteId = sequence.MaxNoteId;
                     rustOutDevice.LowMidiNoteId = sequence.MinNoteId;
                 }
             }
-            
+
         }
 
 
         public string GetChannelName(int id)
         {
-            if (channelNames.ContainsKey(id))
-                return channelNames[id];
+            if (channels.ContainsKey(id))
+                return channels[id].Name;
             else
                 return "Unknown";
         }
@@ -469,7 +584,7 @@ namespace LuteBot.Core.Midi
                             else
                             {
                                 var note = rustOutDevice.FilterNote(filtered, trackSelectionManager.NoteOffset +
-                                    (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0));
+                                    (trackSelectionManager.MidiChannels.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannels[e.Message.MidiChannel].offset : 0));
                                 if (note != null)
                                     outDevice.Send(note);
                             }
@@ -481,7 +596,7 @@ namespace LuteBot.Core.Midi
                 else
                 {
                     mordhauOutDevice.SendNote(trackSelectionManager.FilterMidiEvent(e.Message, e.TrackId), trackSelectionManager.NoteOffset +
-                       (trackSelectionManager.MidiChannelOffsets.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannelOffsets[e.Message.MidiChannel] : 0));
+                       (trackSelectionManager.MidiChannels.ContainsKey(e.Message.MidiChannel) ? trackSelectionManager.MidiChannels[e.Message.MidiChannel].offset : 0));
                 }
             }
             else
@@ -509,7 +624,119 @@ namespace LuteBot.Core.Midi
             int tempTick;
             bool isChannelActive = false;
 
-            foreach (TrackItem track in trackSelectionManager.MidiTracks)
+
+            var instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            // This is kindof annoying.  It only provides tracks to iterate through, which contain events, which have an absoluteTick
+            // But I want to iterate all the ticks.  I swear something had an iterator...
+
+            // Wait.  I can just... get a list of ticks to iterate over... 
+            // Let's do this one without linq and compare how bad they look, both will probably suck
+            List<int> ticksToIterate = new List<int>();
+            foreach (var channel in trackSelectionManager.MidiChannels.Values)
+            {
+                if (channel.Active)
+                {
+                    foreach (var kvp in channel.tickNotes)
+                    {
+                        foreach (var note in kvp.Value)
+                        {
+                            if (trackSelectionManager.MidiTracks[note.track].Active)
+                                if (!ticksToIterate.Contains(kvp.Key))
+                                ticksToIterate.Add(kvp.Key);
+                        }
+                    }
+                    foreach(var kvp in tickMetaNotes)
+                    {
+                        if (!ticksToIterate.Contains(kvp.Key))
+                            ticksToIterate.Add(kvp.Key);
+                    }
+                }
+            }
+            // Yeah still cleaner looking and more obvious that it's doing some real serious iteration
+
+            // Problem: I need meta notes.  I can either try storing them earlier - which means finding and changing any code that was selecting through them for notes, like highest/lowest
+            // Or I could store them in a separate thing, but would have to select them out separately 
+            // Or I could just access the sequence and check for them.  That seems best for now
+
+            // But later I should really just... redo... all of this.  Store all the data I need from the start, in the way I need it
+
+            foreach (var tickNumber in ticksToIterate)
+            {
+                List<MidiNote> notesThisTick = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => { if (c.tickNotes.TryGetValue(tickNumber, out var noteList)) return noteList.Where(n => trackSelectionManager.MidiTracks[n.track].Active); else return new List<MidiNote>(); }).GroupBy(n => n.note).SelectMany(n => n).OrderBy(n => n.note).ToList();
+                // This groupBy is a hacky Distinct method to prevent duplicate notes
+
+                // OK here it is, all the notes for all tracks and all channels this tick
+                // Find out if it's flute or lute
+                if (instrumentId == 0)
+                {
+                    // Lute.  Add only 2? 3? NotesPerChord?
+
+                    // Let's see what it sounds like to add only the first and last
+                    if (notesThisTick.Count > 0)
+                    {
+                        var note = notesThisTick.First();
+                        result.Add(new LuteMod.Sequencing.Note() { Tick = tickNumber, Tone = note.note + trackSelectionManager.MidiChannels[note.channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
+                    }
+                    if (notesThisTick.Count > 1 && trackSelectionManager.NumChords > 1)
+                    {
+                        var note = notesThisTick.Last();
+                        result.Add(new LuteMod.Sequencing.Note() { Tick = tickNumber, Tone = note.note + trackSelectionManager.MidiChannels[note.channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
+                    }
+                    if (notesThisTick.Count > 2 && trackSelectionManager.NumChords > 2)
+                    {
+                        // Add a middle one then
+                        var note = notesThisTick[(notesThisTick.Count) / 2];
+                        result.Add(new LuteMod.Sequencing.Note() { Tick = tickNumber, Tone = note.note + trackSelectionManager.MidiChannels[note.channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
+                    }
+                    // And then all the rest in case it gets to them?  Unsure... let's see how it plays
+                    // I still don't really know.  I'm pretty sure it is now just, prioritizing the important notes
+                    // And I think new lutemod is more able to play cleanly itself as well
+                    // So I think it is best for now to include them because trimming to 3 did cause some minor issues on some specific songs
+
+                    // Though... I should really use notesPerChord for this
+
+                    // Note, that this implementation prefers high notes, after the first 3.  Might should add an option or something, or pick randomly?  idk
+
+                    //if (trackSelectionManager.NumChords > 3)
+                    //{
+                    foreach (var t in notesThisTick)
+                    {
+                        if (result.Count >= trackSelectionManager.NumChords)
+                            break;
+                        if (!result.Any(n => n.Tone == t.note && n.Type == LuteMod.Sequencing.NoteType.On))
+                        {
+                            result.Add(new LuteMod.Sequencing.Note() { Tick = tickNumber, Tone = t.note + trackSelectionManager.MidiChannels[t.channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
+                        }
+                    }
+                    //}
+                }
+                //else if(instrumentId == 1)
+                //{
+                //    // Flute.  Add only 1?  Which one?  Highest isn't really good... and if there's only two, the other option is lowest, that's even worse
+                //    // Let's just leave flute alone for now
+                //
+                //}
+                else
+                {
+                    // Add them all 
+                    foreach (var note in notesThisTick)
+                        result.Add(new LuteMod.Sequencing.Note() { Tick = tickNumber, Tone = note.note + trackSelectionManager.MidiChannels[note.channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
+                }
+
+                // Then look for meta notes
+                // Damn, so, the notes in track don't seem easily accessible via knowing the tick we want... 
+                // Which means it'd be crazy not to just, track them.  
+                if (tickMetaNotes.ContainsKey(tickNumber))
+                {
+                    foreach (var metaNote in tickMetaNotes[tickNumber])
+                    {
+                        result.Add(new LuteMod.Sequencing.Note() { Tick = tickNumber, Tone = metaNote.note, Type = LuteMod.Sequencing.NoteType.Tempo });
+                    }
+                }
+            }
+
+            /*
+            foreach (TrackItem track in trackSelectionManager.MidiTracks.Values)
             {
                 if (track.Active)
                 {
@@ -517,18 +744,27 @@ namespace LuteBot.Core.Midi
                     for (int i = 0; i < tempTrack.Count; i++)
                     {
                         tempTick = tempTrack.GetMidiEvent(i).AbsoluteTicks;
+                        // So let's manually handle chords here, parse them down to 2-3 total
+                        // Find all active channels, and find every note on this tick for those channels...
+
+                        // We can try using tsm.MidiChannels.tickNotes
+                        List<MidiNote> notesThisTick = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => { if (c.tickNotes.TryGetValue(tempTick, out var noteList)) return noteList.Where(n => trackSelectionManager.MidiTracks[n.track].Active); else return new List<MidiNote>(); }).OrderBy(n => n.note).ToList();
+                        // That's a really dumb and ugly linq statement but whatever
+
+                        // Now all we have to do is, if we're lute, take the top and bottom one from this ordered list (maybe a third one from the middle?)
+
+                        // If we're flute, take just the top?
+
                         if (tempTrack.GetMidiEvent(i).MidiMessage.MessageType == MessageType.Channel)
                         {
                             tempMessage = (ChannelMessage)tempTrack.GetMidiEvent(i).MidiMessage;
-                            foreach (MidiChannelItem item in trackSelectionManager.MidiChannels)
+                            foreach (MidiChannelItem item in trackSelectionManager.MidiChannels.Values) // TODO: Enforce an order for consistency?
                             {
                                 isChannelActive = isChannelActive || (item.Id == tempMessage.MidiChannel && item.Active);
                             }
                             if (isChannelActive && tempMessage.Command == ChannelCommand.NoteOn && tempMessage.Data2 > 0)
                             {
-                                int offset = trackSelectionManager.NoteOffset;
-                                if (trackSelectionManager.MidiChannelOffsets.ContainsKey(tempMessage.MidiChannel))
-                                    offset += trackSelectionManager.MidiChannelOffsets[tempMessage.MidiChannel];
+                                int offset = trackSelectionManager.NoteOffset + trackSelectionManager.MidiChannels[tempMessage.MidiChannel].offset;
                                 result.Add(new LuteMod.Sequencing.Note() { Tick = tempTick, Tone = tempMessage.Data1 + offset, Type = LuteMod.Sequencing.NoteType.On });
                             }
                             isChannelActive = false;
@@ -538,12 +774,14 @@ namespace LuteBot.Core.Midi
                             tempMetaMessage = (MetaMessage)tempTrack.GetMidiEvent(i).MidiMessage;
                             if (tempMetaMessage.MetaType == MetaType.Tempo)
                             {
-                                result.Add(new LuteMod.Sequencing.Note() { Tick = tempTick, Tone = BytesToInt(tempMetaMessage.GetBytes()), Type = LuteMod.Sequencing.NoteType.Tempo });
+                                var newTempo = BytesToInt(tempMetaMessage.GetBytes()); // We divide by division when converting for lutemod only, apparently
+                                result.Add(new LuteMod.Sequencing.Note() { Tick = tempTick, Tone = newTempo, Type = LuteMod.Sequencing.NoteType.Tempo });
                             }
                         }
                     }
                 }
             }
+            */
             return result;
         }
 

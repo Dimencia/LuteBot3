@@ -4,6 +4,8 @@ using LuteBot.Soundboard;
 using LuteBot.TrackSelection;
 using LuteBot.UI.Utils;
 
+using Newtonsoft.Json;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +20,7 @@ namespace LuteBot.IO.Files
 {
     public class SaveManager
     {
-        private static string autoSavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"LuteBot","Profiles");
+        private static string autoSavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Profiles");
 
         private static int fileSize = 5000;
         private static List<byte> fileHeader;
@@ -204,7 +206,7 @@ namespace LuteBot.IO.Files
             //return LoadNoDialog<TrackSelectionData>(autoSavePath + "/" + fileName);
             // Backwards compatible in case TSD isn't there.  
 
-            var result = LoadNoDialog<Dictionary<int, TrackSelectionData>>(fileName);
+            var result = LoadNoDialog(fileName);
             if (result == null)
             {
                 var singularData = LoadNoDialog<TrackSelectionData>(fileName);
@@ -291,6 +293,30 @@ namespace LuteBot.IO.Files
             return stream;
         }
 
+
+        private static Dictionary<int, TrackSelectionData> LoadNoDialog(string path)
+        {
+            // And here is our new method, which is json, much smaller and cleaner
+            try
+            {
+                var allbytes = File.ReadAllBytes(path);
+                int jsonIndex = allbytes.Locate(Encoding.ASCII.GetBytes("[{\""));
+                if (jsonIndex > -1)
+                {
+                    var jsonString = Encoding.ASCII.GetString(allbytes.Skip(jsonIndex).ToArray());
+                    var simpleData = JsonConvert.DeserializeObject<SimpleTrackSelectionData[]>(jsonString);
+
+                    return (simpleData.ToDictionary(a => a.InstrumentID, b => new TrackSelectionData(b)));
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            // If this didn't work, try the old one
+            return LoadNoDialog<Dictionary<int, TrackSelectionData>>(path);
+        }
+
+
         private static T LoadNoDialog<T>(string path)
         {
             T result = default(T);
@@ -300,6 +326,7 @@ namespace LuteBot.IO.Files
                 // Also dirty
                 if (typeof(T) == typeof(TrackSelectionData) || typeof(T) == typeof(Dictionary<int, TrackSelectionData>))
                 {
+
                     // We do things totally different here.
                     // We load from the mid file
                     // Cut out everything before the first <
@@ -313,8 +340,8 @@ namespace LuteBot.IO.Files
                             while (line != null && !line.StartsWith("<ArrayOfKeyValueOfintTrackSelectionDatatebA3aWD") && !line.StartsWith("<TrackSelectionData"))
                                 line = reader.ReadLine();
                             line += "\n" + reader.ReadToEnd(); // This is our entire xml data now...
-                            // Now, because of the way I read this, I can't rewind the stream
-                            // So we need to make a new one with just this data
+                                                               // Now, because of the way I read this, I can't rewind the stream
+                                                               // So we need to make a new one with just this data
                             using (Stream xmlStream = GenerateStreamFromString(line))
                             {
                                 result = (T)serializer.ReadObject(xmlStream);
@@ -324,8 +351,9 @@ namespace LuteBot.IO.Files
                     }
                     catch (Exception e)
                     {
-                        path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"LuteBot","Profiles",Path.GetFileNameWithoutExtension(path));
+                        path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Profiles", Path.GetFileNameWithoutExtension(path));
                     }
+
                 }
 
                 Directory.CreateDirectory(autoSavePath);
@@ -362,118 +390,146 @@ namespace LuteBot.IO.Files
                 targetPath = path;
             if (path != null)
             {
-                var serializer = new DataContractSerializer(typeof(T));
                 // Still dirty
                 if (typeof(T) == typeof(Dictionary<int, TrackSelectionData>))
                 {
                     try
                     {
+                        // Split them out from a dictionary to just, a list of TrackSelectionData, each containing its instrumentID
+                        var targetDict = target as Dictionary<int, TrackSelectionData>;
+                        var simpleData = targetDict.Select(kvp => { return new SimpleTrackSelectionData(kvp.Value, kvp.Key); }).ToArray();
+                        // Now parse out any notes that are unchanged; only keep tickNotes that are inactive, that's currently all they can change in individual notes
+                        // These are new instances of track and channel so shouldn't matter if we mess them up; but the instances of the Notes are not new
+
+                        // Though, having tickNotes be a dictionary in this case is kinda stupid too... they already contain the tickNumber...
+
+                        // There; the conversions are now mostly automatic and contained within the classes for SimpleTrackSelectionData and SimpleMidiChannelItem
+
                         Directory.CreateDirectory(autoSavePath);
-                        using (MemoryStream stream = new MemoryStream())
+                        //using (MemoryStream stream = new MemoryStream())
+                        //{
+                        //serializer.WriteObject(stream, simpleData);
+                        // Reset stream for writing it later - No longer necessary with .ToArray
+                        // stream.Seek(0, SeekOrigin.Begin);
+                        // Remove any XML data from the midi file, if any
+
+                        string json = "\n" + JsonConvert.SerializeObject(simpleData);
+
+                        var midiDataBytes = File.ReadAllBytes(path);
+
+                        int xmlPosition = midiDataBytes.Locate(Encoding.ASCII.GetBytes("<Tr"), Encoding.ASCII.GetBytes("<Ar"), Encoding.ASCII.GetBytes("[{\""));
+                        // That last one should catch json while hopefully never catching anything from the midi... 
+                        // For performance, let's trim them all to three letters
+                        if (xmlPosition > -1)
                         {
-                            serializer.WriteObject(stream, target);
-                            // Reset stream...
-                            stream.Seek(0, SeekOrigin.Begin);
-                            // Remove any XML data from the midi file, if any
-
-                            // First read in the existing data
-                            byte[] midiData;
-                            long fsLength;
-                            using (FileStream fs = File.OpenRead(path))
-                            {
-                                fsLength = fs.Length;
-                                midiData = new byte[fs.Length];
-                                for (int i = 0; i < fs.Length; i++)
-                                    midiData[i] = (byte)fs.ReadByte(); // No int overflow issues here vs .Read()
-                            }
-
-
-                            // midiData currently includes both the xml and midi right now
-                            // I need to somehow find out where in the byte array the xml stuff starts
-
-                            //string allData = Encoding.Default.GetString(midiData);
-                            //int xmlCutoff = allData.IndexOf("<TrackSelectionData") / 2;
-
-                            int xmlCutoff = -1;
-                            byte[] xmlMarker = Encoding.ASCII.GetBytes("\n<TrackSelectionData");
-                            byte[] dictXmlMarker = Encoding.ASCII.GetBytes("\n<ArrayOfKeyValueOfintTrackSelectionDatatebA3aWD");
-
-                            // We throw exceptions on these cuz we catch them below and do default saving instead if necessary
-                            if (fsLength + xmlMarker.Length > int.MaxValue) // Handle rare case
-                            {
-                                MessageBox.Show("MIDI byte array value was larger than int maxvalue, writing to separate file instead");
-                                throw new Exception("MIDI byte array value was larger than int maxvalue, writing to separate file instead");
-                            }
-                            if (stream.Length > int.MaxValue)
-                            {
-                                MessageBox.Show("Track Selection byte array value was larger than int maxvalue, writing to separate file instead");
-                                throw new Exception("Track Selection byte array value was larger than int maxvalue, writing to separate file instead");
-                            }
-
-                            // I think we have to do this manually, annoyingly, there's no easy way to find the indexOf a byte array like this
-                            for (int i = 0; (i + xmlMarker.Length) < midiData.Length; i++)
-                            {
-                                if ((i + dictXmlMarker.Length) < midiData.Length)
-                                {
-                                    var compare2 = midiData.Skip(i).Take(dictXmlMarker.Length).ToArray();
-                                    bool success2 = true;
-                                    for (int j = 0; j < dictXmlMarker.Length; j++)
-                                    {
-                                        if (compare2[j] != dictXmlMarker[j])
-                                        {
-                                            success2 = false;
-                                            break;
-                                        }
-                                    }
-                                    if (success2)
-                                    {
-                                        xmlCutoff = i;
-                                        break;
-                                    }
-                                }
-                                var compare = midiData.Skip(i).Take(xmlMarker.Length).ToArray();
-                                // Again it doesn't seem that == works here and we have to do it by hand...
-                                bool success = true;
-                                for (int j = 0; j < xmlMarker.Length; j++)
-                                {
-                                    if (compare[j] != xmlMarker[j])
-                                    {
-                                        success = false;
-                                        break;
-                                    }
-                                }
-                                if (success)
-                                {
-                                    xmlCutoff = i;
-                                    break;
-                                }
-                            }
-
-                            // As a safety check - it should never be -1 or 0 or really anything low but whatever
-                            if (xmlCutoff > 0)
-                                midiData = midiData.Take(xmlCutoff).ToArray();
-
-                            // Now we have all the data we need
-                            using (FileStream fs = File.Create(targetPath))
-                            {
-                                fs.Write(midiData, 0, midiData.Length); // Midi data
-                                byte[] xmlData = new byte[stream.Length];
-                                stream.Read(xmlData, 0, (int)stream.Length);
-                                var newline = Encoding.Default.GetBytes("\n");
-                                fs.Write(newline, 0, newline.Length);
-                                fs.Write(xmlData, 0, xmlData.Length);
-                            }
+                            midiDataBytes = midiDataBytes.Take(xmlPosition).ToArray();
                         }
+
+                        midiDataBytes = midiDataBytes.Concat(Encoding.ASCII.GetBytes(json)).ToArray();
+
+                        File.WriteAllBytes(targetPath, midiDataBytes);
+
+                        // First read in the existing data
+                        //byte[] midiData;
+                        //long fsLength;
+                        //using (FileStream fs = File.OpenRead(path))
+                        //{
+                        //    fsLength = fs.Length;
+                        //    midiData = new byte[fs.Length];
+                        //    for (int i = 0; i < fs.Length; i++)
+                        //        midiData[i] = (byte)fs.ReadByte(); // No int overflow issues here vs .Read()
+                        //}
+
+
+                        // midiData currently includes both the xml and midi right now
+                        // I need to somehow find out where in the byte array the xml stuff starts
+
+                        //string allData = Encoding.Default.GetString(midiData);
+                        //int xmlCutoff = allData.IndexOf("<TrackSelectionData") / 2;
+
+                        // So, all this is cool and all, but if I just convert it to ASCII, each of these should start on a newline
+
+                        //int xmlCutoff = -1;
+                        //byte[] xmlMarker = Encoding.ASCII.GetBytes("\n<TrackSelectionData");
+                        //byte[] dictXmlMarker = Encoding.ASCII.GetBytes("\n<ArrayOfKeyValueOfintTrackSelectionDatatebA3aWD");
+                        //
+                        //// We throw exceptions on these cuz we catch them below and do default saving instead if necessary
+                        //if (fsLength + xmlMarker.Length > int.MaxValue) // Handle rare case
+                        //{
+                        //    MessageBox.Show("MIDI byte array value was larger than int maxvalue, writing to separate file instead");
+                        //    throw new Exception("MIDI byte array value was larger than int maxvalue, writing to separate file instead");
+                        //}
+                        //if (stream.Length > int.MaxValue)
+                        //{
+                        //    MessageBox.Show("Track Selection byte array value was larger than int maxvalue, writing to separate file instead");
+                        //    throw new Exception("Track Selection byte array value was larger than int maxvalue, writing to separate file instead");
+                        //}
+                        //
+                        //// I think we have to do this manually, annoyingly, there's no easy way to find the indexOf a byte array like this
+                        //for (int i = 0; (i + xmlMarker.Length) < midiData.Length; i++)
+                        //{
+                        //    if ((i + dictXmlMarker.Length) < midiData.Length)
+                        //    {
+                        //        var compare2 = midiData.Skip(i).Take(dictXmlMarker.Length).ToArray();
+                        //        bool success2 = true;
+                        //        for (int j = 0; j < dictXmlMarker.Length; j++)
+                        //        {
+                        //            if (compare2[j] != dictXmlMarker[j])
+                        //            {
+                        //                success2 = false;
+                        //                break;
+                        //            }
+                        //        }
+                        //        if (success2)
+                        //        {
+                        //            xmlCutoff = i;
+                        //            break;
+                        //        }
+                        //    }
+                        //    var compare = midiData.Skip(i).Take(xmlMarker.Length).ToArray();
+                        //    // Again it doesn't seem that == works here and we have to do it by hand...
+                        //    bool success = true;
+                        //    for (int j = 0; j < xmlMarker.Length; j++)
+                        //    {
+                        //        if (compare[j] != xmlMarker[j])
+                        //        {
+                        //            success = false;
+                        //            break;
+                        //        }
+                        //    }
+                        //    if (success)
+                        //    {
+                        //        xmlCutoff = i;
+                        //        break;
+                        //    }
+                        //}
+                        //
+                        //// As a safety check - it should never be -1 or 0 or really anything low but whatever
+                        //if (xmlCutoff > 0)
+                        //    midiData = midiData.Take(xmlCutoff).ToArray();
+
+                        // Now we have all the data we need
+                        //using (FileStream fs = File.Create(targetPath))
+                        //{
+                        //    fs.Write(midiData, 0, midiData.Length); // Midi data
+                        //    byte[] xmlData = new byte[stream.Length];
+                        //    stream.Read(xmlData, 0, (int)stream.Length);
+                        //    var newline = Encoding.Default.GetBytes("\n");
+                        //    fs.Write(newline, 0, newline.Length);
+                        //    fs.Write(xmlData, 0, xmlData.Length);
+                        //}
+                        //}
                         return;
                     }
                     catch (Exception e)
                     {
                         MessageBox.Show("Failed to write to midi file - writing to XML file instead");
-                        var folderpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"LuteBot","Profiles");
+                        var folderpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Profiles");
                         Directory.CreateDirectory(folderpath);
                         path = folderpath + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(path) + ".xml";
                         using (var stream = File.Create(path))
                         {
+                            var serializer = new DataContractSerializer(typeof(T));
                             serializer.WriteObject(stream, target);
                         }
                     } // If it fails, fallback and write to the old path, and write just the stream

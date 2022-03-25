@@ -14,18 +14,13 @@ namespace LuteBot.TrackSelection
 {
     public class TrackSelectionManager
     {
-        private List<MidiChannelItem> midiChannels;
-        private List<TrackItem> midiTracks;
-        private Dictionary<int, int> midiChannelOffsets = new Dictionary<int, int>();
-        private Dictionary<int, int> maxNoteByChannel = new Dictionary<int, int>();
-        private Dictionary<int, int> minNoteByChannel = new Dictionary<int, int>();
+        private Dictionary<int, MidiChannelItem> midiChannels;
+        private Dictionary<int, TrackItem> midiTracks;
 
+        private int PredictedFluteChannel = -1;
 
-        public List<MidiChannelItem> MidiChannels { get => midiChannels; set { midiChannels = value; ResetRequest(); } }
-        public List<TrackItem> MidiTracks { get => midiTracks; set { midiTracks = value; ResetRequest(); } }
-        public Dictionary<int, int> MidiChannelOffsets { get => midiChannelOffsets; set { midiChannelOffsets = value; ResetRequest(); } }
-        public Dictionary<int, int> MaxNoteByChannel { get => maxNoteByChannel; set { maxNoteByChannel = value; ResetRequest(); } }
-        public Dictionary<int, int> MinNoteByChannel { get => minNoteByChannel; set { minNoteByChannel = value; ResetRequest(); } }
+        public Dictionary<int, MidiChannelItem> MidiChannels { get => midiChannels; set { midiChannels = value; ResetRequest(); } }
+        public Dictionary<int, TrackItem> MidiTracks { get => midiTracks; set { midiTracks = value; ResetRequest(); } }
         public bool ActivateAllChannels { get => activateAllChannels; set { activateAllChannels = value; ResetRequest(); } }
         public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
         public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
@@ -48,8 +43,8 @@ namespace LuteBot.TrackSelection
 
         public TrackSelectionManager()
         {
-            midiChannels = new List<MidiChannelItem>();
-            midiTracks = new List<TrackItem>();
+            midiChannels = new Dictionary<int, MidiChannelItem>();
+            midiTracks = new Dictionary<int, TrackItem>();
             activateAllChannels = false;
             activateAllTracks = false;
             autoLoadProfile = true;
@@ -91,13 +86,45 @@ namespace LuteBot.TrackSelection
             //NoteOffset = data.Offset;
             //NumChords = data.NumChords;
 
-            this.MidiChannels = data.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel));
-            this.MidiTracks = data.MidiTracks.ConvertAll(track => new TrackItem(track));
+            // Aha.  So, we don't want to overwrite because old ones might not have some data, and we already have populated data
+            // We also need new objects so we don't have refernce issues.  So start by duplicating all existing ones
+            foreach (var c in data.MidiChannels)
+            {
+                if (MidiChannels.ContainsKey(c.Id))
+                {
+                    MidiChannels[c.Id] = new MidiChannelItem(MidiChannels[c.Id]);
+                    MidiChannels[c.Id].Active = c.Active;
+                    MidiChannels[c.Id].offset = c.offset;
+                }
+                // If we don't have it, we discarded it cuz it was dumb, so don't do anything.  
+            }
+            foreach (var t in data.MidiTracks)
+            {
+                if (MidiTracks.ContainsKey(t.Id))
+                {
+                    MidiTracks[t.Id] = new TrackItem(MidiTracks[t.Id]);
+                    MidiTracks[t.Id].Active = t.Active;
+                }
+            }
+
+            //this.MidiChannels = data.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel)).ToDictionary(channel => channel.Id);
+            //this.MidiTracks = data.MidiTracks.ConvertAll(track => new TrackItem(track)).ToDictionary(track => track.Id);
             this.NoteOffset = data.Offset;
-            this.MidiChannelOffsets = new Dictionary<int, int>(data.MidiChannelOffsets);
             this.NumChords = data.NumChords;
 
-            DataDictionary[ConfigManager.GetIntegerProperty(PropertyItem.Instrument)] = new TrackSelectionData(data);
+            if (data.MidiChannelOffsets != null)
+                foreach(var kvp in data.MidiChannelOffsets)
+                {
+                    if (MidiChannels.ContainsKey(kvp.Key)) // If not, we don't care. 
+                        MidiChannels[kvp.Key].offset = kvp.Value;
+                }
+
+            // Restore any channel names that might be null or incorrect, from older data that got saved
+            foreach (var c in midiChannels.Values)
+                c.Name = Player.GetChannelName(c.Id);
+
+            int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            DataDictionary[instrumentId] = new TrackSelectionData(data, instrumentId);
         }
 
 
@@ -112,17 +139,35 @@ namespace LuteBot.TrackSelection
                 // If it's duet flute but there is no data for it, and we also have a flute track, copy the flute settings
                 SetTrackSelectionData(DataDictionary[1]);
             }
-            else if (instrumentId == 2 && DataDictionary.ContainsKey(1))
+            else if (instrumentId == 0 && DataDictionary.ContainsKey(1))
             {
-                // If it's duet lute with no data, and there is a flute track, copy the lute track and disable whatever the flute has active
-                SetTrackSelectionData(DataDictionary[0]);
+                // If it's lute with no data, and there is a flute track, copy the flute track and disable whatever the flute has active
+                SetTrackSelectionData(DataDictionary[1]);
                 var fluteData = DataDictionary[1];
 
-                foreach(var channel in MidiChannels)
+                foreach (var channel in MidiChannels.Values)
                 {
                     // There's no real situation where they should have any disparity between their channels
                     if (fluteData.MidiChannels.Where(d => d.Id == channel.Id).Single().Active)
                         channel.Active = false;
+                }
+            }
+            else if (instrumentId == 1 && DataDictionary.ContainsKey(0))
+            {
+                // Load default from lute...
+                SetTrackSelectionData(DataDictionary[0]);
+                if (midiChannels.ContainsKey(PredictedFluteChannel))
+                {
+                    foreach (var channel in midiChannels.Values)
+                    {
+                        if (channel.Id != PredictedFluteChannel)
+                            channel.Active = false;
+                        else
+                        {
+                            //channel.Name += " (Flute?)";
+                            channel.Active = true;
+                        }
+                    }
                 }
             }
             else if (DataDictionary.ContainsKey(0))
@@ -132,10 +177,9 @@ namespace LuteBot.TrackSelection
         public TrackSelectionData GetTrackSelectionData()
         {
             TrackSelectionData data = new TrackSelectionData();
-            data.MidiChannels = new List<MidiChannelItem>(MidiChannels);
-            data.MidiTracks = new List<TrackItem>(MidiTracks);
+            data.MidiChannels = new List<MidiChannelItem>(MidiChannels.Values);
+            data.MidiTracks = new List<TrackItem>(MidiTracks.Values);
             data.Offset = NoteOffset;
-            data.MidiChannelOffsets = new Dictionary<int, int>(MidiChannelOffsets);
             data.NumChords = NumChords;
             return data;
         }
@@ -156,34 +200,46 @@ namespace LuteBot.TrackSelection
                 int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
                 if (DataDictionary.ContainsKey(instrumentId))
                     data = DataDictionary[instrumentId];
-                else if(DataDictionary.ContainsKey(0))
+                else if (DataDictionary.ContainsKey(0))
                     data = DataDictionary[0];
 
                 if (data != null)
                 {
-
-                    this.MidiChannels = new List<MidiChannelItem>(data.MidiChannels);
-                    this.MidiTracks = new List<TrackItem>(data.MidiTracks);
-                    this.NoteOffset = data.Offset;
-                    this.MidiChannelOffsets = new Dictionary<int, int>(data.MidiChannelOffsets);
-                    if (data.NumChords > 0)
-                        this.NumChords = data.NumChords;
-                    else
-                        this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
-
-                    // Restore any channel names that might be null or incorrect, from older data that got saved
-                    foreach (var c in midiChannels)
-                        c.Name = Player.GetChannelName(c.Id);
+                    SetTrackSelectionData(data);
                 }
                 else
                 { // Reset these if there's no settings for something
                     DataDictionary.Clear();
                     this.NoteOffset = 0;
-                    this.MidiChannelOffsets.Clear();
                     //this.midiChannels.Clear();
                     //this.midiTracks.Clear();
                     this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+
+                    // There was no saved data... So, for lute, disable the PredictedFluteChannel, and enable it for flute
+                    if (midiChannels.ContainsKey(PredictedFluteChannel))
+                    {
+                        midiChannels[PredictedFluteChannel].Active = false;
+                        if (!midiChannels[PredictedFluteChannel].Name.Contains("Shawm"))
+                            midiChannels[PredictedFluteChannel].Name += " (Shawm?)";
+                    }
+
                     UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
+
+                    // Setup the flute and make that happen too
+                    if (midiChannels.ContainsKey(PredictedFluteChannel))
+                    {
+                        foreach (var channel in midiChannels.Values)
+                        {
+                            if (channel.Id != PredictedFluteChannel)
+                                channel.Active = false;
+                            else
+                            {
+                                //channel.Name += " (Flute?)";
+                                channel.Active = true;
+                            }
+                        }
+                    }
+                    UpdateTrackSelectionForInstrument(1);
                 }
                 EventHelper();
             }
@@ -191,48 +247,184 @@ namespace LuteBot.TrackSelection
             {
                 DataDictionary.Clear();
                 this.NoteOffset = 0;
-                this.MidiChannelOffsets.Clear();
                 //this.midiChannels.Clear();
                 //this.midiTracks.Clear();
                 this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+
+                // There was no saved data... So, for lute, disable the PredictedFluteChannel, and enable it for flute
+                if (midiChannels.ContainsKey(PredictedFluteChannel))
+                {
+                    midiChannels[PredictedFluteChannel].Active = false;
+                    if (!midiChannels[PredictedFluteChannel].Name.Contains("Shawm"))
+                        midiChannels[PredictedFluteChannel].Name += " (Shawm?)";
+                }
+
                 UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
+
+                // Setup the flute and make that happen too
+                if (midiChannels.ContainsKey(PredictedFluteChannel))
+                {
+                    foreach (var channel in midiChannels.Values)
+                    {
+                        if (channel.Id != PredictedFluteChannel)
+                            channel.Active = false;
+                        else
+                        {
+                            //channel.Name += " (Flute?)";
+                            channel.Active = true;
+                        }
+                    }
+                }
+                UpdateTrackSelectionForInstrument(1);
+                EventHelper();
             }
         }
 
-        public void LoadTracks(Dictionary<int, string> channels, Dictionary<int,string> tracks, TrackSelectionManager tsm)
+        public void LoadTracks(Dictionary<int, MidiChannelItem> channels, Dictionary<int, TrackItem> tracks, TrackSelectionManager tsm)
         {
-            midiChannels.Clear();
-            midiTracks.Clear();
+            //midiChannels.Clear();
+            //midiTracks.Clear();
+            //
+            //foreach (var kvp in channels)
+            //    if(kvp.Key != 9)
+            //        midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = true, Name = kvp.Value });
+            //    else // Automatically disable glockenspiel channel
+            //        midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = false, Name = kvp.Value });
+            //foreach (var kvp in tracks)
+            //    midiTracks.Add(new TrackItem() { Id = kvp.Key, Name = kvp.Value, Active = true });
 
-            foreach (var kvp in channels)
-                if(kvp.Key != 9)
-                    midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = true, Name = kvp.Value });
-                else // Automatically disable glockenspiel channel
-                    midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = false, Name = kvp.Value });
-            foreach (var kvp in tracks)
-                midiTracks.Add(new TrackItem() { Id = kvp.Key, Name = kvp.Value, Active = true });
-            
+            // We don't want to directly copy it... I think we already have some at this point?
+            // We do not, yet... 
+            midiChannels = channels;
+            midiTracks = tracks;
+
             NoteOffset = tsm.NoteOffset;
             NumChords = tsm.NumChords;
 
+            // Now is a good time to predict a flute channel - PredictedFluteChannel
+            PredictedFluteChannel = GetFlutePrediction();
+
             ResetRequest();
-            EventHelper();
+            //EventHelper();
+        }
+
+        private int GetFlutePrediction()
+        {
+            // A good flute track has long notes, many notes, and the notes cover a wide octave area
+            // So let's get all of those on a scale of 0 to 1
+            // That means finding the highest and lowest avgNoteLength, numNotes, and highest-lowest
+
+            // If there is only 1 channel, don't mark it, so that it plays on both lute and flute
+            var activeChannels = midiChannels.Values.Where(c => c.Active);
+            if (activeChannels.Count() < 2)
+                return -1;
+
+            var lowestAvgLength = int.MaxValue;
+            var highestAvgLength = 0;
+            var lowestNumNotes = int.MaxValue;
+            var highestNumNotes = 0;
+            var lowestRange = int.MaxValue;
+            var highestRange = 0;
+
+            // First, parse channels for the highest and lowest values of: average note length, total number of notes, range of notes 
+
+            foreach (var c in activeChannels)
+            {
+                if (c.avgNoteLength < lowestAvgLength)
+                    lowestAvgLength = c.avgNoteLength;
+                if (c.avgNoteLength > highestAvgLength)
+                    highestAvgLength = c.avgNoteLength;
+
+                if (c.numNotes < lowestNumNotes)
+                    lowestNumNotes = c.numNotes;
+                if (c.numNotes > highestNumNotes)
+                    highestNumNotes = c.numNotes;
+
+                var range = c.highestNote - c.lowestNote;
+                if (range < lowestRange)
+                    lowestRange = range;
+                if (range > highestRange)
+                    highestRange = range;
+            }
+
+            int lengthRange = highestAvgLength - lowestAvgLength;
+            int numNoteRange = highestNumNotes - lowestNumNotes;
+            int rangeRange = highestRange - lowestRange;
+
+            // Also for each channel, store the total number of ticks covered by all notes in the channel (i.e. total duration that notes are actually playing, later compared to song duration)
+
+            // And then apply some weights and targets; the weights are all negative because the ideal track gets a 0 on the percent differences
+            // Targets and weights set by some manual testing... 
+            float lengthWeight = -1.5f; 
+            float targetALen = 0.2f; // Vocals aren't the longest, but not the shortest... 
+
+            float rangeWeight = -1f; 
+            float targetRange = 0.5f; // They cover a very average amount of range
+
+            float numNotesWeight = -0.5f; 
+            float targetNumNotes = 0.2f; // And usually only have like 20% of total notes for a song
+            
+            float targetLengthPercent = 0.6f; // Vocals are about half of the song usually...
+            float targetLengthWeight = -2f; // At least 2 weight, because we're looking at values from 0 to 0.5, probably more than that
+
+            float numChordsWeight = -0.25f; // Prefer fewer chords... 
+
+            float targetMaxOctave = 84; // Prefer notes closer to our flute max
+            float octaveWeight = -3;
+
+            var totalTrackLength = Player.GetLength();
+
+            var channels = activeChannels.OrderByDescending(c =>
+            {
+                float weight = 0;
+                
+                if (lengthRange > 0)
+                    weight += Math.Abs(((c.avgNoteLength - lowestAvgLength) / (float)lengthRange)- targetALen) * lengthWeight;
+                
+                if (numNoteRange > 0)
+                    weight += Math.Abs(((c.numNotes - lowestNumNotes) / (float)numNoteRange)-targetNumNotes) * numNotesWeight;
+                
+                if (rangeRange > 0)
+                    weight += Math.Abs((((c.highestNote - c.lowestNote) - lowestRange) / (float)rangeRange)-targetRange) * rangeWeight;
+
+                weight += c.maxChordSize * numChordsWeight;
+
+                weight += Math.Abs((c.highestNote - targetMaxOctave) / 64) * octaveWeight; // This /64 is a bit arbitrary, but should ensure values stay below 1 like everything else
+                // They can't be more than 84 away, and assumedly they'll have a max note of at least a C1 (C-1 is at 0 in our implementation)
+
+                var lengthPercent = c.totalNoteLength / (float)totalTrackLength;
+                var targetLengthDiff = Math.Abs(lengthPercent - targetLengthPercent);
+
+                weight += targetLengthDiff * targetLengthWeight;
+
+                return weight;
+            });
+
+            // Let's adjust their names with their scores
+            // They tend to be like... up to -5?  I should really sum all the weights and find out but
+            // Good enough otherwise
+            for (int i = 0; i < channels.Count(); i++)
+                channels.ElementAt(i).Name += " (Flute Rank: " + (i + 1) + ")";
+
+            var channel = channels.FirstOrDefault();
+            if (channel != null)
+                return channel.Id;
+            return -1;
         }
 
         public ChannelMessage FilterMidiEvent(ChannelMessage message, int trackId)
         {
             ChannelMessage newMessage = message;
-            TrackItem track = midiTracks.FirstOrDefault(x => x.Id == trackId);
-            if (track != null && track.Active)
+            if (midiTracks.ContainsKey(trackId))
             {
-                if (message.Command == ChannelCommand.NoteOn)
+                TrackItem track = midiTracks[trackId];
+                if (track != null && track.Active)
                 {
-                    foreach (MidiChannelItem channelItem in midiChannels)
+                    if (message.Command == ChannelCommand.NoteOn)
                     {
-                        if (channelItem.Id == message.MidiChannel)
+                        if (midiChannels.ContainsKey(message.MidiChannel))
                         {
-                            // We're filtering out glockenspiel in a super hacky way here... 
-                            // And removed it, because we might want them for things sometimes.   || channelItem.Name.ToLower().Equals("glockenspiel")
+                            var channelItem = midiChannels[message.MidiChannel];
                             if (!(channelItem.Active || activateAllChannels))
                             {
                                 newMessage = new ChannelMessage(ChannelCommand.NoteOn, message.MidiChannel, message.Data1, 0);
@@ -240,10 +432,10 @@ namespace LuteBot.TrackSelection
                         }
                     }
                 }
-            }
-            else
-            {
-                newMessage = new ChannelMessage(ChannelCommand.NoteOn, message.MidiChannel, message.Data1, 0);
+                else
+                {
+                    newMessage = new ChannelMessage(ChannelCommand.NoteOn, message.MidiChannel, message.Data1, 0);
+                }
             }
             return newMessage;
         }
@@ -253,7 +445,7 @@ namespace LuteBot.TrackSelection
             midiChannels.Clear();
             midiTracks.Clear();
             NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
-            EventHelper();
+            //EventHelper();
         }
 
         public void ToggleTrackActivation(bool active, int index)
@@ -266,14 +458,14 @@ namespace LuteBot.TrackSelection
         }
         public void ToggleChannelActivation(bool active, int index)
         {
-            if (index >= 0 && index < midiChannels.Count)
+            if (midiChannels.ContainsKey(index))
             {
                 MidiChannels[index].Active = active;
                 ResetRequest();
             }
         }
 
-        private void ResetRequest()
+        public void ResetRequest()
         {
             EventHandler handler = OutDeviceResetRequest;
             handler?.Invoke(this, new EventArgs());

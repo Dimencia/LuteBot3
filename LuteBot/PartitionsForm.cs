@@ -289,7 +289,7 @@ namespace LuteBot
         private void savePartitionsButton_Click(object sender, EventArgs e)
         {
 
-            if (tsm.MidiTracks.Where(t => t.Active).Count() > 0)
+            if (tsm.MidiTracks.Values.Where(t => t.Active).Count() > 0)
             {
                 var namingForm = new TrackNamingForm(Path.GetFileNameWithoutExtension(tsm.FileName));
                 namingForm.ShowDialog(this);
@@ -348,9 +348,10 @@ namespace LuteBot
                                         converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
                                         converter.IsConversionEnabled = true;
                                         converter.SetDivision(player.sequence.Division);
+                                        converter.SetPartitionTempo(player.sequence.FirstTempo);
                                         converter.AddTrack();
-                                        converter.SetEnabledTracksInTrack(i, tsm.MidiTracks);
-                                        converter.SetEnabledMidiChannelsInTrack(i, tsm.MidiChannels);
+                                        converter.SetEnabledTracksInTrack(i, tsm.MidiTracks.Values.ToList());
+                                        converter.SetEnabledMidiChannelsInTrack(i, tsm.MidiChannels.Values.ToList());
 
                                         converter.FillTrack(i, player.ExtractMidiContent());
                                     }
@@ -408,8 +409,8 @@ namespace LuteBot
                     trackConverter.IsConversionEnabled = true;
                     trackConverter.SetDivision(player.sequence.Division); // This one could be weird
                     trackConverter.AddTrack();
-                    trackConverter.SetEnabledTracksInTrack(trackConverter.GetTrackCount() - 1, tsm.MidiTracks);
-                    trackConverter.SetEnabledMidiChannelsInTrack(trackConverter.GetTrackCount() - 1, tsm.MidiChannels);
+                    trackConverter.SetEnabledTracksInTrack(trackConverter.GetTrackCount() - 1, tsm.MidiTracks.Values.ToList());
+                    trackConverter.SetEnabledMidiChannelsInTrack(trackConverter.GetTrackCount() - 1, tsm.MidiChannels.Values.ToList());
 
                     trackConverter.FillTrack(trackConverter.GetTrackCount() - 1, player.ExtractMidiContent());
                 }

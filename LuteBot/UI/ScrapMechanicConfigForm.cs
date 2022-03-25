@@ -26,7 +26,7 @@ namespace LuteBot.UI
             InitializeComponent();
             tableLayoutPanel.SuspendLayout();
 
-            var channels = player.trackSelectionManager.MidiChannels.Where(c => c.Active);
+            var channels = player.trackSelectionManager.MidiChannels.Values.Where(c => c.Active);
             if (channels.Count() > 0)
                 tableLayoutPanel.RowCount = channels.Count();
 

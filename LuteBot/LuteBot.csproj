@@ -130,6 +130,7 @@
     <Compile Include="DiscordAuthForm.Designer.cs">
       <DependentUpon>DiscordAuthForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Extensions.cs" />
     <Compile Include="GuildSong.cs" />
     <Compile Include="IO\KB\Keybinds.cs" />
     <Compile Include="LiveInput\Midi\LiveMidiManager.cs" />

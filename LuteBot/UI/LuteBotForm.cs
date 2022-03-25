@@ -88,6 +88,8 @@ namespace LuteBot
         static KeyBindingForm keyBindingForm = null;
 
         private static string lutemodPakName = "FLuteMod_1.3.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static int lutemodVersion1 = 1;
+        private static int lutemodVersion2 = 3;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
         private static string loaderString1 = @"[/AutoLoader/BP_AutoLoaderActor.BP_AutoLoaderActor_C]
@@ -387,7 +389,18 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 }
             }
             else
-                return false;
+            {
+                // Check if they have a newer version instead
+                foreach(var f in Directory.GetFiles(MordhauPakPath))
+                {
+                    Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9])");
+                    if(m.Success)
+                    {
+                        return int.Parse(m.Groups[1].Value) >= lutemodVersion1 && int.Parse(m.Groups[2].Value) >= lutemodVersion2;
+                    }
+                }
+            }
+            return false;
         }
 
         public static void InstallLuteMod()
