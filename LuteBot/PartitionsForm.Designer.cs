@@ -36,6 +36,8 @@ namespace LuteBot
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openSavFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveMultipleSongsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openMidiFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -82,7 +84,8 @@ namespace LuteBot
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importPartitionsToolStripMenuItem,
-            this.openSavFolderToolStripMenuItem});
+            this.openSavFolderToolStripMenuItem,
+            this.saveMultipleSongsToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -90,16 +93,28 @@ namespace LuteBot
             // importPartitionsToolStripMenuItem
             // 
             this.importPartitionsToolStripMenuItem.Name = "importPartitionsToolStripMenuItem";
-            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.importPartitionsToolStripMenuItem.Text = "Import Partitions";
             this.importPartitionsToolStripMenuItem.Click += new System.EventHandler(this.button1_Click);
             // 
             // openSavFolderToolStripMenuItem
             // 
             this.openSavFolderToolStripMenuItem.Name = "openSavFolderToolStripMenuItem";
-            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.openSavFolderToolStripMenuItem.Text = "Open Sav Folder";
             this.openSavFolderToolStripMenuItem.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // saveMultipleSongsToolStripMenuItem
+            // 
+            this.saveMultipleSongsToolStripMenuItem.Name = "saveMultipleSongsToolStripMenuItem";
+            this.saveMultipleSongsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.saveMultipleSongsToolStripMenuItem.Text = "Save Multiple Songs...";
+            this.saveMultipleSongsToolStripMenuItem.Click += new System.EventHandler(this.saveMultipleSongsToolStripMenuItem_Click);
+            // 
+            // openMidiFileDialog
+            // 
+            this.openMidiFileDialog.Filter = "MIDI files|*.mid";
+            this.openMidiFileDialog.Multiselect = true;
             // 
             // PartitionsForm
             // 
@@ -128,5 +143,7 @@ namespace LuteBot
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importPartitionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openSavFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveMultipleSongsToolStripMenuItem;
+        private System.Windows.Forms.OpenFileDialog openMidiFileDialog;
     }
 }

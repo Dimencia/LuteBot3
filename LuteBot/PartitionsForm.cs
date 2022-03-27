@@ -453,5 +453,25 @@ namespace LuteBot
             }
         }
 
+        private async void saveMultipleSongsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try // async void won't propagate errors, always try/catch
+            {
+                openMidiFileDialog.Title = "Auto-Convert MIDI files to Partitions";
+                if (openMidiFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var filenames = openMidiFileDialog.FileNames;
+                    foreach (var f in filenames)
+                    {
+                        await LuteBotForm.luteBotForm.LoadHelperAsync(f);
+                        savePartitionsButton_Click(null, null);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
     }
 }

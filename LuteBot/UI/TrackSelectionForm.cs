@@ -188,6 +188,11 @@ namespace LuteBot.UI
                         SetVisibleNotes(true);
                         (ev as HandledMouseEventArgs).Handled = true;
                         OffsetPanel.Refresh();
+                        // Something is still not right here; we get notes cut off at both left and right side
+                        // Considering how we build them, they can't have an X < 0 so that doesn't add up unless it's just
+                        // visible notes not being correct; maybe the new scroll value isn't updated yet...?  But should be as soon as they scroll...
+
+                        // I guess, at least on the left, we're not accounting for pianoWidth
                     }
                 }
             }); // The OffsetPanel lets us override the scroll, and the panel1 triggers after it occurs 
@@ -221,6 +226,14 @@ namespace LuteBot.UI
             {
                 foreach (var note in selectedNotes)
                     note.active = false;
+
+                selectedNotes.Clear();
+                OffsetPanel.Refresh();
+            }
+            else if(keyData == Keys.Insert)
+            {
+                foreach (var note in selectedNotes)
+                    note.active = true;
 
                 selectedNotes.Clear();
                 OffsetPanel.Refresh();
@@ -1142,7 +1155,7 @@ namespace LuteBot.UI
 
         private Rectangle GetNoteRect(MidiNote note)
         {
-            int x = (int)(note.tickNumber * tickLength);
+            int x = (int)(note.tickNumber * tickLength) + pianoWidth;
             int width = (int)Math.Max((note.length * tickLength), 1);
             int finalNote = note.note + trackSelectionManager.MidiChannels[note.channel].offset + trackSelectionManager.NoteOffset;
             int y = maxHeight - ((finalNote - minNote + 1 + numNotesBelow) * pianoRowHeight);

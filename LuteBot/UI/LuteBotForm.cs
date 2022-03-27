@@ -87,9 +87,9 @@ namespace LuteBot
         static LiveMidiManager liveMidiManager;
         static KeyBindingForm keyBindingForm = null;
 
-        private static string lutemodPakName = "FLuteMod_1.3.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string lutemodPakName = "FLuteMod_1.4.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
         private static int lutemodVersion1 = 1;
-        private static int lutemodVersion2 = 3;
+        private static int lutemodVersion2 = 4;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
         private static string loaderString1 = @"[/AutoLoader/BP_AutoLoaderActor.BP_AutoLoaderActor_C]
@@ -277,6 +277,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                                             updateType = PropertyItem.MinorUpdates;
                                         break;
                                     }
+                                    else if (LatestVersion.VersionArray[i] < currentVersion[i])
+                                        break;// Don't keep looking if we're already out of date
                                 }
                                 else
                                 {
@@ -725,6 +727,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             }
         }
 
+        private TaskCompletionSource<bool> asyncLoadTask = null;
+
         private void PlayerLoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
             if (e.Error == null)
@@ -763,6 +767,10 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             else
             {
                 MessageBox.Show(e.Error.Message + " in " + e.Error.Source + e.Error.TargetSite + "\n" + e.Error.InnerException + "\n" + e.Error.StackTrace);
+            }
+            if (asyncLoadTask != null)
+            {
+                asyncLoadTask.SetResult(e.Error != null);
             }
         }
 
@@ -1014,6 +1022,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             }
         }
 
+
         private void LoadHelper(PlayListItem item)
         {
             player.LoadFile(item.Path);
@@ -1030,6 +1039,16 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
         {
             player.LoadFile(path);
             currentTrackName = path;
+        }
+
+        public async Task LoadHelperAsync(string path)
+        {
+            asyncLoadTask = new TaskCompletionSource<bool>();
+            player.LoadFile(path);
+            currentTrackName = path;
+
+            await asyncLoadTask.Task;
+            asyncLoadTask = null;
         }
 
         private void PlayButton_Click(object sender, EventArgs e)

@@ -640,7 +640,7 @@ namespace LuteBot.Core.Midi
                     {
                         foreach (var note in kvp.Value)
                         {
-                            if (trackSelectionManager.MidiTracks[note.track].Active)
+                            if (trackSelectionManager.MidiTracks[note.track].Active && note.active)
                                 if (!ticksToIterate.Contains(kvp.Key))
                                 ticksToIterate.Add(kvp.Key);
                         }
@@ -662,7 +662,7 @@ namespace LuteBot.Core.Midi
 
             foreach (var tickNumber in ticksToIterate)
             {
-                List<MidiNote> notesThisTick = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => { if (c.tickNotes.TryGetValue(tickNumber, out var noteList)) return noteList.Where(n => trackSelectionManager.MidiTracks[n.track].Active); else return new List<MidiNote>(); }).GroupBy(n => n.note).SelectMany(n => n).OrderBy(n => n.note).ToList();
+                List<MidiNote> notesThisTick = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => { if (c.tickNotes.TryGetValue(tickNumber, out var noteList)) return noteList.Where(n => trackSelectionManager.MidiTracks[n.track].Active); else return new List<MidiNote>(); }).GroupBy(n => n.note).SelectMany(n => n).OrderBy(n => n.note).Where(n => n.active).ToList();
                 // This groupBy is a hacky Distinct method to prevent duplicate notes
 
                 // OK here it is, all the notes for all tracks and all channels this tick
