@@ -4,6 +4,8 @@ using LuteBot.IO.Files;
 
 using Sanford.Multimedia.Midi;
 
+using SimpleML;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,7 @@ namespace LuteBot.TrackSelection
         private Dictionary<int, MidiChannelItem> midiChannels;
         private Dictionary<int, TrackItem> midiTracks;
 
-        private int PredictedFluteChannel = -1;
+        private MidiChannelItem PredictedFluteChannel = null;
 
         public Dictionary<int, MidiChannelItem> MidiChannels { get => midiChannels; set { midiChannels = value; ResetRequest(); } }
         public Dictionary<int, TrackItem> MidiTracks { get => midiTracks; set { midiTracks = value; ResetRequest(); } }
@@ -156,16 +158,32 @@ namespace LuteBot.TrackSelection
             {
                 // Load default from lute...
                 SetTrackSelectionData(DataDictionary[0]);
-                if (midiChannels.ContainsKey(PredictedFluteChannel))
+                if (PredictedFluteChannel != null)
                 {
-                    foreach (var channel in midiChannels.Values)
+                    if (PredictedFluteChannel is TrackItem)
                     {
-                        if (channel.Id != PredictedFluteChannel)
-                            channel.Active = false;
-                        else
+                        foreach (var channel in midiTracks.Values)
                         {
-                            //channel.Name += " (Flute?)";
-                            channel.Active = true;
+                            if (channel.Id != PredictedFluteChannel.Id)
+                                channel.Active = false;
+                            else
+                            {
+                                //channel.Name += " (Flute?)";
+                                channel.Active = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var channel in midiChannels.Values)
+                        {
+                            if (channel.Id != PredictedFluteChannel.Id)
+                                channel.Active = false;
+                            else
+                            {
+                                //channel.Name += " (Flute?)";
+                                channel.Active = true;
+                            }
                         }
                     }
                 }
@@ -216,26 +234,51 @@ namespace LuteBot.TrackSelection
                     this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
 
                     // There was no saved data... So, for lute, disable the PredictedFluteChannel, and enable it for flute
-                    if (midiChannels.ContainsKey(PredictedFluteChannel))
+                    if (PredictedFluteChannel != null)
                     {
-                        midiChannels[PredictedFluteChannel].Active = false;
-                        if (!midiChannels[PredictedFluteChannel].Name.Contains("Shawm"))
-                            midiChannels[PredictedFluteChannel].Name += " (Shawm?)";
+                        if (PredictedFluteChannel is TrackItem)
+                        {
+                            midiTracks[PredictedFluteChannel.Id].Active = false;
+                            if (!midiTracks[PredictedFluteChannel.Id].Name.Contains("Shawm"))
+                                midiTracks[PredictedFluteChannel.Id].Name += " (Shawm?)";
+                        }
+                        else
+                        {
+                            midiChannels[PredictedFluteChannel.Id].Active = false;
+                            if (!midiChannels[PredictedFluteChannel.Id].Name.Contains("Shawm"))
+                                midiChannels[PredictedFluteChannel.Id].Name += " (Shawm?)";
+                        }
                     }
 
                     UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
 
                     // Setup the flute and make that happen too
-                    if (midiChannels.ContainsKey(PredictedFluteChannel))
+                    if (PredictedFluteChannel != null)
                     {
-                        foreach (var channel in midiChannels.Values)
+                        if (PredictedFluteChannel is TrackItem)
                         {
-                            if (channel.Id != PredictedFluteChannel)
-                                channel.Active = false;
-                            else
+                            foreach (var channel in midiTracks.Values)
                             {
-                                //channel.Name += " (Flute?)";
-                                channel.Active = true;
+                                if (channel.Id != PredictedFluteChannel.Id)
+                                    channel.Active = false;
+                                else
+                                {
+                                    //channel.Name += " (Flute?)";
+                                    channel.Active = true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (var channel in midiChannels.Values)
+                            {
+                                if (channel.Id != PredictedFluteChannel.Id)
+                                    channel.Active = false;
+                                else
+                                {
+                                    //channel.Name += " (Flute?)";
+                                    channel.Active = true;
+                                }
                             }
                         }
                     }
@@ -252,26 +295,51 @@ namespace LuteBot.TrackSelection
                 this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
 
                 // There was no saved data... So, for lute, disable the PredictedFluteChannel, and enable it for flute
-                if (midiChannels.ContainsKey(PredictedFluteChannel))
+                if (PredictedFluteChannel != null)
                 {
-                    midiChannels[PredictedFluteChannel].Active = false;
-                    if (!midiChannels[PredictedFluteChannel].Name.Contains("Shawm"))
-                        midiChannels[PredictedFluteChannel].Name += " (Shawm?)";
+                    if (PredictedFluteChannel is TrackItem)
+                    {
+                        midiTracks[PredictedFluteChannel.Id].Active = false;
+                        if (!midiTracks[PredictedFluteChannel.Id].Name.Contains("Shawm"))
+                            midiTracks[PredictedFluteChannel.Id].Name += " (Shawm?)";
+                    }
+                    else
+                    {
+                        midiChannels[PredictedFluteChannel.Id].Active = false;
+                        if (!midiChannels[PredictedFluteChannel.Id].Name.Contains("Shawm"))
+                            midiChannels[PredictedFluteChannel.Id].Name += " (Shawm?)";
+                    }
                 }
 
                 UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
 
                 // Setup the flute and make that happen too
-                if (midiChannels.ContainsKey(PredictedFluteChannel))
+                if (PredictedFluteChannel != null)
                 {
-                    foreach (var channel in midiChannels.Values)
+                    if (PredictedFluteChannel is TrackItem)
                     {
-                        if (channel.Id != PredictedFluteChannel)
-                            channel.Active = false;
-                        else
+                        foreach (var channel in midiTracks.Values)
                         {
-                            //channel.Name += " (Flute?)";
-                            channel.Active = true;
+                            if (channel.Id != PredictedFluteChannel.Id)
+                                channel.Active = false;
+                            else
+                            {
+                                //channel.Name += " (Flute?)";
+                                channel.Active = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var channel in midiChannels.Values)
+                        {
+                            if (channel.Id != PredictedFluteChannel.Id)
+                                channel.Active = false;
+                            else
+                            {
+                                //channel.Name += " (Flute?)";
+                                channel.Active = true;
+                            }
                         }
                     }
                 }
@@ -308,108 +376,225 @@ namespace LuteBot.TrackSelection
             //EventHelper();
         }
 
-        private int GetFlutePrediction()
+
+        public SimpleML<MidiChannelItem> simpleML = null;
+        public NeuralNetwork neural = null;
+
+        // Returns the channel ID of the channel most likely to be good for flute
+        private MidiChannelItem GetFlutePrediction()
         {
-            // A good flute track has long notes, many notes, and the notes cover a wide octave area
-            // So let's get all of those on a scale of 0 to 1
-            // That means finding the highest and lowest avgNoteLength, numNotes, and highest-lowest
+            var activeChannels = midiChannels.Values;//.Where(c => c.Active); // Wait ... how...?  
+            // I don't understand how anything was even getting labeled if we were using this
 
-            // If there is only 1 channel, don't mark it, so that it plays on both lute and flute
-            var activeChannels = midiChannels.Values.Where(c => c.Active);
-            if (activeChannels.Count() < 2)
-                return -1;
-
-            var lowestAvgLength = int.MaxValue;
-            var highestAvgLength = 0;
-            var lowestNumNotes = int.MaxValue;
-            var highestNumNotes = 0;
-            var lowestRange = int.MaxValue;
-            var highestRange = 0;
-
-            // First, parse channels for the highest and lowest values of: average note length, total number of notes, range of notes 
-
-            foreach (var c in activeChannels)
+            if (neural == null)
             {
-                if (c.avgNoteLength < lowestAvgLength)
-                    lowestAvgLength = c.avgNoteLength;
-                if (c.avgNoteLength > highestAvgLength)
-                    highestAvgLength = c.avgNoteLength;
+                //string[] activation = new string[] { "tanh", "leakyrelu", "softmax" }; // TODO make this an enum, what kind of madman made them strings... 
+                //neural = new NeuralNetwork(new int[] { 96, 96, 48, 16 }, activation);
+                // neural.Load("TestML");
 
-                if (c.numNotes < lowestNumNotes)
-                    lowestNumNotes = c.numNotes;
-                if (c.numNotes > highestNumNotes)
-                    highestNumNotes = c.numNotes;
+                //string[] activation = new string[] { "tanh", "softmax" };
+                //
+                //int numParamsPerChannel = 8;
+                //neural = new NeuralNetwork(new int[] { 16 * numParamsPerChannel, 64, 16 }, activation);
+                //
+                //neural.Load("v2Weights");
 
-                var range = c.highestNote - c.lowestNote;
-                if (range < lowestRange)
-                    lowestRange = range;
-                if (range > highestRange)
-                    highestRange = range;
+                string[] activation = new string[] { "tanh", "tanh", "tanh" };
+                neural = new NeuralNetwork(new int[] { Extensions.numParamsPerChannel, 64, 32, 1 }, activation);
+                neural.Load("channelNeural");
             }
 
-            int lengthRange = highestAvgLength - lowestAvgLength;
-            int numNoteRange = highestNumNotes - lowestNumNotes;
-            int rangeRange = highestRange - lowestRange;
-
-            // Also for each channel, store the total number of ticks covered by all notes in the channel (i.e. total duration that notes are actually playing, later compared to song duration)
-
-            // And then apply some weights and targets; the weights are all negative because the ideal track gets a 0 on the percent differences
-            // Targets and weights set by some manual testing... 
-            float lengthWeight = -1.5f; 
-            float targetALen = 0.2f; // Vocals aren't the longest, but not the shortest... 
-
-            float rangeWeight = -1f; 
-            float targetRange = 0.5f; // They cover a very average amount of range
-
-            float numNotesWeight = -0.5f; 
-            float targetNumNotes = 0.2f; // And usually only have like 20% of total notes for a song
-            
-            float targetLengthPercent = 0.6f; // Vocals are about half of the song usually...
-            float targetLengthWeight = -2f; // At least 2 weight, because we're looking at values from 0 to 0.5, probably more than that
-
-            float numChordsWeight = -0.25f; // Prefer fewer chords... 
-
-            float targetMaxOctave = 84; // Prefer notes closer to our flute max
-            float octaveWeight = -3;
-
-            var totalTrackLength = Player.GetLength();
-
-            var channels = activeChannels.OrderByDescending(c =>
+            if (activeChannels.Count() < 2)
+                return null;
+            else// if(simpleML.Trained)
             {
-                float weight = 0;
-                
-                if (lengthRange > 0)
-                    weight += Math.Abs(((c.avgNoteLength - lowestAvgLength) / (float)lengthRange)- targetALen) * lengthWeight;
-                
-                if (numNoteRange > 0)
-                    weight += Math.Abs(((c.numNotes - lowestNumNotes) / (float)numNoteRange)-targetNumNotes) * numNotesWeight;
-                
-                if (rangeRange > 0)
-                    weight += Math.Abs((((c.highestNote - c.lowestNote) - lowestRange) / (float)rangeRange)-targetRange) * rangeWeight;
+                Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
 
-                weight += c.maxChordSize * numChordsWeight;
+                float maxAvgNoteLength = activeChannels.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
+                float maxNoteLength = activeChannels.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
+                float maxNumNotes = activeChannels.Max(c => c.Id == 9 ? 0 : c.numNotes);
 
-                weight += Math.Abs((c.highestNote - targetMaxOctave) / 64) * octaveWeight; // This /64 is a bit arbitrary, but should ensure values stay below 1 like everything else
-                // They can't be more than 84 away, and assumedly they'll have a max note of at least a C1 (C-1 is at 0 in our implementation)
+                foreach (var channel in activeChannels)
+                {
+                    var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                    var neuralResults = neural.FeedForward(inputs);
+                    channelResults[channel] = neuralResults[0];
+                }
+                foreach (var channel in MidiTracks.Values)
+                {
+                    var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                    var neuralResults = neural.FeedForward(inputs);
+                    channelResults[channel] = neuralResults[0]; // The tracks are MidiChannels and can work in this way; later we just check if they are a MidiTrack
+                }
+
+                var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
+                // Get softmaxed values... maybe? No.  We don't want that, in a large song that leaves many at low percent
+                // We just want to scale the value between either -1 and 1, or -0.5 and 0.5
+                // Just adding 0.5 gets us from 0 to 1 for most purposes, let's try that
+                // It's funny when they're above 100% or below 0%, but messy
+                // 
+                orderedResults = orderedResults.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + 0.5f)).OrderByDescending(kvp => kvp.Value);
+
+
+                /*
+                float[] inputs = activeChannels.ToArray().GetNeuralInput();
+
+                for (int j = 0; j < 16; j++)
+                {
+                    var channel = activeChannels.Where(c => c.Id == j && c.Id != 9).SingleOrDefault();
+                    //var channel = song.Values[j];
+
+                }
+
+                var neuralResults = neural.FeedForward(inputs);
+                // The output here is a channel ID to confidence map...
+                // I need to find the ID of the best one... and rank the rest...
+                // So let's just build a quick dictionary I guess
+                var results = new Dictionary<int, float>();
+
+                for(int i = 0; i < neuralResults.Length; i++)
+                {
+                    results[i] = neuralResults[i];
+                }
+
+                var orderedResults = results.OrderByDescending(kvp => kvp.Value);
+                */
+
+                int count = 0; // Separately track count for rank... 
+                int trackCount = 0;
+                for(int i = 0; i < orderedResults.Count(); i++)
+                //foreach (var channel in activeChannels)
+                {
+                    //var channel = activeChannels.Where(c => c.Id == orderedResults.ElementAt(i).Key).SingleOrDefault();
+                    var channel = orderedResults.ElementAt(i).Key;
+                    if (channel != null) {
+                        string ident = "Channel";
+                        if (channel is TrackItem)
+                            ident = "Track";
+                        Console.WriteLine($"{ident} {channel.Name} ({channel.Id}) - Neural Score: {channelResults[channel]}");
+                        //Console.WriteLine($"{channel.Name} ({channel.Id}) - Neural Score: {neuralResults[channel.Id]}");
+                        if (channel is TrackItem)
+                            channel.Name += $"(Flute Rank {++trackCount} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
+                        else
+                            channel.Name += $"(Flute Rank {++count} - {Math.Round(orderedResults.ElementAt(i).Value * 100,2)}%)";
+                    }
+                }
+
+                return orderedResults.First().Key;
+            }
+            
+            //return -1;
+            /*
+            if (simpleML != null && simpleML.Trained)
+            {
+                var results = simpleML.GetWeights(activeChannels.ToArray()).OrderBy(r => r.Weight).ToArray(); // Lower values are better 
+
+
+                
+            }
+            else
+            {
+                return -1;
+                // A good flute track has long notes, many notes, and the notes cover a wide octave area
+                // So let's get all of those on a scale of 0 to 1
+                // That means finding the highest and lowest avgNoteLength, numNotes, and highest-lowest
+
+                // If there is only 1 channel, don't mark it, so that it plays on both lute and flute
+                
+
+                var lowestAvgLength = int.MaxValue;
+                var highestAvgLength = 0;
+                var lowestNumNotes = int.MaxValue;
+                var highestNumNotes = 0;
+                var lowestRange = int.MaxValue;
+                var highestRange = 0;
+
+                // First, parse channels for the highest and lowest values of: average note length, total number of notes, range of notes 
+
+                foreach (var c in activeChannels)
+                {
+                    if (c.avgNoteLength < lowestAvgLength)
+                        lowestAvgLength = c.avgNoteLength;
+                    if (c.avgNoteLength > highestAvgLength)
+                        highestAvgLength = c.avgNoteLength;
+
+                    if (c.numNotes < lowestNumNotes)
+                        lowestNumNotes = c.numNotes;
+                    if (c.numNotes > highestNumNotes)
+                        highestNumNotes = c.numNotes;
+
+                    var range = c.highestNote - c.lowestNote;
+                    if (range < lowestRange)
+                        lowestRange = range;
+                    if (range > highestRange)
+                        highestRange = range;
+                }
+
+                int lengthRange = highestAvgLength - lowestAvgLength;
+                int numNoteRange = highestNumNotes - lowestNumNotes;
+                int rangeRange = highestRange - lowestRange;
+
+                // Also for each channel, store the total number of ticks covered by all notes in the channel (i.e. total duration that notes are actually playing, later compared to song duration)
+
+                // And then apply some weights and targets; the weights are all negative because the ideal track gets a 0 on the percent differences
+                // Targets and weights set by some manual testing... 
+                float lengthWeight = -1.5f;
+                float targetALen = 0.2f; // Vocals aren't the longest, but not the shortest... 
+
+                float rangeWeight = -1f;
+                float targetRange = 0.5f; // They cover a very average amount of range
+
+                float numNotesWeight = -0.5f;
+                float targetNumNotes = 0.2f; // And usually only have like 20% of total notes for a song
+
+                float targetLengthPercent = 0.6f; // Vocals are about half of the song usually...
+                float targetLengthWeight = -2f; // At least 2 weight, because we're looking at values from 0 to 0.5, probably more than that
+
+                float numChordsWeight = -0.25f; // Prefer fewer chords... 
+
+                float targetMaxOctave = 84; // Prefer notes closer to our flute max
+                float octaveWeight = -3;
+
+                var totalTrackLength = Player.GetLength();
+
+                var channels = activeChannels.OrderByDescending(c =>
+                {
+                    float weight = 0;
+
+                    if (lengthRange > 0)
+                        weight += Math.Abs(((c.avgNoteLength - lowestAvgLength) / (float)lengthRange) - targetALen) * lengthWeight;
+
+                    if (numNoteRange > 0)
+                        weight += Math.Abs(((c.numNotes - lowestNumNotes) / (float)numNoteRange) - targetNumNotes) * numNotesWeight;
+
+                    if (rangeRange > 0)
+                        weight += Math.Abs((((c.highestNote - c.lowestNote) - lowestRange) / (float)rangeRange) - targetRange) * rangeWeight;
+
+                    weight += c.maxChordSize * numChordsWeight;
+
+                    weight += Math.Abs((c.highestNote - targetMaxOctave) / 64) * octaveWeight; // This /64 is a bit arbitrary, but should ensure values stay below 1 like everything else
+                                                                                               // They can't be more than 84 away, and assumedly they'll have a max note of at least a C1 (C-1 is at 0 in our implementation)
 
                 var lengthPercent = c.totalNoteLength / (float)totalTrackLength;
-                var targetLengthDiff = Math.Abs(lengthPercent - targetLengthPercent);
+                    var targetLengthDiff = Math.Abs(lengthPercent - targetLengthPercent);
 
-                weight += targetLengthDiff * targetLengthWeight;
+                    weight += targetLengthDiff * targetLengthWeight;
 
-                return weight;
-            });
+                    return weight;
+                });
 
-            // Let's adjust their names with their scores
-            // They tend to be like... up to -5?  I should really sum all the weights and find out but
-            // Good enough otherwise
-            for (int i = 0; i < channels.Count(); i++)
-                channels.ElementAt(i).Name += " (Flute Rank: " + (i + 1) + ")";
+                // Let's adjust their names with their scores
+                // They tend to be like... up to -5?  I should really sum all the weights and find out but
+                // Good enough otherwise
+                for (int i = 0; i < channels.Count(); i++)
+                    channels.ElementAt(i).Name += " (Flute Rank: " + (i + 1) + ")";
 
-            var channel = channels.FirstOrDefault();
-            if (channel != null)
-                return channel.Id;
-            return -1;
+                var channel = channels.FirstOrDefault();
+                if (channel != null)
+                    return channel.Id;
+                return -1;
+            }
+            */
         }
 
         public ChannelMessage FilterMidiEvent(ChannelMessage message, int trackId)

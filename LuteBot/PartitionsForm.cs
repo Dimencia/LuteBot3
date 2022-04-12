@@ -19,6 +19,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SimpleML;
 
 namespace LuteBot
 {
@@ -469,6 +470,384 @@ namespace LuteBot
                 }
             }
             catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        private async void trainToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Check every partition for a midi file
+            // If that file has more than one channel and one is selected for flute
+            // Setup training for it
+
+            // So far: 
+            // I think the training makes sense and is converging as well as it can... sorta... 
+            // We're getting 50/113 incorrect still, at best, with avgNoteLength,totalNoteLength,highest,lowest,numnotes, all relative
+            // So let's try all the others relative too
+
+            // I may just need more params to be able to do this broad set
+
+            // Not bad.  Down to 49 incorrect, and it's only avgNoteLength and maxChordSize that make anything disagree
+            // ... 47 incorrect before it started iterating... I swear it must be doing something backwards... 
+
+
+
+
+            // OK, I've implemented a simple neural network we can try also... 
+            // No idea about layer sizes
+            // Input would be 7 layers
+
+            // Output is expected to be basically just 0 or 1, 1 if it's an acceptable flute channel, 0 if it's not...
+            // This would allow multiple flute channels to be selected for a given song, which is interesting... 
+            // And also probably ends up giving values between 0 and 1, letting us rank them if we want?
+
+            // We'll just try 5 in the hidden layer and see how that does
+
+            try
+            {
+                // Gave us nans at 7,5,1; does hidden have to be bigger than input?  Let's try 7,10,1.  It really shouldn't have to, though... 
+
+                // Yeah something's broken, 7,10,1 gives an index out of bounds error during backpropagate... 
+
+                // The fuck.  Lots of things were broken, but I think they're all fixed and it just, puts the weights to infinity and -infinity immediately
+                // Let's try normal relu... Nope.  I think learningRate just needs to be way, way, way smaller than default of 0.01
+                // FIIIINE I need to give it normalized values... 
+                //string[] activation = new string[] { "tanh", "tanh", "softmax" }; // TODO make this an enum, what kind of madman made them strings... 
+                int numParamsPerChannel = Extensions.numParamsPerChannel;
+
+                // Let's try a compare implementation - 
+                    // For each song, take two arbitrary channels and compare for best flute between them
+                    // Take the result of that and continue, ending when the last channel is compared and the result is given for the one best flute
+                    // Consider it a bubble sort... hmm.... but that doesn't really let us do more than one
+
+                // Well then, maybe instead, do individual channels for flute suitability and rank those results
+                    // We won't normalize anything and we might make the network a little complex
+
+                // We can softmax all the outputs once we have them for each channel
+                string[] activation = new string[] { "tanh", "tanh", "tanh" };
+                tsm.neural = new NeuralNetwork(new int[] { numParamsPerChannel, 64, 32, 1 }, activation);
+
+
+
+
+                // These below work great and are the settings for 'v2Neural'
+                //string[] activation = new string[] { "tanh", "softmax" };
+                //tsm.neural = new NeuralNetwork(new int[] { 16 * numParamsPerChannel, 64, 16 }, activation);
+
+
+                tsm.simpleML = new SimpleML<MidiChannelItem>(
+                    (c => c.avgNoteLength), 
+                    (c => c.maxChordSize), 
+                    (c => c.totalNoteLength), 
+                    (c => c.highestNote), 
+                    (c => c.lowestNote), 
+                    (c => c.numNotes), 
+                    (c => c.Id) 
+                    );
+
+                var candidates = new List<TrainingCandidate<MidiChannelItem>>();
+
+                var neuralCandidates = new List<MidiChannelItem[]>(); // It can accept multiple correct answers, hopefully... 
+
+                foreach(var part in index.PartitionNames)
+                {
+                    string midiPath = Path.Combine(partitionMidiPath, part + ".mid");
+                    if (File.Exists(midiPath))
+                    {
+                        await LuteBotForm.luteBotForm.LoadHelperAsync(midiPath);
+                        if (tsm.MidiChannels.Count() > 1 && tsm.DataDictionary.ContainsKey(1)) // To keep the percentages from getting weird in training, at least 4 channels?
+                        {
+                            if (tsm.MidiTracks.All(t => t.Value.Active))
+                            {
+                                // Actually, I think the flute track may not have the appropriate data...
+                                var tempNeuralCandidates = tsm.MidiChannels.Values.Where(c => c.Id != 9).ToArray();
+                                foreach (var ca in tempNeuralCandidates)
+                                {
+                                    ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
+                                }
+                                neuralCandidates.Add(tempNeuralCandidates);
+                                var fluteChannels = tsm.DataDictionary[1].MidiChannels.Where(c => c.Active);
+                                if (fluteChannels.Count() == 1)
+                                {
+                                    var fluteChannel = fluteChannels.First();
+                                    // We have what we need, one flute track and more than one total track
+                                    // We need to make sure our passed target exactly matches the one in our passed list
+                                    var candidate = new TrainingCandidate<MidiChannelItem>(tsm.MidiChannels.Values, fluteChannel);
+                                    candidates.Add(candidate);
+                                }
+                            }
+                            else if(tsm.MidiChannels.All(c => c.Value.Active))
+                            {
+                                // If some tracks are disabled and all channels are enabled, we'll take the tracks as data
+                                // Track notes should already have discarded anything with channel 9
+                                MidiChannelItem[] tempNeuralCandidates = tsm.MidiTracks.Values.ToArray();
+                                foreach (var ca in tempNeuralCandidates)
+                                { // This may not be necessary; I could probably just take the MidiTracks from DataDictionary[1] but, it seemed to give odd results like it didn't have everything
+                                    ca.Active = tsm.DataDictionary[1].MidiTracks.Where(c => c.Id == ca.Id).Single().Active;
+                                }
+                                neuralCandidates.Add(tempNeuralCandidates);
+                            }
+                        }
+                    }
+                }
+                Console.WriteLine($"Training with {candidates.Count} candidates...");
+                var trainingTarget = new TrainingTarget<MidiChannelItem>(candidates, ((a,b) => a.Id == b.Id));
+
+                tsm.simpleML.Train(trainingTarget);
+                Console.WriteLine("Trained - Final Values:");
+                int count = 0;
+                foreach (var p in tsm.simpleML.Parameters)
+                    Console.WriteLine($"Parameter {count++}: Target={p.Target}; Weight={p.Weight}");
+
+                // Now train the neural one
+
+                // So after 100k trainings, all the channels give a negative answer which is pretty weird
+                // And they seem completely wrong or arbitrary, nothing useful.  
+
+                // Probably need to make the network deeper... 
+                int trainCount = 2000;
+                float costTotal = 999f;
+
+                Console.WriteLine($"Training neural network {trainCount} times");
+
+                // Partition candidates into test sets, probably 70/30%?
+                // So, first shuffle them
+
+                var random = new Random();
+
+                var orderedCandidates = neuralCandidates.OrderBy(c => random.Next());
+                var numTrainingCandidates = (int)(orderedCandidates.Count() * 0.3f);
+                var neuralTrainingCandidates = orderedCandidates.Skip(numTrainingCandidates);
+                var neuralTestCandidates = orderedCandidates.Take(numTrainingCandidates);
+
+                int numTestsCorrect = 0;
+                int numActualTestsCorrect = 0;
+
+                int i = 0;
+                while(numActualTestsCorrect < neuralTestCandidates.Count())
+                //while(costTotal > 0.1f && i < trainCount)
+                //for (int i = 0; i < trainCount; i++)
+                {
+                    costTotal = 0;
+                    foreach (var song in neuralTrainingCandidates)
+                    {
+                        float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
+                        float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
+                        float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
+
+                        foreach (var channel in song)
+                        {
+                            var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                            var expected = new float[1];
+
+                            if (channel.Active)
+                                expected[0] = 0.5f;
+                            else
+                                expected[0] = -0.5f;
+
+                            /*
+                            var inputs = song.GetNeuralInput();
+
+                            float numActive = song.Count(c => c.Active);
+                            float[] expected = new float[16];
+
+                            for(int j = 0; j < 16; j++)
+                            {
+                                var channel = song.Where(c => c.Id == j).SingleOrDefault();
+                                //var channel = song.Values[j];
+
+                                expected[j] = 0;
+
+                                if (channel != null) {
+                                    if (channel.Active)
+                                        expected[j] = 1 / numActive;
+                                }
+                                else
+                                {
+                                    for (int k = 0; k < numParamsPerChannel; k++)
+                                        inputs[j * numParamsPerChannel + k] = 0; // Tanh should evaluate this as -1 to keep it from taking weight
+                                }
+                            }
+                            */
+
+                            tsm.neural.BackPropagate(inputs, expected);
+                            costTotal += tsm.neural.cost;
+                        }
+                    }
+                    numTestsCorrect = 0;
+                    numActualTestsCorrect = 0;
+                    foreach (var song in neuralTrainingCandidates)
+                    {
+                        float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
+                        float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
+                        float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
+
+                        Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
+                        foreach(var channel in song)
+                        {
+                            var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                            var neuralResults = tsm.neural.FeedForward(inputs);
+                            channelResults[channel] = neuralResults[0];
+                        }
+
+                        var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
+
+
+                        /*
+                        var inputs = song.GetNeuralInput();
+
+                        var neuralResults = tsm.neural.FeedForward(inputs);
+                        // The output here is a channel ID to confidence map...
+                        // I need to find the ID of the best one... and rank the rest...
+                        // So let's just build a quick dictionary I guess
+                        var results = new Dictionary<int, float>();
+
+                        for (int j = 0; j < neuralResults.Length; j++)
+                        {
+                            results[j] = neuralResults[j];
+                        }
+
+                        var orderedResults = results.OrderByDescending(kvp => kvp.Value);
+                        */
+                        // Check the number of active flute channels...
+                        var numFlute = song.Where(s => s.Active).Count();
+                        bool correct = true;
+
+                        for (int j = 0; j < numFlute; j++)
+                        {
+                            bool? existsAndCorrect = song.Where(s => s.Id == orderedResults.ElementAt(j).Key.Id).SingleOrDefault()?.Active;
+                            if (!existsAndCorrect.HasValue || !existsAndCorrect.Value)
+                                correct = false;
+                        }
+
+                        if (correct)
+                            numTestsCorrect++;
+                        
+                    }
+                    foreach (var song in neuralTestCandidates)
+                    {
+                        float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
+                        float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
+                        float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
+
+                        Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
+                        foreach (var channel in song)
+                        {
+                            var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                            var neuralResults = tsm.neural.FeedForward(inputs);
+                            channelResults[channel] = neuralResults[0];
+                        }
+
+                        var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
+
+
+                        /*
+                        var inputs = song.GetNeuralInput();
+
+                        var neuralResults = tsm.neural.FeedForward(inputs);
+                        // The output here is a channel ID to confidence map...
+                        // I need to find the ID of the best one... and rank the rest...
+                        // So let's just build a quick dictionary I guess
+                        var results = new Dictionary<int, float>();
+
+                        for (int j = 0; j < neuralResults.Length; j++)
+                        {
+                            results[j] = neuralResults[j];
+                        }
+
+                        var orderedResults = results.OrderByDescending(kvp => kvp.Value);
+                        */
+                        // Check the number of active flute channels...
+                        var numFlute = song.Where(s => s.Active).Count();
+                        bool correct = true;
+
+                        for (int j = 0; j < numFlute; j++)
+                        {
+                            bool? existsAndCorrect = song.Where(s => s.Id == orderedResults.ElementAt(j).Key.Id).SingleOrDefault()?.Active;
+                            if (!existsAndCorrect.HasValue || !existsAndCorrect.Value)
+                                correct = false;
+                        }
+
+                        if (correct)
+                        {
+                            numTestsCorrect++;
+                            numActualTestsCorrect++;
+                        }
+
+                        //int fluteCount = 0;
+                        //foreach (var channel in channelResults.Keys)
+                        ////foreach (var channel in activeChannels)
+                        //{
+                        //    //var channel = activeChannels.Where(c => c.Id == orderedResults.ElementAt(i).Key).SingleOrDefault();
+                        //    
+                        //    if (channel != null)
+                        //    {
+                        //        Console.WriteLine($"{channel.Name} ({channel.Id}) - Neural Score: {channelResults[channel]}");
+                        //        //Console.WriteLine($"{channel.Name} ({channel.Id}) - Neural Score: {neuralResults[channel.Id]}");
+                        //        //channel.Name += $"(Flute Rank {++fluteCount} - {Math.Round(channelResults[channel], 2)}%)";
+                        //    }
+                        //}
+                    }
+                    Console.WriteLine($"{numTestsCorrect} tests correct out of {neuralCandidates.Count()}; {numActualTestsCorrect}/{neuralTestCandidates.Count()} - Training #{i++} - TotalCost: {costTotal}");
+
+                    //orderedCandidates = neuralCandidates.OrderBy(c => random.Next());
+                    //neuralTrainingCandidates = orderedCandidates.Take(numTrainingCandidates);
+                    //neuralTestCandidates = orderedCandidates.Skip(numTrainingCandidates);
+                }
+
+                numTestsCorrect = 0;
+                foreach (var song in neuralCandidates)
+                {
+                    float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
+                    float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
+                    float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
+
+                    Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
+                    foreach (var channel in song)
+                    {
+                        var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                        var neuralResults = tsm.neural.FeedForward(inputs);
+                        channelResults[channel] = neuralResults[0];
+                    }
+
+                    var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
+
+
+                    /*
+                    var inputs = song.GetNeuralInput();
+
+                    var neuralResults = tsm.neural.FeedForward(inputs);
+                    // The output here is a channel ID to confidence map...
+                    // I need to find the ID of the best one... and rank the rest...
+                    // So let's just build a quick dictionary I guess
+                    var results = new Dictionary<int, float>();
+
+                    for (int j = 0; j < neuralResults.Length; j++)
+                    {
+                        results[j] = neuralResults[j];
+                    }
+
+                    var orderedResults = results.OrderByDescending(kvp => kvp.Value);
+                    */
+                    // Check the number of active flute channels...
+                    var numFlute = song.Where(s => s.Active).Count();
+                    bool correct = true;
+
+                    for (int j = 0; j < numFlute; j++)
+                    {
+                        bool? existsAndCorrect = song.Where(s => s.Id == orderedResults.ElementAt(j).Key.Id).SingleOrDefault()?.Active;
+                        if (!existsAndCorrect.HasValue || !existsAndCorrect.Value)
+                            correct = false;
+                    }
+
+                    if (correct)
+                        numTestsCorrect++;
+                }
+                Console.WriteLine($"Complete - {numTestsCorrect} tests correct out of {neuralCandidates.Count()}");
+                // TODO: Save the values somewhere... I've got them pasted as a screenshot in officers chat, if I need to
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }

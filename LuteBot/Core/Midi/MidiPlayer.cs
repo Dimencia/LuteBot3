@@ -121,7 +121,7 @@ namespace LuteBot.Core.Midi
         private TimeSpan lastDuration = TimeSpan.Zero;
         private int lastLength = 0;
 
-        public override string GetFormattedLength()
+        public TimeSpan GetTimeLength()
         {
             Dictionary<int, int> tempoEvents = new Dictionary<int, int>(); // Ordered by: AbsoluteTicks, Tempo
             int id = 0;
@@ -168,7 +168,13 @@ namespace LuteBot.Core.Midi
             if (time == TimeSpan.Zero)
                 time = TimeSpan.FromSeconds((((double)lastLength / sequence.Division) * this.sequence.FirstTempo / 1000000d)); // Old method
             lastDuration = time;
-            return time.ToString(@"mm\:ss");
+
+            return time;
+        }
+
+        public override string GetFormattedLength()
+        {
+            return GetTimeLength().ToString(@"mm\:ss");
         }
 
         public override void SetPosition(int position)
@@ -345,6 +351,11 @@ namespace LuteBot.Core.Midi
 
                     //Parallel.ForEach(sequence, track =>
                     //{
+                    int lastTempo = sequence.FirstTempo;
+
+                    Dictionary<int, int> lastNote = new Dictionary<int, int>();
+                    Dictionary<int, int> lastTrackNote = new Dictionary<int, int>();
+
                     foreach (var track in sequence)
                     {
                         foreach (var midiEvent in track.Iterator())
@@ -373,14 +384,45 @@ namespace LuteBot.Core.Midi
                                         channels[c.MidiChannel].highestNote = c.Data1;
                                     if (c.Data1 < channels[c.MidiChannel].lowestNote)
                                         channels[c.MidiChannel].lowestNote = c.Data1;
+
+                                    // We'll pre-filter drums from tracks, because their only purpose right now is to be used for ML
+                                    if (c.MidiChannel != 9)
+                                    {
+                                        if (c.Data1 > tracks[track.Id].highestNote)
+                                            tracks[track.Id].highestNote = c.Data1;
+                                        if (c.Data1 < tracks[track.Id].lowestNote)
+                                            tracks[track.Id].lowestNote = c.Data1;
+
+                                        tracks[track.Id].noteTicks[c.Data1] = midiEvent.AbsoluteTicks;
+                                        tracks[track.Id].numNotes++;
+
+                                        if (lastTrackNote.ContainsKey(track.Id))
+                                        {
+                                            tracks[track.Id].avgVariation += Math.Abs(c.Data1 - lastTrackNote[track.Id]);
+                                        }
+                                        lastTrackNote[track.Id] = c.Data1;
+
+                                        if (!tracks[track.Id].tickNotes.ContainsKey(midiEvent.AbsoluteTicks))
+                                            tracks[track.Id].tickNotes[midiEvent.AbsoluteTicks] = new List<MidiNote>();
+
+                                        tracks[track.Id].tickNotes[midiEvent.AbsoluteTicks].Add(new MidiNote() { note = c.Data1, tickNumber = midiEvent.AbsoluteTicks, track = track.Id, channel = c.MidiChannel });
+                                    }
+
                                     // Track noteOn events and when we get a noteOff or velocity 0, add up note lengths
                                     channels[c.MidiChannel].noteTicks[c.Data1] = midiEvent.AbsoluteTicks;
                                     channels[c.MidiChannel].numNotes++;
+
+                                    if (lastNote.ContainsKey(c.MidiChannel))
+                                    {
+                                        channels[c.MidiChannel].avgVariation += Math.Abs(c.Data1 - lastNote[c.MidiChannel]);
+                                    }
+                                    lastNote[c.MidiChannel] = c.Data1;
 
                                     if (!channels[c.MidiChannel].tickNotes.ContainsKey(midiEvent.AbsoluteTicks))
                                         channels[c.MidiChannel].tickNotes[midiEvent.AbsoluteTicks] = new List<MidiNote>();
 
                                     channels[c.MidiChannel].tickNotes[midiEvent.AbsoluteTicks].Add(new MidiNote() { note = c.Data1, tickNumber = midiEvent.AbsoluteTicks, track = track.Id, channel = c.MidiChannel });
+
                                     // Ideally I'd like to parse out chords of size 3 or more, using some setting like RemoveLowest, RemoveHighest, RemoveMiddle
                                     // Though I'm unsure how I'd really do that to anything except lutemod; lutebot is reading straight from the midi data isn't it?
                                 }
@@ -388,6 +430,9 @@ namespace LuteBot.Core.Midi
                                 {
                                     string channelName = MidiChannelTypes.Names[c.Data1];
                                     channels[c.MidiChannel].Name = channelName;
+                                    channels[c.MidiChannel].midiInstrument = c.Data1;
+                                    // Tracks can't really have this, can they... Well, we can just, vaguely take the most recent one
+                                    tracks[track.Id].midiInstrument = c.Data1;
                                 }
                                 else if (c.Command == ChannelCommand.NoteOff || (c.Command == ChannelCommand.NoteOn && c.Data2 == 0))
                                 {
@@ -396,16 +441,45 @@ namespace LuteBot.Core.Midi
                                     {
                                         // Find the original note...
                                         var startTick = channels[c.MidiChannel].noteTicks[c.Data1];
-                                        var length = midiEvent.AbsoluteTicks - startTick;
+                                        var length = midiEvent.AbsoluteTicks - startTick; // How to turn number of ticks into a length with tempo in mind?
+                                                                                          // TimeSpan.FromSeconds((((double)(deltaTick) / sequence.Division) * lastTempo / 1000000d))
+
+                                        var timeLength = (length / (float)sequence.Division) * lastTempo / 1000000f;
+
                                         var note = channels[c.MidiChannel].tickNotes[startTick].Where(n => n.note == c.Data1).FirstOrDefault();
                                         note.length = length;
+                                        note.timeLength = timeLength;
+
+
                                         // If we already have a note with a length on this same tick, we don't need to add to totalNoteLength...?
                                         // I want to avoid a chord of 3 having 3x the detected total length... 
                                         // I'll just have to deal with that later, and we won't bother tracking totalLength here
 
                                         // Just add all the lengths, we'll divide after we read everything
-                                        channels[c.MidiChannel].avgNoteLength += length;
+                                        channels[c.MidiChannel].avgNoteLength += timeLength;
                                         channels[c.MidiChannel].noteTicks.Remove(c.Data1);
+                                    }
+                                    if (tracks[track.Id].noteTicks.ContainsKey(c.Data1))
+                                    {
+                                        // Find the original note...
+                                        var startTick = tracks[track.Id].noteTicks[c.Data1];
+                                        var length = midiEvent.AbsoluteTicks - startTick; // How to turn number of ticks into a length with tempo in mind?
+                                                                                          // TimeSpan.FromSeconds((((double)(deltaTick) / sequence.Division) * lastTempo / 1000000d))
+
+                                        var timeLength = (length / (float)sequence.Division) * lastTempo / 1000000f;
+
+                                        var note = tracks[track.Id].tickNotes[startTick].Where(n => n.note == c.Data1).FirstOrDefault();
+                                        note.length = length;
+                                        note.timeLength = timeLength;
+
+
+                                        // If we already have a note with a length on this same tick, we don't need to add to totalNoteLength...?
+                                        // I want to avoid a chord of 3 having 3x the detected total length... 
+                                        // I'll just have to deal with that later, and we won't bother tracking totalLength here
+
+                                        // Just add all the lengths, we'll divide after we read everything
+                                        tracks[track.Id].avgNoteLength += timeLength;
+                                        tracks[track.Id].noteTicks.Remove(c.Data1);
                                     }
                                 }
                             }
@@ -430,6 +504,7 @@ namespace LuteBot.Core.Midi
                                         tickMetaNotes[midiEvent.AbsoluteTicks] = new List<MidiNote>();
 
                                     tickMetaNotes[midiEvent.AbsoluteTicks].Add(new MidiNote() { note = newTempo, tickNumber = midiEvent.AbsoluteTicks, track = track.Id });
+                                    lastTempo = newTempo;
 
                                 }
                             }
@@ -446,10 +521,10 @@ namespace LuteBot.Core.Midi
                     foreach (var kvp in channels)
                     {
                         var channel = kvp.Value;
-                        if (channel.numNotes > 0)
-                            channel.avgNoteLength = channel.avgNoteLength / channel.numNotes;
+                        
 
                         int nextValidTick = 0;
+                        channel.averageNote = 0;
 
                         foreach (var noteKvp in channel.tickNotes.OrderBy(n => n.Key))
                         {
@@ -458,15 +533,60 @@ namespace LuteBot.Core.Midi
 
                             if (note.tickNumber > nextValidTick)
                             {
-                                channel.totalNoteLength += note.length;
+                                channel.totalNoteLength += note.timeLength;
                                 nextValidTick = note.tickNumber + note.length;
                             }
                             else if (note.tickNumber + note.length > nextValidTick)
                             {
                                 var diff = (note.tickNumber + note.length) - nextValidTick;
-                                channel.totalNoteLength += diff;
+                                channel.totalNoteLength += note.timeLength * (diff/note.length);
                                 nextValidTick = nextValidTick + diff;
                             }
+                            foreach(var n in noteList)
+                                channel.averageNote += n.note;
+                        }
+                        if (channel.numNotes > 0)
+                        {
+                            channel.avgNoteLength = channel.avgNoteLength / channel.numNotes;
+                            channel.averageNote = (int)((float)channel.averageNote / channel.numNotes);
+                            channel.avgVariation = channel.avgVariation / channel.numNotes;
+                        }
+
+                        if (channel.tickNotes.Count > 0)
+                            channel.maxChordSize = channel.tickNotes.Max(t => t.Value.Count);
+                    }
+                    foreach (var kvp in tracks)
+                    {
+                        var channel = kvp.Value;
+
+
+                        int nextValidTick = 0;
+                        channel.averageNote = 0;
+
+                        foreach (var noteKvp in channel.tickNotes.OrderBy(n => n.Key))
+                        {
+                            var noteList = noteKvp.Value;
+                            var note = noteList.OrderByDescending(n => n.length).First();
+
+                            if (note.tickNumber > nextValidTick)
+                            {
+                                channel.totalNoteLength += note.timeLength;
+                                nextValidTick = note.tickNumber + note.length;
+                            }
+                            else if (note.tickNumber + note.length > nextValidTick)
+                            {
+                                var diff = (note.tickNumber + note.length) - nextValidTick;
+                                channel.totalNoteLength += note.timeLength * (diff / note.length);
+                                nextValidTick = nextValidTick + diff;
+                            }
+                            foreach (var n in noteList)
+                                channel.averageNote += n.note;
+                        }
+                        if (channel.numNotes > 0)
+                        {
+                            channel.avgNoteLength = channel.avgNoteLength / channel.numNotes;
+                            channel.averageNote = (int)((float)channel.averageNote / channel.numNotes);
+                            channel.avgVariation = channel.avgVariation / channel.numNotes;
                         }
 
                         if (channel.tickNotes.Count > 0)
@@ -479,6 +599,29 @@ namespace LuteBot.Core.Midi
 
                     // Remove any channels or tracks that don't contain any notes
                     channels = channels.Values.Where(c => c.numNotes > 0).ToDictionary(c => c.Id);
+                    tracks = tracks.Values.Where(c => c.numNotes > 0).ToDictionary(c => c.Id);
+
+                    // When we're finished, it would also be nice to find the first actual audible note, move any tempo events to that tick, and make that tick 0
+                    var minimumTick = channels.Values.SelectMany(c => c.tickNotes).SelectMany(n => n.Value).Min(n => n.tickNumber); // This will have gotten all notes in tracks too
+
+                    if (tickMetaNotes.Count > 0)
+                    {
+                        var temposToMove = tickMetaNotes.Select(kvp => kvp.Value).SelectMany(nl => nl).Where(n => n.tickNumber < minimumTick);
+                        foreach (var n in temposToMove)
+                            n.tickNumber = minimumTick;
+                    }
+                    // Then just subtractk minimumTick from every note, including meta notes
+                    foreach(var nl in tickMetaNotes.Values)
+                    {
+                        foreach (var n in nl)
+                            n.tickNumber -= minimumTick;
+                    }
+                    foreach(var c in channels.Values)
+                    {
+                        foreach (var nl in c.tickNotes.Values)
+                            foreach (var n in nl)
+                                n.tickNumber -= minimumTick;
+                    }
 
                     Console.WriteLine("Read track data in " + (DateTime.Now - startTime).TotalMilliseconds);
                     // Now let's get a sorted list of drum note counts

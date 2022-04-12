@@ -5,13 +5,10 @@ using LuteBot.UI.Utils;
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LuteBot.UI
@@ -36,6 +33,8 @@ namespace LuteBot.UI
             this.Load += TrackSelectionForm_Load;
             InitializeComponent();
 
+            this.SizeChanged += TrackSelectionForm_SizeChanged;
+
             SuspendLayout();
             Instrument.Read();
             instrumentsBox.DisplayMember = "Name";
@@ -58,6 +57,16 @@ namespace LuteBot.UI
             ChannelsListBox.ContextMenuStrip = contextMenuStrip1;
             TrackListBox.ContextMenuStrip = contextMenuStrip2;
 
+        }
+
+        private void TrackSelectionForm_SizeChanged(object sender, EventArgs e)
+        {
+            // Resize/move the two listboxes
+            // Minx and max x are available via OffsetPanel, I think.  Or maybe, probably, panel1
+            // Some arbitrary gap between them; 8 is what we have at start, that seems fine
+            ChannelsListBox.Size = new Size(panel1.Width / 2 - 4, ChannelsListBox.Size.Height);
+            TrackListBox.Size = new Size(panel1.Width / 2 - 4, TrackListBox.Size.Height);
+            TrackListBox.Location = new Point(panel1.Location.X + panel1.Width / 2 + 4, TrackListBox.Location.Y);
         }
 
         private void _mordhauOut_notePlayed(object sender, int channel)
@@ -194,6 +203,19 @@ namespace LuteBot.UI
 
                         // I guess, at least on the left, we're not accounting for pianoWidth
                     }
+                    else
+                    {
+                        if (panel1.VerticalScroll.Visible && panel1.VerticalScroll.Enabled)
+                        {
+                            var args = new ScrollEventArgs(ScrollEventType.SmallIncrement, 0, ScrollOrientation.VerticalScroll); // We aren't really gonna use these values...
+                            scrollHandler(null, args);
+                        }
+                        else
+                        {
+                            var args = new ScrollEventArgs(ScrollEventType.SmallIncrement, 0, ScrollOrientation.HorizontalScroll); // We aren't really gonna use these values...
+                            scrollHandler(null, args);
+                        }
+                    }
                 }
             }); // The OffsetPanel lets us override the scroll, and the panel1 triggers after it occurs 
             panel1.MouseWheel += new MouseEventHandler((o, ev) =>
@@ -217,6 +239,8 @@ namespace LuteBot.UI
             OffsetPanel.MouseCaptureChanged += OffsetPanel_MouseLeave; // These should do the same thing
             OffsetPanel.MouseMove += OffsetPanel_MouseMove;
             OffsetPanel.MouseEnter += OffsetPanel_MouseEnter;
+
+            TrackSelectionForm_SizeChanged(null, null); // Make it resize the listboxes on load
         }
 
 
@@ -283,11 +307,11 @@ namespace LuteBot.UI
 
                         // Nah.  If the highest note changed is the only time we don't do this
                         int oldHighest = maxNote;
-                        ResetRowSize();
+                        ReloadNotes(true);
                         if (maxNote == oldHighest)
                             lastMousePosition = new Point(dragStart.X, dragStart.Y - (channel.offset - startOffset) * pianoRowHeight);
-                        OffsetPanel.Refresh();
-                        pianoPanel.Refresh();
+                        //OffsetPanel.Refresh();
+                        //pianoPanel.Refresh();
                     }
                 }
                 //}
@@ -510,9 +534,9 @@ namespace LuteBot.UI
         // Or maybe I could have the left and bottom regions not inside the scroll panel, and manually redraw them based on that scroll...
         // Might look awkward with the bottom one being below the bar, but, we could put it ontop but not inside... 
 
-        private float tickLength = 1f; // IDK, 1px per tick sounds ok to me
+        private float tickLength = 0.25f; // IDK, 1px per tick sounds ok to me
         private int pianoWidth = 60;
-        private int pianoRowHeight = 15;
+        private int pianoRowHeight = 10;
 
         private int minNote = 0;
         private int maxNote = 127;
@@ -1166,7 +1190,7 @@ namespace LuteBot.UI
         }
 
         private int maxNoteLength = 0;
-        private void ReloadNotes()
+        private void ReloadNotes(bool forceRefresh = false)
         {
             allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks[n.track].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
                 .ToArray();
@@ -1178,7 +1202,7 @@ namespace LuteBot.UI
             else
                 maxNoteLength = 0;
             ResetRowSize();
-            SetVisibleNotes();
+            SetVisibleNotes(forceRefresh);
             pianoPanel.Refresh();
             OffsetPanel.Refresh();
         }
@@ -1206,7 +1230,7 @@ namespace LuteBot.UI
 
             instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
-            ReloadNotes();
+            ReloadNotes(true);
 
             ResumeLayout();
             Invalidate();

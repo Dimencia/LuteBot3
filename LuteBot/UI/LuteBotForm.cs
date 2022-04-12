@@ -482,9 +482,30 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             {
                 var content = File.ReadAllText(gameIniPath);
 
+                // So if they already have other mods, and we add a second set of [/Autoloader/...LoaderActor_C], Mordhau combines them together after
+                // So it ends up with just one heading, then multiple things below it
+                // We need to handle this a bit more robustly and look for lines 1 and 2 of loaderstring1
+                // If either doesn't exist, we write line 0, then the ones that don't exist
 
-                if (!content.Contains(loaderString1))
-                    content = content + "\n" + loaderString1;
+                var loaderLines = loaderString1.Replace("\r\n", "\n").Split('\n');
+                bool replace1 = false;
+                string loaderString1Modified = loaderLines[0];
+
+                if(!content.Contains(loaderLines[1]))
+                {
+                    replace1 = true;
+                    loaderString1Modified += loaderLines[1];
+                }
+                if (!content.Contains(loaderLines[2]))
+                {
+                    replace1 = true;
+                    loaderString1Modified += loaderLines[2];
+                }
+                
+
+
+                if (replace1)
+                    content = content + "\n" + loaderString1Modified;
                 if (!content.Contains(loaderString2))
                     content = content + "\n" + loaderString2;
 

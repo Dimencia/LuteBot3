@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LuteBot.TrackSelection;
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -25,14 +27,14 @@ namespace LuteBot
 
         public static int Locate(this byte[] self, params byte[][] candidates)
         {
-            foreach(var arr in candidates)
+            foreach (var arr in candidates)
                 if (IsEmptyLocate(self, arr))
-                return -1;
+                    return -1;
 
 
             for (int i = 0; i < self.Length; i++)
             {
-                foreach(var arr in candidates)
+                foreach (var arr in candidates)
                     if (IsMatch(self, i, arr))
                         return i;
             }
@@ -59,6 +61,81 @@ namespace LuteBot
                 || array.Length == 0
                 || candidate.Length == 0
                 || candidate.Length > array.Length;
+        }
+
+        public static int numParamsPerChannel = 8;
+
+        public static float[] GetNeuralInput(this MidiChannelItem[] song)
+        {
+            float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
+            float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
+            // noteLength is now in a time format, a float in seconds.  We should divide it by total song duration
+
+            // ... but we don't have that... 
+            // Welp, nvm then.  It's very hard and annoying to get that here
+
+            float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
+
+            float[] inputs = new float[numParamsPerChannel * 16];
+
+            for (int j = 0; j < 16; j++)
+            {
+                var channel = song.Where(c => c.Id == j && c.Id != 9).SingleOrDefault();
+                //var channel = song.Values[j];
+
+
+                if (channel != null)
+                {
+                    //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
+                    inputs[j * numParamsPerChannel] = channel.avgNoteLength;
+                    inputs[j * numParamsPerChannel + 1] = channel.maxChordSize;
+                    inputs[j * numParamsPerChannel + 2] = (maxNoteLength > 0 ? channel.totalNoteLength / maxNoteLength : 0);
+                    //inputs[j * 6 + 2] = channel.totalNoteLength;
+                    inputs[j * numParamsPerChannel + 3] = channel.highestNote;// / 128f;
+                    inputs[j * numParamsPerChannel + 4] = channel.lowestNote;// / 128f;
+                    inputs[j * numParamsPerChannel + 5] = (maxNumNotes > 0 ? channel.numNotes / maxNumNotes : 0);
+                    //inputs[j * numParamsPerChannel + 6] = channel.Id / 16f;
+                    inputs[j * numParamsPerChannel + 6] = channel.midiInstrument;// / 128f;
+                    inputs[j * numParamsPerChannel + 7] = channel.avgVariation;
+                    //inputs[j * 6 + 5] = channel.numNotes;
+                }
+                else
+                {
+                    for (int k = 0; k < numParamsPerChannel; k++)
+                        inputs[j * numParamsPerChannel + k] = 0;
+                }
+            }
+
+            return inputs;
+        }
+
+
+        public static float[] GetNeuralInputs(this MidiChannelItem c, float maxAvgNoteLength, float maxNumNotes, float maxTotalNoteLength)
+        {
+            // We'll try not normalizing 
+
+            float[] inputs = new float[numParamsPerChannel];
+
+
+            var channel = c;
+            //var channel = song.Values[j];
+
+            //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
+            int i = 0;
+            inputs[i++] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
+            inputs[i++] = channel.maxChordSize;
+            inputs[i++] = (maxTotalNoteLength > 0 ? channel.totalNoteLength / maxTotalNoteLength : 0);
+            //inputi++lNoteLength;
+            inputs[i++] = channel.highestNote / 128f;
+            inputs[i++] = channel.lowestNote / 128f;
+            inputs[i++] = (maxNumNotes > 0 ? channel.numNotes / maxNumNotes : 0);
+            //inputi++ 6] = channel.Id / 16f;
+            inputs[i++] = channel.midiInstrument / 128f;
+            inputs[i++] = channel.avgVariation;
+            //inputs[j * 6 + 5] = channel.numNotes;
+
+
+            return inputs;
         }
     }
 }

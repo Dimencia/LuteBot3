@@ -38,6 +38,7 @@ namespace LuteBot
             this.openSavFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveMultipleSongsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openMidiFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -85,7 +86,8 @@ namespace LuteBot
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importPartitionsToolStripMenuItem,
             this.openSavFolderToolStripMenuItem,
-            this.saveMultipleSongsToolStripMenuItem});
+            this.saveMultipleSongsToolStripMenuItem,
+            this.trainToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -116,6 +118,13 @@ namespace LuteBot
             this.openMidiFileDialog.Filter = "MIDI files|*.mid";
             this.openMidiFileDialog.Multiselect = true;
             // 
+            // trainToolStripMenuItem
+            // 
+            this.trainToolStripMenuItem.Name = "trainToolStripMenuItem";
+            this.trainToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.trainToolStripMenuItem.Text = "Train...";
+            this.trainToolStripMenuItem.Click += new System.EventHandler(this.trainToolStripMenuItem_Click);
+            // 
             // PartitionsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -145,5 +154,6 @@ namespace LuteBot
         private System.Windows.Forms.ToolStripMenuItem openSavFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveMultipleSongsToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openMidiFileDialog;
+        private System.Windows.Forms.ToolStripMenuItem trainToolStripMenuItem;
     }
 }

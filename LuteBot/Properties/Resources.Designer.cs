@@ -77,7 +77,7 @@ namespace LuteBot.Properties {
         ///    },
         ///    {
         ///      &quot;Item&quot;: &quot;TrackSelection&quot;,
-        ///      &quot;Value&quot;: &quot;False&quot;
+        ///      &quot;Value&quot;: &quot;True&quot;
         ///    },
         ///    {
         ///      &quot;Item&quot;: &quot;OnlineSync&quot;,
@@ -88,11 +88,11 @@ namespace LuteBot.Properties {
         ///      &quot;Value&quot;: &quot;False&quot;
         ///    },
         ///    {
-        ///      &quot;Item&quot;: &quot;SoundEffects&quot;,
-        ///      &quot;Value&quot;: &quot;False&quot;
+        ///      &quot;Item&quot;: &quot;PartitionList&quot;,
+        ///      &quot;Value&quot;: &quot;True&quot;
         ///    },
         ///    {
-        ///      &quot;Item&quot;: &quot;C [rest of string was truncated]&quot;;.
+        ///      &quot;Item&quot;: &quot;So [rest of string was truncated]&quot;;.
         /// </summary>
         public static string DefaultConfig {
             get {
