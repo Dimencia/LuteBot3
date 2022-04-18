@@ -16,5 +16,9 @@ namespace LuteBot.TrackSelection
         public TrackItem(TrackItem old) : base(old)
         {
         }
+
+        public TrackItem(SimpleMidiChannelItem old) : base(old) { }
+
+        public TrackItem(MidiChannelItem old) : base(old) { }
     }
 }

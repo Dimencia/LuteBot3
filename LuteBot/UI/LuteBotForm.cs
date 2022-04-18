@@ -763,7 +763,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 if (player.GetType() == typeof(MidiPlayer))
                 {
                     MidiPlayer midiPlayer = player as MidiPlayer;
-                    trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks(), trackSelectionManager);
+                    trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
                     trackSelectionManager.FileName = currentTrackName;
                 }
 
@@ -1279,7 +1279,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
             // I don't think getting the settings is that easy but we'll try
             // Oh hey it can be.
-            var data = trackSelectionManager.GetTrackSelectionData();
+            var instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            var data = trackSelectionManager.GetTrackSelectionData(instrumentId);
             player.LoadFile(currentTrackName);
             trackSelectionManager.SetTrackSelectionData(data);
             //trackSelectionManager.SaveTrackManager(); // Don't save when we reload, that's bad.  

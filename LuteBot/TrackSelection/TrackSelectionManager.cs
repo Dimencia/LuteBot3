@@ -1,6 +1,7 @@
 ﻿using LuteBot.Config;
 using LuteBot.Core.Midi;
 using LuteBot.IO.Files;
+using LuteBot.UI.Utils;
 
 using Sanford.Multimedia.Midi;
 
@@ -8,8 +9,10 @@ using SimpleML;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace LuteBot.TrackSelection
@@ -21,13 +24,14 @@ namespace LuteBot.TrackSelection
 
         private MidiChannelItem PredictedFluteChannel = null;
 
-        public Dictionary<int, MidiChannelItem> MidiChannels { get => midiChannels; set { midiChannels = value; ResetRequest(); } }
-        public Dictionary<int, TrackItem> MidiTracks { get => midiTracks; set { midiTracks = value; ResetRequest(); } }
+        public Dictionary<int, MidiChannelItem> MidiChannels { get => midiChannels; private set { midiChannels = value; ResetRequest(); } }
+        public Dictionary<int, TrackItem> MidiTracks { get => midiTracks; private set { midiTracks = value; ResetRequest(); } }
         public bool ActivateAllChannels { get => activateAllChannels; set { activateAllChannels = value; ResetRequest(); } }
         public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
         public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
         public int NumChords { get => numChords; set { numChords = value; ResetRequest(); } }
         public Dictionary<int, TrackSelectionData> DataDictionary { get; set; } = new Dictionary<int, TrackSelectionData>();
+        public Dictionary<int, TrackSelectionData> OriginalDataDictionary { get; set; } = new Dictionary<int, TrackSelectionData>();
 
         private int numChords;
         private int noteOffset;
@@ -90,6 +94,8 @@ namespace LuteBot.TrackSelection
 
             // Aha.  So, we don't want to overwrite because old ones might not have some data, and we already have populated data
             // We also need new objects so we don't have refernce issues.  So start by duplicating all existing ones
+
+            /*
             foreach (var c in data.MidiChannels)
             {
                 if (MidiChannels.ContainsKey(c.Id))
@@ -115,11 +121,18 @@ namespace LuteBot.TrackSelection
             this.NumChords = data.NumChords;
 
             if (data.MidiChannelOffsets != null)
-                foreach(var kvp in data.MidiChannelOffsets)
+                foreach (var kvp in data.MidiChannelOffsets)
                 {
                     if (MidiChannels.ContainsKey(kvp.Key)) // If not, we don't care. 
                         MidiChannels[kvp.Key].offset = kvp.Value;
                 }
+            */
+
+            // Just copy the stuff straight over
+            this.NoteOffset = data.Offset;
+            this.NumChords = data.NumChords;
+            this.MidiChannels = data.MidiChannels.ToDictionary(c => c.Id, c => c);
+            this.MidiTracks = data.MidiTracks.ToDictionary(c => c.Id, c => c);
 
             // Restore any channel names that might be null or incorrect, from older data that got saved
             foreach (var c in midiChannels.Values)
@@ -132,7 +145,7 @@ namespace LuteBot.TrackSelection
 
         public void UpdateTrackSelectionForInstrument(int oldInstrument)
         {
-            DataDictionary[oldInstrument] = GetTrackSelectionData();
+            DataDictionary[oldInstrument] = GetTrackSelectionData(oldInstrument);
             int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
             if (DataDictionary.ContainsKey(instrumentId))
                 SetTrackSelectionData(DataDictionary[instrumentId]);
@@ -192,34 +205,51 @@ namespace LuteBot.TrackSelection
                 SetTrackSelectionData(DataDictionary[0]);
         }
 
-        public TrackSelectionData GetTrackSelectionData()
+        public TrackSelectionData GetTrackSelectionData(int instrumentId)
         {
             TrackSelectionData data = new TrackSelectionData();
-            data.MidiChannels = new List<MidiChannelItem>(MidiChannels.Values);
-            data.MidiTracks = new List<TrackItem>(MidiTracks.Values);
+            data.MidiChannels = MidiChannels.Values.Select(c => new MidiChannelItem(c)).ToList();
+            data.MidiTracks = MidiTracks.Values.Select(c => new TrackItem(c)).ToList();
             data.Offset = NoteOffset;
             data.NumChords = NumChords;
+            data.InstrumentID = instrumentId;
             return data;
         }
 
         public void SaveTrackManager(string filename = null)
         {
-            DataDictionary[ConfigManager.GetIntegerProperty(PropertyItem.Instrument)] = GetTrackSelectionData();
-            SaveManager.SaveTrackSelectionData(DataDictionary, FileName, filename);
+            int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            DataDictionary[instrumentId] = GetTrackSelectionData(instrumentId);
+            var simpleDataDictionary = new Dictionary<int, SimpleTrackSelectionData>();
+
+            foreach(var kvp in DataDictionary)
+            {
+                simpleDataDictionary[kvp.Key] = new SimpleTrackSelectionData(kvp.Value, kvp.Value.InstrumentID, OriginalDataDictionary[kvp.Key]);
+            }
+
+            SaveManager.SaveTrackSelectionData(simpleDataDictionary, FileName, filename);
         }
 
         public void LoadTrackManager()
         {
-            var dataDictionary = SaveManager.LoadTrackSelectionData(FileName);
-            if (dataDictionary != null)
+            var simpleDataDict = SaveManager.LoadTrackSelectionData(FileName);
+            if (simpleDataDict != null)
             {
-                DataDictionary = dataDictionary;
-                TrackSelectionData data = null;
                 int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                // The only reason we need simple data is so we can pull out and handle the Notes from within the channels and tracks, if there are any
+                DataDictionary.Clear();
+                var currentData = GetTrackSelectionData(instrumentId);
+                foreach(var kvp in simpleDataDict)
+                {
+                    DataDictionary[kvp.Key] = new TrackSelectionData(currentData, kvp.Key).WithData(kvp.Value);
+                }
+                
+                TrackSelectionData data = null;
+                
                 if (DataDictionary.ContainsKey(instrumentId))
                     data = DataDictionary[instrumentId];
                 else if (DataDictionary.ContainsKey(0))
-                    data = DataDictionary[0];
+                    data = new TrackSelectionData(DataDictionary[0], instrumentId);
 
                 if (data != null)
                 {
@@ -346,9 +376,12 @@ namespace LuteBot.TrackSelection
                 UpdateTrackSelectionForInstrument(1);
                 EventHelper();
             }
+            // Fix up the instrument IDs in case we didn't get them before... unsure why they're included at all tbh but, future compatibility I guess
+            //foreach (var kvp in DataDictionary)
+            //    kvp.Value.InstrumentID = kvp.Key;
         }
 
-        public void LoadTracks(Dictionary<int, MidiChannelItem> channels, Dictionary<int, TrackItem> tracks, TrackSelectionManager tsm)
+        public void LoadTracks(Dictionary<int, MidiChannelItem> channels, Dictionary<int, TrackItem> tracks)
         {
             //midiChannels.Clear();
             //midiTracks.Clear();
@@ -366,8 +399,17 @@ namespace LuteBot.TrackSelection
             midiChannels = channels;
             midiTracks = tracks;
 
-            NoteOffset = tsm.NoteOffset;
-            NumChords = tsm.NumChords;
+            NoteOffset = 0;
+            NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+
+            // Before we screw with it by predicting flutes, we should store this current TrackSelectionData into our OriginalDataDictionary in every feasible slot
+            OriginalDataDictionary.Clear();
+            for (int i = 0; i < 16; i++)
+            {
+                var data = GetTrackSelectionData(i);
+                data.InstrumentID = i;
+                OriginalDataDictionary[i] = data;
+            }
 
             // Now is a good time to predict a flute channel - PredictedFluteChannel
             PredictedFluteChannel = GetFlutePrediction();
@@ -406,7 +448,7 @@ namespace LuteBot.TrackSelection
 
             if (activeChannels.Count() < 2)
                 return null;
-            else// if(simpleML.Trained)
+            else // if(simpleML != null && simpleML.Trained)
             {
                 Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
 
@@ -462,12 +504,13 @@ namespace LuteBot.TrackSelection
 
                 int count = 0; // Separately track count for rank... 
                 int trackCount = 0;
-                for(int i = 0; i < orderedResults.Count(); i++)
+                for (int i = 0; i < orderedResults.Count(); i++)
                 //foreach (var channel in activeChannels)
                 {
                     //var channel = activeChannels.Where(c => c.Id == orderedResults.ElementAt(i).Key).SingleOrDefault();
                     var channel = orderedResults.ElementAt(i).Key;
-                    if (channel != null) {
+                    if (channel != null)
+                    {
                         string ident = "Channel";
                         if (channel is TrackItem)
                             ident = "Track";
@@ -476,14 +519,14 @@ namespace LuteBot.TrackSelection
                         if (channel is TrackItem)
                             channel.Name += $"(Flute Rank {++trackCount} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
                         else
-                            channel.Name += $"(Flute Rank {++count} - {Math.Round(orderedResults.ElementAt(i).Value * 100,2)}%)";
+                            channel.Name += $"(Flute Rank {++count} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
                     }
                 }
 
                 return orderedResults.First().Key;
             }
-            
-            //return -1;
+
+            return null;
             /*
             if (simpleML != null && simpleML.Trained)
             {
@@ -596,6 +639,193 @@ namespace LuteBot.TrackSelection
             }
             */
         }
+
+
+        Regex savStartRegex = new Regex(@"\|\w*;[0-9]+\|");
+        public void LoadSavFiles(string directory, string songname)
+        {
+            try
+            {
+                // Sav files have this format:
+
+                //|name;tempo|{track 0}|{track 1}|
+
+                // Where each track, is a list of notes, with the format:
+
+                // tickNumber-note-NoteType
+
+                // NoteType 1 is a NoteOn, 2 is a tempo event, Off is 0 - these are LuteMod.Sequencing.NoteType 
+
+
+                // Annoyingly, at EOF we have some chars that may or may not be particular:     None    
+                // Many of those are invis and won't paste right...
+                // ENQ is 05... NUL is supposed to be 00
+                // It's: NULENQNULNULNULNoneNULNULNULNUL
+                // So tldr, it's NUL
+                var eofDelim = (char)0;
+                // There are of course, NULs before that too.  
+
+                // OK, it's easy, here's what we do
+                // We start with the 0 file, and find our signature, |name;tempo|.  Then go backwards until we find SavedPartitions, and store that as the start delim for this song
+                // Then we iterate all of the files, cutting out after our start delim, to the next NUL, and appending to one long string
+                // Then we easily parse that string
+
+                string startDelim;
+                var firstContent = File.ReadAllText(Path.Combine(directory, songname + "[0].sav"));
+                Match firstMatch = savStartRegex.Match(firstContent);
+                if (!firstMatch.Success)
+                    throw new Exception("Sav file was in unrecognized format");
+                var delimEndIndex = firstMatch.Index;
+
+                // Remember that substring's second param is a length
+                int startDelimStartIndex = firstContent.IndexOf("StrProperty"); // 'SavdPartition' occurs multiple times before we actually want it
+                startDelim = firstContent.Substring(startDelimStartIndex, delimEndIndex - startDelimStartIndex);
+
+                StringBuilder contentBuilder = new StringBuilder();
+
+                var bottomContent = firstContent.Substring(delimEndIndex);
+                contentBuilder.Append(bottomContent.Substring(0, bottomContent.IndexOf(eofDelim)));
+
+                int i = 1;
+                while (File.Exists(Path.Combine(directory, $"{songname}[{i}].sav")))
+                {
+                    firstContent = File.ReadAllText(Path.Combine(directory, $"{songname}[{i}].sav"));
+                    delimEndIndex = firstContent.IndexOf(startDelim) + startDelim.Length;
+                    bottomContent = firstContent.Substring(delimEndIndex);
+                    int captureLength = bottomContent.IndexOf(eofDelim);
+                    int atSymbol = bottomContent.IndexOf("@");
+                    if (atSymbol > -1 && (atSymbol < captureLength || captureLength == -1))
+                        captureLength = atSymbol;
+                    if (captureLength == -1)
+                        captureLength = bottomContent.Length;
+                    contentBuilder.Append(bottomContent.Substring(0, captureLength));
+                    i++;
+                }
+
+                string fullContent = contentBuilder.ToString();
+                // Beautiful
+
+                var trackSplit = fullContent.Split('|');
+                // Tempo is in 1, the tracks are then each in 2+, 0 is blank or stuff we don't want if it isn't
+                // The last one is also empty
+                // I guess we'll build these into MidiChannelItems, then into a TrackSelectionData, and load it
+
+                // The problem is, many things rely on the player and its tempo, which we have as our first bit of data
+                // But it's probably not a good idea to brute-force... better if we can make it into a midi and actually load it on the player
+
+                // I guess we can make a new sequencer maybe?
+                var sequence = new Sequence(120) { Format = 1 };
+                int tempo = int.Parse(trackSplit[1].Split(';')[1]) / 120;
+                sequence.FirstTempo = tempo;
+
+                var firstTempoBuilder = new TempoChangeBuilder();
+                firstTempoBuilder.Tempo = tempo;
+                firstTempoBuilder.Build();
+
+                trackSplit = trackSplit.Skip(2).Take(trackSplit.Length - 3).ToArray();
+
+                var metaTrack = new Track();
+                metaTrack.Insert(0, firstTempoBuilder.Result);
+                sequence.Add(metaTrack);
+
+                //var tsb = new TimeSignatureBuilder();
+                //tsb.Numerator = 4;
+                //tsb.Denominator = 4;
+                //tsb.Build();
+                //metaTrack.Insert(0, tsb.Result);
+                //
+                //var ksb = new KeySignatureBuilder();
+                //ksb.Key = Sanford.Multimedia.Key.CMajor;
+                //ksb.Build();
+                //metaTrack.Insert(0, ksb.Result);
+
+                int trackNum = 1;
+                int maxTick = 0;
+                foreach (var trackString in trackSplit)
+                {
+                    var track = new Track();
+                    sequence.Channels.Add(trackNum);
+
+                    var noteSplit = trackString.Split(';');
+
+                    int lastTick = 0;
+
+                    foreach (var noteString in noteSplit)
+                    {
+
+
+                        var noteValueSplit = noteString.Split('-');
+                        // 0 is the tick number, 1 is the value, 2 is the type
+
+                        int noteTrackNum = trackNum - 1;
+                        if (trackNum > 1)
+                            noteTrackNum = 0;
+
+                        IMidiMessage message;
+                        lastTick = int.Parse(noteValueSplit[0]);
+                        if (noteValueSplit[2] == "1")
+                        {
+                            message = new ChannelMessage(ChannelCommand.NoteOn, trackNum, int.Parse(noteValueSplit[1]) + Instrument.Prefabs[noteTrackNum].LowestPlayedNote, 100);
+                            track.Insert(lastTick, message);
+                            lastTick += 10; // IDK some arbitrary length
+                            track.Insert(lastTick, new ChannelMessage(ChannelCommand.NoteOff, trackNum, int.Parse(noteValueSplit[1]) + Instrument.Prefabs[noteTrackNum].LowestPlayedNote));
+                        }
+                        else // This should be 7 bits per byte, little endian
+                        { // Each byte is high except the last one...?
+                            var tcb = new TempoChangeBuilder();
+                            tcb.Tempo = int.Parse(noteValueSplit[1]) / 120;
+                            tcb.Build();
+                            message = tcb.Result;
+                            // Well this is awkward.  The tempo we read is divided by the division
+                            // But we don't know what the division is/was
+                            metaTrack.Insert(lastTick, message);
+                        }
+
+                        if (lastTick > maxTick)
+                            maxTick = lastTick;
+                    }
+
+                    track.Insert(lastTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
+
+                    string trackName = null;
+                    int instrumentId = 0;
+                    if (trackNum == 1)
+                        trackName = "Lute";
+                    else if (trackNum == 2)
+                    {
+                        trackName = "Flute";
+                        instrumentId = 73;
+                    }
+                    if (trackName != null)
+                    {
+                        track.Insert(0, new MetaMessage(MetaType.TrackName, Encoding.ASCII.GetBytes(trackName)));
+                    }
+                    if (instrumentId > 0)
+                        track.Insert(0, new ChannelMessage(ChannelCommand.ProgramChange, trackNum, instrumentId));
+                    
+                    sequence.Add(track);
+                    //sequence.Tracks.Add(track);
+                    
+
+                    trackNum++;
+                }
+                metaTrack.Insert(maxTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
+                // This is fucking annoying
+                // There's no way to get the division back out, and I can't set it even if I could
+                // Ahhh, we can set it in the constructor... 
+                // What if it's just, 1?  
+
+                string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, songname + ".mid");
+                sequence.Save(midiPath);
+                
+                LuteBotForm.luteBotForm.LoadHelper(midiPath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
 
         public ChannelMessage FilterMidiEvent(ChannelMessage message, int trackId)
         {

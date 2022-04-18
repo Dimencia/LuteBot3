@@ -52,7 +52,7 @@ namespace LuteBot
             RefreshPartitionList();
         }
 
-        private static readonly string partitionMidiPath = Path.Combine(LuteBotForm.lutebotPath, "Partition MIDIs");
+        public static readonly string partitionMidiPath = Path.Combine(LuteBotForm.lutebotPath, "Partition MIDIs");
 
         private void ListBoxPartitions_MouseMove(object sender, MouseEventArgs e)
         {
@@ -128,12 +128,12 @@ namespace LuteBot
 
                 if (listBoxPartitions.SelectedIndices.Count == 1)
                 {
-                    string midiPath = Path.Combine(partitionMidiPath, listBoxPartitions.SelectedItems[0] + ".mid");
-                    if (File.Exists(midiPath))
-                    {
-                        MenuItem editItem = indexContextMenu.MenuItems.Add("Load " + name);
-                        editItem.Click += EditItem_Click;
-                    }
+                    //string midiPath = Path.Combine(partitionMidiPath, listBoxPartitions.SelectedItems[0] + ".mid");
+                    //if (File.Exists(midiPath))
+                    //{
+                    MenuItem editItem = indexContextMenu.MenuItems.Add("Load " + name);
+                    editItem.Click += EditItem_Click;
+                    //}
                 }
                 
                 listBoxPartitions.ContextMenu = indexContextMenu; // TODO: I'd love to make it popup at the selected item, not at mouse pos, but whatever
@@ -148,7 +148,10 @@ namespace LuteBot
         private void EditItem_Click(object sender, EventArgs e)
         {
             string midiPath = Path.Combine(partitionMidiPath, listBoxPartitions.SelectedItems[0] + ".mid");
-            LuteBotForm.luteBotForm.LoadHelper(midiPath);
+            if (File.Exists(midiPath))
+                LuteBotForm.luteBotForm.LoadHelper(midiPath);
+            else
+                tsm.LoadSavFiles(SaveManager.SaveFilePath, (string)listBoxPartitions.SelectedItems[0]);
         }
 
         private void PartitionIndexBox_DragOver(object sender, DragEventArgs e)
@@ -517,17 +520,58 @@ namespace LuteBot
                 int numParamsPerChannel = Extensions.numParamsPerChannel;
 
                 // Let's try a compare implementation - 
-                    // For each song, take two arbitrary channels and compare for best flute between them
-                    // Take the result of that and continue, ending when the last channel is compared and the result is given for the one best flute
-                    // Consider it a bubble sort... hmm.... but that doesn't really let us do more than one
+                // For each song, take two arbitrary channels and compare for best flute between them
+                // Take the result of that and continue, ending when the last channel is compared and the result is given for the one best flute
+                // Consider it a bubble sort... hmm.... but that doesn't really let us do more than one
 
                 // Well then, maybe instead, do individual channels for flute suitability and rank those results
-                    // We won't normalize anything and we might make the network a little complex
+                // We won't normalize anything and we might make the network a little complex
 
                 // We can softmax all the outputs once we have them for each channel
-                string[] activation = new string[] { "tanh", "tanh", "tanh" };
-                tsm.neural = new NeuralNetwork(new int[] { numParamsPerChannel, 64, 32, 1 }, activation);
+                // This is great, btw.  This is 'channelNeural', the only issue is that the way I handle the output gives values <0 and > 100% sometimes, but rarely...
+                //string[] activation = new string[] { "tanh", "tanh", "tanh" };
+                //tsm.neural = new NeuralNetwork(new int[] { numParamsPerChannel, 64, 32, 1 }, activation);
 
+                // I want to try simulating memory and give it a stream of note data
+                // The idea is to send it a stream of notes; tick, duration, and value
+                // And give it say, 16 sets of memory before and after
+                // So that's a 16*3 input layer - but wait, there's more
+                // The outputs from those 16*3, are then fed to another 16*3 set of inputs on the next go round...?
+                // How would those be trained?  We don't know an expected value
+                // Well, we know what the other nodes are supposed to output, they will end up trained based on that
+
+                // I mean, we kinda know.  If we want to predict the next note, which was the idea just for fun, and we have the whole sequence, absolutely
+                // If we want to classify, like feed it a channel and say is that lute, we don't know progressively what the answer should be
+                // But I guess we never do.  Only an entire run-through is enough to say, okay, adjust some things
+
+                // So.  16*3, 48, *2, 96 would be our input layer, with an output layer of ... 3.  Our 3 next note params
+                // We then take a whole sequence of notes, feedforward the first note
+                // Take the output of... what, the first hidden layer?  Do we enforce that the last hidden layer is always 48?  That sounds good...
+                // Or maybe the output layer becomes 48+3; the first 3 are the actual outputs, while the other 48 must learn their purpose?  
+                // That sounds like a stupid way to avoid having to expose the outputs of the last hidden layer, which may even already be available...
+
+                // Well, I made the neurons public because why not.  So I absolutely could easily read the last layer's outputs and send them back 
+
+                // I suspect it'll have trouble 'starting' when those bottom 48 inputs are empty...
+
+                // But OK.  Let's go straight to predicting flute channels cuz that's what we're setup for
+                // The network itself accepts the 3 params for a note, memory_count*2 times (ie memory_count*6 input layer), with a final hidden layer of size memory_count*3
+                // And an output layer of 1 - the estimate of whether or not this is a flute track
+
+                // Ahhh... but we could also use note velocity
+
+                // And realistically, it's crazy to discard info like, the channel midiInstrument
+                // Well, whatever.  If this does reasonably well, I might could setup a second neural network to take this result and some of the other channel info to make a final determination
+
+                        // Random, but it occurs to me, I could have solved all my problems with nonexistent channels getting values, by ignoring them after I got the output... and/or softmaxing after, not before
+                int memory_count = 1;
+                int noteParams = 3;
+                string[] activation = new string[] { "tanh", "tanh", "tanh" };
+                // The important ones are the first, and last two - the rest are all arbitrary
+                // I suspect it will need a deep and complex network so we'll go a little ham; this is effectively 96, 96, 96, 48, 1.  If I don't include velocity
+
+                // Well.  It took forever and did nothing when done this way.  Let's remove memory and just try to get recurrent going
+                tsm.neural = new NeuralNetwork(new int[] { memory_count*noteParams*2, memory_count * noteParams, memory_count*noteParams, 1 }, activation);
 
 
 
@@ -636,9 +680,19 @@ namespace LuteBot
                         float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
                         float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
 
+                        float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
+
                         foreach (var channel in song)
                         {
-                            var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                            // So for the 'recurrent memory' implementation, we have memory_count*noteParams*2 inputs; 16 notes, each time we process another note, we push the others up the chain
+                            // and pop off the oldest.  Then we have memory_count*noteParams in the final hidden layer, which should be fed back into the last memory_count*noteParams*2 inputs next time
+
+                            // We need an alternate backPropagation that doesn't feedforward, or rather, does all of this before it tries correcting
+                            var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
+                            
+
+
+                            //var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
                             var expected = new float[1];
 
                             if (channel.Active)
@@ -671,7 +725,8 @@ namespace LuteBot
                             }
                             */
 
-                            tsm.neural.BackPropagate(inputs, expected);
+                            tsm.neural.BackPropagateRecurrent(inputs, expected);
+                            //tsm.neural.BackPropagate(inputs, expected);
                             costTotal += tsm.neural.cost;
                         }
                     }
@@ -683,11 +738,14 @@ namespace LuteBot
                         float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
                         float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
 
+                        float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
+
                         Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
                         foreach(var channel in song)
                         {
-                            var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
-                            var neuralResults = tsm.neural.FeedForward(inputs);
+                            //var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                            var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
+                            var neuralResults = tsm.neural.FeedForwardRecurrent(inputs);
                             channelResults[channel] = neuralResults[0];
                         }
 
@@ -731,11 +789,13 @@ namespace LuteBot
                         float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
                         float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
 
+                        float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
+
                         Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
                         foreach (var channel in song)
                         {
-                            var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
-                            var neuralResults = tsm.neural.FeedForward(inputs);
+                            var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
+                            var neuralResults = tsm.neural.FeedForwardRecurrent(inputs);
                             channelResults[channel] = neuralResults[0];
                         }
 
@@ -796,6 +856,7 @@ namespace LuteBot
                     //neuralTestCandidates = orderedCandidates.Skip(numTrainingCandidates);
                 }
 
+                /* It is still odd that this gives different results than the last one that ran
                 numTestsCorrect = 0;
                 foreach (var song in neuralCandidates)
                 {
@@ -814,22 +875,22 @@ namespace LuteBot
                     var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
 
 
-                    /*
-                    var inputs = song.GetNeuralInput();
-
-                    var neuralResults = tsm.neural.FeedForward(inputs);
-                    // The output here is a channel ID to confidence map...
-                    // I need to find the ID of the best one... and rank the rest...
-                    // So let's just build a quick dictionary I guess
-                    var results = new Dictionary<int, float>();
-
-                    for (int j = 0; j < neuralResults.Length; j++)
-                    {
-                        results[j] = neuralResults[j];
-                    }
-
-                    var orderedResults = results.OrderByDescending(kvp => kvp.Value);
-                    */
+                    
+                    //var inputs = song.GetNeuralInput();
+                    //
+                    //var neuralResults = tsm.neural.FeedForward(inputs);
+                    //// The output here is a channel ID to confidence map...
+                    //// I need to find the ID of the best one... and rank the rest...
+                    //// So let's just build a quick dictionary I guess
+                    //var results = new Dictionary<int, float>();
+                    //
+                    //for (int j = 0; j < neuralResults.Length; j++)
+                    //{
+                    //    results[j] = neuralResults[j];
+                    //}
+                    //
+                    //var orderedResults = results.OrderByDescending(kvp => kvp.Value);
+                    
                     // Check the number of active flute channels...
                     var numFlute = song.Where(s => s.Active).Count();
                     bool correct = true;
@@ -846,6 +907,7 @@ namespace LuteBot
                 }
                 Console.WriteLine($"Complete - {numTestsCorrect} tests correct out of {neuralCandidates.Count()}");
                 // TODO: Save the values somewhere... I've got them pasted as a screenshot in officers chat, if I need to
+                */
             }
             catch (Exception ex)
             {

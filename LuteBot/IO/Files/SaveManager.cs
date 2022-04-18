@@ -196,12 +196,12 @@ namespace LuteBot.IO.Files
             return LoadNoDialog<SoundBoard>(path);
         }
 
-        public static void SaveTrackSelectionData(Dictionary<int, TrackSelectionData> data, string fileName, string targetPath = null)
+        public static void SaveTrackSelectionData(Dictionary<int, SimpleTrackSelectionData> data, string fileName, string targetPath = null)
         {
             SaveNoDialog(data, fileName, targetPath);
         }
 
-        public static Dictionary<int, TrackSelectionData> LoadTrackSelectionData(string fileName)
+        public static Dictionary<int, SimpleTrackSelectionData> LoadTrackSelectionData(string fileName)
         {
             //return LoadNoDialog<TrackSelectionData>(autoSavePath + "/" + fileName);
             // Backwards compatible in case TSD isn't there.  
@@ -210,9 +210,10 @@ namespace LuteBot.IO.Files
             if (result == null)
             {
                 var singularData = LoadNoDialog<TrackSelectionData>(fileName);
-                result = new Dictionary<int, TrackSelectionData>() { { 0, singularData } };
+                result = new Dictionary<int, SimpleTrackSelectionData>() { { 0, new SimpleTrackSelectionData(singularData, 0) } };
             }
-            return result;
+            // If we had to fallback, it may not have an instrumentID as part of it; use the key as if it were the ID
+            return result.ToDictionary(kvp => kvp.Key, kvp => kvp.Value is SimpleTrackSelectionData ? kvp.Value as SimpleTrackSelectionData : new SimpleTrackSelectionData(kvp.Value, kvp.Key));
         }
 
         public static string SetMordhauConfigLocation()
@@ -294,7 +295,7 @@ namespace LuteBot.IO.Files
         }
 
 
-        private static Dictionary<int, TrackSelectionData> LoadNoDialog(string path)
+        private static Dictionary<int, SimpleTrackSelectionData> LoadNoDialog(string path)
         {
             // And here is our new method, which is json, much smaller and cleaner
             try
@@ -306,14 +307,14 @@ namespace LuteBot.IO.Files
                     var jsonString = Encoding.ASCII.GetString(allbytes.Skip(jsonIndex).ToArray());
                     var simpleData = JsonConvert.DeserializeObject<SimpleTrackSelectionData[]>(jsonString);
 
-                    return (simpleData.ToDictionary(a => a.InstrumentID, b => new TrackSelectionData(b)));
+                    return (simpleData.ToDictionary(a => a.InstrumentID, b => b));
                 }
             }
             catch (Exception ex)
             {
             }
             // If this didn't work, try the old one
-            return LoadNoDialog<Dictionary<int, TrackSelectionData>>(path);
+            return LoadNoDialog<Dictionary<int, TrackSelectionData>>(path).ToDictionary(kvp => kvp.Key, kvp => new SimpleTrackSelectionData(kvp.Value, kvp.Value.InstrumentID));
         }
 
 
@@ -391,13 +392,13 @@ namespace LuteBot.IO.Files
             if (path != null)
             {
                 // Still dirty
-                if (typeof(T) == typeof(Dictionary<int, TrackSelectionData>))
+                if (typeof(T) == typeof(Dictionary<int, SimpleTrackSelectionData>))
                 {
                     try
                     {
                         // Split them out from a dictionary to just, a list of TrackSelectionData, each containing its instrumentID
-                        var targetDict = target as Dictionary<int, TrackSelectionData>;
-                        var simpleData = targetDict.Select(kvp => { return new SimpleTrackSelectionData(kvp.Value, kvp.Key); }).ToArray();
+                        var targetDict = target as Dictionary<int, SimpleTrackSelectionData>;
+                        var simpleData = targetDict.Select(kvp => kvp.Value).ToArray();
                         // Now parse out any notes that are unchanged; only keep tickNotes that are inactive, that's currently all they can change in individual notes
                         // These are new instances of track and channel so shouldn't matter if we mess them up; but the instances of the Notes are not new
 

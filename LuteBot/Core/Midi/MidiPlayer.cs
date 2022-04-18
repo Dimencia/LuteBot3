@@ -14,7 +14,7 @@ using System.Windows.Forms;
 
 namespace LuteBot.Core.Midi
 {
-    public class MidiPlayer : Player
+    public class MidiPlayer : Player, IDisposable
     {
         private OutputDevice outDevice;
         public Sequence sequence;
@@ -27,7 +27,7 @@ namespace LuteBot.Core.Midi
         private Dictionary<int, MidiChannelItem> channels = new Dictionary<int, MidiChannelItem>();
         private Dictionary<int, TrackItem> tracks = new Dictionary<int, TrackItem>();
 
-        public Dictionary<int, List<MidiNote>> tickMetaNotes { get; } = new Dictionary<int, List<MidiNote>>();
+        public Dictionary<int, List<MidiNote>> tickMetaNotes { get; private set; } = new Dictionary<int, List<MidiNote>>();
 
         public MidiPlayer(TrackSelectionManager trackSelectionManager)
         {
@@ -288,16 +288,6 @@ namespace LuteBot.Core.Midi
                 outDevice.Reset();
         }
 
-        public override void Dispose()
-        {
-            this.disposed = true;
-            sequence.Dispose();
-
-            if (outDevice != null)
-            {
-                outDevice.Dispose();
-            }
-        }
 
         //------------- Handlers -------------
 
@@ -610,18 +600,53 @@ namespace LuteBot.Core.Midi
                         foreach (var n in temposToMove)
                             n.tickNumber = minimumTick;
                     }
-                    // Then just subtractk minimumTick from every note, including meta notes
-                    foreach(var nl in tickMetaNotes.Values)
+                    // Then just subtract minimumTick from every note, including meta notes
+                    // And store it back in under its adjusted key... I guess we need a temp dictionary for that
+                    var tempMetaNotes = new Dictionary<int, List<MidiNote>>();
+                    
+                    foreach (var nl in tickMetaNotes.Values)
                     {
                         foreach (var n in nl)
+                        {
                             n.tickNumber -= minimumTick;
+                            if (!tempMetaNotes.ContainsKey(n.tickNumber))
+                                tempMetaNotes[n.tickNumber] = new List<MidiNote>();
+                            tempMetaNotes[n.tickNumber].Add(n);
+                        }
                     }
                     foreach(var c in channels.Values)
                     {
+                        var tempNotes = new Dictionary<int, List<MidiNote>>();
                         foreach (var nl in c.tickNotes.Values)
+                        {
                             foreach (var n in nl)
+                            {
                                 n.tickNumber -= minimumTick;
+                                if (!tempNotes.ContainsKey(n.tickNumber))
+                                    tempNotes[n.tickNumber] = new List<MidiNote>();
+                                tempNotes[n.tickNumber].Add(n);
+                            }
+                        }
+                        c.tickNotes = tempNotes;
                     }
+                    foreach (var c in tracks.Values)
+                    {
+                        var tempNotes = new Dictionary<int, List<MidiNote>>();
+                        foreach (var nl in c.tickNotes.Values)
+                        {
+                            foreach (var n in nl)
+                            {
+                                n.tickNumber -= minimumTick;
+                                if (!tempNotes.ContainsKey(n.tickNumber))
+                                    tempNotes[n.tickNumber] = new List<MidiNote>();
+                                tempNotes[n.tickNumber].Add(n);
+                            }
+                        }
+                        c.tickNotes = tempNotes;
+                    }
+
+                    tickMetaNotes = tempMetaNotes;
+                    
 
                     Console.WriteLine("Read track data in " + (DateTime.Now - startTime).TotalMilliseconds);
                     // Now let's get a sorted list of drum note counts
@@ -932,6 +957,34 @@ namespace LuteBot.Core.Midi
         {
             return (int)((bytes[0] * Math.Pow(2, 16)) + (bytes[1] * Math.Pow(2, 8)) + bytes[2]);
         }
+
+        public sealed override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        // Protected implementation of Dispose pattern.
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    if (sequence != null)
+                        sequence.Dispose();
+                    if (sequencer != null)
+                        sequencer.Dispose();
+                    if (outDevice != null && !outDevice.IsDisposed)
+                        outDevice.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposed = true;
+            }
+        }
+
     }
 
     public static class DrumMappings

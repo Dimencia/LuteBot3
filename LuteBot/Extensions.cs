@@ -65,6 +65,25 @@ namespace LuteBot
 
         public static int numParamsPerChannel = 8;
 
+        public static float[][] GetRecurrentInput(this MidiChannelItem channel, int noteParams, float maxTickNumber)
+        {
+            // Got one.  Next, build the neural inputs our way - it accepts a float[][], where each float[] is a note, and each second param is one of the params of it
+            var allNotes = channel.tickNotes.SelectMany(kvp => kvp.Value).OrderBy(n => n.tickNumber);
+
+            float[][] inputs = new float[allNotes.Count()][];// This really doesn't need to be jagged tho
+
+            for (int noteCount = 0; noteCount < allNotes.Count(); noteCount++)
+            {
+                var note = allNotes.ElementAt(noteCount);
+                inputs[noteCount] = new float[noteParams];
+                inputs[noteCount][0] = note.note;
+                inputs[noteCount][1] = note.tickNumber / maxTickNumber; // If this works at all, I should instead get the note's timestamp including tempo, as a percent of the whole
+                inputs[noteCount][2] = note.timeLength;
+            }
+            return inputs;
+        }
+
+
         public static float[] GetNeuralInput(this MidiChannelItem[] song)
         {
             float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
