@@ -210,10 +210,13 @@ namespace LuteBot.IO.Files
             if (result == null)
             {
                 var singularData = LoadNoDialog<TrackSelectionData>(fileName);
-                result = new Dictionary<int, SimpleTrackSelectionData>() { { 0, new SimpleTrackSelectionData(singularData, 0) } };
+                if (singularData != null)
+                    result = new Dictionary<int, SimpleTrackSelectionData>() { { 0, new SimpleTrackSelectionData(singularData, 0) } };
             }
             // If we had to fallback, it may not have an instrumentID as part of it; use the key as if it were the ID
-            return result.ToDictionary(kvp => kvp.Key, kvp => kvp.Value is SimpleTrackSelectionData ? kvp.Value as SimpleTrackSelectionData : new SimpleTrackSelectionData(kvp.Value, kvp.Key));
+            if (result != null)
+                return result.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value is SimpleTrackSelectionData ? kvp.Value as SimpleTrackSelectionData : new SimpleTrackSelectionData(kvp.Value, kvp.Key));
+            return null;
         }
 
         public static string SetMordhauConfigLocation()
@@ -314,7 +317,10 @@ namespace LuteBot.IO.Files
             {
             }
             // If this didn't work, try the old one
-            return LoadNoDialog<Dictionary<int, TrackSelectionData>>(path).ToDictionary(kvp => kvp.Key, kvp => new SimpleTrackSelectionData(kvp.Value, kvp.Value.InstrumentID));
+            var oldResults = LoadNoDialog<Dictionary<int, TrackSelectionData>>(path);
+            if (oldResults != null)
+                return oldResults.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => new SimpleTrackSelectionData(kvp.Value, kvp.Key));
+            return null;
         }
 
 

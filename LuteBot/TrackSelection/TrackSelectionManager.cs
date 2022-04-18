@@ -152,12 +152,13 @@ namespace LuteBot.TrackSelection
             else if (instrumentId == 3 && DataDictionary.ContainsKey(1))
             {
                 // If it's duet flute but there is no data for it, and we also have a flute track, copy the flute settings
-                SetTrackSelectionData(DataDictionary[1]);
+                SetTrackSelectionData(new TrackSelectionData(DataDictionary[1], instrumentId));
             }
             else if (instrumentId == 0 && DataDictionary.ContainsKey(1))
             {
                 // If it's lute with no data, and there is a flute track, copy the flute track and disable whatever the flute has active
-                SetTrackSelectionData(DataDictionary[1]);
+                // I don't think this can ever happen since we populate a default lute immediately...
+                SetTrackSelectionData(new TrackSelectionData(DataDictionary[1], instrumentId));
                 var fluteData = DataDictionary[1];
 
                 foreach (var channel in MidiChannels.Values)
@@ -170,7 +171,7 @@ namespace LuteBot.TrackSelection
             else if (instrumentId == 1 && DataDictionary.ContainsKey(0))
             {
                 // Load default from lute...
-                SetTrackSelectionData(DataDictionary[0]);
+                SetTrackSelectionData(new TrackSelectionData(DataDictionary[0], instrumentId));
                 if (PredictedFluteChannel != null)
                 {
                     if (PredictedFluteChannel is TrackItem)
@@ -202,7 +203,7 @@ namespace LuteBot.TrackSelection
                 }
             }
             else if (DataDictionary.ContainsKey(0))
-                SetTrackSelectionData(DataDictionary[0]);
+                SetTrackSelectionData(new TrackSelectionData(DataDictionary[0], instrumentId));
         }
 
         public TrackSelectionData GetTrackSelectionData(int instrumentId)

@@ -9,7 +9,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{3EC86B25-181A-4FA9-AE99-8BF461A37739}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>LuteBot</RootNamespace>
     <AssemblyName>LuteBot</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -347,7 +347,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="LuteBot_TemporaryKey.pfx" />
-    <None Include="LuteMod\FLuteMod_1.4.pak">
+    <None Include="LuteMod\FLuteMod_1.42.pak">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="LuteMod\PartitionIndex[0].sav">

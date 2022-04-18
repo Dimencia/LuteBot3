@@ -87,9 +87,9 @@ namespace LuteBot
         static LiveMidiManager liveMidiManager;
         static KeyBindingForm keyBindingForm = null;
 
-        private static string lutemodPakName = "FLuteMod_1.4.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string lutemodPakName = "FLuteMod_1.42.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
         private static int lutemodVersion1 = 1;
-        private static int lutemodVersion2 = 4;
+        private static int lutemodVersion2 = 42;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
         private static string loaderString1 = @"[/AutoLoader/BP_AutoLoaderActor.BP_AutoLoaderActor_C]
@@ -395,7 +395,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 // Check if they have a newer version instead
                 foreach(var f in Directory.GetFiles(MordhauPakPath))
                 {
-                    Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9])");
+                    Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9]*)");
                     if(m.Success)
                     {
                         return int.Parse(m.Groups[1].Value) >= lutemodVersion1 && int.Parse(m.Groups[2].Value) >= lutemodVersion2;
@@ -453,7 +453,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 var files = Directory.GetFiles(pakPath);
                 foreach (var f in files)
                 {
-                    var name = Path.GetFileName(f);
+                    var name = Path.GetFileName(f); // TODO: Only do this if it's older than the current version
                     if (Regex.IsMatch(name.ToLower(), "^f?-?lutemod") && name != lutemodPakName)
                     {
                         File.Delete(f);
