@@ -489,17 +489,17 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
                 var loaderLines = loaderString1.Replace("\r\n", "\n").Split('\n');
                 bool replace1 = false;
-                string loaderString1Modified = loaderLines[0];
+                string loaderString1Modified = loaderLines[0] + "\n";
 
                 if(!content.Contains(loaderLines[1]))
                 {
                     replace1 = true;
-                    loaderString1Modified += loaderLines[1];
+                    loaderString1Modified += loaderLines[1] + "\n";
                 }
                 if (!content.Contains(loaderLines[2]))
                 {
                     replace1 = true;
-                    loaderString1Modified += loaderLines[2];
+                    loaderString1Modified += loaderLines[2] + "\n";
                 }
                 
 
