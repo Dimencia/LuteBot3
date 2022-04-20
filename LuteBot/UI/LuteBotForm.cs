@@ -101,7 +101,7 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
 GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_MainMenu";
         private static string removeFromPaks = "zz_clientmodloadingmap_425.pak";
 
-        private static string MordhauPakPath = GetPakPath();
+        private static string MordhauPakPath;
 
         public static LuteBotVersion LatestVersion = null;
 
@@ -109,6 +109,8 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
         {
             luteBotForm = this;
             InitializeComponent();
+
+            MordhauPakPath = GetPakPath();
 
             onlineManager = new OnlineSyncManager();
             playList = new PlayListManager();
@@ -369,8 +371,12 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             }
         }
 
-        public static bool IsLuteModInstalled()
+        public bool IsLuteModInstalled()
         {
+            if (MordhauPakPath == string.Empty)
+            {
+                return true; // They have disabled installs or otherwise didn't input the path correctly, so don't check
+            }
             // Just check for the lutemod pak in CustomPaks, if they messed it up beyond that they can click the install button themselves, this is just to prompt them to install if necessary
             var pakPath = Path.Combine(MordhauPakPath, lutemodPakName);
             if (File.Exists(pakPath))
@@ -392,27 +398,38 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             }
             else
             {
-                // Check if they have a newer version instead
-                foreach(var f in Directory.GetFiles(MordhauPakPath))
+                try
                 {
-                    Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9]*)");
-                    if(m.Success)
+                    // Check if they have a newer version instead
+                    Directory.CreateDirectory(MordhauPakPath); // Prevent crash if it doesn't exist
+                    foreach (var f in Directory.GetFiles(MordhauPakPath))
                     {
-                        return int.Parse(m.Groups[1].Value) >= lutemodVersion1 && int.Parse(m.Groups[2].Value) >= lutemodVersion2;
+                        Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9]*)");
+                        if (m.Success)
+                        {
+                            return int.Parse(m.Groups[1].Value) >= lutemodVersion1 && int.Parse(m.Groups[2].Value) >= lutemodVersion2;
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    new PopupForm("Mordhau Detection Failed", $"Could not access the Mordhau path at {MordhauPakPath}", $"If you wish to enable LuteMod installs, choose Settings -> Set Mordhau Path\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "LuteMod Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                    .ShowDialog();
+                    installLuteModToolStripMenuItem.Enabled = false;
+                    return true;
                 }
             }
             return false;
         }
 
-        public static void InstallLuteMod()
+        public void InstallLuteMod()
         {
             // This may require admin access.  TODO: Detect if we need it and prompt them for it
             var pakPath = MordhauPakPath;
             if (string.IsNullOrWhiteSpace(pakPath))
             { // Shouldn't really happen.  More likely is they have mordhau installed in more than one place and I pick the wrong one.  Might need to let them choose the location
-
-                new PopupForm("Install Failed", $"Could not find Steam path", "LuteMod auto install not available\nPlease install LuteMod manually using the following instructions:", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                installLuteModToolStripMenuItem.Enabled = false;
+                new PopupForm("Install Failed", $"Could not find Steam path", "LuteMod auto install not available\nPlease set the path manually by choosing Settings -> Set Mordhau Path", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
                     .ShowDialog();
                 return;
             }
@@ -562,7 +579,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                     .ShowDialog();
         }
 
-        private static string GetPakPath()
+        private string GetPakPath()
         {
             try
             {
@@ -659,7 +676,27 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 MessageBox.Show($"General failure... \n{e.Message}\n{e.StackTrace}");
             }
 
-            return string.Empty;
+            return GetMordhauPathFromPrompt();
+        }
+
+        private string GetMordhauPathFromPrompt()
+        {
+            var inputForm = new MordhauPathInputForm();
+            inputForm.ShowDialog(this);
+
+            if (inputForm.result == DialogResult.OK && inputForm.path != string.Empty && File.Exists(inputForm.path))
+            {
+                installLuteModToolStripMenuItem.Enabled = true;
+                var result = Path.Combine(Path.GetDirectoryName(inputForm.path), "Mordhau", "Content", "CustomPaks");
+                Directory.CreateDirectory(result);
+                return result;
+            }
+            else
+            {
+                if (MordhauPakPath == null || MordhauPakPath == string.Empty)
+                    installLuteModToolStripMenuItem.Enabled = false;
+                return MordhauPakPath;
+            }
         }
 
         // Are arrow keys valid?  These names are all good WinForms names, are they good Mordhau names?  
@@ -1920,6 +1957,11 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
         private async void checkInstallUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             await CheckUpdates(true);
+        }
+
+        private void setMordhauPathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MordhauPakPath = GetMordhauPathFromPrompt();
         }
     }
 }

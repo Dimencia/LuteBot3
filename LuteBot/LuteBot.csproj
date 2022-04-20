@@ -139,6 +139,12 @@
     <Compile Include="LiveInput\Midi\LiveMidiManager.cs" />
     <Compile Include="LiveInput\Midi\MidiDeviceItem.cs" />
     <Compile Include="MordhauConverter.cs" />
+    <Compile Include="MordhauPathInputForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MordhauPathInputForm.Designer.cs">
+      <DependentUpon>MordhauPathInputForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="OnlineSync\AsynchronousClient.cs" />
     <Compile Include="OnlineSync\AsynchronousSocketListener.cs" />
     <Compile Include="OnlineSync\OnlineSyncManager.cs" />
@@ -279,6 +285,9 @@
     <Compile Include="UI\Utils\WindowPositionUtils.cs" />
     <EmbeddedResource Include="DiscordAuthForm.resx">
       <DependentUpon>DiscordAuthForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MordhauPathInputForm.resx">
+      <DependentUpon>MordhauPathInputForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PartitionsForm.resx">
       <DependentUpon>PartitionsForm.cs</DependentUpon>
