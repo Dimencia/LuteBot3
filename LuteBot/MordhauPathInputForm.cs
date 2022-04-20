@@ -12,9 +12,10 @@ namespace LuteBot
 {
     public partial class MordhauPathInputForm : Form
     {
-        public MordhauPathInputForm()
+        public MordhauPathInputForm(string currentPath)
         {
             InitializeComponent();
+            textBoxPath.Text = currentPath ?? "";
         }
 
         public string path { get; set; }
@@ -31,12 +32,14 @@ namespace LuteBot
         {
             this.result = DialogResult.OK;
             this.path = textBoxPath.Text;
+            this.Close();
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
             this.result = DialogResult.Cancel;
             this.path = null;
+            this.Close();
         }
     }
 }

@@ -114,7 +114,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxPath);
             this.Name = "MordhauPathInputForm";
-            this.Text = "MordhauPathInputForm";
+            this.Text = "Select Mordhau Path";
             this.ResumeLayout(false);
             this.PerformLayout();
 

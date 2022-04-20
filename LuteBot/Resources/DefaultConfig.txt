@@ -179,6 +179,10 @@
     {
       "Item": "CheckForUpdates",
       "Value": "True"
+    },
+    {
+      "Item": "MordhauPakPath",
+      "Value": ""
     }
   ]
 }

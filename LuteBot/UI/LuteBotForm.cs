@@ -109,6 +109,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
         {
             luteBotForm = this;
             InitializeComponent();
+            hotkeyManager = new HotkeyManager();
 
             MordhauPakPath = GetPakPath();
 
@@ -120,7 +121,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             soundBoardManager.SoundBoardTrackRequest += new EventHandler<SoundBoardEventArgs>(HandleSoundBoardTrackRequest);
             player = new MidiPlayer(trackSelectionManager);
             player.SongLoaded += new EventHandler<AsyncCompletedEventArgs>(PlayerLoadCompleted);
-            hotkeyManager = new HotkeyManager();
+            
             hotkeyManager.NextKeyPressed += new EventHandler(NextButton_Click);
             hotkeyManager.PlayKeyPressed += new EventHandler(PlayButton_Click);
             hotkeyManager.StopKeyPressed += new EventHandler(StopButton_Click);
@@ -373,7 +374,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
         public bool IsLuteModInstalled()
         {
-            if (MordhauPakPath == string.Empty)
+            if (string.IsNullOrWhiteSpace(MordhauPakPath))
             {
                 return true; // They have disabled installs or otherwise didn't input the path correctly, so don't check
             }
@@ -583,6 +584,13 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
         {
             try
             {
+                string originalPath = ConfigManager.GetProperty(PropertyItem.MordhauPakPath);
+                if(!string.IsNullOrWhiteSpace(originalPath))
+                {
+                    return originalPath;
+                }
+
+
                 string mordhauId = "629760";
                 string steam32 = "SOFTWARE\\VALVE\\";
                 string steam64 = "SOFTWARE\\Wow6432Node\\Valve\\";
@@ -681,7 +689,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
         private string GetMordhauPathFromPrompt()
         {
-            var inputForm = new MordhauPathInputForm();
+            var inputForm = new MordhauPathInputForm(MordhauPakPath);
             inputForm.ShowDialog(this);
 
             if (inputForm.result == DialogResult.OK && inputForm.path != string.Empty && File.Exists(inputForm.path))
@@ -689,6 +697,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 installLuteModToolStripMenuItem.Enabled = true;
                 var result = Path.Combine(Path.GetDirectoryName(inputForm.path), "Mordhau", "Content", "CustomPaks");
                 Directory.CreateDirectory(result);
+                ConfigManager.SetProperty(PropertyItem.MordhauPakPath, result);
                 return result;
             }
             else
@@ -1962,6 +1971,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
         private void setMordhauPathToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MordhauPakPath = GetMordhauPathFromPrompt();
+            ConfigManager.SetProperty(PropertyItem.MordhauPakPath, MordhauPakPath);
         }
     }
 }

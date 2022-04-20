@@ -50,6 +50,8 @@ namespace LuteBot
                     Process.Start(saveFolder);
                 }
 
+                Environment.Exit(1);
+
             }
         }
     }

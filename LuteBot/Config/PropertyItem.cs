@@ -61,6 +61,8 @@
         LiveMidiPos,
         VirtualKeyboardBinds,
         LiveMidiListen,
-        PartitionListPos
+        PartitionListPos,
+
+        MordhauPakPath
     }
 }
