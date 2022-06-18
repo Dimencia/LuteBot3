@@ -37,8 +37,8 @@ namespace LuteBot
             this.importPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openSavFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveMultipleSongsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openMidiFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openMidiFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -113,17 +113,17 @@ namespace LuteBot
             this.saveMultipleSongsToolStripMenuItem.Text = "Save Multiple Songs...";
             this.saveMultipleSongsToolStripMenuItem.Click += new System.EventHandler(this.saveMultipleSongsToolStripMenuItem_Click);
             // 
-            // openMidiFileDialog
-            // 
-            this.openMidiFileDialog.Filter = "MIDI files|*.mid";
-            this.openMidiFileDialog.Multiselect = true;
-            // 
             // trainToolStripMenuItem
             // 
             this.trainToolStripMenuItem.Name = "trainToolStripMenuItem";
             this.trainToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.trainToolStripMenuItem.Text = "Train...";
             this.trainToolStripMenuItem.Click += new System.EventHandler(this.trainToolStripMenuItem_Click);
+            // 
+            // openMidiFileDialog
+            // 
+            this.openMidiFileDialog.Filter = "MIDI files|*.mid";
+            this.openMidiFileDialog.Multiselect = true;
             // 
             // PartitionsForm
             // 

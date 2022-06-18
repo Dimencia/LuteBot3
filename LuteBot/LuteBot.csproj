@@ -205,6 +205,12 @@
     <Compile Include="UI\KeyBindingForm.Designer.cs">
       <DependentUpon>KeyBindingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\NeuralNetworkForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\NeuralNetworkForm.Designer.cs">
+      <DependentUpon>NeuralNetworkForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\PartitionAdjustmentForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -309,6 +315,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\LuteBotForm.resx">
       <DependentUpon>LuteBotForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\NeuralNetworkForm.resx">
+      <DependentUpon>NeuralNetworkForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\OnlineSyncForm.resx">
       <DependentUpon>OnlineSyncForm.cs</DependentUpon>

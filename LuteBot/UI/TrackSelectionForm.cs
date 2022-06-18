@@ -1255,7 +1255,8 @@ namespace LuteBot.UI
 
         private void TrackChangedHandler(object sender, EventArgs e)
         {
-            InitLists();
+            if(!LuteBotForm.skipUI)
+                InitLists();
         }
 
         private void TrackSelectionForm_Closing(object sender, FormClosingEventArgs e)

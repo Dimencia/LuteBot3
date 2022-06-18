@@ -1,8 +1,9 @@
 ﻿using LuteBot.Config;
 using LuteBot.Core.Midi;
 using LuteBot.IO.Files;
+using LuteBot.UI;
 using LuteBot.UI.Utils;
-
+using Newtonsoft.Json;
 using Sanford.Multimedia.Midi;
 
 using SimpleML;
@@ -223,7 +224,7 @@ namespace LuteBot.TrackSelection
             DataDictionary[instrumentId] = GetTrackSelectionData(instrumentId);
             var simpleDataDictionary = new Dictionary<int, SimpleTrackSelectionData>();
 
-            foreach(var kvp in DataDictionary)
+            foreach (var kvp in DataDictionary)
             {
                 simpleDataDictionary[kvp.Key] = new SimpleTrackSelectionData(kvp.Value, kvp.Value.InstrumentID, OriginalDataDictionary[kvp.Key]);
             }
@@ -240,13 +241,13 @@ namespace LuteBot.TrackSelection
                 // The only reason we need simple data is so we can pull out and handle the Notes from within the channels and tracks, if there are any
                 DataDictionary.Clear();
                 var currentData = GetTrackSelectionData(instrumentId);
-                foreach(var kvp in simpleDataDict)
+                foreach (var kvp in simpleDataDict)
                 {
                     DataDictionary[kvp.Key] = new TrackSelectionData(currentData, kvp.Key).WithData(kvp.Value);
                 }
-                
+
                 TrackSelectionData data = null;
-                
+
                 if (DataDictionary.ContainsKey(instrumentId))
                     data = DataDictionary[instrumentId];
                 else if (DataDictionary.ContainsKey(0))
@@ -442,9 +443,34 @@ namespace LuteBot.TrackSelection
                 //
                 //neural.Load("v2Weights");
 
-                string[] activation = new string[] { "tanh", "tanh", "tanh" };
-                neural = new NeuralNetwork(new int[] { Extensions.numParamsPerChannel, 64, 32, 1 }, activation);
-                neural.Load("channelNeural");
+                if (File.Exists(NeuralNetworkForm.savePath) && File.Exists(NeuralNetworkForm.savePath + ".config"))
+                {
+                    var sizes = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(NeuralNetworkForm.savePath + ".config"));
+
+                    int numParamsPerChannel = Extensions.numParamsPerChannel;
+
+                    // We can softmax all the outputs once we have them for each channel
+                    // This is great, btw.  This is 'channelNeural', the only issue is that the way I handle the output gives values <0 and > 100% sometimes, but rarely...
+
+                    int numNeurons = sizes.Length + 2; // They don't hand us the input or output layer
+
+                    string[] activation = new string[numNeurons - 1]; // And the input layer doesn't have an activation
+                    for (int n = 0; n < activation.Length; n++) // I decided not to use softmax because it gave more varied values
+                        activation[n] = "tanh";
+                    int[] parameters = new int[numNeurons];
+                    parameters[0] = numParamsPerChannel;
+                    for (int n = 1; n < parameters.Length - 1; n++)
+                        parameters[n] = sizes[n - 1];
+                    parameters[parameters.Length - 1] = 1;
+                    neural = new NeuralNetwork(parameters, activation);
+                    neural.Load(NeuralNetworkForm.savePath);
+                }
+                else
+                {
+                    string[] activation = new string[] { "tanh", "tanh", "tanh" };
+                    neural = new NeuralNetwork(new int[] { Extensions.numParamsPerChannel, 64, 32, 1 }, activation);
+                    neural.Load("channelNeural");
+                }
             }
 
             if (activeChannels.Count() < 2)
@@ -476,7 +502,7 @@ namespace LuteBot.TrackSelection
                 // Just adding 0.5 gets us from 0 to 1 for most purposes, let's try that
                 // It's funny when they're above 100% or below 0%, but messy
                 // 
-                orderedResults = orderedResults.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + 0.5f)).OrderByDescending(kvp => kvp.Value);
+                orderedResults = orderedResults.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + 1f) / 2f).OrderByDescending(kvp => kvp.Value);
 
 
                 /*
@@ -656,7 +682,7 @@ namespace LuteBot.TrackSelection
                 // tickNumber-note-NoteType
 
                 // NoteType 1 is a NoteOn, 2 is a tempo event, Off is 0 - these are LuteMod.Sequencing.NoteType 
-
+                int arbitraryDivision = 120;
 
                 // Annoyingly, at EOF we have some chars that may or may not be particular:     None    
                 // Many of those are invis and won't paste right...
@@ -715,8 +741,8 @@ namespace LuteBot.TrackSelection
                 // But it's probably not a good idea to brute-force... better if we can make it into a midi and actually load it on the player
 
                 // I guess we can make a new sequencer maybe?
-                var sequence = new Sequence(120) { Format = 1 };
-                int tempo = int.Parse(trackSplit[1].Split(';')[1]) / 120;
+                var sequence = new Sequence(arbitraryDivision) { Format = 1 };
+                int tempo = int.Parse(trackSplit[1].Split(';')[1]) * arbitraryDivision;
                 sequence.FirstTempo = tempo;
 
                 var firstTempoBuilder = new TempoChangeBuilder();
@@ -725,9 +751,9 @@ namespace LuteBot.TrackSelection
 
                 trackSplit = trackSplit.Skip(2).Take(trackSplit.Length - 3).ToArray();
 
-                var metaTrack = new Track();
-                metaTrack.Insert(0, firstTempoBuilder.Result);
-                sequence.Add(metaTrack);
+                //var metaTrack = new Track();
+                //metaTrack.Insert(0, firstTempoBuilder.Result);
+                //sequence.Add(metaTrack);
 
                 //var tsb = new TimeSignatureBuilder();
                 //tsb.Numerator = 4;
@@ -740,59 +766,104 @@ namespace LuteBot.TrackSelection
                 //ksb.Build();
                 //metaTrack.Insert(0, ksb.Result);
 
-                int trackNum = 1;
-                int maxTick = 0;
+                int trackNum = 0;
                 foreach (var trackString in trackSplit)
                 {
                     var track = new Track();
                     sequence.Channels.Add(trackNum);
 
+                    if (trackNum == 0)
+                    {
+                        track.Insert(0, firstTempoBuilder.Result);
+                    }
+
                     var noteSplit = trackString.Split(';');
 
-                    int lastTick = 0;
+                    int curTick = 0;
+
+                    int prevNoteLength = arbitraryDivision;
+
+                    if (trackNum == 1) // Flute
+                        prevNoteLength = arbitraryDivision*4; // IDK some arbitrary length
+
+                    Dictionary<int, int> activeNoteTicks = new Dictionary<int, int>();
+                    // NoteNum:TickNumber, the notes that are ongoing, so we can find collisions
 
                     foreach (var noteString in noteSplit)
                     {
-
-
                         var noteValueSplit = noteString.Split('-');
                         // 0 is the tick number, 1 is the value, 2 is the type
 
-                        int noteTrackNum = trackNum - 1;
+                        int noteTrackNum = trackNum;
                         if (trackNum > 1)
                             noteTrackNum = 0;
 
                         IMidiMessage message;
-                        lastTick = int.Parse(noteValueSplit[0]);
+                        curTick = int.Parse(noteValueSplit[0]);
                         if (noteValueSplit[2] == "1")
                         {
-                            message = new ChannelMessage(ChannelCommand.NoteOn, trackNum, int.Parse(noteValueSplit[1]) + Instrument.Prefabs[noteTrackNum].LowestPlayedNote, 100);
-                            track.Insert(lastTick, message);
-                            lastTick += 10; // IDK some arbitrary length
-                            track.Insert(lastTick, new ChannelMessage(ChannelCommand.NoteOff, trackNum, int.Parse(noteValueSplit[1]) + Instrument.Prefabs[noteTrackNum].LowestPlayedNote));
+                            int curNote = int.Parse(noteValueSplit[1]) + Instrument.Prefabs[noteTrackNum].LowestPlayedNote;
+                            message = new ChannelMessage(ChannelCommand.NoteOn, trackNum, curNote, 100);
+                            track.Insert(curTick, message);
+                            // So for the noteOff, we have to be careful to turn it off before another note plays on this same track/note
+                            // And so, what we'll do is store the last note we played on this track, and its tick
+                            // And if we encounter the same one, we'll *then* insert the noteOff for the previous one, right before our next one, if it's close enough
+                            // Or we'll put it at some arbitrary distance if not
+
+                            if (activeNoteTicks.TryGetValue(curNote, out int prevNoteStartTick))
+                            {
+                                if (prevNoteStartTick + prevNoteLength >= curTick)
+                                {
+                                    // Maybe we don't need a NoteOff if it overlaps
+                                    //track.Insert(curTick, new ChannelMessage(ChannelCommand.NoteOff, trackNum, curNote));
+                                    activeNoteTicks.Remove(curNote);
+                                }
+                            }
+
+                            // Removing them as we iterate is annoyingly difficult, so... 
+                            List<int> toRemove = new List<int>();
+                            foreach (var kvp in activeNoteTicks)
+                            {
+                                if (kvp.Value + prevNoteLength <= curTick)
+                                {
+                                    track.Insert(kvp.Value + prevNoteLength, new ChannelMessage(ChannelCommand.NoteOff, trackNum, kvp.Key));
+                                    toRemove.Add(kvp.Key);
+                                }
+                                else if (trackNum == 1)
+                                {
+                                    // If it's flute, cut off their old one at our new one, if the old one is >= curTick
+                                    track.Insert(curTick, new ChannelMessage(ChannelCommand.NoteOff, trackNum, kvp.Key));
+                                    toRemove.Add(kvp.Key);
+                                }
+                            }
+                            foreach (var r in toRemove)
+                                activeNoteTicks.Remove(r);
+
+                            activeNoteTicks[curNote] = curTick;
                         }
                         else // This should be 7 bits per byte, little endian
                         { // Each byte is high except the last one...?
                             var tcb = new TempoChangeBuilder();
-                            tcb.Tempo = int.Parse(noteValueSplit[1]) / 120;
+                            tcb.Tempo = int.Parse(noteValueSplit[1]) * arbitraryDivision;
                             tcb.Build();
                             message = tcb.Result;
                             // Well this is awkward.  The tempo we read is divided by the division
                             // But we don't know what the division is/was
-                            metaTrack.Insert(lastTick, message);
+                            track.Insert(curTick, message);
                         }
-
-                        if (lastTick > maxTick)
-                            maxTick = lastTick;
                     }
 
-                    track.Insert(lastTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
+                    foreach (var kvp in activeNoteTicks)
+                    {
+                        //if (kvp.Value + prevNoteLength < curTick)
+                        track.Insert(kvp.Value + prevNoteLength, new ChannelMessage(ChannelCommand.NoteOff, trackNum, kvp.Key));
+                    }
 
                     string trackName = null;
                     int instrumentId = 0;
-                    if (trackNum == 1)
+                    if (trackNum == 0)
                         trackName = "Lute";
-                    else if (trackNum == 2)
+                    else if (trackNum == 1)
                     {
                         trackName = "Flute";
                         instrumentId = 73;
@@ -803,22 +874,45 @@ namespace LuteBot.TrackSelection
                     }
                     if (instrumentId > 0)
                         track.Insert(0, new ChannelMessage(ChannelCommand.ProgramChange, trackNum, instrumentId));
-                    
+
+                    //track.Insert(lastTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
+
                     sequence.Add(track);
                     //sequence.Tracks.Add(track);
-                    
+
 
                     trackNum++;
                 }
-                metaTrack.Insert(maxTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
-                // This is fucking annoying
+                //metaTrack.Insert(maxTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
+                // This is annoying
                 // There's no way to get the division back out, and I can't set it even if I could
                 // Ahhh, we can set it in the constructor... 
                 // What if it's just, 1?  
 
+                // Hmm... well, how does lutemod play it, then?  
+                // The tick values we send to lutemod already include the divison, and I think end up being directly relevant to time
+
+                // microseconds for 1 tick = tempo / division, is how it's used
+                // When we send the notes, we already divide the tempo we give it by that division
+                // So the value we send it for a tempo is how many microseconds there are in a tick
+
+                // 120bpm is default tempo, or 500,000 microseconds per beat
+                // The division specifies how many ticks there are within a beat
+                // Putting them together specifies how many microseconds there are in a tick
+
+                // If we know how many microseconds are in a tick, we can multiply it by the division to get the tempo
+                // Or divide it by the tempo to get the division.  But we know neither division nor true tempo
+
+                // We also know that whatever we tell it the tempo is, it's going to end up dividing it by whatever we tell it the division is
+                // And the result it wants is the result we have in the first place
+                // So... a division of 1 really should just kinda work, unless it's doing other weird stuff
+
+                // That, or we could pick some arbitrarily high division - and multiply our tempos we get by it, it will divide them by it later
+
+
                 string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, songname + ".mid");
                 sequence.Save(midiPath);
-                
+
                 LuteBotForm.luteBotForm.LoadHelper(midiPath);
             }
             catch (Exception e)

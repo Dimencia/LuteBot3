@@ -815,38 +815,47 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
         private void PlayerLoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
+            SuspendLayout();
             if (e.Error == null)
             {
-                StopButton_Click(null, null);
-                PlayButton.Enabled = true;
-                MusicProgressBar.Enabled = true;
-                StopButton.Enabled = true;
-
-                trackSelectionManager.UnloadTracks();
-                if (player.GetType() == typeof(MidiPlayer))
+                if (!skipUI)
                 {
-                    MidiPlayer midiPlayer = player as MidiPlayer;
-                    trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
-                    trackSelectionManager.FileName = currentTrackName;
+                    StopButton_Click(null, null);
+                    PlayButton.Enabled = true;
+                    MusicProgressBar.Enabled = true;
+                    StopButton.Enabled = true;
                 }
 
-                if (trackSelectionManager.autoLoadProfile)
-                {
-                    trackSelectionManager.LoadTrackManager();
-                }
+                    trackSelectionManager.UnloadTracks();
+                    if (player.GetType() == typeof(MidiPlayer))
+                    {
+                        MidiPlayer midiPlayer = player as MidiPlayer;
+                        trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
+                        trackSelectionManager.FileName = currentTrackName;
+                    }
 
-                MusicProgressBar.Value = 0;
-                MusicProgressBar.Maximum = player.GetLength();
-                StartLabel.Text = TimeSpan.FromSeconds(0).ToString(@"mm\:ss");
-                EndTimeLabel.Text = player.GetFormattedLength();
-                CurrentMusicLabel.Text = musicNameLabelHeader + Path.GetFileNameWithoutExtension(currentTrackName);
-                if (autoplay)
+                    if (trackSelectionManager.autoLoadProfile)
+                    {
+                        trackSelectionManager.LoadTrackManager();
+                    }
+                if (!skipUI)
                 {
-                    Play();
-                    autoplay = false;
+                    MusicProgressBar.Value = 0;
+                    MusicProgressBar.Maximum = player.GetLength();
+                    StartLabel.Text = TimeSpan.FromSeconds(0).ToString(@"mm\:ss");
+                    EndTimeLabel.Text = player.GetFormattedLength();
+                    CurrentMusicLabel.Text = musicNameLabelHeader + Path.GetFileNameWithoutExtension(currentTrackName);
+                    if (autoplay)
+                    {
+                        Play();
+                        autoplay = false;
+                    }
+                    //if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated)
+                    //    trackSelectionForm.Invoke((MethodInvoker)delegate
+                    //    {
+                    //        trackSelectionForm.Invalidate(); //trackSelectionForm.RefreshOffsetPanel();
+                    //    }); // Invoking just in case this is on a diff thread somehow
                 }
-                if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated)
-                    trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.Invalidate(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
             }
             else
             {
@@ -856,6 +865,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             {
                 asyncLoadTask.SetResult(e.Error != null);
             }
+            ResumeLayout();
         }
 
         private void ToggleTrack(object sender, TrackItem e)
@@ -1125,14 +1135,18 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
             currentTrackName = path;
         }
 
-        public async Task LoadHelperAsync(string path)
+        public static bool skipUI = false;
+
+        public async Task LoadHelperAsync(string path, bool skipUI = false)
         {
+            LuteBotForm.skipUI = skipUI;
             asyncLoadTask = new TaskCompletionSource<bool>();
             player.LoadFile(path);
             currentTrackName = path;
 
             await asyncLoadTask.Task;
             asyncLoadTask = null;
+            LuteBotForm.skipUI = false;
         }
 
         private void PlayButton_Click(object sender, EventArgs e)

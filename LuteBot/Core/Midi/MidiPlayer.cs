@@ -195,6 +195,7 @@ namespace LuteBot.Core.Midi
 
 
         public object loadLock = new object();
+        private bool loading = false;
 
         public override void LoadFile(string filename)
         {
@@ -203,11 +204,11 @@ namespace LuteBot.Core.Midi
                 channels = new Dictionary<int, MidiChannelItem>();
                 tracks = new Dictionary<int, TrackItem>();
                 // Reset the sequence because we can't cancel the load or detect if one is occurring
-                sequence.LoadCompleted -= HandleLoadCompleted;
-                sequence.Dispose();
-                sequence = new Sequence() { Format = 1 };
-                sequencer.Sequence = sequence;
-                sequence.LoadCompleted += HandleLoadCompleted;
+                //sequence.LoadCompleted -= HandleLoadCompleted;
+                //sequence.Dispose();
+                //sequence = new Sequence() { Format = 1 };
+                //sequencer.Sequence = sequence;
+                //sequence.LoadCompleted += HandleLoadCompleted;
                 sequence.LoadAsync(filename);
             }
             /*
@@ -665,7 +666,6 @@ namespace LuteBot.Core.Midi
                     rustOutDevice.LowMidiNoteId = sequence.MinNoteId;
                 }
             }
-
         }
 
 
