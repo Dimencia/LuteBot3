@@ -80,7 +80,7 @@ namespace LuteBot.UI
             
 
 
-            int numIterations = 50000;
+            int numIterations = 2000;
 
             var candidates = neuralTrainingCandidates.Select(s => s.SelectMany(c => c.tickNotes.Values.Select(nl => nl.OrderBy(n => n.note).Where((n,i) => (i == 0 || i == c.tickNotes.Count-1 || (c.tickNotes.Count > 2 && i == c.tickNotes.Count/2)) && n.channel != 9 && n.length > 0 && n.timeLength >= 0.005f))).SelectMany(nl => nl.GroupBy(n => n.note).Select(ng => ng.FirstOrDefault())).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray()).Where(nl => nl.Count() > numNotes).ToArray();
 
@@ -88,8 +88,8 @@ namespace LuteBot.UI
             {
                 float costTotal = 0;
 
-                Parallel.ForEach(candidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = 12 }, notes =>
-                //foreach (var song in neuralTrainingCandidates.OrderBy(n => random.NextDouble()))
+                //Parallel.ForEach(candidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = 12 }, notes =>
+                foreach (var notes in candidates)
                 {
                     // Each time we train for a song, we should skip some arbitrary percentage into it
                     //var notes = song.SelectMany(c => c.tickNotes.Values).SelectMany(tn => tn).Where(n => n.channel != 9 && n.length > 0 && n.timeLength > 0).OrderBy(n => n.tickNumber).ToArray();
@@ -123,7 +123,7 @@ namespace LuteBot.UI
 
                     neural.BackPropagate(inputs, expected);
                     costTotal += neural.cost;
-                });
+                }//);
                 Console.WriteLine($"#{iteration}: Cost - {costTotal}");
             }
 
@@ -332,17 +332,30 @@ namespace LuteBot.UI
                         await LuteBotForm.luteBotForm.LoadHelperAsync(midiPath, true);
                         // To prevent it from trying to train on re-generated midis, which have incorrect lengths
                         // Require at least 3 channels
-                        if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1)) // To keep the percentages from getting weird in training, at least 4 channels?
+                        if (tsm.DataDictionary.ContainsKey(1))
                         {
-                            if (tsm.MidiTracks.All(t => t.Value.Active))
+                            // We were missing a lot of checks here.
+                            // If we're using channels, it has to have >2 channels, and must have at least one channel that is active on flute
+                            // And not active on lute...?
+
+                            if (tsm.MidiChannels.Count() > 2 && tsm.MidiTracks.All(t => t.Value.Active))
                             {
                                 // Actually, I think the flute track may not have the appropriate data...
                                 var tempNeuralCandidates = tsm.MidiChannels.Values.Where(c => c.Id != 9).ToArray();
+
+                                int numActiveFlute = 0;
+
                                 foreach (var ca in tempNeuralCandidates)
                                 {
                                     ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
+                                    if (ca.Active)
+                                        numActiveFlute++;
                                 }
-                                neuralCandidates.Add(tempNeuralCandidates);
+
+                                if(numActiveFlute > 0)
+                                    neuralCandidates.Add(tempNeuralCandidates);
+
+
                                 var fluteChannels = tsm.DataDictionary[1].MidiChannels.Where(c => c.Active);
                                 if (fluteChannels.Count() == 1)
                                 {
@@ -353,16 +366,20 @@ namespace LuteBot.UI
                                     candidates.Add(candidate);
                                 }
                             }
-                            else if (tsm.MidiChannels.All(c => c.Value.Active))
+                            else if (tsm.MidiTracks.Count() > 2 && tsm.MidiChannels.All(c => c.Value.Id == 9 || c.Value.Active))
                             {
                                 // If some tracks are disabled and all channels are enabled, we'll take the tracks as data
                                 // Track notes should already have discarded anything with channel 9
                                 MidiChannelItem[] tempNeuralCandidates = tsm.MidiTracks.Values.ToArray();
+                                int numActiveFlute = 0;
                                 foreach (var ca in tempNeuralCandidates)
                                 { // This may not be necessary; I could probably just take the MidiTracks from DataDictionary[1] but, it seemed to give odd results like it didn't have everything
                                     ca.Active = tsm.DataDictionary[1].MidiTracks.Where(c => c.Id == ca.Id).Single().Active;
+                                    if (ca.Active)
+                                        numActiveFlute++;
                                 }
-                                neuralCandidates.Add(tempNeuralCandidates);
+                                if(numActiveFlute>0)
+                                    neuralCandidates.Add(tempNeuralCandidates);
                             }
                         }
                     }
@@ -421,8 +438,8 @@ namespace LuteBot.UI
                 //for (int i = 0; i < trainCount; i++)
                 {
                     costTotal = 0;
-                    //foreach (var song in neuralTrainingCandidates)
-                    Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
+                    foreach (var song in neuralTrainingCandidates)
+                    //Parallel.ForEach(neuralTrainingCandidates, new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
                     {
                         float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
                         float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
@@ -477,10 +494,11 @@ namespace LuteBot.UI
                             tsm.neural.BackPropagate(inputs, expected);
                             costTotal += tsm.neural.cost;
                         }
-                    });
+                    }//);
                     numTestsCorrect = 0;
                     numActualTestsCorrect = 0;
-                    Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
+                    //Parallel.ForEach(neuralTrainingCandidates, new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
+                    foreach(var song in neuralTrainingCandidates)
                     {
                         float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
                         float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
@@ -532,8 +550,9 @@ namespace LuteBot.UI
                             numTestsCorrect++;
 
                         //await Task.Delay(0); // Let the form live between iterations
-                    });
-                    Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
+                    }//);
+                    //Parallel.ForEach(neuralTestCandidates, new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
+                    foreach(var song in neuralTestCandidates)
                     {
                         float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
                         float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
@@ -602,7 +621,7 @@ namespace LuteBot.UI
                         //}
 
                         //await Task.Delay(0); // Let the form live between iterations
-                    });
+                    }//);
                     BeginInvoke((MethodInvoker)delegate
                     {
                         richTextBox1.AppendText($"\n{numActualTestsCorrect}/{neuralTestCandidates.Count()} ({(float)numActualTestsCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTestsCorrect}/{neuralCandidates.Count()}\nTraining #{i++} - TotalCost: {costTotal} (This number should go down eventually)");
