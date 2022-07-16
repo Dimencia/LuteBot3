@@ -80,7 +80,7 @@ namespace LuteBot
             }
         }
 
-        
+
 
         private void PartitionsForm_FormClosing1(object sender, FormClosingEventArgs e)
         {
@@ -135,7 +135,7 @@ namespace LuteBot
                     editItem.Click += EditItem_Click;
                     //}
                 }
-                
+
                 listBoxPartitions.ContextMenu = indexContextMenu; // TODO: I'd love to make it popup at the selected item, not at mouse pos, but whatever
                 indexContextMenu.Show(listBoxPartitions, listBoxPartitions.PointToClient(Cursor.Position));
             }
@@ -472,7 +472,7 @@ namespace LuteBot
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
@@ -483,6 +483,53 @@ namespace LuteBot
             var trainingForm = new NeuralNetworkForm(tsm, this);
             trainingForm.ShowDialog(this);
 
+        }
+
+        private void clearUnusedPMidisToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (var f in Directory.GetFiles(partitionMidiPath, "*.mid"))
+            {
+                var filename = Path.GetFileName(f);
+                var trimmed = filename.Substring(0, filename.Length - 4); // Get rid of .mid that we know is at the end
+                if (!index.PartitionNames.Contains(trimmed))
+                    File.Delete(f);// I'd love to send it to recycle bin, but that's apparently really hard
+            }
+        }
+
+        private void removeSettingsFromMIdisToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                openMidiFileDialog.Title = "Remove Settings from MIDIs";
+                if (openMidiFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var filenames = openMidiFileDialog.FileNames;
+                    foreach (var f in filenames)
+                    {
+                        var path = f;
+                        // We do things totally different here.
+                        // We load from the mid file
+                        // Cut out everything before the first <
+                        // Then parse the rest of the content as our object
+                        // If this doesn't work, we just fall through and try the default
+                        var midiDataBytes = File.ReadAllBytes(path);
+
+                        int xmlPosition = midiDataBytes.Locate(Encoding.ASCII.GetBytes("<Tr"), Encoding.ASCII.GetBytes("<Ar"), Encoding.ASCII.GetBytes("[{\""));
+                        // That last one should catch json while hopefully never catching anything from the midi... 
+                        // For performance, let's trim them all to three letters
+                        if (xmlPosition > -1)
+                        {
+                            midiDataBytes = midiDataBytes.Take(xmlPosition).ToArray();
+                        }
+
+                        File.WriteAllBytes(path, midiDataBytes);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }

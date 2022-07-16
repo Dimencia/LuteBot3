@@ -1,4 +1,5 @@
-﻿using Lutebot.UI;
+﻿using BardMidiSharp;
+using Lutebot.UI;
 
 using LuteBot.Config;
 using LuteBot.Core;
@@ -251,6 +252,12 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
         private async void LuteBotForm_Shown(object sender, EventArgs e)
         {
             await CheckUpdates(false);
+
+            // Will test the new midi loader here...
+            string midiPath = @"C:\Users\Dimen_hmzu9w6\Downloads\Tetris.mid";
+            var reader = new MidiReader();
+            var result = await reader.Load(midiPath);
+            Console.WriteLine("Done...");
         }
 
         public async Task CheckUpdates(bool ignoreSettings = false)

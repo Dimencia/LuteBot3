@@ -30,7 +30,6 @@ namespace LuteBot
         /// </summary>
         private void InitializeComponent()
         {
-            this.listBoxPartitions = new LuteBot.UI.Utils.CustomListBox();
             this.savePartitionButton = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -39,25 +38,11 @@ namespace LuteBot
             this.saveMultipleSongsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openMidiFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.clearUnusedPMidisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.listBoxPartitions = new LuteBot.UI.Utils.CustomListBox();
+            this.removeSettingsFromMIdisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // listBoxPartitions
-            // 
-            this.listBoxPartitions.AllowDrop = true;
-            this.listBoxPartitions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listBoxPartitions.FormattingEnabled = true;
-            this.listBoxPartitions.ItemHeight = 16;
-            this.listBoxPartitions.Location = new System.Drawing.Point(12, 65);
-            this.listBoxPartitions.Name = "listBoxPartitions";
-            this.listBoxPartitions.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBoxPartitions.Size = new System.Drawing.Size(497, 484);
-            this.listBoxPartitions.TabIndex = 0;
-            this.listBoxPartitions.DragDrop += new System.Windows.Forms.DragEventHandler(this.PartitionIndexBox_DragDrop);
-            this.listBoxPartitions.DragOver += new System.Windows.Forms.DragEventHandler(this.PartitionIndexBox_DragOver);
-            this.listBoxPartitions.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PartitionIndexBox_MouseDown);
             // 
             // savePartitionButton
             // 
@@ -77,7 +62,7 @@ namespace LuteBot
             this.optionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(524, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(524, 30);
             this.menuStrip1.TabIndex = 5;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -87,36 +72,38 @@ namespace LuteBot
             this.importPartitionsToolStripMenuItem,
             this.openSavFolderToolStripMenuItem,
             this.saveMultipleSongsToolStripMenuItem,
-            this.trainToolStripMenuItem});
+            this.trainToolStripMenuItem,
+            this.clearUnusedPMidisToolStripMenuItem,
+            this.removeSettingsFromMIdisToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 26);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // importPartitionsToolStripMenuItem
             // 
             this.importPartitionsToolStripMenuItem.Name = "importPartitionsToolStripMenuItem";
-            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
             this.importPartitionsToolStripMenuItem.Text = "Import Partitions";
             this.importPartitionsToolStripMenuItem.Click += new System.EventHandler(this.button1_Click);
             // 
             // openSavFolderToolStripMenuItem
             // 
             this.openSavFolderToolStripMenuItem.Name = "openSavFolderToolStripMenuItem";
-            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
             this.openSavFolderToolStripMenuItem.Text = "Open Sav Folder";
             this.openSavFolderToolStripMenuItem.Click += new System.EventHandler(this.button3_Click);
             // 
             // saveMultipleSongsToolStripMenuItem
             // 
             this.saveMultipleSongsToolStripMenuItem.Name = "saveMultipleSongsToolStripMenuItem";
-            this.saveMultipleSongsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.saveMultipleSongsToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
             this.saveMultipleSongsToolStripMenuItem.Text = "Save Multiple Songs...";
             this.saveMultipleSongsToolStripMenuItem.Click += new System.EventHandler(this.saveMultipleSongsToolStripMenuItem_Click);
             // 
             // trainToolStripMenuItem
             // 
             this.trainToolStripMenuItem.Name = "trainToolStripMenuItem";
-            this.trainToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.trainToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
             this.trainToolStripMenuItem.Text = "Train...";
             this.trainToolStripMenuItem.Click += new System.EventHandler(this.trainToolStripMenuItem_Click);
             // 
@@ -124,6 +111,37 @@ namespace LuteBot
             // 
             this.openMidiFileDialog.Filter = "MIDI files|*.mid";
             this.openMidiFileDialog.Multiselect = true;
+            // 
+            // clearUnusedPMidisToolStripMenuItem
+            // 
+            this.clearUnusedPMidisToolStripMenuItem.Name = "clearUnusedPMidisToolStripMenuItem";
+            this.clearUnusedPMidisToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
+            this.clearUnusedPMidisToolStripMenuItem.Text = "Clear Unused PMidis";
+            this.clearUnusedPMidisToolStripMenuItem.Click += new System.EventHandler(this.clearUnusedPMidisToolStripMenuItem_Click);
+            // 
+            // listBoxPartitions
+            // 
+            this.listBoxPartitions.AllowDrop = true;
+            this.listBoxPartitions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listBoxPartitions.FormattingEnabled = true;
+            this.listBoxPartitions.ItemHeight = 16;
+            this.listBoxPartitions.Location = new System.Drawing.Point(12, 65);
+            this.listBoxPartitions.Name = "listBoxPartitions";
+            this.listBoxPartitions.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listBoxPartitions.Size = new System.Drawing.Size(497, 484);
+            this.listBoxPartitions.TabIndex = 0;
+            this.listBoxPartitions.DragDrop += new System.Windows.Forms.DragEventHandler(this.PartitionIndexBox_DragDrop);
+            this.listBoxPartitions.DragOver += new System.Windows.Forms.DragEventHandler(this.PartitionIndexBox_DragOver);
+            this.listBoxPartitions.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PartitionIndexBox_MouseDown);
+            // 
+            // removeSettingsFromMIdisToolStripMenuItem
+            // 
+            this.removeSettingsFromMIdisToolStripMenuItem.Name = "removeSettingsFromMIdisToolStripMenuItem";
+            this.removeSettingsFromMIdisToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
+            this.removeSettingsFromMIdisToolStripMenuItem.Text = "Remove Settings From MIdis";
+            this.removeSettingsFromMIdisToolStripMenuItem.Click += new System.EventHandler(this.removeSettingsFromMIdisToolStripMenuItem_Click);
             // 
             // PartitionsForm
             // 
@@ -155,5 +173,7 @@ namespace LuteBot
         private System.Windows.Forms.ToolStripMenuItem saveMultipleSongsToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openMidiFileDialog;
         private System.Windows.Forms.ToolStripMenuItem trainToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearUnusedPMidisToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeSettingsFromMIdisToolStripMenuItem;
     }
 }

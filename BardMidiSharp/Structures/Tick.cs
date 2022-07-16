@@ -6,8 +6,13 @@ namespace BardMidiSharp
 {
     public class Tick
     {
-        public int TickNumber { get; set; }
-        public MidiNote[] Notes { get; set; } = new MidiNote[0];    
-        public MetaNote[] MetaNotes { get; set; } = new MetaNote[0];
+        public uint TickNumber { get; set; }
+        public List<MidiNote> Notes { get; set; } = new List<MidiNote>();    
+        public List<MetaNote> MetaNotes { get; set; } = new List<MetaNote>();
+
+        public Tick(uint tickNumber)
+        {
+            this.TickNumber = tickNumber;
+        }
     }
 }

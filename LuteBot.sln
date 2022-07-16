@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuteBot", "LuteBot\LuteBot.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuteBotUpdater", "LuteBotUpdater\LuteBotUpdater.csproj", "{57807DCC-BA9B-45ED-B42A-E61F2CA9D882}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleML", "..\SimpleML\SimpleML\SimpleML.csproj", "{ED348757-F2A0-4AA1-A421-1168617AD6C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BardMidiSharp", "BardMidiSharp\BardMidiSharp.csproj", "{D7094977-B66E-4138-AD92-A6C867D5E033}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BardMidiSharp", "BardMidiSharp\BardMidiSharp.csproj", "{D7094977-B66E-4138-AD92-A6C867D5E033}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleML", "SimpleML\SimpleML.csproj", "{A03CBCBE-9347-4500-AAF3-1D22F1311F23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,14 +25,14 @@ Global
 		{57807DCC-BA9B-45ED-B42A-E61F2CA9D882}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57807DCC-BA9B-45ED-B42A-E61F2CA9D882}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57807DCC-BA9B-45ED-B42A-E61F2CA9D882}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ED348757-F2A0-4AA1-A421-1168617AD6C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED348757-F2A0-4AA1-A421-1168617AD6C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED348757-F2A0-4AA1-A421-1168617AD6C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED348757-F2A0-4AA1-A421-1168617AD6C1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D7094977-B66E-4138-AD92-A6C867D5E033}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D7094977-B66E-4138-AD92-A6C867D5E033}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7094977-B66E-4138-AD92-A6C867D5E033}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7094977-B66E-4138-AD92-A6C867D5E033}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A03CBCBE-9347-4500-AAF3-1D22F1311F23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A03CBCBE-9347-4500-AAF3-1D22F1311F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A03CBCBE-9347-4500-AAF3-1D22F1311F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A03CBCBE-9347-4500-AAF3-1D22F1311F23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

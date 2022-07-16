@@ -405,13 +405,17 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SimpleML\SimpleML\SimpleML.csproj">
-      <Project>{ed348757-f2a0-4aa1-a421-1168617ad6c1}</Project>
-      <Name>SimpleML</Name>
+    <ProjectReference Include="..\BardMidiSharp\BardMidiSharp.csproj">
+      <Project>{d7094977-b66e-4138-ad92-a6c867d5e033}</Project>
+      <Name>BardMidiSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\LuteBotUpdater\LuteBotUpdater.csproj">
       <Project>{57807dcc-ba9b-45ed-b42a-e61f2ca9d882}</Project>
       <Name>LuteBotUpdater</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SimpleML\SimpleML.csproj">
+      <Project>{a03cbcbe-9347-4500-aaf3-1d22f1311f23}</Project>
+      <Name>SimpleML</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
