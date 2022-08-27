@@ -3,7 +3,7 @@ on:
         branches: [master]
 jobs:
     build:
-        runs-on: windows-latest
+        runs-on: windows-2019
         steps:
         - name: Checkout
           uses: actions/checkout@v2
@@ -24,7 +24,7 @@ jobs:
             echo ::set-output name=VERSION::%Version%
 
         - name: Restore Packages
-          run: nuget restore Sandbox.sln
+          run: nuget restore LuteBot.sln
 
         - name: Build Solution
           run: |
