@@ -25,6 +25,7 @@ namespace BardMidiSharp
             // TODO: Consider doing the processing while we read to give it space to breathe...?
             var bytes = await File.ReadAllBytesAsync(filepath);
 
+            return new Song();//TODO Temporary
         }
 
         private byte[] ReadAndAdvanceChunk(byte[] bytes, ref int index)
@@ -45,7 +46,9 @@ namespace BardMidiSharp
 
             // An ascii char is only 1 byte each, so the first 4 bytes can turn into those
 
-            string chunkType = new string(bytes.Take(4));
+            //string chunkType = new string(bytes.Take(4));
+
+            return new byte[0]; // TODO: Temporary
         }
 
 

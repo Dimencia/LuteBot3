@@ -11,13 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BardMidiSharp", "BardMidiSh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleML", "SimpleML\SimpleML.csproj", "{2C3ECF07-4415-4E63-84A9-99C56D4831B3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{4169C02B-6362-4672-AA09-AC128780C894}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{DC7DF00E-E6AC-4F95-AE6B-EFCC6B3A4161}"
-	ProjectSection(SolutionItems) = preProject
-		main.yml = main.yml
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3D12CEFF-AA3D-4BA0-AAA6-CE44B1E2EE81}"
 	ProjectSection(SolutionItems) = preProject
 		Version.txt = Version.txt
@@ -48,9 +41,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{DC7DF00E-E6AC-4F95-AE6B-EFCC6B3A4161} = {4169C02B-6362-4672-AA09-AC128780C894}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B131AC5F-D0AF-474D-986D-0E4601B1E810}
