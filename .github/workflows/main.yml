@@ -21,7 +21,7 @@ jobs:
           id: versionReader
           run: |
             $content = Get-Content Version.txt
-            echo ::set-output name=VERSION::$content
+            echo VERSION=$content >> $GITHUB_ENV
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
@@ -35,7 +35,7 @@ jobs:
           with:
             directory: LuteBot/bin/Release
             type: zip
-            filename: $GITHUB_WORKSPACE/LuteBot${{steps.versionReader.outputs.VERSION}}.zip
+            filename: ./LuteBot${{ env.VERSION }}.zip
             exclusions: '*.pdb /app.publish/* *.application'
 
         - name: Create github Release
@@ -44,8 +44,8 @@ jobs:
           env: 
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
-              tag_name: v${{ steps.versionReader.outputs.VERSION }}
-              release_name: LuteBot v${{ steps.versionReader.outputs.VERSION }}
+              tag_name: v${{ env.VERSION }}
+              release_name: LuteBot v${{ env.VERSION }}
               draft: true
               prerelease: false
         - name: Upload release
@@ -54,8 +54,8 @@ jobs:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
               upload_url: ${{ steps.create_release.outputs.upload_url }}
-              asset_path: $GITHUB_WORKSPACE/LuteBot${{steps.versionReader.outputs.VERSION}}.zip
-              asset_name: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
+              asset_path: ./LuteBot${{ env.VERSION }}.zip
+              asset_name: LuteBot${{ env.VERSION }}.zip
               asset_content_type: application/zip
         - name: Publish release
           uses: eregon/publish-release@v1
