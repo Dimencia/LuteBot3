@@ -17,11 +17,14 @@ jobs:
         - name: Navigate to Workspace
           run: cd $GITHUB_WORKSPACE
 
+        - name: Store version
+          run: |
+            dir
+            set /p Version=<Version.txt
+
         - name: Get version
           id: versionReader
-          run: |
-            set /p Version=<Version.txt
-            echo ::set-output name=VERSION::%Version%
+          run: echo ::set-output name=VERSION::%Version%
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
@@ -35,7 +38,7 @@ jobs:
           with:
             directory: LuteBot/bin/Release
             type: zip
-            filename: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
+            filename: $GITHUB_WORKSPACE/LuteBot${{steps.versionReader.outputs.VERSION}}.zip
             exclusions: '*.pdb /app.publish/* *.application'
 
         - name: Create github Release
@@ -54,7 +57,7 @@ jobs:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
               upload_url: ${{ steps.create_release.outputs.upload_url }}
-              asset_path: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
+              asset_path: $GITHUB_WORKSPACE/LuteBot${{steps.versionReader.outputs.VERSION}}.zip
               asset_name: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
               asset_content_type: application/zip
         - name: Publish release
