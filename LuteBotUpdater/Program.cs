@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace LuteBotUpdater
 {
@@ -15,11 +17,18 @@ namespace LuteBotUpdater
             if (args.Length < 2)
             {
                 Console.WriteLine("The path must be explicitly passed to avoid erasing the wrong files");
-                Console.WriteLine(@"Usage: LuteBotUpdater.exe C:\Path\to\LuteBotFolder https://github.com/Dimencia/path/to/LuteBot.zip");
+                Console.WriteLine(@"Usage: LuteBotUpdater.exe C:\Path\to\LuteBotFolder");
                 return;
             }
             string installPath = args[0];
-            string downloadUrl = args[1];
+
+            string downloadUrl = GetLatestVersionUrl();
+            if(downloadUrl == null)
+            {
+                Console.WriteLine("Could not update LuteBot");
+                return;
+            }
+
             string zipName = "LuteBot.zip";
 
 
@@ -87,6 +96,39 @@ namespace LuteBotUpdater
                 Console.WriteLine($"\nInstall could not be completed.  You should update manually from {downloadUrl}");
                 Console.Read();
             }
+        }
+
+        private static Regex downloadRegex = new Regex(@"<a href=[""'](\/Dimencia\/LuteBot3\/releases\/download\/[^""']*\.zip)[""']", RegexOptions.Compiled);
+
+        public static string GetLatestVersionUrl()
+        {
+            var versionPage = GetVersionPage(); // Arbitrary 10s timeout seems fine
+            if (versionPage != null)
+            {
+                var downloadMatch = downloadRegex.Match(versionPage);
+                if (downloadMatch.Success) // They give a relative path starting at /Dimencia
+                    return "https://github.com" + downloadMatch.Groups[1].Value;
+                Console.WriteLine("Failed to match with a download link for latest version.  Aborting");
+            }
+            return null;
+        }
+
+        private static string GetVersionPage()
+        {
+            try
+            {
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12; // Didn't I already do this?
+                using (System.Net.WebClient client = new System.Net.WebClient())
+                {
+                    return client.DownloadString("https://github.com/Dimencia/LuteBot3/releases/latest");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Version Check Failed - could not determine the latest LuteBot version\n" +
+                    $"You are offline, or something is wrong\nYou can manually check for an updated version at https://github.com/Dimencia/LuteBot3/releases\n\n{ex.Message}\n{ex.StackTrace}");
+            }
+            return null;
         }
     }
 }

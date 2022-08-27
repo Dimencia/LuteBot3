@@ -315,7 +315,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                                     File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.exe"), Path.Combine(updaterPath, "LuteBotUpdater.exe"));
                                     //File.Copy(Path.Combine(assemblyLocation, "LuteBotUpdater.dll"), Path.Combine(updaterPath, "LuteBotUpdater.dll"));
                                     // Start a separate process to run the updater
-                                    Process.Start(Path.Combine(updaterPath, "LuteBotUpdater.exe"), $"{assemblyLocation} {LatestVersion.DownloadLink}");
+                                    Process.Start(Path.Combine(updaterPath, "LuteBotUpdater.exe"), assemblyLocation);
                                     // And close
                                     Close();
                                 }

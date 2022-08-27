@@ -13,6 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleML", "SimpleML\Simple
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3D12CEFF-AA3D-4BA0-AAA6-CE44B1E2EE81}"
 	ProjectSection(SolutionItems) = preProject
+		ReleaseNotes.txt = ReleaseNotes.txt
 		Version.txt = Version.txt
 	EndProjectSection
 EndProject
