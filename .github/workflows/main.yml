@@ -24,7 +24,7 @@ jobs:
             echo ::set-output name=VERSION::%Version%
 
         - name: Restore Packages
-          run: nuget restore Sandbox.sln
+          run: nuget restore LuteBot.sln
 
         - name: Build Solution
           run: |
