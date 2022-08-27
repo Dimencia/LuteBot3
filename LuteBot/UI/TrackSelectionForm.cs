@@ -1192,7 +1192,7 @@ namespace LuteBot.UI
         private int maxNoteLength = 0;
         private void ReloadNotes(bool forceRefresh = false)
         {
-            allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks[n.track].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
+            allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks.ContainsKey(n.track) &&  trackSelectionManager.MidiTracks[n.track].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
                 .ToArray();
             // Give it an arbitrary order to make things consistent for draw order
 
