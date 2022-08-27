@@ -29,12 +29,14 @@ jobs:
         - name: Build Solution
           run: |
             msbuild.exe LuteBot.sln /p:platform="Any CPU" /p:configuration="Release"
-            del LuteBot/bin/Release/LuteBot.application
 
         - name: Zip Solution
-          uses: montudor/action-zip@v1
+          uses: thedoctor0/zip-release@main
           with:
-            args: zip -qq -r LuteBot${{steps.versionReader.outputs.VERSION}}.zip LuteBot/bin/Release
+            directory: LuteBot/bin/Release
+            type: zip
+            filename: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
+            exclusions: '*.pdb /app.publish/* *.application'
 
         - name: Create github Release
           id: create_release
