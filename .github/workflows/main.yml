@@ -17,14 +17,11 @@ jobs:
         - name: Navigate to Workspace
           run: cd $GITHUB_WORKSPACE
 
-        - name: Store version
-          run: |
-            dir
-            set /p Version=<Version.txt
-
         - name: Get version
           id: versionReader
-          run: echo ::set-output name=VERSION::%Version%
+          run: |
+            $content = Get-Content Version.txt
+            echo ::set-output name=VERSION::$content
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
