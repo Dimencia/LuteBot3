@@ -1,6 +1,7 @@
 on:
     push:
         branches: [master]
+         
 jobs:
     build:
         runs-on: windows-2019
@@ -18,23 +19,24 @@ jobs:
           run: cd $GITHUB_WORKSPACE
 
         - name: Get version
-          id: versionReader
-          run: |
-            set /p Version=<Version.txt
-            echo ::set-output name=VERSION::%Version%
+          id: getv
+          run: echo "::set-output name=version::$(Get-Content Version.txt)"
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
 
         - name: Build Solution
           run: |
+            echo Version: ${{ steps.getv.outputs.version }}
             msbuild.exe LuteBot.sln /p:platform="Any CPU" /p:configuration="Release"
-            del LuteBot/bin/Release/LuteBot.application
 
         - name: Zip Solution
-          uses: montudor/action-zip@v1
+          uses: thedoctor0/zip-release@main
           with:
-            args: zip -qq -r LuteBot${{steps.versionReader.outputs.VERSION}}.zip LuteBot/bin/Release
+            directory: LuteBot/bin/Release
+            type: zip
+            filename: "./LuteBot.${{ steps.getv.outputs.version }}.zip"
+            exclusions: "*.pdb /app.publish/* *.application"
 
         - name: Create github Release
           id: create_release
@@ -42,8 +44,8 @@ jobs:
           env: 
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
-              tag_name: v${{ steps.versionReader.outputs.VERSION }}
-              release_name: LuteBot v${{ steps.versionReader.outputs.VERSION }}
+              tag_name: v${{ steps.getv.outputs.version }}}
+              release_name: LuteBot v${{ steps.getv.outputs.version }}
               draft: true
               prerelease: false
         - name: Upload release
@@ -52,8 +54,8 @@ jobs:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
               upload_url: ${{ steps.create_release.outputs.upload_url }}
-              asset_path: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
-              asset_name: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
+              asset_path: LuteBot/bin/Release/LuteBot.${{ steps.getv.outputs.version }}.zip
+              asset_name: LuteBot.${{ steps.getv.outputs.version }}.zip
               asset_content_type: application/zip
         - name: Publish release
           uses: eregon/publish-release@v1
