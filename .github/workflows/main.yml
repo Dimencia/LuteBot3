@@ -20,8 +20,9 @@ jobs:
         - name: Get version
           id: versionReader
           run: |
-            $content = Get-Content Version.txt
+            $content = $(Get-Content Version.txt)
             echo "VERSION=$content" >> $GITHUB_ENV
+            echo "VERSION=$content"
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
