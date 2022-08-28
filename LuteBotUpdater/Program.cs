@@ -14,7 +14,7 @@ namespace LuteBotUpdater
     {
         static void Main(string[] args)
         {
-            if (args.Length < 2)
+            if (args.Length < 1)
             {
                 Console.WriteLine("The path must be explicitly passed to avoid erasing the wrong files");
                 Console.WriteLine(@"Usage: LuteBotUpdater.exe C:\Path\to\LuteBotFolder");

@@ -1,11 +1,8 @@
 Version 3.4.1
 
 - Many bugfixes regarding crashes when loading or saving songs in certain circumstances
-
 - Auto-build implemented - Github is now responsible for making the releases, which guarantees the binary matches the source
-
 - Updater modified to find its own update URL
-
 - Moved DLLs to their own folder where possible, to make it easier to find the exe
-
 - Removed unnecessary dependencies
+- Added code-signing that may help with antivirus false-positives
