@@ -28,19 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.chromiumWebBrowser1 = new CefSharp.WinForms.ChromiumWebBrowser();
+            //this.chromiumWebBrowser1 = new CefSharp.WinForms.ChromiumWebBrowser();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // chromiumWebBrowser1
             // 
-            this.chromiumWebBrowser1.ActivateBrowserOnCreation = false;
+            //this.chromiumWebBrowser1.ActivateBrowserOnCreation = false;
 // TODO: Code generation for '' failed because of Exception 'Invalid Primitive Type: System.IntPtr. Consider using CodeObjectCreateExpression.'.
-            this.chromiumWebBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chromiumWebBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.chromiumWebBrowser1.Name = "chromiumWebBrowser1";
-            this.chromiumWebBrowser1.Size = new System.Drawing.Size(846, 718);
-            this.chromiumWebBrowser1.TabIndex = 0;
+            //this.chromiumWebBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            //this.chromiumWebBrowser1.Location = new System.Drawing.Point(0, 0);
+            //this.chromiumWebBrowser1.Name = "chromiumWebBrowser1";
+            //this.chromiumWebBrowser1.Size = new System.Drawing.Size(846, 718);
+            //this.chromiumWebBrowser1.TabIndex = 0;
             // 
             // textBox1
             // 
@@ -56,7 +56,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(846, 718);
             this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.chromiumWebBrowser1);
+            //this.Controls.Add(this.chromiumWebBrowser1);
             this.Name = "DiscordAuthForm";
             this.Text = "Discord Authentication";
             this.ResumeLayout(false);
@@ -66,7 +66,7 @@
 
         #endregion
 
-        private CefSharp.WinForms.ChromiumWebBrowser chromiumWebBrowser1;
+        //private CefSharp.WinForms.ChromiumWebBrowser chromiumWebBrowser1;
         private System.Windows.Forms.TextBox textBox1;
     }
 }

@@ -469,7 +469,7 @@ namespace LuteBot.TrackSelection
                 {
                     string[] activation = new string[] { "tanh", "tanh", "tanh" };
                     neural = new NeuralNetwork(new int[] { Extensions.numParamsPerChannel, 64, 32, 1 }, activation);
-                    neural.Load("channelNeural");
+                    neural.Load(Path.Combine("lib","channelNeural"));
                 }
             }
 

@@ -24,29 +24,29 @@ namespace LuteBot
 
             // Navigate browser to our auth URL
             
-            chromiumWebBrowser1.LoadUrlAsync(AUTH_URL);
-            chromiumWebBrowser1.LoadingStateChanged += ChromiumWebBrowser1_LoadingStateChanged;
-            chromiumWebBrowser1.LoadError += ChromiumWebBrowser1_LoadError;
+            //chromiumWebBrowser1.LoadUrlAsync(AUTH_URL);
+            //chromiumWebBrowser1.LoadingStateChanged += ChromiumWebBrowser1_LoadingStateChanged;
+            //chromiumWebBrowser1.LoadError += ChromiumWebBrowser1_LoadError;
         }
 
-        private void ChromiumWebBrowser1_LoadError(object sender, CefSharp.LoadErrorEventArgs e)
-        {
-            // We should get this on the localhost load
-            BeginInvoke((MethodInvoker)delegate { textBox1.Text = e.FailedUrl; Refresh(); }); // FailedUrl is correct and we can get the info out of it
-        }
-
-        private void ChromiumWebBrowser1_LoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
-        {
-            if (!e.IsLoading)
-            {
-                if (chromiumWebBrowser1.Address.ToLower().StartsWith("http://localhost"))
-                {
-                    // Read info from the url
-                    string url = chromiumWebBrowser1.Address;
-                }
-            }
-            BeginInvoke((MethodInvoker)delegate { textBox1.Text = chromiumWebBrowser1.Address; Refresh(); });
-        }
+        //private void ChromiumWebBrowser1_LoadError(object sender, CefSharp.LoadErrorEventArgs e)
+        //{
+        //    // We should get this on the localhost load
+        //    BeginInvoke((MethodInvoker)delegate { textBox1.Text = e.FailedUrl; Refresh(); }); // FailedUrl is correct and we can get the info out of it
+        //}
+        //
+        //private void ChromiumWebBrowser1_LoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
+        //{
+        //    if (!e.IsLoading)
+        //    {
+        //        if (chromiumWebBrowser1.Address.ToLower().StartsWith("http://localhost"))
+        //        {
+        //            // Read info from the url
+        //            string url = chromiumWebBrowser1.Address;
+        //        }
+        //    }
+        //    BeginInvoke((MethodInvoker)delegate { textBox1.Text = chromiumWebBrowser1.Address; Refresh(); });
+        //}
 
     }
 }
