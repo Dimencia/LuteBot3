@@ -17,14 +17,16 @@ jobs:
 
         - name: Navigate to Workspace
           run: cd $GITHUB_WORKSPACE
+          
+        - name: Create Code Signing Certificate
+          run: |
+            New-Item -ItemType directory -Path certificate
+            Set-Content -Path certificate\certificate.txt -Value '${{ secrets.SIGNINGKEY }}'
+            certutil -decode certificate\certificate.txt certificate\certificate.pfx
 
         - name: Get version
           id: getv
           run: echo "::set-output name=version::$(Get-Content Version.txt)"
-          
-        - name: Get notes
-          id: getn
-          run: echo "::set-output name=version::$(Get-Content ReleaseNotes.txt)"
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
@@ -33,6 +35,18 @@ jobs:
           run: |
             echo Version: ${{ steps.getv.outputs.version }}
             msbuild.exe LuteBot.sln /p:platform="Any CPU" /p:configuration="Release"
+            
+        - name: Code Sign SimpleML
+          run: |
+            & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /f certificate\certificate.pfx /p '${{ secrets.CERTIFICATE_PASS }}' /t http://timestamp.comodoca.com/authenticode LuteBot\bin\Release\SimpleML.dll
+            
+        - name: Code Sign LuteBot
+          run: |
+            & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /f certificate\certificate.pfx /p '${{ secrets.CERTIFICATE_PASS }}' /t http://timestamp.comodoca.com/authenticode LuteBot\bin\Release\LuteBot.exe
+
+        - name: Code Sign Updater
+          run: |
+            & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /f certificate\certificate.pfx /p '${{ secrets.CERTIFICATE_PASS }}' /t http://timestamp.comodoca.com/authenticode LuteBot\bin\Release\LuteBotUpdater.exe
 
         - name: Zip Solution
           uses: thedoctor0/zip-release@main
@@ -52,7 +66,7 @@ jobs:
               release_name: LuteBot v${{ steps.getv.outputs.version }}
               draft: true
               prerelease: false
-              body: ${{ steps.getn.outputs.notes }}
+              body_path: ReleaseNotes.txt
         - name: Upload release
           uses: actions/upload-release-asset@v1.0.1
           env: 
