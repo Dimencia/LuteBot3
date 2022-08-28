@@ -4,6 +4,4 @@ Version 3.4.1
 
 - Auto-build implemented - Github is now responsible for making the releases, which guarantees the binary matches the source
 
-- Code-signing added - Hopefully this results in fewer problems with Defender and antivirus
-
 - Updater modified to find its own update URL
