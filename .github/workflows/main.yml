@@ -21,6 +21,10 @@ jobs:
         - name: Get version
           id: getv
           run: echo "::set-output name=version::$(Get-Content Version.txt)"
+          
+        - name: Get notes
+          id: getn
+          run: echo "::set-output name=version::$(Get-Content ReleaseNotes.txt)"
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
@@ -44,10 +48,11 @@ jobs:
           env: 
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
-              tag_name: v${{ steps.getv.outputs.version }}}
+              tag_name: v${{ steps.getv.outputs.version }}
               release_name: LuteBot v${{ steps.getv.outputs.version }}
               draft: true
               prerelease: false
+              body: ${{ steps.getn.outputs.notes }}
         - name: Upload release
           uses: actions/upload-release-asset@v1.0.1
           env: 
