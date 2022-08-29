@@ -6,3 +6,7 @@ Version 3.4.1
 - Moved DLLs to their own folder where possible, to make it easier to find the exe
 - Removed unnecessary dependencies
 - Added code-signing that may help with antivirus false-positives
+
+Version 3.4.2
+
+- Fixed issue with installing lutemod introduced by moving dependencies
