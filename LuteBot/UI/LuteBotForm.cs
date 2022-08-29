@@ -448,12 +448,12 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
 
                 string lutemodPakTarget = Path.Combine(pakPath, lutemodPakName);
                 if (!File.Exists(lutemodPakTarget))
-                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", lutemodPakName), lutemodPakTarget);
+                    File.Copy(Path.Combine(Application.StartupPath, "lib", "LuteMod", lutemodPakName), lutemodPakTarget);
 
 
                 string loaderPakTarget = Path.Combine(pakPath, loaderPakName);
                 if (!File.Exists(loaderPakTarget))
-                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", loaderPakName), loaderPakTarget);
+                    File.Copy(Path.Combine(Application.StartupPath, "lib", "LuteMod", loaderPakName), loaderPakTarget);
             }
             catch (Exception e)
             {
