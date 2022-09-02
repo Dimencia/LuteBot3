@@ -41,7 +41,7 @@ jobs:
           
           
         - name: Update files for patch
-          if: endsWith(github.event.push.head_commit.message,"+patch")
+          if: endsWith(github.event.push.head_commit.message,'+patch')
           uses: jacobtomlinson/gha-find-replace@v2
           with:
             find: |
