@@ -4,10 +4,59 @@ on:
          
 jobs:
     build:
+        if: endsWith(github.event.push.head_commit.message,"+patch") || endsWith(github.event.push.head_commit.message,"+minor") endsWith(github.event.push.head_commit.message,"+major")
         runs-on: windows-2019
         steps:
+        
+        - name: Get Current Release
+          id: get_current_release
+          uses: joutvhu/get-release@v1
+          with:
+            throwing: true
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
+        - name: Semantic version from string
+          id: sem_ver
+          uses: Steffo99/actions-semver@v0.3.4
+          with:
+            string: ${{ steps.get_current_release.outputs.tag_name }} #May need to trim the v
+            
+            
+        - name: Get patch tag from semver
+          id: version_tag_patch
+          run: echo "::set-output name=version::${{ steps.sem_ver.outputs.major }}.${{ steps.sem_ver.outputs.minor }}.$(${{ steps.sem_ver.outputs.patch }}+1)"
+          
+        - name: Get minor tag from semver
+          id: version_tag_minor
+          run: echo "::set-output name=version::${{ steps.sem_ver.outputs.major }}.$(${{ steps.sem_ver.outputs.minor }}+1).${{ steps.sem_ver.outputs.patch }}"
+          
+        - name: Get major tag from semver
+          id: version_tag_major
+          run: echo "::set-output name=version::${{ steps.sem_ver.outputs.major }}.$(${{ steps.sem_ver.outputs.minor }}+1).${{ steps.sem_ver.outputs.patch }}"
+          
+        
         - name: Checkout
           uses: actions/checkout@v2
+          
+          
+        - name: Update files for patch
+          if: endsWith(github.event.push.head_commit.message,"+patch")
+          uses: jacobtomlinson/gha-find-replace@v2
+          with:
+            find: |
+              "(public static string GetVersion\(\)
+              [\s]*{
+              [\s]*return ")[0-9]+\.[0-9]+\.[0-9]+(";
+              [\s]*})"
+            replace: "$1${{ steps.version_tag_patch.outputs.version }}$2"
+            include: "LuteBot/Config/ConfigManager.cs"
+          
+        - name: Push changes
+          uses: ad-m/github-push-action@v0.6.0
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            branch: ${{ github.ref }}
 
         - name: Setup MSBuild
           uses: microsoft/setup-msbuild@v1
@@ -78,9 +127,4 @@ jobs:
               asset_name: LuteBot.${{ steps.getv.outputs.version }}.zip
               asset_content_type: application/zip
 
-        - name: Publish release
-          uses: eregon/publish-release@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            release_id: ${{ steps.create_release.outputs.id }}
+
