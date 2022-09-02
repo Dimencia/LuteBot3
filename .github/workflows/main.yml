@@ -47,7 +47,7 @@ jobs:
           
         - name: Update files for patch
           if: endsWith(github.event.head_commit.message,'+patch')
-          uses: jacobtomlinson/gha-find-replace@v2
+          uses: nguyenvanuyn96/str-find-and-replace-action@0.0.5
           with:
             find: |
               "(public static string GetVersion\(\)
