@@ -4,9 +4,14 @@ on:
          
 jobs:
     build:
-        if: endsWith(github.event.push.head_commit.messageHeadline,'+patch') || endsWith(github.event.push.head_commit.messageHeadline,'+minor') || endsWith(github.event.push.head_commit.messageHeadline,'+major')
+        #if: endsWith(github.event.push.head_commit.messageHeadline,'+patch') || endsWith(github.event.push.head_commit.messageHeadline,'+minor') || endsWith(github.event.push.head_commit.messageHeadline,'+major')
         runs-on: windows-2019
         steps:
+        
+        - name: Output commit info
+          run: |
+            echo ${{ github.event.push.head_commit.messageHeadline }}
+            echo ${{ github.event.push.head_commit.message }}
         
         - name: Get Current Release
           id: get_current_release
