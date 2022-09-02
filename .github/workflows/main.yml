@@ -4,14 +4,12 @@ on:
          
 jobs:
     build:
-        #if: endsWith(github.event.head_commit.messageHeadline,'+patch') || endsWith(github.event.head_commit.messageHeadline,'+minor') || endsWith(github.event.head_commit.messageHeadline,'+major')
+        if: endsWith(github.event.head_commit.message,'+patch') || endsWith(github.event.head_commit.message,'+minor') || endsWith(github.event.head_commit.message,'+major')
         runs-on: windows-2019
         steps:
         
         - name: Output commit info
-          run: |
-            echo ${{ github.event.head_commit.messageHeadline }}
-            echo ${{ github.event.head_commit.message }}
+          run: echo ${{ github.event.head_commit.message }}
         
         - name: Get Current Release
           id: get_current_release
@@ -46,7 +44,7 @@ jobs:
           
           
         - name: Update files for patch
-          if: endsWith(github.event.head_commit.messageHeadline,'+patch')
+          if: endsWith(github.event.head_commit.message,'+patch')
           uses: jacobtomlinson/gha-find-replace@v2
           with:
             find: |
