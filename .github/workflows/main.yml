@@ -4,7 +4,7 @@ on:
          
 jobs:
     build:
-        if: endsWith(github.event.push.head_commit.message,"+patch") || endsWith(github.event.push.head_commit.message,"+minor") endsWith(github.event.push.head_commit.message,"+major")
+        if: endsWith(github.event.push.head_commit.message,'+patch') || endsWith(github.event.push.head_commit.message,'+minor') || endsWith(github.event.push.head_commit.message,'+major')
         runs-on: windows-2019
         steps:
         
