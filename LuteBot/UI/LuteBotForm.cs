@@ -568,7 +568,7 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                 Directory.CreateDirectory(SaveManager.SaveFilePath); // Some people don't have one yet apparently
                                                                      // TODO: Testing on this.  Supposedly each user needs to generate their own empty PartitionIndex, but that may have just been some other bug that was fixed since?
                 if (!File.Exists(partitionIndexTarget))
-                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", partitionIndexName), partitionIndexTarget);
+                    File.Copy(Path.Combine(Application.StartupPath, "bin", "LuteMod", partitionIndexName), partitionIndexTarget);
             }
             catch (Exception e)
             {

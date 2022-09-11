@@ -10,3 +10,8 @@ Version 3.4.1
 Version 3.4.2
 
 - Fixed issue with installing lutemod introduced by moving dependencies
+
+Version 3.4.3
+
+- Fixed another issue with installing lutemod introduced by moving dependencies (PartitionIndex)
+- Increased size of popup menu to help ensure text shows up on lower resolutions
