@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using static System.Resources.ResXFileRef;
 
 namespace LuteBot.UI
 {
@@ -709,7 +710,7 @@ namespace LuteBot.UI
 
             for (int i = 0; i < numNotes; i++)
             {
-                int translatedNote = minNote + i - numNotesBelow;
+                int translatedNote = minNote - numNotesBelow + i;
 
                 int y = maxHeight - pianoRowHeight * (i + 1);
 
@@ -1272,7 +1273,7 @@ namespace LuteBot.UI
             //OffsetPanel.Refresh();
             //ResetRowSize();
             //InitLists();
-            ReloadNotes();
+            ReloadNotes(true);
         }
 
         private void SongProfileSaveButton_Click(object sender, EventArgs e)
@@ -1305,7 +1306,7 @@ namespace LuteBot.UI
             //ResetRowSize();
             //Invalidate();
             //OffsetPanel.Refresh();
-            ReloadNotes();
+            ReloadNotes(true);
         }
 
         private Size originalPanelSize;

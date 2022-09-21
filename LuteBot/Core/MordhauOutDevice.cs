@@ -65,12 +65,12 @@ namespace LuteBot.Core
                 ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, lowestPlayed.ToString()); // Enforce a default if they don't have it
                 ConfigManager.SaveConfig();
             }
-            if (noteRange > luteRange || lowMidiNoteId < luteMin || highMidiNoteId > luteMin + luteRange)
+            if (noteRange > luteRange || lowMidiNoteId < luteMin || highMidiNoteId > luteMin + luteRange-1)
             {
                 //lowNoteId = ((noteRange / 2) + lowMidiNoteId) - (luteRange / 2);
                 //highNoteId = ((noteRange / 2) + lowMidiNoteId) + (luteRange / 2);
                 lowNoteId = lowestPlayed + luteMin;
-                highNoteId = lowNoteId + luteRange;
+                highNoteId = lowNoteId + luteRange-1;
                 //lowNoteId = lowNoteId - (lowNoteId % 12);
                 //highNoteId = highNoteId - (highNoteId % 12);
                 conversionNeeded = true;
@@ -89,12 +89,12 @@ namespace LuteBot.Core
             if (isLower)
             {
                 lowNoteId = value;
-                highNoteId = value + ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount) - 1;
+                highNoteId = value + ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount)-1;
             }
             else
             {
                 highNoteId = value;
-                lowNoteId = value - ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount) - 1;
+                lowNoteId = value - ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount)-1;
             }
         }
 
@@ -157,7 +157,7 @@ namespace LuteBot.Core
                         if (!stopWatch.IsRunning)
                         {
                             filterResult = FilterNote(message, offset);
-                            int note = filterResult.Data1 - lowNoteId + luteMin;
+                            int note = filterResult.Data1 - lowNoteId;
                             ActionManager.PlayNote(note, message.MidiChannel);
 
                             stopWatch.Start();
@@ -166,7 +166,7 @@ namespace LuteBot.Core
                         else
                         {
                             filterResult = FilterNote(message, offset);
-                            int note = filterResult.Data1 - lowNoteId + luteMin;
+                            int note = filterResult.Data1 - lowNoteId;
                             // We use numChords-1 because by default we always allow 2 chords by the way the timer resets.  When they enter 3, we really only want to play two notes during cooldown
                             if (stopWatch.ElapsedMilliseconds < noteCooldown && notesThisCooldown.Count < (numChords - 1) && !notesThisCooldown.Contains(note))
                             {
@@ -184,7 +184,7 @@ namespace LuteBot.Core
                     else
                     {
                         filterResult = FilterNote(message, offset);
-                        int note = filterResult.Data1 - lowNoteId + luteMin;
+                        int note = filterResult.Data1 - lowNoteId;
                         if (!stopWatch.IsRunning)
                         {
                             ActionManager.PlayNote(note, message.MidiChannel);
@@ -206,7 +206,7 @@ namespace LuteBot.Core
                     filterResult = FilterNote(message, offset);
                     if (message.Data2 > 0)
                     {
-                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId + luteMin, message.MidiChannel);
+                        ActionManager.PlayNote(filterResult.Data1 - lowNoteId, message.MidiChannel);
                     }
                 }
             }

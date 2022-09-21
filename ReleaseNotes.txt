@@ -1,3 +1,26 @@
+Version 3.4.4
+
+- Fixed LuteMod playing an octave too high
+- Fixed LuteBot playing an octave too low
+- Fixed issues with transposition for both lutebot and lutemod
+- Actually fixed the lutemod install issue with PartitionIndex
+- Fixed piano roll showing notes an octave higher than they really are
+- Fixed issue with Updater caused by the way Github is now serving the page
+
+You will have to manually download and extract the zip file if using any lower version, in order to be able to auto-update again
+
+
+Version 3.4.3
+
+- Fixed another issue with installing lutemod introduced by moving dependencies (PartitionIndex)
+- Increased size of popup menu to help ensure text shows up on lower resolutions
+
+
+Version 3.4.2
+
+- Fixed issue with installing lutemod introduced by moving dependencies
+
+
 Version 3.4.1
 
 - Many bugfixes regarding crashes when loading or saving songs in certain circumstances
@@ -6,12 +29,3 @@ Version 3.4.1
 - Moved DLLs to their own folder where possible, to make it easier to find the exe
 - Removed unnecessary dependencies
 - Added code-signing that may help with antivirus false-positives
-
-Version 3.4.2
-
-- Fixed issue with installing lutemod introduced by moving dependencies
-
-Version 3.4.3
-
-- Fixed another issue with installing lutemod introduced by moving dependencies (PartitionIndex)
-- Increased size of popup menu to help ensure text shows up on lower resolutions

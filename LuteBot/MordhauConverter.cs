@@ -17,6 +17,7 @@ namespace LuteMod.Converter
 
         public int Range { get => range; set => range = value; }
         public int LowNote { get => lowNote; set => lowNote = value; }
+        public int LowestPlayed { get; set; }
         public int HighNote { get => (lowNote + range); }
         public bool IsConversionEnabled { get => isConversionEnabled; set => isConversionEnabled = value; }
 
@@ -167,17 +168,17 @@ namespace LuteMod.Converter
             }
             if (isConversionEnabled)
             {
-                if (note.Tone < lowNote)
+                if (note.Tone < lowNote + LowestPlayed)
                 {
-                    note.Tone = lowNote + (note.Tone % 12);
+                    note.Tone = lowNote + LowestPlayed + (note.Tone % 12);
                 }
-                else if (note.Tone > HighNote)
+                else if (note.Tone > HighNote + LowestPlayed)
                 {
-                    note.Tone = (HighNote - 12) + (note.Tone % 12);
+                    note.Tone = ((HighNote+LowestPlayed) - 12) + (note.Tone % 12);
                 }
 
             }
-            return new Note() { Tick = note.Tick, Tone = note.Tone - lowNote, Type = note.Type };
+            return new Note() { Tick = note.Tick, Tone = note.Tone - LowestPlayed + lowNote, Type = note.Type };
         }
 
         public void FillTrack(int id, List<Note> notes)

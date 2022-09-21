@@ -20,6 +20,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SimpleML;
+using static System.Resources.ResXFileRef;
 
 namespace LuteBot
 {
@@ -349,7 +350,8 @@ namespace LuteBot
                                         }
 
                                         converter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
-                                        converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
+                                        converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
+                                        converter.LowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
                                         converter.IsConversionEnabled = true;
                                         converter.SetDivision(player.sequence.Division);
                                         converter.SetPartitionTempo(player.sequence.FirstTempo);
@@ -409,7 +411,8 @@ namespace LuteBot
                         trackConverter = new LuteMod.Converter.MordhauConverter();
                     // These ranges and settings only matter for FillTrack.  So re-setting them each time isn't a problem
                     trackConverter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
-                    trackConverter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
+                    trackConverter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
+                    trackConverter.LowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
                     trackConverter.IsConversionEnabled = true;
                     trackConverter.SetDivision(player.sequence.Division); // This one could be weird
                     trackConverter.AddTrack();

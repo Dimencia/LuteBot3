@@ -98,16 +98,21 @@ namespace LuteBotUpdater
             }
         }
 
-        private static Regex downloadRegex = new Regex(@"<a href=[""'](\/Dimencia\/LuteBot3\/releases\/download\/[^""']*\.zip)[""']", RegexOptions.Compiled);
-
+        private static Regex downloadRegex = new Regex(@"\/Dimencia\/LuteBot3\/releases\/tag\/([^""']*)", RegexOptions.Compiled);
+        // Github changed things on me.  There is no longer a link in the lazy-loaded download page
+        // So now we look for: Dimencia/LuteBot3/releases/tag/v3.4.3
+        // And download /Dimencia/LuteBot3/release/download/v3.4.3/LuteBot.3.4.3.zip
+        // And rely on my new build actions to get those zip names right
         public static string GetLatestVersionUrl()
         {
             var versionPage = GetVersionPage(); // Arbitrary 10s timeout seems fine
             if (versionPage != null)
             {
                 var downloadMatch = downloadRegex.Match(versionPage);
-                if (downloadMatch.Success) // They give a relative path starting at /Dimencia
-                    return "https://github.com" + downloadMatch.Groups[1].Value;
+                if (downloadMatch.Success) // We matched something like "v3.4.3"
+                {
+                    return $"https://github.com/Dimencia/LuteBot3/releases/download/{downloadMatch.Groups[1].Value}/LuteBot.{downloadMatch.Groups[1].Value.Replace("v","")}.zip";
+                }
                 Console.WriteLine("Failed to match with a download link for latest version.  Aborting");
             }
             return null;
