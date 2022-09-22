@@ -1,3 +1,9 @@
+Version 3.4.5
+
+- Fixed exceptions in Track Selection
+- Added Shift+Drag hotkey to move all notes up/down octaves in Track Selection
+
+
 Version 3.4.4
 
 - Fixed LuteMod playing an octave too high

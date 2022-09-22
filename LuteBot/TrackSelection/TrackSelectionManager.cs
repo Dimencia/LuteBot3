@@ -960,7 +960,7 @@ namespace LuteBot.TrackSelection
 
         public void ToggleTrackActivation(bool active, int index)
         {
-            if (index >= 0 && index < midiTracks.Count)
+            if (midiTracks.ContainsKey(index))
             {
                 midiTracks[index].Active = active;
                 ToggleTrackRequestHelper(midiTracks[index]);

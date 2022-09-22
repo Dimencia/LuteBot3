@@ -271,6 +271,7 @@ namespace LuteBot.UI
         private bool dragging;
         private Rectangle draggableRect;
         private int startOffset;
+        private int startGlobalOffset;
         private Dictionary<int, Color> channelColors = new Dictionary<int, Color>();
         private Dictionary<int, Color> originalChannelColors = new Dictionary<int, Color>();
         private MidiChannelItem dragTarget;
@@ -300,19 +301,34 @@ namespace LuteBot.UI
 
 
                     int oldOffset = channel.offset;
-                    channel.offset = startOffset + (int)Math.Round((double)(Math.Abs(dragStart.Y - e.Location.Y) * multiplier / pianoRowHeight) / 12) * 12;
-                    if (channel.offset != oldOffset)
-                    {
-                        // Simulate a mouse position at where it should now draw...?
-                        // If we're scrolled all the way up or down, we don't want it to move though
 
-                        // Nah.  If the highest note changed is the only time we don't do this
-                        int oldHighest = maxNote;
-                        ReloadNotes(true);
-                        if (maxNote == oldHighest)
-                            lastMousePosition = new Point(dragStart.X, dragStart.Y - (channel.offset - startOffset) * pianoRowHeight);
-                        //OffsetPanel.Refresh();
-                        //pianoPanel.Refresh();
+                    if (ModifierKeys == Keys.Shift)
+                    {
+                        trackSelectionManager.NoteOffset = startGlobalOffset + (int)Math.Round((double)(Math.Abs(dragStart.Y - e.Location.Y) * multiplier / pianoRowHeight) / 12) * 12;
+                        if (trackSelectionManager.NoteOffset != startGlobalOffset)
+                        {
+                            int oldHighest = maxNote;
+                            ReloadNotes(true);
+                            if (maxNote == oldHighest)
+                                lastMousePosition = new Point(dragStart.X, dragStart.Y - (channel.offset - startOffset) * pianoRowHeight);
+                        }
+                    }
+                    else
+                    {
+                        channel.offset = startOffset + (int)Math.Round((double)(Math.Abs(dragStart.Y - e.Location.Y) * multiplier / pianoRowHeight) / 12) * 12;
+                        if (channel.offset != oldOffset)
+                        {
+                            // Simulate a mouse position at where it should now draw...?
+                            // If we're scrolled all the way up or down, we don't want it to move though
+
+                            // Nah.  If the highest note changed is the only time we don't do this
+                            int oldHighest = maxNote;
+                            ReloadNotes(true);
+                            if (maxNote == oldHighest)
+                                lastMousePosition = new Point(dragStart.X, dragStart.Y - (channel.offset - startOffset) * pianoRowHeight);
+                            //OffsetPanel.Refresh();
+                            //pianoPanel.Refresh();
+                        }
                     }
                 }
                 //}
@@ -458,6 +474,7 @@ namespace LuteBot.UI
                     dragStart = e.Location;
                     //if (isAdvanced)
                     startOffset = channel.offset;
+                    startGlobalOffset = trackSelectionManager.NoteOffset;
                     dragTarget = channel;
                     hoverChannels.Clear();
                     hoverChannels.Add(targetChannel);
@@ -648,7 +665,9 @@ namespace LuteBot.UI
                 // Get them in reverse order though so the top one is the one that gets selected
                 var hoverChannel = hoverChannels[numHovers];
 
-                var channel = trackSelectionManager.MidiChannels[hoverChannel];
+                var channel = trackSelectionManager.MidiChannels.ContainsKey(hoverChannel) ? trackSelectionManager.MidiChannels[hoverChannel] : null;
+                if (channel == null)
+                    continue;
                 var labelSize = g.MeasureString(channel.Name, labelFont);
 
                 Rectangle channelLabelRect = new Rectangle((int)(lastMousePosition.X - labelSize.Width/2 - 2), (int)(lastMousePosition.Y - (pianoRowHeight*1.5f) - ((labelSize.Height+10)*(numHovers+1))), (int)(labelSize.Width+4), (int)(labelSize.Height + 4));
@@ -1182,7 +1201,7 @@ namespace LuteBot.UI
         {
             int x = (int)(note.tickNumber * tickLength) + pianoWidth;
             int width = (int)Math.Max((note.length * tickLength), 1);
-            int finalNote = note.note + trackSelectionManager.MidiChannels[note.channel].offset + trackSelectionManager.NoteOffset;
+            int finalNote = note.note + (trackSelectionManager.MidiChannels.ContainsKey(note.channel) ? trackSelectionManager.MidiChannels[note.channel].offset : 0) + trackSelectionManager.NoteOffset;
             int y = maxHeight - ((finalNote - minNote + 1 + numNotesBelow) * pianoRowHeight);
             int height = pianoRowHeight;
 
