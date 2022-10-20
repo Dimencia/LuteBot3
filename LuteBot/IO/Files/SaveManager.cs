@@ -48,6 +48,7 @@ namespace LuteBot.IO.Files
 
         public static void WriteSaveFile(string filePath, string content)
         {
+            DeleteData(filePath);
             int i = 0;
             while (SaveDataInFile(filePath, content, i))
             {

@@ -21,6 +21,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SimpleML;
 using static System.Resources.ResXFileRef;
+using System.Xml.Linq;
+using System.IO.Compression;
+using System.Diagnostics;
 
 namespace LuteBot
 {
@@ -81,7 +84,7 @@ namespace LuteBot
             }
         }
 
-        
+
 
         private void PartitionsForm_FormClosing1(object sender, FormClosingEventArgs e)
         {
@@ -136,7 +139,7 @@ namespace LuteBot
                     editItem.Click += EditItem_Click;
                     //}
                 }
-                
+
                 listBoxPartitions.ContextMenu = indexContextMenu; // TODO: I'd love to make it popup at the selected item, not at mouse pos, but whatever
                 indexContextMenu.Show(listBoxPartitions, listBoxPartitions.PointToClient(Cursor.Position));
             }
@@ -475,7 +478,7 @@ namespace LuteBot
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
@@ -486,6 +489,47 @@ namespace LuteBot
             var trainingForm = new NeuralNetworkForm(tsm, this);
             trainingForm.ShowDialog(this);
 
+        }
+
+        private void exportPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                string tempDir = Path.Combine(partitionMidiPath, "TempFiles");
+                if (Directory.Exists(tempDir))
+                    Directory.Delete(tempDir, true);
+                Directory.CreateDirectory(tempDir);
+                foreach (var name in index.PartitionNames)
+                {
+                    string midiPath = Path.Combine(partitionMidiPath, name + ".mid");
+                    if (File.Exists(midiPath))
+                        File.Copy(midiPath, Path.Combine(tempDir, name + ".mid"), true);
+
+                    int i = 0;
+                    string currentFile = Path.Combine(SaveManager.SaveFilePath, name + "[" + i + "].sav");
+                    while (File.Exists(currentFile))
+                    {
+                        File.Copy(currentFile, Path.Combine(tempDir, name + "[" + i + "].sav"), true);
+                        currentFile = Path.Combine(SaveManager.SaveFilePath, name + "[" + ++i + "].sav");
+                    }
+                }
+
+                int c = 0;
+                string partitionFile = Path.Combine(SaveManager.SaveFilePath, "PartitionIndex[" + c + "].sav");
+                while (File.Exists(partitionFile))
+                {
+                    File.Copy(partitionFile, Path.Combine(tempDir, "PartitionIndex[" + c + "].sav"));
+                    partitionFile = Path.Combine(SaveManager.SaveFilePath, "PartitionIndex[" + ++c + "].sav");
+                }
+                var zipDir = Path.Combine(partitionMidiPath, "Export");
+                Directory.CreateDirectory(zipDir);
+                // Zip the dir
+                ZipFile.CreateFromDirectory(tempDir, Path.Combine(zipDir, DateTime.Now.ToString("yyyy-MM-dd-HH-mm") + "-Export.zip"));
+                // Delete temp
+                Directory.Delete(tempDir, true);
+                // Show them the zip
+                Process.Start(zipDir);
+            });
         }
     }
 }

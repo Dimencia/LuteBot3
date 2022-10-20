@@ -39,6 +39,7 @@ namespace LuteBot
             this.saveMultipleSongsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openMidiFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.exportPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -85,6 +86,7 @@ namespace LuteBot
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importPartitionsToolStripMenuItem,
+            this.exportPartitionsToolStripMenuItem,
             this.openSavFolderToolStripMenuItem,
             this.saveMultipleSongsToolStripMenuItem,
             this.trainToolStripMenuItem});
@@ -125,6 +127,13 @@ namespace LuteBot
             this.openMidiFileDialog.Filter = "MIDI files|*.mid";
             this.openMidiFileDialog.Multiselect = true;
             // 
+            // exportPartitionsToolStripMenuItem
+            // 
+            this.exportPartitionsToolStripMenuItem.Name = "exportPartitionsToolStripMenuItem";
+            this.exportPartitionsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.exportPartitionsToolStripMenuItem.Text = "Export Partitions";
+            this.exportPartitionsToolStripMenuItem.Click += new System.EventHandler(this.exportPartitionsToolStripMenuItem_Click);
+            // 
             // PartitionsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -155,5 +164,6 @@ namespace LuteBot
         private System.Windows.Forms.ToolStripMenuItem saveMultipleSongsToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openMidiFileDialog;
         private System.Windows.Forms.ToolStripMenuItem trainToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportPartitionsToolStripMenuItem;
     }
 }
