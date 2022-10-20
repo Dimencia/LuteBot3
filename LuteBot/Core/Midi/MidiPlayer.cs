@@ -371,7 +371,7 @@ namespace LuteBot.Core.Midi
                                         channels[c.MidiChannel].Active = false; // Disabled by default
                                     }
                                     // For some reason we read all notes an octave high... so I'll try to fix that here
-                                    var note = c.Data1 - 12;
+                                    var note = c.Data1;
                                     if (note > channels[c.MidiChannel].highestNote)
                                         channels[c.MidiChannel].highestNote = note;
                                     if (note < channels[c.MidiChannel].lowestNote)
@@ -428,7 +428,7 @@ namespace LuteBot.Core.Midi
                                 }
                                 else if (c.Command == ChannelCommand.NoteOff || (c.Command == ChannelCommand.NoteOn && c.Data2 == 0))
                                 {
-                                    var adjusted = c.Data1 - 12;
+                                    var adjusted = c.Data1;
                                     if (channels[c.MidiChannel].noteTicks.ContainsKey(adjusted))
                                     {
                                         // Find the original note...
