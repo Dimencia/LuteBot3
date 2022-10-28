@@ -510,15 +510,8 @@ namespace SimpleML
                 {
                     for (int j = 0; j < biases[i].Length; j++)
                     {
-                        if (ListLines[index] != null)
-                        {
-                            try
-                            {
-                                biases[i][j] = float.Parse(ListLines[index]);
-                                index++;
-                            }
-                            catch (Exception e) { }
-                        }
+                        float.TryParse(ListLines[index], out biases[i][j]);
+                        index++;
                     }
                 }
                 for (int i = 0; i < weights.Length; i++)
@@ -527,15 +520,8 @@ namespace SimpleML
                     {
                         for (int k = 0; k < weights[i][j].Length; k++)
                         {
-                            if (ListLines[index] != null)
-                            {
-                                try
-                                {
-                                    weights[i][j][k] = float.Parse(ListLines[index]);
-                                    index++;
-                                }
-                                catch (Exception e) { }
-                            }
+                            float.TryParse(ListLines[index], out weights[i][j][k]);
+                            index++;
                         }
                     }
                 }
