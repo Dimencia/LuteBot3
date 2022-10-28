@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace SimpleML
 {
@@ -511,8 +510,15 @@ namespace SimpleML
                 {
                     for (int j = 0; j < biases[i].Length; j++)
                     {
-                        biases[i][j] = float.Parse(ListLines[index]);
-                        index++;
+                        if (ListLines[index] != null)
+                        {
+                            try
+                            {
+                                biases[i][j] = float.Parse(ListLines[index]);
+                                index++;
+                            }
+                            catch (Exception e) { }
+                        }
                     }
                 }
                 for (int i = 0; i < weights.Length; i++)
@@ -521,8 +527,15 @@ namespace SimpleML
                     {
                         for (int k = 0; k < weights[i][j].Length; k++)
                         {
-                            weights[i][j][k] = float.Parse(ListLines[index]);
-                            index++;
+                            if (ListLines[index] != null)
+                            {
+                                try
+                                {
+                                    weights[i][j][k] = float.Parse(ListLines[index]);
+                                    index++;
+                                }
+                                catch (Exception e) { }
+                            }
                         }
                     }
                 }
