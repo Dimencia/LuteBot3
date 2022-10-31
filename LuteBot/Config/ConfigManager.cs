@@ -25,6 +25,7 @@ namespace LuteBot.Config
         static ConfigManager()
         {
             autoSavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Config");
+            Directory.CreateDirectory(autoSavePath);
             Refresh();
         }
 
@@ -34,11 +35,10 @@ namespace LuteBot.Config
         public static void Refresh()
         {
             defaultConfig = LoadDefaultConfig();
-            configuration = new Config();
             configuration = LoadConfig();
             if (configuration == null)
             {
-                configuration = LoadDefaultConfig();
+                configuration = defaultConfig;
                 configuration.Verify();
                 SaveConfig();
             }
@@ -69,7 +69,10 @@ namespace LuteBot.Config
 
         private static Config LoadConfig()
         {
-            return FileIO.LoadJSON<Config>(BuildPath(configuration));
+            var path = BuildPath(configuration);
+            if (File.Exists(path + ".json"))
+                return FileIO.LoadJSON<Config>(path);
+            return null;
         }
 
         private static Config LoadDefaultConfig()
@@ -164,7 +167,7 @@ namespace LuteBot.Config
 
         public static string GetVersion()
         {
-            return "3.4.7";
+            return "3.4.8";
         }
     }
 }

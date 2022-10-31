@@ -329,7 +329,7 @@ namespace LuteBot
                                 int firstInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
                                 // Step 1, load solo lute into track 0 - this profile should always exist
                                 // Actually, all of the first 4 instruments get loaded in, under the same ID we use in lutebot.  Convenient.
-                                for (int i = 0; i < 4; i++)
+                                for (int i = 0; i < 2; i++)
                                 {
                                     int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
