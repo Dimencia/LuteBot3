@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -167,7 +169,7 @@ namespace LuteBot.Config
 
         public static string GetVersion()
         {
-            return "3.4.8";
+            return "3.4.9";
         }
     }
 }

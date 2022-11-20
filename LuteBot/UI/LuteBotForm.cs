@@ -87,7 +87,7 @@ namespace LuteBot
         static LiveMidiManager liveMidiManager;
         static KeyBindingForm keyBindingForm = null;
 
-        private static string lutemodPakName = "FLuteMod_1.42.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string lutemodPakName = "FLuteMod_1.432.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
         private static int lutemodVersion1 = 1;
         private static int lutemodVersion2 = 42;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
@@ -100,6 +100,9 @@ ModStartupMap=/AutoLoader/ClientModNew_MainMenu.ClientModNew_MainMenu";
         private static string removeFromEngine = @"[/Script/EngineSettings.GameMapsSettings]
 GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_MainMenu";
         private static string removeFromPaks = "zz_clientmodloadingmap_425.pak";
+        private static string removeFromGame = @"[/Game/Mordhau/Maps/ClientModMap/BP_ClientModLoaderActor.BP_ClientModLoaderActor_C]
+ClientMods=/Game/Mordhau/Maps/LuteMod/Client/BP_LuteModClientLoader.BP_LuteModClientLoader_C
+ModListWidgetStayTime=5.0";
 
         private static string MordhauPakPath;
 
@@ -525,7 +528,9 @@ GameDefaultMap=/Game/Mordhau/Maps/ClientModMap/ClientMod_MainMenu.ClientMod_Main
                     replace1 = true;
                     loaderString1Modified += loaderLines[2] + "\n";
                 }
-                
+
+                if (content.Contains(removeFromGame))
+                    content = content.Replace(removeFromGame, "\n");
 
 
                 if (replace1)
