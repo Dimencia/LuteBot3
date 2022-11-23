@@ -87,7 +87,7 @@ namespace LuteBot
         static LiveMidiManager liveMidiManager;
         static KeyBindingForm keyBindingForm = null;
 
-        private static string lutemodPakName = "FLuteMod_1.432.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string lutemodPakName = "FLuteMod_2.0.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
         private static int lutemodVersion1 = 1;
         private static int lutemodVersion2 = 42;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
@@ -215,38 +215,45 @@ ModListWidgetStayTime=5.0";
 
             // Again, also removing the following; it's pointless, 3.3.0 was the first version that uses that config path, so it will never need to modify anything for versions below
 
-            // If it's not set, it's below 3.3; the rest is also there just for posterity so I can use it in the future
-            //if (!string.IsNullOrWhiteSpace(ConfigManager.GetProperty(PropertyItem.LastVersion)))
-            //{
-            //
-            //    // Parse the version into something we can compare
-            //    var firstGoodVersions = "3.3".Split('.');
-            //    var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
-            //
-            //
-            //    for (int i = 0; i < firstGoodVersions.Length; i++)
-            //    {
-            //        // If we've run out of numbers to compare on either side and none have been less yet, or if any of the numbers are less, the version is below our target
-            //
-            //        // I think.  Target: 3.3 vs 3.31, we ran out of numbers but we're above.  So it depends in which direction
-            //        // If we run out of numbers in the target, it is not less
-            //        // Target: 3.31 vs 3.3, we run out of numbers in the lastversions, so it is less.  Good.  
-            //
-            //        if (i >= lastversions.Length || int.Parse(lastversions[i]) < int.Parse(firstGoodVersions[i]))
-            //        {
-            //            // The last version ran is below the target, and changes should be applied
-            //            Instrument.WriteDefaults();
-            //            // The new config data will pull from defaultConfig and should all be OK
-            //
-            //            // We might should messagebox to let them know, but that'd be like a third messagebox for new installs, and that's just annoying at that point
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    Instrument.WriteDefaults();
-            //}
+            try
+            {
+                // If it's not set, it's below 3.3; the rest is also there just for posterity so I can use it in the future
+                if (!string.IsNullOrWhiteSpace(ConfigManager.GetProperty(PropertyItem.LastVersion)))
+                {
+
+                    // Parse the version into something we can compare
+                    var firstGoodVersions = "3.5.0".Split('.');
+                    var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
+
+
+                    for (int i = 0; i < firstGoodVersions.Length; i++)
+                    {
+                        // If we've run out of numbers to compare on either side and none have been less yet, or if any of the numbers are less, the version is below our target
+
+                        // I think.  Target: 3.3 vs 3.31, we ran out of numbers but we're above.  So it depends in which direction
+                        // If we run out of numbers in the target, it is not less
+                        // Target: 3.31 vs 3.3, we run out of numbers in the lastversions, so it is less.  Good.  
+
+                        if (i >= lastversions.Length || int.Parse(lastversions[i]) < int.Parse(firstGoodVersions[i]))
+                        {
+                            // I don't see how this could fail.  We know their last version and it had the prefab there
+                            // I guess if they deleted all but one prefab.  
+                            Instrument.Prefabs[1].ForbidsChords = false;
+                            // The last version ran is below the target, and changes should be applied
+                            Instrument.Write();
+
+                            // We might should messagebox to let them know, but that'd be like a third messagebox for new installs, and that's just annoying at that point
+                            InstallLuteMod(); // Update their lutemod
+                        }
+                    }
+                }
+            }
+            catch 
+            {
+                MessageBox.Show("Could not perform version upgrade\nYou may need to use the option to Install Lutemod\nAnd may need to delete and re-generate your configuration", "Version upgrade failed");
+            }
             ConfigManager.SetProperty(PropertyItem.LastVersion, ConfigManager.GetVersion());
+            ConfigManager.SaveConfig();
 
             this.Text = "LuteBot v" + ConfigManager.GetVersion();
         }

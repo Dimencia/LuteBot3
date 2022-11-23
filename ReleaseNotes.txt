@@ -1,4 +1,28 @@
-Version 3.4.9
+Version 3.5.0
+
+- MAJOR LuteMod Update:
+	- You now play all instruments you have in your equipment; no horse required for duets+
+	- Notes that previously would have been delayed or skipped are instead played on extra instruments
+	- Pitch settings are now specific to the instrument you have in your hands, they work on your own songs, and are persistent
+		- So you can set one of your flutes to +1 pitch and you don't have to keep it equipped for it to work
+		- Pressing ctrl+up/down will change your global pitch instead of per-instrument
+	- New modes:
+		- Pressing shift+up will toggle Note Duplication for the equipped instrument  
+			- This means it will make a copy of its notes for other instruments of the same type to play
+		- Pressing shift+down will toggle Copying for the equipped instrument type
+			- Copies notes from the other instrument type, such as playing flute notes on a lute (enable copying on lute)
+		- These apply to all songs you play or mirror until you disable them or join a new game
+		- Turning on duplication for all instruments you have of the same type (lute or flute) will make bad things happen
+	- Mirroring someone now mirrors every instrument they have, instead of the one they have equipped
+	- Ctrl+left/right when navigating partitions now skips 5 pages at a time and doesn't close if it reaches the end or beginning
+	- Partition display when you kick is now very fast
+		- Caveat: Songs that are split between two partition indexes now make a broken entry in your list (and one good entry).  Worth it.
+	- Notes always get transposed into the instrument range when out of range
+	- Overhaul to timing to allow faster and more accurate playback
+	- Swapping to another instrument while playing no longer pauses playback
+	- Removed fastforward/rewind due to issues it was causing
+	- Mirror targets are removed from your list when they no longer are holding any instruments
+	- Mirror targets no longer show up in chat
 
 - Made lutemod installer remove old lines from Game.ini that were preventing it from working
-- Minor lutemod update for clearer playback
+- Allowed chords for flute

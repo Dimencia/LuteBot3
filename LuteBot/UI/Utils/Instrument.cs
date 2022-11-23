@@ -22,7 +22,7 @@ namespace LuteBot.UI.Utils
         public static List<Instrument> Prefabs = new List<Instrument>()
         {
             new Instrument() { LowestSentNote = 0, LowestPlayedNote = 24, NoteCount = 60, NoteCooldown = 18, Name = "Mordhau Lute" },
-            new Instrument() { LowestSentNote = 0, LowestPlayedNote = 36, NoteCount = 48, NoteCooldown = 18, Name = "Mordhau Flute", ForbidsChords = true },
+            new Instrument() { LowestSentNote = 0, LowestPlayedNote = 36, NoteCount = 48, NoteCooldown = 18, Name = "Mordhau Flute" },
             new Instrument() { LowestSentNote = 45, NoteCount = 32, NoteCooldown = 5, Name = "Rust Trumpet" }, // TODO: Fill out LowestPlayedNotes on Rust instruments
             new Instrument() { LowestSentNote = 21, NoteCount = 88, NoteCooldown = 5, Name = "Rust Piano" },
             new Instrument() { LowestSentNote = 40, NoteCount = 30, NoteCooldown = 5, Name = "Rust Can Guitar" },
