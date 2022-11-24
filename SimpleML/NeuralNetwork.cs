@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -511,7 +512,7 @@ namespace SimpleML
                 {
                     for (int j = 0; j < biases[i].Length; j++)
                     {
-                        biases[i][j] = float.Parse(ListLines[index]);
+                        biases[i][j] = float.Parse(ListLines[index], CultureInfo.InvariantCulture);
                         index++;
                     }
                 }
@@ -521,7 +522,7 @@ namespace SimpleML
                     {
                         for (int k = 0; k < weights[i][j].Length; k++)
                         {
-                            weights[i][j][k] = float.Parse(ListLines[index]);
+                            weights[i][j][k] = float.Parse(ListLines[index], CultureInfo.InvariantCulture);
                             index++;
                         }
                     }
@@ -538,7 +539,7 @@ namespace SimpleML
             {
                 for (int j = 0; j < biases[i].Length; j++)
                 {
-                    writer.WriteLine(biases[i][j]);
+                    writer.WriteLine(biases[i][j].ToString(CultureInfo.InvariantCulture));
                 }
             }
 
@@ -548,7 +549,7 @@ namespace SimpleML
                 {
                     for (int k = 0; k < weights[i][j].Length; k++)
                     {
-                        writer.WriteLine(weights[i][j][k]);
+                        writer.WriteLine(weights[i][j][k].ToString(CultureInfo.InvariantCulture));
                     }
                 }
             }
