@@ -1,3 +1,7 @@
+Version 3.5.2
+
+- Fixed issue loading Neural Network when the application was started from a different directory
+
 Version 3.5.1
 
 - Fixed issue loading Neural Network for languages that use `,` as a decimal separator
