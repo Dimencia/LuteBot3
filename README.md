@@ -12,7 +12,11 @@ And Monty, for LuteBot2, and LuteMod which he allowed me to package here https:/
 ## Usage Instructions
 Download the latest Release from https://github.com/Dimencia/LuteBot3/releases
 
-Change your Mordhau Console keybinding to PageDown (inside the game).  Load a song, and press + while Mordhau is focused and it should start/pause playing
+If prompted to install LuteMod, click yes.
+
+Open game, verify modloader menu showing LuteMod is loaded.  If not, try options -> Install LuteMod
+
+In-game with an instrument in hand, press Kick to open the partition list, press number keys to select a partition, and press feint to pause/play
 
 Further support is provided at the [Bard's Guild Discord](https://discord.gg/4xnJVuz)
 
