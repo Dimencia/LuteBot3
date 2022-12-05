@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,8 +24,8 @@ namespace LuteBot.IO.Files
         private static string autoSavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "Profiles");
 
         private static int fileSize = 5000;
-        private static List<byte> fileHeader;
-        private static List<byte> fileEnd;
+        private static byte[] fileHeader;
+        private static byte[] fileEnd;
 
         public static readonly string SaveFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\..\Local\Mordhau\Saved\SaveGames\";
 
@@ -48,11 +49,35 @@ namespace LuteBot.IO.Files
 
         public static void WriteSaveFile(string filePath, string content)
         {
+            // TODO: Rewrite DeleteData as async
             DeleteData(filePath);
-            int i = 0;
-            while (SaveDataInFile(filePath, content, i))
+
+            // The old way here fails on some edge cases and I'm too lazy to fix it
+            // I'm just rewriting it
+            var dataList = Encoding.UTF8.GetBytes(content).ToList();
+            // Pad with '@' up to something that divides evenly by fileSize
+            while (dataList.Count % fileSize > 0)
+                dataList.Add((byte)'@');
+            var data = dataList.ToArray();
+
+            // tbh I'm rewriting all of the logic just to make sure it's cleared up
+            // and to make it more clear what's going on here
+
+            // We're not going async because it would end up with async voids all over the forms,
+            // and having to invoke back to the main thread, all a lot of work
+            int index = 0;
+            for(int i = 0; (index = i * fileSize) < data.Length; i++)
             {
-                i++;
+                // The index we start writing from... we update it in check instead of setting it to (i+1)*fileSize at the end
+
+                using (FileStream sourceStream = new FileStream(filePath + "[" + i + "].sav",
+                    FileMode.Create, FileAccess.Write, FileShare.None,
+                    bufferSize: 4096, useAsync: true))
+                {
+                    sourceStream.Write(fileHeader, 0, fileHeader.Length);
+                    sourceStream.Write(data, index, fileSize);
+                    sourceStream.Write(fileEnd, 0, fileEnd.Length);
+                };
             }
         }
 
@@ -76,8 +101,8 @@ namespace LuteBot.IO.Files
             }
             else
             {
-                fileHeader = new List<byte>();
-                fileEnd = new List<byte>();
+                var fileHeader = new List<byte>();
+                var fileEnd = new List<byte>();
                 i = readResult.Length - 1;
                 while (i >= 0 && !(readResult[i] == 124 || readResult[i] == 64))
                 {
@@ -99,6 +124,8 @@ namespace LuteBot.IO.Files
                 fileEnd.Reverse();
                 fileHeader.Reverse();
                 fileSize = retrievedData.Count;
+                SaveManager.fileHeader = fileHeader.ToArray();
+                SaveManager.fileEnd = fileEnd.ToArray();
                 string debug1 = Encoding.UTF8.GetString(fileEnd.ToArray());
                 string debug2 = Encoding.UTF8.GetString(retrievedData.ToArray());
                 string debug3 = Encoding.UTF8.GetString(fileHeader.ToArray());
@@ -130,9 +157,9 @@ namespace LuteBot.IO.Files
 
         private static void SaveDataOnDisk(string filePath, byte[] value)
         {
-            byte[] data = new byte[fileHeader.Count + value.Length + fileEnd.Count];
+            byte[] data = new byte[fileHeader.Length + value.Length + fileEnd.Length];
             int i, y;
-            for (i = 0; i < fileHeader.Count; i++)
+            for (i = 0; i < fileHeader.Length; i++)
             {
                 data[i] = fileHeader[i];
             }
@@ -140,7 +167,7 @@ namespace LuteBot.IO.Files
             {
                 data[i] = value[y];
             }
-            for (y = 0; y < fileEnd.Count; i++, y++)
+            for (y = 0; y < fileEnd.Length; i++, y++)
             {
                 data[i] = fileEnd[y];
             }

@@ -360,7 +360,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="LuteBot_TemporaryKey.pfx" />
-    <None Include="LuteMod\FLuteMod_2.0.pak">
+    <None Include="LuteMod\FLuteMod_2.1.pak">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="LuteMod\PartitionIndex[0].sav">

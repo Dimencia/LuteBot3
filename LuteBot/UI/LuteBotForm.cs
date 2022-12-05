@@ -87,9 +87,9 @@ namespace LuteBot
         static LiveMidiManager liveMidiManager;
         static KeyBindingForm keyBindingForm = null;
 
-        private static string lutemodPakName = "FLuteMod_2.0.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
-        private static int lutemodVersion1 = 1;
-        private static int lutemodVersion2 = 42;
+        private static string lutemodPakName = "FLuteMod_2.1.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static int lutemodVersion1 = 2;
+        private static int lutemodVersion2 = 1;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
         private static string loaderString1 = @"[/AutoLoader/BP_AutoLoaderActor.BP_AutoLoaderActor_C]
@@ -197,7 +197,7 @@ ModListWidgetStayTime=5.0";
             }
             catch
             {
-                ConfigManager.SetProperty(PropertyItem.NumChords, "3");
+                ConfigManager.SetProperty(PropertyItem.NumChords, "6");
                 ConfigManager.SaveConfig();
             }
 
@@ -222,7 +222,7 @@ ModListWidgetStayTime=5.0";
                 {
 
                     // Parse the version into something we can compare
-                    var firstGoodVersions = "3.5.0".Split('.');
+                    var firstGoodVersions = "3.5.3".Split('.');
                     var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
 
 
@@ -425,7 +425,9 @@ ModListWidgetStayTime=5.0";
                         Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9]*)");
                         if (m.Success)
                         {
-                            return int.Parse(m.Groups[1].Value) >= lutemodVersion1 && int.Parse(m.Groups[2].Value) >= lutemodVersion2;
+                            var v1 = int.Parse(m.Groups[1].Value);
+                            var v2 = int.Parse(m.Groups[2].Value);
+                            return v1 > lutemodVersion1 || (v1 == lutemodVersion1 && v2 >= lutemodVersion2);
                         }
                     }
                 }

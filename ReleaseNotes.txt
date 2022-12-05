@@ -1,3 +1,15 @@
+Version 3.5.3
+
+- Updated to LuteMod 2.1, removing queueing on Flutes to clean up playback
+	- The first time launching with this LuteBot version, it will automatically update LuteMod
+
+- Rewrote file-saving logic for .sav files:
+	- In some rare instances, Partitions and the PartitionIndex were being corrupted or filled with junk data
+	- This rewrite simplifies saving these files and should hopefully stop that from happening
+
+- Fixed issue with detecting if LuteMod version is up to date
+- Set default NumChords to 6 for new installs
+
 Version 3.5.2
 
 - Fixed issue loading Neural Network when the application was started from a different directory

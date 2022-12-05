@@ -62,7 +62,7 @@
     },
     {
       "Item": "NumChords",
-      "Value": "3"
+      "Value": "6"
     },
     {
       "Item": "DebugMode",
