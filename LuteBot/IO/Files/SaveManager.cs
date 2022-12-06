@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
@@ -74,7 +73,7 @@ namespace LuteBot.IO.Files
             // We're not going async because it would end up with async voids all over the forms,
             // and having to invoke back to the main thread, all a lot of work
             int index = 0;
-            for (int i = 0; (index = i * fileSize) < data.Length; i++)
+            for(int i = 0; (index = i * fileSize) < data.Length; i++)
             {
                 // The index we start writing from... we update it in check instead of setting it to (i+1)*fileSize at the end
 
