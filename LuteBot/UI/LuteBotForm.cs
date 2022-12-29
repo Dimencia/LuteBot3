@@ -1127,6 +1127,9 @@ ModListWidgetStayTime=5.0";
                 //{
                 currentTrackName = fileName;
                 //}
+
+                // Make sure the Track Selection window opens and goes to the top when songs are loaded
+                TrackFilteringToolStripMenuItem_Click(this, null);
             }
         }
 
@@ -1298,12 +1301,18 @@ ModListWidgetStayTime=5.0";
                 var midiPlayer = player as MidiPlayer;
                 trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice, this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
+                trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
                 trackSelectionForm.Left = coords.X;
+                trackSelectionForm.BringToFront();
+                trackSelectionForm.Focus();
             }
-            trackSelectionForm.Show();
-            trackSelectionForm.BringToFront();
-            trackSelectionForm.Focus();
+            else
+            {
+                trackSelectionForm.Show();
+                trackSelectionForm.BringToFront();
+                trackSelectionForm.Focus();
+            }
         }
 
         private static IntPtr SetHook(LowLevelKeyboardProc proc)

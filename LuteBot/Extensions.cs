@@ -141,16 +141,17 @@ namespace LuteBot
 
             //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
             int i = 0;
-            inputs[i++] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
-            inputs[i++] = channel.maxChordSize;
-            inputs[i++] = (maxTotalNoteLength > 0 ? channel.totalNoteLength / maxTotalNoteLength : 0);
+            inputs[i++] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength * 2 - 1 : 0);
+            inputs[i++] = channel.maxChordSize-2;
+            inputs[i++] = (maxTotalNoteLength > 0 ? channel.totalNoteLength / maxTotalNoteLength * 2 - 1 : 0);
             //inputi++lNoteLength;
-            inputs[i++] = channel.highestNote / 128f;
-            inputs[i++] = channel.lowestNote / 128f;
-            inputs[i++] = (maxNumNotes > 0 ? channel.numNotes / maxNumNotes : 0);
+            inputs[i++] = (channel.highestNote - 64f) / 64f;
+            inputs[i++] = (channel.lowestNote - 64f) / 64f;
+            inputs[i++] = (maxNumNotes > 0 ? channel.numNotes / maxNumNotes * 2 - 1 : 0);
             //inputi++ 6] = channel.Id / 16f;
-            inputs[i++] = channel.midiInstrument / 128f;
-            inputs[i++] = channel.avgVariation;
+            //inputs[i++] = channel.midiInstrument / 64f - 1f;
+            inputs[i++] = channel.avgChordSize-2;
+            inputs[i++] = (channel.avgVariation - 32f) / 32f; // This one can end up as high as 2 in rare cases, but that's still ok
             //inputs[j * 6 + 5] = channel.numNotes;
 
 

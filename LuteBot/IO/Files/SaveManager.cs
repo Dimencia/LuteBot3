@@ -30,6 +30,24 @@ namespace LuteBot.IO.Files
 
         public static readonly string SaveFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\..\Local\Mordhau\Saved\SaveGames\";
 
+
+        static SaveManager()
+        {
+            // On startup, try to get fileHeader and fileSize from our included PartitionIndex file
+            // preventing crashes from malformed index files failing to read on startup
+            try
+            {
+                ReadSavFile(Path.Combine(Application.StartupPath, "lib", "LuteMod", "PartitionIndex[0].sav"));
+            }
+            catch
+            {
+                // And if it doesn't work... oh well?  Maybe other things can still work, we won't throw.
+                // It should always work, though
+
+            }
+        }
+
+
         public static string ReadSavFile(string filePath)
         {
             StringBuilder strbld = new StringBuilder();
@@ -93,75 +111,104 @@ namespace LuteBot.IO.Files
 
         private static string GetDataFromFile(string filePath)
         {
+            try
+            {
+                byte[] readResult = FileIO.LoadFile(filePath);
+                byte[] retrievedData = null;
+                if (readResult == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    // The data we start with is backwards; so from the end of the file
+                    // And this is the problem
+
+                    // It looks for @ or |, but if a partition extends across
+                    // Any name in this file here becomes part of the new footer for every file
+
+                    // Which means that some files already have junk there that shouldn't be there
+                    // I'm pretty certain the footer is just, NUl ENQ NUL, which is 0 5 0
+                    // That's still not as helpful as it should be 
+                    // I think I need to search it forwards, to find that; any additional junk will be after it
+
+                    // And also, extra stuff after the footer doesn't matter; only the content's size is important
+
+
+                    // So I guess I'm rewriting this, too
+
+                    // I know the header ends with a Š DC3 NUL NUL, but that may not be reliable
+
+                    // I also know the PartitionIndex[0] will have a perfect header and an easy way to find it
+                    // And that this is, currently, only used to read PartitionIndex...
+                    // So I'll just do it on the first one of whatever we read
+                    int contentStart = 0;
+
+                    int index = 0;
+                    if (fileHeader == null)
+                    {
+                        // Assume it has |PartitionIndex| at the start of its content
+                        // Cuz in our use cases it should...
+
+                        // Oh right, but finding the byte occurrence of that is painful
+
+                        // Alright... convert the string to bytes
+                        // Then pull that many bytes at a time, moving forward 1 at a time, til we find it
+                        var headerTagBytes = Encoding.UTF8.GetBytes("|PartitionIndex|");
+                        var lastBytes = new byte[headerTagBytes.Length];
+
+                        while (!Enumerable.SequenceEqual(lastBytes, headerTagBytes))
+                        {
+                            Array.Copy(readResult, index++, lastBytes, 0, lastBytes.Length);
+                        }
+                        fileHeader = new byte[index - 1];
+                        Array.Copy(readResult, 0, fileHeader, 0, fileHeader.Length);
+                    }
+                    contentStart = fileHeader.Length;
+
+                    if (fileSize == 0)
+                    {
+                        // Now find the footer in the content; index is already at the start of the content +1
+                        // We can probably just look for NUL and stop there, but that's more complicated than it sounds with UTF-8
+                        // So this will do
+                        var lastFooterBytes = new byte[fileEnd.Length];
+                        while (!Enumerable.SequenceEqual(lastFooterBytes, fileEnd))
+                        {
+                            Array.Copy(readResult, index++, lastFooterBytes, 0, lastFooterBytes.Length);
+                        }
+                        fileSize = index - 1 - fileHeader.Length;
+                    }
+
+                    // And now we know the start/end
+                    retrievedData = new byte[fileSize];
+                    Array.Copy(readResult, contentStart, retrievedData, 0, fileSize);
+
+                    return Encoding.UTF8.GetString(retrievedData.ToArray()).Replace("\0", "").Replace("@", "");
+                }
+            }
+            catch
+            {
+                var result = GetDataFromFileOld(filePath);
+                // We should already have accurate data and will save it as a new version if anything changes
+                // So we won't bother resaving or doing anything if we had to fallback
+                return result;
+            }
+        }
+
+        private static string GetDataFromFileOld(string filePath)
+        {
             byte[] readResult = FileIO.LoadFile(filePath);
-            byte[] retrievedData = null;
+            int i;
+            List<byte> retrievedData = new List<byte>();
             if (readResult == null)
             {
                 return null;
             }
             else
             {
-                // The data we start with is backwards; so from the end of the file
-                // And this is the problem
-
-                // It looks for @ or |, but if a partition extends across
-                // Any name in this file here becomes part of the new footer for every file
-
-                // Which means that some files already have junk there that shouldn't be there
-                // I'm pretty certain the footer is just, NUl ENQ NUL, which is 0 5 0
-                // That's still not as helpful as it should be 
-                // I think I need to search it forwards, to find that; any additional junk will be after it
-
-                // And also, extra stuff after the footer doesn't matter; only the content's size is important
-
-
-                // So I guess I'm rewriting this, too
-
-                // I know the header ends with a Š DC3 NUL NUL, but that may not be reliable
-
-                // I also know the PartitionIndex[0] will have a perfect header and an easy way to find it
-                // And that this is, currently, only used to read PartitionIndex...
-                // So I'll just do it on the first one of whatever we read
-                int contentStart = 0;
-
-                int index = 0;
-                if (fileHeader == null)
-                {
-                    // Assume it has |PartitionIndex| at the start of its content
-                    // Cuz in our use cases it should...
-
-                    // Oh right, but finding the byte occurrence of that is painful
-
-                    // Alright... convert the string to bytes
-                    // Then pull that many bytes at a time, moving forward 1 at a time, til we find it
-                    var headerTagBytes = Encoding.UTF8.GetBytes("|PartitionIndex|");
-                    var lastBytes = new byte[headerTagBytes.Length];
-
-                    while (!Enumerable.SequenceEqual(lastBytes, headerTagBytes))
-                    {
-                        Array.Copy(readResult, index++, lastBytes, 0, lastBytes.Length);
-                    }
-                    fileHeader = new byte[index - 1];
-                    Array.Copy(readResult, 0, fileHeader, 0, fileHeader.Length);
-                }
-                contentStart = fileHeader.Length;
-
-                if (fileSize == 0)
-                {
-                    // Now find the footer in the content; index is already at the start of the content +1
-                    var lastFooterBytes = new byte[fileEnd.Length];
-                    while (!Enumerable.SequenceEqual(lastFooterBytes, fileEnd))
-                    {
-                        Array.Copy(readResult, index++, lastFooterBytes, 0, lastFooterBytes.Length);
-                    }
-                    fileSize = index - 1 - fileHeader.Length;
-                }
-
-                // And now we know the start/end
-                retrievedData = new byte[fileSize];
-                Array.Copy(readResult, contentStart, retrievedData, 0, fileSize);
-
-                /*
+                var fileHeader = new List<byte>();
+                var fileEnd = new List<byte>();
+                i = readResult.Length - 1;
                 while (i >= 0 && !(readResult[i] == 124 || readResult[i] == 64))
                 {
                     i--;
@@ -182,12 +229,9 @@ namespace LuteBot.IO.Files
                 fileEnd.Reverse();
                 fileHeader.Reverse();
                 fileSize = retrievedData.Count;
-                SaveManager.fileHeader = fileHeader.ToArray();
-                SaveManager.fileEnd = fileEnd.ToArray();
                 string debug1 = Encoding.UTF8.GetString(fileEnd.ToArray());
                 string debug2 = Encoding.UTF8.GetString(retrievedData.ToArray());
                 string debug3 = Encoding.UTF8.GetString(fileHeader.ToArray());
-                */
                 return Encoding.UTF8.GetString(retrievedData.ToArray()).Replace("\0", "").Replace("@", "");
             }
         }

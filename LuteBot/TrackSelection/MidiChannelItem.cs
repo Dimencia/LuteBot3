@@ -183,6 +183,7 @@ namespace LuteBot.TrackSelection
         public Dictionary<int, List<MidiNote>> tickNotes { get; internal set; } = new Dictionary<int, List<MidiNote>>(); // For setup and filtering, as well as disabling/enabling specific notes
         public int midiInstrument { get; set; }
         public float avgVariation { get; set; }
+        public float avgChordSize { get; set; }
 
         public MidiChannelItem() { }
 
@@ -201,6 +202,7 @@ namespace LuteBot.TrackSelection
             this.averageNote = old.averageNote;
             this.midiInstrument = old.midiInstrument;
             this.avgVariation = old.avgVariation;
+            this.avgChordSize = old.avgChordSize;
             // in tickNotes, the MidiNotes need to be reinstantiated so we don't have them by ref
             this.tickNotes.Clear();
             foreach(var kvp in old.tickNotes)

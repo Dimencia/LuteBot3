@@ -545,7 +545,10 @@ namespace LuteBot.Core.Midi
                         }
 
                         if (channel.tickNotes.Count > 0)
+                        {
                             channel.maxChordSize = channel.tickNotes.Max(t => t.Value.Count);
+                            channel.avgChordSize = (float)channel.tickNotes.Sum(t => t.Value.Count) / channel.tickNotes.Count;
+                        }
                     }
                     foreach (var kvp in tracks)
                     {
@@ -582,7 +585,10 @@ namespace LuteBot.Core.Midi
                         }
 
                         if (channel.tickNotes.Count > 0)
+                        {
                             channel.maxChordSize = channel.tickNotes.Max(t => t.Value.Count);
+                            channel.avgChordSize = (float)channel.tickNotes.Sum(t => t.Value.Count) / channel.tickNotes.Count;
+                        }
                     }
 
                     // Add a note on the drum channel

@@ -66,10 +66,10 @@ namespace LuteBot.UI
             this.ChannelsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ChannelsListBox.FormattingEnabled = true;
-            this.ChannelsListBox.Location = new System.Drawing.Point(16, 47);
+            this.ChannelsListBox.Location = new System.Drawing.Point(16, 81);
             this.ChannelsListBox.Margin = new System.Windows.Forms.Padding(4);
             this.ChannelsListBox.Name = "ChannelsListBox";
-            this.ChannelsListBox.Size = new System.Drawing.Size(359, 208);
+            this.ChannelsListBox.Size = new System.Drawing.Size(359, 174);
             this.ChannelsListBox.TabIndex = 3;
             this.ChannelsListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ChannelListBox_ItemChecked);
             // 
@@ -77,7 +77,7 @@ namespace LuteBot.UI
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(16, 11);
+            this.label1.Location = new System.Drawing.Point(22, 57);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(153, 20);
@@ -101,10 +101,10 @@ namespace LuteBot.UI
             this.AutoActivateCheckBox.AutoSize = true;
             this.AutoActivateCheckBox.Checked = true;
             this.AutoActivateCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.AutoActivateCheckBox.Location = new System.Drawing.Point(267, 897);
+            this.AutoActivateCheckBox.Location = new System.Drawing.Point(267, 899);
             this.AutoActivateCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.AutoActivateCheckBox.Name = "AutoActivateCheckBox";
-            this.AutoActivateCheckBox.Size = new System.Drawing.Size(203, 38);
+            this.AutoActivateCheckBox.Size = new System.Drawing.Size(193, 36);
             this.AutoActivateCheckBox.TabIndex = 11;
             this.AutoActivateCheckBox.Text = "Automatically load a profile \r\non song selection";
             this.AutoActivateCheckBox.UseVisualStyleBackColor = true;
@@ -127,7 +127,7 @@ namespace LuteBot.UI
             this.TrackListLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.TrackListLabel.AutoSize = true;
             this.TrackListLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TrackListLabel.Location = new System.Drawing.Point(598, 11);
+            this.TrackListLabel.Location = new System.Drawing.Point(604, 57);
             this.TrackListLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.TrackListLabel.Name = "TrackListLabel";
             this.TrackListLabel.Size = new System.Drawing.Size(111, 20);
@@ -138,10 +138,10 @@ namespace LuteBot.UI
             // 
             this.TrackListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.TrackListBox.FormattingEnabled = true;
-            this.TrackListBox.Location = new System.Drawing.Point(383, 47);
+            this.TrackListBox.Location = new System.Drawing.Point(383, 81);
             this.TrackListBox.Margin = new System.Windows.Forms.Padding(4);
             this.TrackListBox.Name = "TrackListBox";
-            this.TrackListBox.Size = new System.Drawing.Size(341, 208);
+            this.TrackListBox.Size = new System.Drawing.Size(341, 174);
             this.TrackListBox.TabIndex = 13;
             this.TrackListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.TrackListBox_ItemCheck);
             // 
@@ -170,7 +170,7 @@ namespace LuteBot.UI
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(13, 268);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(113, 17);
+            this.label2.Size = new System.Drawing.Size(106, 16);
             this.label2.TabIndex = 21;
             this.label2.Text = "Notes Per Chord";
             // 
@@ -195,10 +195,11 @@ namespace LuteBot.UI
             // 
             this.instrumentsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.instrumentsBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.instrumentsBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.instrumentsBox.FormattingEnabled = true;
-            this.instrumentsBox.Location = new System.Drawing.Point(490, 265);
+            this.instrumentsBox.Location = new System.Drawing.Point(253, 12);
             this.instrumentsBox.Name = "instrumentsBox";
-            this.instrumentsBox.Size = new System.Drawing.Size(230, 24);
+            this.instrumentsBox.Size = new System.Drawing.Size(249, 33);
             this.instrumentsBox.TabIndex = 23;
             this.instrumentsBox.SelectedIndexChanged += new System.EventHandler(this.instrumentsBox_SelectedIndexChanged);
             // 
@@ -206,11 +207,12 @@ namespace LuteBot.UI
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(404, 270);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(69, 15);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(74, 17);
+            this.label3.Size = new System.Drawing.Size(183, 25);
             this.label3.TabIndex = 24;
-            this.label3.Text = "Instrument";
+            this.label3.Text = "Show Settings For: ";
             // 
             // contextMenuStrip1
             // 

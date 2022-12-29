@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace SimpleML
@@ -216,8 +218,8 @@ namespace SimpleML
 
         public void BackPropagate(float[] inputs, float[] expected)//backpropogation;
         {
-            lock (ParallelLock) // Well this is pointless.  Obviously I can't go parallel when the inputs need to be populated throughout all of this
-            {
+            //lock (ParallelLock) // Well this is pointless.  Obviously I can't go parallel when the inputs need to be populated throughout all of this
+            //{
                 // One way to make this parallel might involve locking, deep-copying the neurons, unlocking, 
                 // Doing our math and calculating a final set of adjustments to make
                 // Then lock and apply them
@@ -273,7 +275,7 @@ namespace SimpleML
                         }
                     }
                 }
-            }
+            //}
         }
 
 
@@ -459,7 +461,7 @@ namespace SimpleML
         // It should iterate each neuron, get each value from the previous layer, multiply it by the value of the weight
         // Each neuron adds all these together, the values*weights of every previous layer's neuron
         // Adds the bias, runs it through the activation function, and then sets its own value
-        // The process then continues forward
+        // The process then continues forward 
         // It then returns the final set of neuron values
         public float[] FeedForward(float[] inputs)
         {
@@ -472,11 +474,8 @@ namespace SimpleML
                 int layer = i - 1;
                 for (int j = 0; j < layers[i]; j++)
                 {
-                    float value = 0f;
-                    for (int k = 0; k < layers[i - 1]; k++)
-                    {
-                        value += weights[i - 1][j][k] * neurons[i - 1][k];
-                    }// For each neuron in this layer, get each neuron's value * weight from the previous layer, and sum them
+                    float value = MatrixMultiply(weights[i-1][j], neurons[i-1]).Sum();
+                    // For each neuron in this layer, get each neuron's value * weight from the previous layer, and sum them
                     // Then add the bias and activate
                     //if (i != layers.Length - 1)
                     if (activations[layer] != 4)
@@ -489,6 +488,46 @@ namespace SimpleML
             }
             //neurons[layers.Length - 1] = Softmax(neurons[layers.Length - 1]);
             return neurons[layers.Length - 1];
+        }
+
+
+        float[] MatrixMultiply(float[] left, float[] right)
+        {
+            if (left is null)
+            {
+                throw new ArgumentNullException(nameof(left));
+            }
+
+            if (right is null)
+            {
+                throw new ArgumentNullException(nameof(right));
+            }
+
+            if (left.Length != right.Length)
+            {
+                throw new ArgumentException($"{nameof(left)} and {nameof(right)} are not the same length");
+            }
+
+            int length = left.Length;
+            float[] result = new float[length];
+
+            // Get the number of elements that can't be processed in the vector
+            // NOTE: Vector<T>.Count is a JIT time constant and will get optimized accordingly
+            int remaining = length % Vector<float>.Count;
+
+            for (int i = 0; i < length - remaining; i += Vector<float>.Count)
+            {
+                var v1 = new Vector<float>(left, i);
+                var v2 = new Vector<float>(right, i);
+                (v1 * v2).CopyTo(result, i);
+            }
+
+            for (int i = length - remaining; i < length; i++)
+            {
+                result[i] = left[i] * right[i];
+            }
+
+            return result;
         }
 
 
