@@ -220,61 +220,82 @@ namespace SimpleML
         {
             //lock (ParallelLock) // Well this is pointless.  Obviously I can't go parallel when the inputs need to be populated throughout all of this
             //{
-                // One way to make this parallel might involve locking, deep-copying the neurons, unlocking, 
-                // Doing our math and calculating a final set of adjustments to make
-                // Then lock and apply them
+            // One way to make this parallel might involve locking, deep-copying the neurons, unlocking, 
+            // Doing our math and calculating a final set of adjustments to make
+            // Then lock and apply them
 
-                float[] output = FeedForward(inputs);//runs feed forward to ensure neurons are populated correctly
-                cost = 0;
-                for (int i = 0; i < output.Length; i++) cost += (float)Math.Pow(output[i] - expected[i], 2);//calculated cost of network
-                                                                                                            //for (int i = 0; i < output.Length; i++) cost += (output[i] - expected[i]);//calculated cost of network - removed pow because we were overflowing to nan
-                cost = cost / 2;//this value is not used in calculions, rather used to identify the performance of the network
+            float[] output = FeedForward(inputs);//runs feed forward to ensure neurons are populated correctly
+            cost = 0;
 
-                float[][] gamma;
+            // If the sorted result list has the same one as the highest, we treat loss as 0
+            var orderedResults = output.Select((v, c) => (v, expected[c])).OrderByDescending(v => v.Item1).ToArray();
+
+            var numFlute = 1;
+            bool correct = true;
+
+            for (int j = 0; j < numFlute; j++)
+            {
+                if (orderedResults.ElementAt(j).Item2 != 1f)
+                    correct = false;
+            }
+
+            //if (correct)
+            //{
+            //    return;//No changes and no cost, it was good
+            //}
 
 
-                List<float[]> gammaList = new List<float[]>();
-                for (int i = 0; i < layers.Length; i++)
+            for (int i = 0; i < output.Length; i++) cost += (float)Math.Pow(output[i] - expected[i], 2);//calculated cost of network
+                                                                                                        //for (int i = 0; i < output.Length; i++) cost += (output[i] - expected[i]);//calculated cost of network - removed pow because we were overflowing to nan
+            cost = cost / 2;//this value is not used in calculions, rather used to identify the performance of the network
+
+            float[][] gamma;
+
+
+            List<float[]> gammaList = new List<float[]>();
+            for (int i = 0; i < layers.Length; i++)
+            {
+                gammaList.Add(new float[layers[i]]);
+            }
+            gamma = gammaList.ToArray();//gamma initialization
+
+            int layer = layers.Length - 2;
+
+
+            for (int i = 0; i < output.Length; i++) gamma[layers.Length - 1][i] = (output[i] - expected[i]) * activateDer(output[i], layer);//Gamma calculation
+
+
+            for (int i = 0; i < layers[layers.Length - 1]; i++)//calculates the w' and b' for the last layer in the network
+            {
+                biases[layers.Length - 2][i] -= gamma[layers.Length - 1][i] * learningRate;
+                for (int j = 0; j < layers[layers.Length - 2]; j++)
                 {
-                    gammaList.Add(new float[layers[i]]);
+                    weights[layers.Length - 2][i][j] -= gamma[layers.Length - 1][i] * neurons[layers.Length - 2][j] * learningRate;//*learning 
                 }
-                gamma = gammaList.ToArray();//gamma initialization
+            }
 
-                int layer = layers.Length - 2;
-                for (int i = 0; i < output.Length; i++) gamma[layers.Length - 1][i] = (output[i] - expected[i]) * activateDer(output[i], layer);//Gamma calculation
-
-
-                for (int i = 0; i < layers[layers.Length - 1]; i++)//calculates the w' and b' for the last layer in the network
+            for (int i = layers.Length - 2; i > 0; i--)//runs on all hidden layers
+            {
+                layer = i - 1;
+                for (int j = 0; j < layers[i]; j++)//outputs
                 {
-                    biases[layers.Length - 2][i] -= gamma[layers.Length - 1][i] * learningRate;
-                    for (int j = 0; j < layers[layers.Length - 2]; j++)
+                    gamma[i][j] = 0;
+                    for (int k = 0; k < gamma[i + 1].Length; k++)
                     {
-                        weights[layers.Length - 2][i][j] -= gamma[layers.Length - 1][i] * neurons[layers.Length - 2][j] * learningRate;//*learning 
+                        gamma[i][j] += gamma[i + 1][k] * weights[i][k][j];
+                    }
+                    gamma[i][j] *= activateDer(neurons[i][j], layer);//calculate gamma
+                }
+
+                for (int j = 0; j < layers[i]; j++)//itterate over outputs of layer
+                {
+                    biases[i - 1][j] -= gamma[i][j] * learningRate;//modify biases of network
+                    for (int k = 0; k < layers[i - 1]; k++)//itterate over inputs to layer
+                    {
+                        weights[i - 1][j][k] -= gamma[i][j] * neurons[i - 1][k] * learningRate;//modify weights of network
                     }
                 }
-
-                for (int i = layers.Length - 2; i > 0; i--)//runs on all hidden layers
-                {
-                    layer = i - 1;
-                    for (int j = 0; j < layers[i]; j++)//outputs
-                    {
-                        gamma[i][j] = 0;
-                        for (int k = 0; k < gamma[i + 1].Length; k++)
-                        {
-                            gamma[i][j] += gamma[i + 1][k] * weights[i][k][j];
-                        }
-                        gamma[i][j] *= activateDer(neurons[i][j], layer);//calculate gamma
-                    }
-
-                    for (int j = 0; j < layers[i]; j++)//itterate over outputs of layer
-                    {
-                        biases[i - 1][j] -= gamma[i][j] * learningRate;//modify biases of network
-                        for (int k = 0; k < layers[i - 1]; k++)//itterate over inputs to layer
-                        {
-                            weights[i - 1][j][k] -= gamma[i][j] * neurons[i - 1][k] * learningRate;//modify weights of network
-                        }
-                    }
-                }
+            }
             //}
         }
 
@@ -474,7 +495,7 @@ namespace SimpleML
                 int layer = i - 1;
                 for (int j = 0; j < layers[i]; j++)
                 {
-                    float value = MatrixMultiply(weights[i-1][j], neurons[i-1]).Sum();
+                    float value = MatrixMultiply(weights[i - 1][j], neurons[i - 1]).Sum();
                     // For each neuron in this layer, get each neuron's value * weight from the previous layer, and sum them
                     // Then add the bias and activate
                     //if (i != layers.Length - 1)

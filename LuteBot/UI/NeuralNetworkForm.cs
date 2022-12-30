@@ -305,6 +305,7 @@ namespace LuteBot.UI
                     parameters[n] = sizes[n - 1];
                 parameters[parameters.Length - 1] = numSupportedChannels;
                 tsm.neural = new NeuralNetwork(parameters, activation);
+                tsm.neural.Load(savePath);
 
                 // These below work great and are the settings for 'v2Neural'
                 //string[] activation = new string[] { "tanh", "softmax" };
@@ -335,13 +336,15 @@ namespace LuteBot.UI
                         // Require at least 3 channels
                         if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1)) // To keep the percentages from getting weird in training, at least 4 channels?
                         {
-                            if (tsm.MidiTracks.All(t => t.Value.Active))
+                            if (tsm.MidiTracks.All(t => t.Value.Active) && tsm.DataDictionary[1].MidiChannels.Where(c => c.Active).Count() == 1)
                             {
                                 var tempNeuralCandidates = tsm.MidiChannels.Values.Where(c => c.Id != 9).ToArray();
+
                                 foreach (var ca in tempNeuralCandidates)
                                 {
                                     ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
                                 }
+
                                 // Now copy it to an array of appropriate size
                                 var fullCandidates = new MidiChannelItem[numSupportedChannels];
                                 tempNeuralCandidates.CopyTo(fullCandidates, 0);
@@ -578,12 +581,14 @@ namespace LuteBot.UI
                         }
                     }
                     float invokeTotal = costTotal;
+                    int numTestCorrect = numActualTestsCorrect;
+                    int numTrainingCorrect = numTestsCorrect;
                     if(InvokeRequired)
                         Task.Run(() => Invoke((MethodInvoker)delegate
                         {
-                            richTextBox1.AppendText($"\n{numActualTestsCorrect}/{neuralTestCandidates.Count()} ({(float)numActualTestsCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTestsCorrect}/{neuralCandidates.Count()}\nTraining #{i++} - TotalCost: {invokeTotal} (This number should go down eventually)");
+                            richTextBox1.AppendText($"\n{numTestCorrect}/{neuralTestCandidates.Count()} ({(float)numTestCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTrainingCorrect}/{neuralCandidates.Count()}\nTraining #{i++} - TotalCost: {invokeTotal} (This number should go down eventually)");
                             richTextBox1.ScrollToCaret();
-                            progressBarTraining.Value = numActualTestsCorrect;
+                            progressBarTraining.Value = numTestCorrect;
                         }));
                     else
                     {
@@ -601,8 +606,8 @@ namespace LuteBot.UI
                     else
                         numSuccesses++;
 
-                    break;
-                    //await Task.Delay(1).ConfigureAwait(false); // Let the form live between iterations
+                    await Task.Delay(1).ConfigureAwait(false); // Let the form live between iterations
+                    //break;
                 }
 
                 Invoke((MethodInvoker)delegate

@@ -443,9 +443,11 @@ namespace LuteBot.TrackSelection
                     var sizes = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(NeuralNetworkForm.savePath + ".config"));
 
                     int numParamsPerChannel = Extensions.numParamsPerChannel;
+                    int numSupportedChannels = 32;
 
                     // We can softmax all the outputs once we have them for each channel
                     // This is great, btw.  This is 'channelNeural', the only issue is that the way I handle the output gives values <0 and > 100% sometimes, but rarely...
+
 
                     int numNeurons = sizes.Length + 2; // They don't hand us the input or output layer
 
@@ -453,10 +455,10 @@ namespace LuteBot.TrackSelection
                     for (int n = 0; n < activation.Length; n++) // I decided not to use softmax because it gave more varied values
                         activation[n] = "tanh";
                     int[] parameters = new int[numNeurons];
-                    parameters[0] = numParamsPerChannel;
+                    parameters[0] = numParamsPerChannel * numSupportedChannels;
                     for (int n = 1; n < parameters.Length - 1; n++)
                         parameters[n] = sizes[n - 1];
-                    parameters[parameters.Length - 1] = 1;
+                    parameters[parameters.Length - 1] = numSupportedChannels;
                     neural = new NeuralNetwork(parameters, activation);
                     neural.Load(NeuralNetworkForm.savePath);
                 }
@@ -474,30 +476,60 @@ namespace LuteBot.TrackSelection
             {
                 Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
 
-                float maxAvgNoteLength = activeChannels.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
-                float maxNoteLength = activeChannels.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
-                float maxNumNotes = activeChannels.Max(c => c.Id == 9 ? 0 : c.numNotes);
+                int numParamsPerChannel = Extensions.numParamsPerChannel;
+                int numSupportedChannels = 32;
+                var random = new Random();
+                var tempNeuralCandidates = MidiChannels.Values.Where(c => c.Id != 9).Concat(MidiTracks.Values).ToArray();
 
-                foreach (var channel in activeChannels)
-                {
-                    var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
-                    var neuralResults = neural.FeedForward(inputs);
-                    channelResults[channel] = neuralResults[0];
-                }
-                foreach (var channel in MidiTracks.Values)
-                {
-                    var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
-                    var neuralResults = neural.FeedForward(inputs);
-                    channelResults[channel] = neuralResults[0]; // The tracks are MidiChannels and can work in this way; later we just check if they are a MidiTrack
-                }
+                if (tempNeuralCandidates.Length > numSupportedChannels)
+                    tempNeuralCandidates = tempNeuralCandidates.Take(numSupportedChannels).ToArray();
+                // Now copy it to an array of appropriate size
+                var song = new MidiChannelItem[numSupportedChannels];
+                tempNeuralCandidates.CopyTo(song, 0);
 
-                var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
+                var notNullSong = song.Where(c => c != null).ToArray();
+                float maxAvgNoteLength = notNullSong.Max(c => c.avgNoteLength);
+                float maxNoteLength = notNullSong.Max(c => c.totalNoteLength);
+                float maxNumNotes = notNullSong.Sum(c => c.numNotes);// Let's get it as a percentage of notes in the song
+
+                float maxTickNumber = notNullSong.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
+
+                float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
+                MidiChannelItem[] finalExpected = new MidiChannelItem[numSupportedChannels];
+                int channelNum = 0;
+
+                foreach (var channel in song)
+                {
+                    if (channel == null)
+                    {
+                        channelNum++;// Leave the inputs at 0's
+                    }
+                    else
+                    {
+                        var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                        inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
+
+                        finalExpected[channelNum] = channel;
+
+                        channelNum++;
+                    }
+                }
+                // I still only care that the top N responses are the flute tracks
+                var orderedResults = neural.FeedForward(finalInputs).Select((v, c) => (v, finalExpected[c])).OrderByDescending(v => v.Item1);
+                foreach (var channel in orderedResults.Where(c => c.Item2 != null))
+                    channelResults[channel.Item2] = channel.Item1;
+
+                var orderedResults2 = channelResults.OrderByDescending(kvp => kvp.Value);
                 // Get softmaxed values... maybe? No.  We don't want that, in a large song that leaves many at low percent
                 // We just want to scale the value between either -1 and 1, or -0.5 and 0.5
                 // Just adding 0.5 gets us from 0 to 1 for most purposes, let's try that
                 // It's funny when they're above 100% or below 0%, but messy
                 // 
-                orderedResults = orderedResults.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + 1f) / 2f).OrderByDescending(kvp => kvp.Value);
+
+                // We can actually indeed softmax tho, which is not what it was previously, we just divide each value by the sum of all values
+                // I'm just leaving it for now cuz I'm curious
+
+                orderedResults2 = orderedResults2.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + 1f) / 2f).OrderByDescending(kvp => kvp.Value);
 
 
                 /*
@@ -526,11 +558,11 @@ namespace LuteBot.TrackSelection
 
                 int count = 0; // Separately track count for rank... 
                 int trackCount = 0;
-                for (int i = 0; i < orderedResults.Count(); i++)
+                for (int i = 0; i < orderedResults2.Count(); i++)
                 //foreach (var channel in activeChannels)
                 {
                     //var channel = activeChannels.Where(c => c.Id == orderedResults.ElementAt(i).Key).SingleOrDefault();
-                    var channel = orderedResults.ElementAt(i).Key;
+                    var channel = orderedResults2.ElementAt(i).Key;
                     if (channel != null)
                     {
                         string ident = "Channel";
@@ -539,13 +571,13 @@ namespace LuteBot.TrackSelection
                         Console.WriteLine($"{ident} {channel.Name} ({channel.Id}) - Neural Score: {channelResults[channel]}");
                         //Console.WriteLine($"{channel.Name} ({channel.Id}) - Neural Score: {neuralResults[channel.Id]}");
                         if (channel is TrackItem)
-                            channel.Name += $"(Flute Rank {++trackCount} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
+                            channel.Name += $"(Flute Rank {++trackCount} - {Math.Round(orderedResults2.ElementAt(i).Value * 100, 2)}%)";
                         else
-                            channel.Name += $"(Flute Rank {++count} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
+                            channel.Name += $"(Flute Rank {++count} - {Math.Round(orderedResults2.ElementAt(i).Value * 100, 2)}%)";
                     }
                 }
 
-                return orderedResults.Take(2).Select(r => r.Key).ToList();
+                return orderedResults2.Take(2).Select(r => r.Key).ToList();
             }
 
             return null;
