@@ -264,16 +264,6 @@ namespace SimpleML
 
             for (int i = 0; i < output.Length; i++) gamma[layers.Length - 1][i] = (output[i] - expected[i]) * activateDer(output[i], layer);//Gamma calculation
 
-
-            for (int i = 0; i < layers[layers.Length - 1]; i++)//calculates the w' and b' for the last layer in the network
-            {
-                biases[layers.Length - 2][i] -= gamma[layers.Length - 1][i] * learningRate;
-                for (int j = 0; j < layers[layers.Length - 2]; j++)
-                {
-                    weights[layers.Length - 2][i][j] -= gamma[layers.Length - 1][i] * neurons[layers.Length - 2][j] * learningRate;//*learning 
-                }
-            }
-
             for (int i = layers.Length - 2; i > 0; i--)//runs on all hidden layers
             {
                 layer = i - 1;
@@ -286,7 +276,11 @@ namespace SimpleML
                     }
                     gamma[i][j] *= activateDer(neurons[i][j], layer);//calculate gamma
                 }
+            }
 
+            // Apply gammas
+            for (int i = layers.Length - 1; i > 0; i--)//runs on all hidden layers
+            {
                 for (int j = 0; j < layers[i]; j++)//itterate over outputs of layer
                 {
                     biases[i - 1][j] -= gamma[i][j] * learningRate;//modify biases of network
@@ -296,6 +290,7 @@ namespace SimpleML
                     }
                 }
             }
+
             //}
         }
 
