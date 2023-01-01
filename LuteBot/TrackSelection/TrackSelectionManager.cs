@@ -487,13 +487,6 @@ namespace LuteBot.TrackSelection
                 var song = new MidiChannelItem[numSupportedChannels];
                 tempNeuralCandidates.CopyTo(song, 0);
 
-                var notNullSong = song.Where(c => c != null).ToArray();
-                float maxAvgNoteLength = notNullSong.Max(c => c.avgNoteLength);
-                float maxNoteLength = notNullSong.Max(c => c.totalNoteLength);
-                float maxNumNotes = notNullSong.Sum(c => c.numNotes);// Let's get it as a percentage of notes in the song
-
-                float maxTickNumber = notNullSong.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
-
                 float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
                 MidiChannelItem[] finalExpected = new MidiChannelItem[numSupportedChannels];
                 int channelNum = 0;
@@ -506,7 +499,7 @@ namespace LuteBot.TrackSelection
                     }
                     else
                     {
-                        var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                        var inputs = channel.GetNeuralInputs();
                         inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
 
                         finalExpected[channelNum] = channel;

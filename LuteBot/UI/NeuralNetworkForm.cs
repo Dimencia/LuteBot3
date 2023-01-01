@@ -9,6 +9,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,38 +25,49 @@ namespace LuteBot.UI
             this.tsm = tsm;
             this.pf = pf;
             InitializeComponent();
+            checkBoxTrainExisting.Enabled = File.Exists(NeuralNetworkForm.savePath + ".config");
         }
 
         public static string savePath = Path.Combine(LuteBotForm.lutebotPath, "CustomNetwork");
+
+        private bool pauseTraining = false;
 
         private async void buttonTrain_Click(object sender, EventArgs e)
         {
             try
             {
-                //Invoke((MethodInvoker)delegate
-                //{
-                textBoxSizes.Enabled = false;
-                buttonTrain.Enabled = false;
-                textBox1.Enabled = false;
-                textBox2.Enabled = false;
-                textBoxParallel.Enabled = false;
-                richTextBox1.AppendText("\n\n\n\nLoading song data for training...");
-                //});
-                var sizes = textBoxSizes.Text.Split(',').Select(s => int.Parse(s)).ToArray();
-                int numPerfect = int.Parse(textBox1.Text);
-                float percentForSuccess = float.Parse(textBox2.Text);
-                int parallel = int.Parse(textBoxParallel.Text);
-                await TrainNetwork(numPerfect, percentForSuccess, parallel, sizes).ConfigureAwait(false);
+                if (buttonTrain.Text != "Pause")
+                {
+                    //Invoke((MethodInvoker)delegate
+                    //{
+                    buttonTrain.Text = "Pause";
+                    textBoxSizes.Enabled = false;
+                    textBox1.Enabled = false;
+                    textBox2.Enabled = false;
+                    checkBoxTrainExisting.Enabled = false;
+                    richTextBox1.AppendText("\n\n\n\nLoading song data for training...");
+                    //});
+                    var sizes = textBoxSizes.Text.Split(',').Select(s => int.Parse(s)).ToArray();
+                    int numPerfect = int.Parse(textBox1.Text);
+                    float percentForSuccess = float.Parse(textBox2.Text);
+                    var existing = checkBoxTrainExisting.Checked;
+                    await TrainNetwork(numPerfect, percentForSuccess, existing, sizes).ConfigureAwait(false);
+                }
+                else
+                {
+                    pauseTraining = true;
+                    buttonTrain.Enabled = false;
+                }
             }
             catch (Exception ex)
             {
                 Console.Write(ex);
                 richTextBox1.AppendText($"\nERROR: {ex.Message}.  Cannot continue");
-                textBoxSizes.Enabled = true;
+                textBoxSizes.Enabled = !checkBoxTrainExisting.Checked;
                 buttonTrain.Enabled = true;
                 textBox1.Enabled = true;
                 textBox2.Enabled = true;
-                textBoxParallel.Enabled = true;
+                checkBoxTrainExisting.Enabled = File.Exists(NeuralNetworkForm.savePath + ".config");
             }
         }
 
@@ -284,7 +296,7 @@ namespace LuteBot.UI
         }
 
 
-        private async Task TrainNetwork(int numPerfect, float percentForSuccess, int parallelism, params int[] sizes)
+        private async Task TrainNetwork(int numPerfect, float percentForSuccess, bool retrain, params int[] sizes)
         {
             try
             {
@@ -305,7 +317,8 @@ namespace LuteBot.UI
                     parameters[n] = sizes[n - 1];
                 parameters[parameters.Length - 1] = numSupportedChannels;
                 tsm.neural = new NeuralNetwork(parameters, activation);
-                tsm.neural.Load(savePath);
+                if(retrain)
+                    tsm.neural.Load(savePath);
 
                 // These below work great and are the settings for 'v2Neural'
                 //string[] activation = new string[] { "tanh", "softmax" };
@@ -315,7 +328,7 @@ namespace LuteBot.UI
                 tsm.simpleML = new SimpleML<MidiChannelItem>(
                     (c => c.avgNoteLength),
                     (c => c.maxChordSize),
-                    (c => c.totalNoteLength),
+                    (c => c.percentNoteLength),
                     (c => c.highestNote),
                     (c => c.lowestNote),
                     (c => c.numNotes),
@@ -334,7 +347,7 @@ namespace LuteBot.UI
                         await LuteBotForm.luteBotForm.LoadHelperAsync(midiPath, true);
                         // To prevent it from trying to train on re-generated midis, which have incorrect lengths
                         // Require at least 3 channels
-                        if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1)) // To keep the percentages from getting weird in training, at least 4 channels?
+                        if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1))
                         {
                             if (tsm.MidiTracks.All(t => t.Value.Active) && tsm.DataDictionary[1].MidiChannels.Where(c => c.Active).Count() == 1)
                             {
@@ -436,13 +449,6 @@ namespace LuteBot.UI
                     //foreach (var song in neuralTrainingCandidates)
                     foreach(var song in neuralTrainingCandidates.OrderBy(n => random.NextDouble()).ToList())
                     {
-                        var notNullSong = song.Where(c => c != null).ToArray();
-                        float maxAvgNoteLength = notNullSong.Max(c => c.avgNoteLength);
-                        float maxNoteLength = notNullSong.Max(c => c.totalNoteLength);
-                        float maxNumNotes = notNullSong.Sum(c => c.numNotes);// Let's get it as a percentage of notes in the song
-
-                        float maxTickNumber = notNullSong.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
-
                         float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
                         float[] finalExpected = new float[numSupportedChannels];
                         int channelNum = 0;
@@ -451,12 +457,12 @@ namespace LuteBot.UI
                         {
                             if (channel == null)
                             {
-                                finalExpected[channelNum] = -1f;
+                                finalExpected[channelNum] = 0f; // We'll try to teach it that empties are 0's instead of -1's...
                                 channelNum++;// Leave the inputs at 0's
                             }
                             else
                             {
-                                var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                                var inputs = channel.GetNeuralInputs();
                                 inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
 
                                 var expected = -1f;
@@ -467,8 +473,11 @@ namespace LuteBot.UI
                                 finalExpected[channelNum] = expected;
                                 channelNum++;
                             }
+                            if (pauseTraining)
+                                break;
                         }
-
+                        if (pauseTraining)
+                            break;
 
                         tsm.neural.BackPropagate(finalInputs, finalExpected);
                         costTotal += tsm.neural.cost;
@@ -478,12 +487,6 @@ namespace LuteBot.UI
                     numActualTestsCorrect = 0;
                     foreach(var song in neuralTrainingCandidates.OrderBy(n => random.NextDouble()).ToList())
                     {
-                        var notNullSong = song.Where(c => c != null).ToArray();
-                        float maxAvgNoteLength = notNullSong.Max(c => c.avgNoteLength);
-                        float maxNoteLength = notNullSong.Max(c => c.totalNoteLength);
-                        float maxNumNotes = notNullSong.Sum(c => c.numNotes);// Let's get it as a percentage of notes in the song
-
-                        float maxTickNumber = notNullSong.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
 
                         float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
                         float[] finalExpected = new float[numSupportedChannels];
@@ -493,12 +496,12 @@ namespace LuteBot.UI
                         {
                             if (channel == null)
                             {
-                                finalExpected[channelNum] = -1f;
+                                finalExpected[channelNum] = 0f;
                                 channelNum++;// Leave the inputs at 0's
                             }
                             else
                             {
-                                var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                                var inputs = channel.GetNeuralInputs();
                                 inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
 
                                 var expected = -1f;
@@ -509,7 +512,11 @@ namespace LuteBot.UI
                                 finalExpected[channelNum] = expected;
                                 channelNum++;
                             }
+                            if (pauseTraining)
+                                break;
                         }
+                        if (pauseTraining)
+                            break;
                         // I still only care that the top N responses are the flute tracks
                         var orderedResults = tsm.neural.FeedForward(finalInputs).Select((v,c) => (v, finalExpected[c])).OrderByDescending(v => v.Item1);
 
@@ -530,12 +537,6 @@ namespace LuteBot.UI
                     //await Task.Delay(1).ConfigureAwait(false);
                     foreach (var song in neuralTestCandidates.OrderBy(n => random.NextDouble()).ToList())
                     {
-                        var notNullSong = song.Where(c => c != null).ToArray();
-                        float maxAvgNoteLength = notNullSong.Max(c => c.avgNoteLength);
-                        float maxNoteLength = notNullSong.Max(c => c.totalNoteLength);
-                        float maxNumNotes = notNullSong.Sum(c => c.numNotes);// Let's get it as a percentage of notes in the song
-
-                        float maxTickNumber = notNullSong.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
 
                         float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
                         float[] finalExpected = new float[numSupportedChannels];
@@ -545,12 +546,12 @@ namespace LuteBot.UI
                         {
                             if (channel == null)
                             {
-                                finalExpected[channelNum] = -1f;
+                                finalExpected[channelNum] = 0f;
                                 channelNum++;// Leave the inputs at 0's
                             }
                             else
                             {
-                                var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                                var inputs = channel.GetNeuralInputs();
                                 inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
 
                                 var expected = -1f;
@@ -561,7 +562,11 @@ namespace LuteBot.UI
                                 finalExpected[channelNum] = expected;
                                 channelNum++;
                             }
+                            if (pauseTraining)
+                                break;
                         }
+                        if (pauseTraining)
+                            break;
                         // I still only care that the top N responses are the flute tracks
                         var orderedResults = tsm.neural.FeedForward(finalInputs).Select((v, c) => (v, finalExpected[c])).OrderByDescending(v => v.Item1);
 
@@ -580,6 +585,8 @@ namespace LuteBot.UI
                             numActualTestsCorrect++;
                         }
                     }
+                    if (pauseTraining)
+                        break;
                     float invokeTotal = costTotal;
                     int numTestCorrect = numActualTestsCorrect;
                     int numTrainingCorrect = numTestsCorrect;
@@ -614,11 +621,13 @@ namespace LuteBot.UI
                 {
                     richTextBox1.AppendText($"\n\n----Training Complete----\n\nNetwork saved to CustomNetwork file to {savePath}\nYou may now load midis and check it for yourself, and this will be your new default network. \n\nYou can revert at any time by deleting this file, or train again to replace it");
                     richTextBox1.ScrollToCaret();
-                    textBoxSizes.Enabled = true;
+                    textBoxSizes.Enabled = !checkBoxTrainExisting.Checked;
                     buttonTrain.Enabled = true;
+                    buttonTrain.Text = "Train";
                     textBox1.Enabled = true;
-                    textBoxParallel.Enabled = true;
+                    checkBoxTrainExisting.Enabled = File.Exists(NeuralNetworkForm.savePath + ".config");
                     textBox2.Enabled = true;
+                    pauseTraining = false;
                 });
                 if (File.Exists(savePath))
                     File.Delete(savePath);
@@ -683,6 +692,19 @@ namespace LuteBot.UI
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                Invoke((MethodInvoker)delegate
+                {
+                    richTextBox1.AppendText($"Error: {ex.Message}\n{ex.StackTrace}");
+                    richTextBox1.ScrollToCaret();
+                    textBoxSizes.Enabled = !checkBoxTrainExisting.Checked;
+                    buttonTrain.Enabled = true;
+                    buttonTrain.Text = "Train";
+                    textBox1.Enabled = true;
+                    checkBoxTrainExisting.Enabled = File.Exists(NeuralNetworkForm.savePath + ".config");
+                    textBox2.Enabled = true;
+                    pauseTraining = false;
+                });
+                
             }
         }
 
@@ -701,6 +723,18 @@ namespace LuteBot.UI
             {
                 Console.WriteLine(ex);
             }
+        }
+
+        private void checkBoxTrainExisting_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxTrainExisting.Checked)
+            {
+                var sizes = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(NeuralNetworkForm.savePath + ".config"));
+                textBoxSizes.Enabled = false;
+                textBoxSizes.Text = string.Join(",", sizes);
+            }
+            else
+                textBoxSizes.Enabled = true;
         }
     }
 }

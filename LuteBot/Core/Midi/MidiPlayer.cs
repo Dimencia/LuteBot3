@@ -343,6 +343,7 @@ namespace LuteBot.Core.Midi
                     //Parallel.ForEach(sequence, track =>
                     //{
                     int lastTempo = sequence.FirstTempo;
+                    int totalNumNotes = 0;
 
                     Dictionary<int, int> lastNote = new Dictionary<int, int>();
                     Dictionary<int, int> lastTrackNote = new Dictionary<int, int>();
@@ -365,6 +366,7 @@ namespace LuteBot.Core.Midi
 
                                 if (c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
                                 {
+                                    totalNumNotes++;
                                     if (c.MidiChannel == 9) // Glockenspiel - always channel 9
                                     {
                                         drumNoteCounts[c.Data1]++; // They're all 0 by default
@@ -509,7 +511,7 @@ namespace LuteBot.Core.Midi
                     // And then only count new notes if their start+length > thatTick+thatLength
 
 
-                    // Compile noteLengths of channels
+                    // Compile noteLengths of channels and setup ML stuff
                     foreach (var kvp in channels)
                     {
                         var channel = kvp.Value;
@@ -517,6 +519,7 @@ namespace LuteBot.Core.Midi
 
                         int nextValidTick = 0;
                         channel.averageNote = 0;
+                        channel.numNotesPercent = (float)channel.numNotes / totalNumNotes;
 
                         foreach (var noteKvp in channel.tickNotes.OrderBy(n => n.Key))
                         {
@@ -525,13 +528,13 @@ namespace LuteBot.Core.Midi
 
                             if (note.tickNumber > nextValidTick)
                             {
-                                channel.totalNoteLength += note.timeLength;
+                                channel.percentNoteLength += note.timeLength;
                                 nextValidTick = note.tickNumber + note.length;
                             }
                             else if (note.tickNumber + note.length > nextValidTick)
                             {
                                 var diff = (note.tickNumber + note.length) - nextValidTick;
-                                channel.totalNoteLength += note.timeLength * (diff/note.length);
+                                channel.percentNoteLength += note.timeLength * (diff/note.length);
                                 nextValidTick = nextValidTick + diff;
                             }
                             foreach(var n in noteList)
@@ -565,13 +568,13 @@ namespace LuteBot.Core.Midi
 
                             if (note.tickNumber > nextValidTick)
                             {
-                                channel.totalNoteLength += note.timeLength;
+                                channel.percentNoteLength += note.timeLength;
                                 nextValidTick = note.tickNumber + note.length;
                             }
                             else if (note.tickNumber + note.length > nextValidTick)
                             {
                                 var diff = (note.tickNumber + note.length) - nextValidTick;
-                                channel.totalNoteLength += note.timeLength * (diff / note.length);
+                                channel.percentNoteLength += note.timeLength * (diff / note.length);
                                 nextValidTick = nextValidTick + diff;
                             }
                             foreach (var n in noteList)
@@ -590,6 +593,20 @@ namespace LuteBot.Core.Midi
                             channel.avgChordSize = (float)channel.tickNotes.Sum(t => t.Value.Count) / channel.tickNotes.Count;
                         }
                     }
+                    var songLength = (float)GetTimeLength().TotalSeconds;
+
+#if DEBUG
+                    Console.WriteLine("Total song duration in seconds: " + songLength);
+                    Console.WriteLine("Total of all channels: " + channels.Sum(c => c.Value.percentNoteLength));
+                    Console.WriteLine("Total of all tracks: " + tracks.Sum(c => c.Value.percentNoteLength));
+#endif
+
+                    foreach (var kvp in channels)
+                        kvp.Value.percentNoteLength /= songLength;
+                    foreach (var kvp in tracks)
+                        kvp.Value.percentNoteLength /= songLength;
+
+                    
 
                     // Add a note on the drum channel
                     if (channels.ContainsKey(9))

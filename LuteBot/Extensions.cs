@@ -63,7 +63,7 @@ namespace LuteBot
                 || candidate.Length > array.Length;
         }
 
-        public static int numParamsPerChannel = 8;
+        public static int numParamsPerChannel = 9;
 
         public static float[][] GetRecurrentInput(this MidiChannelItem channel, int noteParams, float maxTickNumber)
         {
@@ -84,76 +84,50 @@ namespace LuteBot
         }
 
 
-        public static float[] GetNeuralInput(this MidiChannelItem[] song)
+        public static float[] GetNeuralInputs(this MidiChannelItem c)
         {
-            float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
-            float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
-            // noteLength is now in a time format, a float in seconds.  We should divide it by total song duration
-
-            // ... but we don't have that... 
-            // Welp, nvm then.  It's very hard and annoying to get that here
-
-            float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
-
-            float[] inputs = new float[numParamsPerChannel * 16];
-
-            for (int j = 0; j < 16; j++)
-            {
-                var channel = song.Where(c => c.Id == j && c.Id != 9).SingleOrDefault();
-                //var channel = song.Values[j];
-
-
-                if (channel != null)
-                {
-                    //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
-                    inputs[j * numParamsPerChannel] = channel.avgNoteLength;
-                    inputs[j * numParamsPerChannel + 1] = channel.maxChordSize;
-                    inputs[j * numParamsPerChannel + 2] = (maxNoteLength > 0 ? channel.totalNoteLength / maxNoteLength : 0);
-                    //inputs[j * 6 + 2] = channel.totalNoteLength;
-                    inputs[j * numParamsPerChannel + 3] = channel.highestNote;// / 128f;
-                    inputs[j * numParamsPerChannel + 4] = channel.lowestNote;// / 128f;
-                    inputs[j * numParamsPerChannel + 5] = (maxNumNotes > 0 ? channel.numNotes / maxNumNotes : 0);
-                    //inputs[j * numParamsPerChannel + 6] = channel.Id / 16f;
-                    inputs[j * numParamsPerChannel + 6] = channel.midiInstrument;// / 128f;
-                    inputs[j * numParamsPerChannel + 7] = channel.avgVariation;
-                    //inputs[j * 6 + 5] = channel.numNotes;
-                }
-                else
-                {
-                    for (int k = 0; k < numParamsPerChannel; k++)
-                        inputs[j * numParamsPerChannel + k] = 0;
-                }
-            }
-
-            return inputs;
-        }
-
-
-        public static float[] GetNeuralInputs(this MidiChannelItem c, float maxAvgNoteLength, float maxNumNotes, float maxTotalNoteLength)
-        {
-            // We'll try not normalizing 
-
             float[] inputs = new float[numParamsPerChannel];
 
+            // I need to rethink what we give it and how it's formatted
+            // I think 0-1, the 0 being important rather than negatives, so the values can 'scale' appropriately
+            
+            // And, err on the side of dividing by more instead of less; it's ok to never reach 1, but probably bad to go past it
+
+            // avgNoteLength should be in seconds and maybe /8f and clamp, anything longer than that we don't care
+            // maxChordSize maybe /8f or so, and again clamp
+
+            // totalNoteLength should be in seconds... and may not even correlate well when chords double it
+            // If we use it, make it a percentage of the song: what percentage of the song is this channel playing at least one note?
+
+            // highest and lowest note are good to /128
+            // numNotes would be best as a percentage, of all notes in this song, this channel has x%
+
+            // avgChordSize can be /8
+            // avgVariation could be up to 128, so we'll just /128.  That is the average amount of note value change between each consecutive note on this channel
+
+            // And averageNote was a good idea, let's use that
 
             var channel = c;
             //var channel = song.Values[j];
 
             //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
             int i = 0;
-            inputs[i++] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength * 2 - 1 : 0);
-            inputs[i++] = channel.maxChordSize-2;
-            inputs[i++] = (maxTotalNoteLength > 0 ? channel.totalNoteLength / maxTotalNoteLength * 2 - 1 : 0);
+            inputs[i++] = Math.Min(channel.avgNoteLength / 8f, 1f);
+            inputs[i++] = Math.Min(channel.maxChordSize / 8f, 1f);
+
+            inputs[i++] = channel.percentNoteLength;
             //inputi++lNoteLength;
-            inputs[i++] = (channel.highestNote - 64f) / 64f;
-            inputs[i++] = (channel.lowestNote - 64f) / 64f;
-            inputs[i++] = (maxNumNotes > 0 ? channel.numNotes / maxNumNotes * 2 - 1 : 0);
+            inputs[i++] = channel.highestNote/128f;
+            inputs[i++] = channel.lowestNote/128f;
+
+            inputs[i++] = channel.numNotesPercent;
+
             //inputi++ 6] = channel.Id / 16f;
             //inputs[i++] = channel.midiInstrument / 64f - 1f;
-            inputs[i++] = channel.avgChordSize-2;
-            inputs[i++] = (channel.avgVariation - 32f) / 32f; // This one can end up as high as 2 in rare cases, but that's still ok
+            inputs[i++] = Math.Min(channel.avgChordSize / 8f, 1f);
+            inputs[i++] = channel.avgVariation / 128f;
             //inputs[j * 6 + 5] = channel.numNotes;
-
+            inputs[i++] = channel.averageNote;
 
             return inputs;
         }

@@ -172,11 +172,12 @@ namespace LuteBot.TrackSelection
         public string Name { get; set; }
         public bool Active { get => active; set => active = value; }
         public int numNotes { get; set; }
+        public float numNotesPercent { get; set; }
         public int highestNote { get; set; } = 0;
         public int lowestNote { get; set; } = 127;
         public int averageNote { get; set; }
         public float avgNoteLength { get; set; }
-        public float totalNoteLength { get; set; }
+        public float percentNoteLength { get; set; }
         public int maxChordSize { get; set; }
         public Dictionary<int, int> noteTicks { get; } = new Dictionary<int, int>();
         public int offset { get; set; }
@@ -198,11 +199,12 @@ namespace LuteBot.TrackSelection
             this.avgNoteLength = old.avgNoteLength;
             this.offset = old.offset;
             this.maxChordSize = old.maxChordSize;
-            this.totalNoteLength = old.totalNoteLength;
+            this.percentNoteLength = old.percentNoteLength;
             this.averageNote = old.averageNote;
             this.midiInstrument = old.midiInstrument;
             this.avgVariation = old.avgVariation;
             this.avgChordSize = old.avgChordSize;
+            this.numNotesPercent = old.numNotesPercent;
             // in tickNotes, the MidiNotes need to be reinstantiated so we don't have them by ref
             this.tickNotes.Clear();
             foreach(var kvp in old.tickNotes)
