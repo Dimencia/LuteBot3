@@ -174,7 +174,7 @@ namespace LuteBot.TrackSelection
                 // Load default from lute...
                 SetTrackSelectionData(new TrackSelectionData(DataDictionary[0], instrumentId));
 
-                foreach(var channel in midiChannels.Values)
+                foreach (var channel in midiChannels.Values)
                 {
                     if (PredictedFluteChannels.Any(c => !(c is TrackItem) && c.Id == channel.Id))
                         channel.Active = true;
@@ -466,7 +466,11 @@ namespace LuteBot.TrackSelection
                 {
                     string[] activation = new string[] { "tanh", "tanh", "tanh" };
                     neural = new NeuralNetwork(new int[] { Extensions.numParamsPerChannel, 64, 32, 1 }, activation);
-                    neural.Load(Path.Combine(AppContext.BaseDirectory, "lib","channelNeural"));
+                    try
+                    {
+                        neural.Load(Path.Combine(AppContext.BaseDirectory, "lib", "channelNeural"));
+                    }
+                    catch { }
                 }
             }
 
@@ -477,40 +481,41 @@ namespace LuteBot.TrackSelection
                 Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
 
                 int numParamsPerChannel = Extensions.numParamsPerChannel;
-                int numSupportedChannels = 32;
+                //int numSupportedChannels = 32;
                 var random = new Random();
-                var tempNeuralCandidates = MidiChannels.Values.Where(c => c.Id != 9).Concat(MidiTracks.Values).ToArray();
+                var tempNeuralCandidates = MidiChannels.Values.Where(c => c.Id != 9).ToArray();
 
-                if (tempNeuralCandidates.Length > numSupportedChannels)
-                    tempNeuralCandidates = tempNeuralCandidates.Take(numSupportedChannels).ToArray();
+                //if (tempNeuralCandidates.Length > numSupportedChannels)
+                //    tempNeuralCandidates = tempNeuralCandidates.Take(numSupportedChannels).ToArray();
                 // Now copy it to an array of appropriate size
-                var song = new MidiChannelItem[numSupportedChannels];
-                tempNeuralCandidates.CopyTo(song, 0);
+                //var song = new MidiChannelItem[numSupportedChannels];
+                //tempNeuralCandidates.CopyTo(song, 0);
 
-                float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
-                MidiChannelItem[] finalExpected = new MidiChannelItem[numSupportedChannels];
-                int channelNum = 0;
+                //float[] finalInputs = new float[numParamsPerChannel];
+                //MidiChannelItem[] finalExpected = new MidiChannelItem[1];
+                //int channelNum = 0;
 
-                foreach (var channel in song)
+
+                foreach (var channel in tempNeuralCandidates)
                 {
-                    if (channel == null)
-                    {
-                        channelNum++;// Leave the inputs at 0's
-                    }
-                    else
-                    {
-                        var inputs = channel.GetNeuralInputs();
-                        inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
+                    //if (channel == null)
+                    //{
+                    //    channelNum++;// Leave the inputs at 0's
+                    //}
+                    //else
+                    //{
+                    var inputs = channel.GetNeuralInputs();
+                    //inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
 
-                        finalExpected[channelNum] = channel;
-
-                        channelNum++;
-                    }
+                    //finalExpected[channelNum] = channel;
+                    channelResults[channel] = neural.FeedForward(inputs)[0];
+                    //channelNum++;
+                    //}
                 }
                 // I still only care that the top N responses are the flute tracks
-                var orderedResults = neural.FeedForward(finalInputs).Select((v, c) => (v, finalExpected[c])).OrderByDescending(v => v.Item1);
-                foreach (var channel in orderedResults.Where(c => c.Item2 != null))
-                    channelResults[channel.Item2] = channel.Item1;
+                //var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
+                //foreach (var channel in orderedResults)
+                //    channelResults[channel.Item2] = channel.Item1;
 
                 var orderedResults2 = channelResults.OrderByDescending(kvp => kvp.Value);
                 // Get softmaxed values... maybe? No.  We don't want that, in a large song that leaves many at low percent
@@ -804,7 +809,7 @@ namespace LuteBot.TrackSelection
                     int prevNoteLength = arbitraryDivision;
 
                     if (trackNum == 1) // Flute
-                        prevNoteLength = arbitraryDivision*4; // IDK some arbitrary length
+                        prevNoteLength = arbitraryDivision * 4; // IDK some arbitrary length
 
                     Dictionary<int, int> activeNoteTicks = new Dictionary<int, int>();
                     // NoteNum:TickNumber, the notes that are ongoing, so we can find collisions

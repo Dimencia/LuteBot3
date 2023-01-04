@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SimpleML
 {
@@ -228,16 +229,16 @@ namespace SimpleML
             cost = 0;
 
             // If the sorted result list has the same one as the highest, we treat loss as 0
-            var orderedResults = output.Select((v, c) => (v, expected[c])).OrderByDescending(v => v.Item1).ToArray();
+            //var orderedResults = output.Select((v, c) => (v, expected[c])).OrderByDescending(v => v.Item1).ToArray();
 
-            var numFlute = 1;
-            bool correct = true;
+            //var numFlute = 1;
+            //bool correct = true;
 
-            for (int j = 0; j < numFlute; j++)
-            {
-                if (orderedResults.ElementAt(j).Item2 != 1f)
-                    correct = false;
-            }
+            //for (int j = 0; j < numFlute; j++)
+            //{
+            //    if (orderedResults.ElementAt(j).Item2 != 1f)
+            //        correct = false;
+            //}
 
             //if (correct)
             //{
@@ -260,35 +261,44 @@ namespace SimpleML
             gamma = gammaList.ToArray();//gamma initialization
 
             int layer = layers.Length - 2;
-
-
-            for (int i = 0; i < output.Length; i++) gamma[layers.Length - 1][i] = (output[i] - expected[i]) * activateDer(output[i], layer);//Gamma calculation
+            // Temporary: Force tanh, since... that's what I use on all of them and idk how to do it more generically
+            gamma[layers.Length - 1] = Utils.MatrixMultiply(Utils.MatrixSub(output, expected), Utils.MatrixDerivativeTanh(output));
+            //for (int i = 0; i < output.Length; i++) gamma[layers.Length - 1][i] = (output[i] - expected[i]) * activateDer(output[i], layer);//Gamma calculation
 
             for (int i = layers.Length - 2; i > 0; i--)//runs on all hidden layers
-            {
-                layer = i - 1;
-                for (int j = 0; j < layers[i]; j++)//outputs
-                {
-                    gamma[i][j] = 0;
-                    for (int k = 0; k < gamma[i + 1].Length; k++)
-                    {
-                        gamma[i][j] += gamma[i + 1][k] * weights[i][k][j];
-                    }
-                    gamma[i][j] *= activateDer(neurons[i][j], layer);//calculate gamma
-                }
+            {                
+                gamma[i] = Utils.MatrixMultiply(Utils.MatrixDerivativeTanh(neurons[i]), Utils.MatrixDot(Utils.TransposeValues(weights[i]), gamma[i + 1]));
+
+                //layer = i - 1;
+                //for (int j = 0; j < layers[i]; j++)//outputs
+                //{
+                //    gamma[i][j] = 0;
+                //    for (int k = 0; k < gamma[i + 1].Length; k++)
+                //    {
+                //        gamma[i][j] += gamma[i + 1][k] * weights[i][k][j];
+                //    }
+                //    gamma[i][j] *= activateDer(neurons[i][j], layer);//calculate gamma
+                //}
             }
 
             // Apply gammas
             for (int i = layers.Length - 1; i > 0; i--)//runs on all hidden layers
             {
-                for (int j = 0; j < layers[i]; j++)//itterate over outputs of layer
+                biases[i - 1] = Utils.MatrixSub(biases[i - 1], Utils.MatrixMultiply(gamma[i], learningRate));
+
+                for (int j = 0; j < layers[i]; j++)
                 {
-                    biases[i - 1][j] -= gamma[i][j] * learningRate;//modify biases of network
-                    for (int k = 0; k < layers[i - 1]; k++)//itterate over inputs to layer
-                    {
-                        weights[i - 1][j][k] -= gamma[i][j] * neurons[i - 1][k] * learningRate;//modify weights of network
-                    }
+                    weights[i - 1][j] = Utils.MatrixSub(weights[i - 1][j], Utils.MatrixMultiply(neurons[i - 1], learningRate * gamma[i][j]));
                 }
+
+                //for (int j = 0; j < layers[i]; j++)//itterate over outputs of layer
+                //{
+                //    biases[i - 1][j] -= gamma[i][j] * learningRate;//modify biases of network
+                //    for (int k = 0; k < layers[i - 1]; k++)//itterate over inputs to layer
+                //    {
+                //        weights[i - 1][j][k] -= gamma[i][j] * neurons[i - 1][k] * learningRate;//modify weights of network
+                //    }
+                //}
             }
 
             //}
@@ -487,65 +497,38 @@ namespace SimpleML
             }
             for (int i = 1; i < layers.Length; i++) // Start at layer 1, the first with any previous nuerons to work on
             {
-                int layer = i - 1;
-                for (int j = 0; j < layers[i]; j++)
-                {
-                    float value = MatrixMultiply(weights[i - 1][j], neurons[i - 1]).Sum();
-                    // For each neuron in this layer, get each neuron's value * weight from the previous layer, and sum them
-                    // Then add the bias and activate
-                    //if (i != layers.Length - 1)
-                    if (activations[layer] != 4)
-                        neurons[i][j] = Activate(value + biases[i - 1][j], layer);
-                    else // Force softmax, which must run on the whole set
-                        neurons[i][j] = value + biases[i - 1][j];
-                }
-                if (activations[layer] == 4)
-                    neurons[i] = Softmax(neurons[i]);
+                // TODO: I can probably speed all this up significantly more by not nesting these and do it all in one pass...
+                // Plus activation... 
+
+                Utils.MatrixAddDotTanh(weights[i - 1], neurons[i - 1], biases[i - 1], ref neurons[i]);
+
+                //Utils.MatrixAdd(Utils.MatrixDot(weights[i - 1], neurons[i - 1]), biases[i-1], ref neurons[i]);
+                //// TODO: Activate better...
+                //for (int j = 0; j < layers[i]; j++)
+                //    neurons[i][j] = Activate(neurons[i][j], i - 1);
+
+                //int layer = i - 1;
+                //Parallel.For(0, layers[i], j =>
+                //{
+                //    float value = Utils.MatrixMultiply(weights[i - 1][j], neurons[i - 1]).Sum();
+                //    //for (int k = 0; k < layers[i - 1]; k++)
+                //    //{
+                //    //    value += weights[i - 1][j][k] * neurons[i - 1][k];
+                //    //}
+                //    // For each neuron in this layer, get each neuron's value * weight from the previous layer, and sum them
+                //    // Then add the bias and activate
+                //    //if (i != layers.Length - 1)
+                //    if (activations[layer] != 4)
+                //        neurons[i][j] = Activate(value + biases[i - 1][j], layer);
+                //    else // Force softmax, which must run on the whole set
+                //        neurons[i][j] = value + biases[i - 1][j];
+                //});
+                //if (activations[layer] == 4)
+                //    neurons[i] = Softmax(neurons[i]);
             }
             //neurons[layers.Length - 1] = Softmax(neurons[layers.Length - 1]);
             return neurons[layers.Length - 1];
         }
-
-
-        float[] MatrixMultiply(float[] left, float[] right)
-        {
-            if (left is null)
-            {
-                throw new ArgumentNullException(nameof(left));
-            }
-
-            if (right is null)
-            {
-                throw new ArgumentNullException(nameof(right));
-            }
-
-            if (left.Length != right.Length)
-            {
-                throw new ArgumentException($"{nameof(left)} and {nameof(right)} are not the same length");
-            }
-
-            int length = left.Length;
-            float[] result = new float[length];
-
-            // Get the number of elements that can't be processed in the vector
-            // NOTE: Vector<T>.Count is a JIT time constant and will get optimized accordingly
-            int remaining = length % Vector<float>.Count;
-
-            for (int i = 0; i < length - remaining; i += Vector<float>.Count)
-            {
-                var v1 = new Vector<float>(left, i);
-                var v2 = new Vector<float>(right, i);
-                (v1 * v2).CopyTo(result, i);
-            }
-
-            for (int i = length - remaining; i < length; i++)
-            {
-                result[i] = left[i] * right[i];
-            }
-
-            return result;
-        }
-
 
 
         //Load from file so the results can actually be saved/reused

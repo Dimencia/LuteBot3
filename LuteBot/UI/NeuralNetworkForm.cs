@@ -89,12 +89,12 @@ namespace LuteBot.UI
 
             var neural = new NeuralNetwork(layers, activations);
 
-            
+
 
 
             int numIterations = 50000;
 
-            var candidates = neuralTrainingCandidates.Select(s => s.SelectMany(c => c.tickNotes.Values.Select(nl => nl.OrderBy(n => n.note).Where((n,i) => (i == 0 || i == c.tickNotes.Count-1 || (c.tickNotes.Count > 2 && i == c.tickNotes.Count/2)) && n.channel != 9 && n.length > 0 && n.timeLength >= 0.005f))).SelectMany(nl => nl.GroupBy(n => n.note).Select(ng => ng.FirstOrDefault())).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray()).Where(nl => nl.Count() > numNotes).ToArray();
+            var candidates = neuralTrainingCandidates.Select(s => s.SelectMany(c => c.tickNotes.Values.Select(nl => nl.OrderBy(n => n.note).Where((n, i) => (i == 0 || i == c.tickNotes.Count - 1 || (c.tickNotes.Count > 2 && i == c.tickNotes.Count / 2)) && n.channel != 9 && n.length > 0 && n.timeLength >= 0.005f))).SelectMany(nl => nl.GroupBy(n => n.note).Select(ng => ng.FirstOrDefault())).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray()).Where(nl => nl.Count() > numNotes).ToArray();
 
             for (int iteration = 0; iteration < numIterations; iteration++)
             {
@@ -158,7 +158,7 @@ namespace LuteBot.UI
             int[] pentatonics = new int[] { 0, 2, 4, 7, 9 };
             int targetIndex = (int)((original % 12) / 12f * pentatonics.Length);
 
-            return (original - original%12) + pentatonics[targetIndex];
+            return (original - original % 12) + pentatonics[targetIndex];
         }
 
 
@@ -170,7 +170,7 @@ namespace LuteBot.UI
             var activations = new string[] { "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh" };
             var neural = new NeuralNetwork(layers, activations);
 
-            
+
 
             neural.Load("TestSongMaker");
 
@@ -241,8 +241,8 @@ namespace LuteBot.UI
 
                 //int noteNum = GetPentatonicNote((int)Math.Floor(result[0] * 64f + 64));
                 int noteNum = (int)Math.Floor(result[0] * 64f + 64);
-                var durationTime = Math.Max(Math.Round((result[2] + 1)/1f),0.1f);
-                
+                var durationTime = Math.Max(Math.Round((result[2] + 1) / 1f), 0.1f);
+
                 int durationTicks = (int)(durationTime * ticksPerSecond);
                 //ticksPerSecond = (float)(durationTicks / durationTime);
 
@@ -266,7 +266,7 @@ namespace LuteBot.UI
                     totalLength += deltaTick / ticksPerSecond;
                     notesThisTick = 0;
                 }
-                
+
                 //position = Math.Max(0, position - position % 20);// rounding...?
 
                 track.Insert(position, new Sanford.Multimedia.Midi.ChannelMessage(Sanford.Multimedia.Midi.ChannelCommand.NoteOn, 0, noteNum, 100));
@@ -278,9 +278,9 @@ namespace LuteBot.UI
                 result[2] = (float)Math.Max(Math.Min((Math.Max(durationTime, 0.005f) - 1f), 1), -1);
 
 
-                inputs = (inputs.Skip(3).Take(inputs.Length-3-1)
-                    .Concat(result)).Select((i,index) => (index-1)%3 == 0 ? Math.Max(i-inputs[1],0) : i)
-                    .Concat(new float[] { totalLength/ targetSecondsLength }).ToArray();
+                inputs = (inputs.Skip(3).Take(inputs.Length - 3 - 1)
+                    .Concat(result)).Select((i, index) => (index - 1) % 3 == 0 ? Math.Max(i - inputs[1], 0) : i)
+                    .Concat(new float[] { totalLength / targetSecondsLength }).ToArray();
             }
             while (totalLength < targetSecondsLength);
 
@@ -301,7 +301,7 @@ namespace LuteBot.UI
             try
             {
                 int numParamsPerChannel = Extensions.numParamsPerChannel;
-                int numSupportedChannels = 32;
+                //int numSupportedChannels = 32;
 
                 // We can softmax all the outputs once we have them for each channel
                 // This is great, btw.  This is 'channelNeural', the only issue is that the way I handle the output gives values <0 and > 100% sometimes, but rarely...
@@ -312,12 +312,12 @@ namespace LuteBot.UI
                 for (int n = 0; n < activation.Length; n++) // I decided not to use softmax because it gave more varied values
                     activation[n] = "tanh";
                 int[] parameters = new int[numNeurons];
-                parameters[0] = numParamsPerChannel * numSupportedChannels;
+                parameters[0] = numParamsPerChannel;
                 for (int n = 1; n < parameters.Length - 1; n++)
                     parameters[n] = sizes[n - 1];
-                parameters[parameters.Length - 1] = numSupportedChannels;
+                parameters[parameters.Length - 1] = 1;
                 tsm.neural = new NeuralNetwork(parameters, activation);
-                if(retrain)
+                if (retrain)
                     tsm.neural.Load(savePath);
 
                 // These below work great and are the settings for 'v2Neural'
@@ -359,11 +359,11 @@ namespace LuteBot.UI
                                 }
 
                                 // Now copy it to an array of appropriate size
-                                var fullCandidates = new MidiChannelItem[numSupportedChannels];
-                                tempNeuralCandidates.CopyTo(fullCandidates, 0);
-                                fullCandidates = fullCandidates.OrderBy(c => random.NextDouble()).ToArray();
+                                //var fullCandidates = new MidiChannelItem[numSupportedChannels];
+                                //tempNeuralCandidates.CopyTo(fullCandidates, 0);
+                                //fullCandidates = fullCandidates.OrderBy(c => random.NextDouble()).ToArray();
 
-                                neuralCandidates.Add(fullCandidates);
+                                neuralCandidates.Add(tempNeuralCandidates);
 
                                 var fluteChannels = tsm.DataDictionary[1].MidiChannels.Where(c => c.Active);
                                 if (fluteChannels.Count() == 1)
@@ -384,10 +384,10 @@ namespace LuteBot.UI
                                 { // This may not be necessary; I could probably just take the MidiTracks from DataDictionary[1] but, it seemed to give odd results like it didn't have everything
                                     ca.Active = tsm.DataDictionary[1].MidiTracks.Where(c => c.Id == ca.Id).Single().Active;
                                 }
-                                var fullCandidates = new MidiChannelItem[numSupportedChannels];
-                                tempNeuralCandidates.CopyTo(fullCandidates, 0);
-                                fullCandidates = fullCandidates.OrderBy(c => random.NextDouble()).ToArray();
-                                neuralCandidates.Add(fullCandidates);
+                                //var fullCandidates = new MidiChannelItem[numSupportedChannels];
+                                //tempNeuralCandidates.CopyTo(fullCandidates, 0);
+                                //fullCandidates = fullCandidates.OrderBy(c => random.NextDouble()).ToArray();
+                                neuralCandidates.Add(tempNeuralCandidates);
                             }
                         }
                     }
@@ -415,7 +415,7 @@ namespace LuteBot.UI
                 // Partition candidates into test sets, probably 70/30%?
                 // So, first shuffle them
 
-                
+
 
                 var orderedCandidates = neuralCandidates.OrderBy(c => random.Next()).ToList();
                 var numTestCandidates = (int)(orderedCandidates.Count() * 0.3f);
@@ -426,10 +426,10 @@ namespace LuteBot.UI
                 int numActualTestsCorrect = 0;
 
 
-//#if DEBUG
-//                TrainMusicMaker(neuralCandidates);
-//                return;
-//#endif
+                //#if DEBUG
+                //                TrainMusicMaker(neuralCandidates);
+                //                return;
+                //#endif
 
 
                 await Task.Run(() => Invoke((MethodInvoker)delegate
@@ -439,95 +439,92 @@ namespace LuteBot.UI
                     progressBarTraining.Value = 0;
                 })).ConfigureAwait(false);
 
-                int i = 0;
+                int numEpochs = 0;
                 int numSuccesses = 0;
                 while (numSuccesses < numPerfect)
                 //while(costTotal > 0.1f && i < trainCount)
                 //for (int i = 0; i < trainCount; i++)
                 {
+                    numEpochs++;
                     costTotal = 0;
                     //foreach (var song in neuralTrainingCandidates)
-                    foreach(var song in neuralTrainingCandidates.OrderBy(n => random.NextDouble()).ToList())
+                    foreach (var song in neuralTrainingCandidates.OrderBy(n => random.NextDouble()).ToList())
                     {
-                        float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
-                        float[] finalExpected = new float[numSupportedChannels];
                         int channelNum = 0;
 
-                        foreach (var channel in song.OrderBy(s => random.NextDouble()).ToList())
+                        var fluteChannels = song.Where(c => c.Active).OrderBy(s => random.NextDouble()).ToList();
+                        var luteChannels = song.Where(c => !c.Active).OrderBy(s => random.NextDouble()).ToList();
+
+                        for(int i = 0; i < fluteChannels.Count; i++)
                         {
-                            if (channel == null)
+                            var channel = fluteChannels[i];
+                            if(i < luteChannels.Count)
                             {
-                                finalExpected[channelNum] = 0f; // We'll try to teach it that empties are 0's instead of -1's...
-                                channelNum++;// Leave the inputs at 0's
-                            }
-                            else
-                            {
-                                var inputs = channel.GetNeuralInputs();
-                                inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
-
-                                var expected = -1f;
-
-                                if (channel.Active)
-                                    expected = 1f;
-
-                                finalExpected[channelNum] = expected;
                                 channelNum++;
+                                var luteChannel = luteChannels[i];
+                                var luteInputs = channel.GetNeuralInputs();
+                                tsm.neural.BackPropagate(luteInputs, new float[] { -1f });
+                                costTotal += tsm.neural.cost;
                             }
+                            //if (channel == null)
+                            //{
+                            //    finalExpected[channelNum] = 0f; // We'll try to teach it that empties are 0's instead of -1's...
+                            //    channelNum++;// Leave the inputs at 0's
+                            //}
+                            //else
+                            //{
+                            var inputs = channel.GetNeuralInputs();
+                            //finalExpected[channelNum] = expected;
+                            channelNum++;
+                            //}
                             if (pauseTraining)
                                 break;
+                            tsm.neural.BackPropagate(inputs, new float[] { 1f });
+                            costTotal += tsm.neural.cost;
                         }
                         if (pauseTraining)
                             break;
-
-                        tsm.neural.BackPropagate(finalInputs, finalExpected);
-                        costTotal += tsm.neural.cost;
                     }
                     //await Task.Delay(1).ConfigureAwait(false);
                     numTestsCorrect = 0;
                     numActualTestsCorrect = 0;
-                    foreach(var song in neuralTrainingCandidates.OrderBy(n => random.NextDouble()).ToList())
+                    foreach (var song in neuralTrainingCandidates.OrderBy(n => random.NextDouble()).ToList())
                     {
-
-                        float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
-                        float[] finalExpected = new float[numSupportedChannels];
                         int channelNum = 0;
+                        var channelResults = new Dictionary<MidiChannelItem, float>();
 
                         foreach (var channel in song.OrderBy(s => random.NextDouble()).ToList())
                         {
-                            if (channel == null)
-                            {
-                                finalExpected[channelNum] = 0f;
-                                channelNum++;// Leave the inputs at 0's
-                            }
-                            else
-                            {
-                                var inputs = channel.GetNeuralInputs();
-                                inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
+                            //if (channel == null)
+                            //{
+                            //    finalExpected[channelNum] = 0f;
+                            //    channelNum++;// Leave the inputs at 0's
+                            //}
+                            //else
+                            //{
+                            var inputs = channel.GetNeuralInputs();
+                            //inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
 
-                                var expected = -1f;
+                            var expected = new float[] { -1f };
 
-                                if (channel.Active)
-                                    expected = 1f;
+                            if (channel.Active)
+                                expected[0] = 1f;
 
-                                finalExpected[channelNum] = expected;
-                                channelNum++;
-                            }
+                            //finalExpected[channelNum] = expected;
+                            channelNum++;
+                            //}
                             if (pauseTraining)
                                 break;
+                            channelResults[channel] = tsm.neural.FeedForward(inputs)[0];
                         }
                         if (pauseTraining)
                             break;
                         // I still only care that the top N responses are the flute tracks
-                        var orderedResults = tsm.neural.FeedForward(finalInputs).Select((v,c) => (v, finalExpected[c])).OrderByDescending(v => v.Item1);
+                        var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
+
 
                         var numFlute = song.Where(s => s != null && s.Active).Count();
-                        bool correct = true;
-
-                        for (int j = 0; j < numFlute; j++)
-                        {
-                            if (orderedResults.ElementAt(j).Item2 != 1f)
-                                correct = false;
-                        }
+                        bool correct = orderedResults.Take(numFlute).All(kvp => kvp.Key.Active);
 
                         if (correct)
                             numTestsCorrect++;
@@ -537,47 +534,40 @@ namespace LuteBot.UI
                     //await Task.Delay(1).ConfigureAwait(false);
                     foreach (var song in neuralTestCandidates.OrderBy(n => random.NextDouble()).ToList())
                     {
-
-                        float[] finalInputs = new float[numSupportedChannels * numParamsPerChannel];
-                        float[] finalExpected = new float[numSupportedChannels];
+                        var channelResults = new Dictionary<MidiChannelItem, float>();
                         int channelNum = 0;
 
                         foreach (var channel in song.OrderBy(s => random.NextDouble()).ToList())
                         {
-                            if (channel == null)
-                            {
-                                finalExpected[channelNum] = 0f;
-                                channelNum++;// Leave the inputs at 0's
-                            }
-                            else
-                            {
-                                var inputs = channel.GetNeuralInputs();
-                                inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
+                            //if (channel == null)
+                            //{
+                            //    finalExpected[channelNum] = 0f;
+                            //    channelNum++;// Leave the inputs at 0's
+                            //}
+                            //else
+                            //{
+                            var inputs = channel.GetNeuralInputs();
+                            //inputs.CopyTo(finalInputs, channelNum * numParamsPerChannel);
 
-                                var expected = -1f;
+                            var expected = new float[] { -1f };
 
-                                if (channel.Active)
-                                    expected = 1f;
+                            if (channel.Active)
+                                expected[0] = 1f;
 
-                                finalExpected[channelNum] = expected;
-                                channelNum++;
-                            }
+                            //finalExpected[channelNum] = expected;
+                            channelNum++;
+                            //}
                             if (pauseTraining)
                                 break;
+                            channelResults[channel] = tsm.neural.FeedForward(inputs)[0];
                         }
                         if (pauseTraining)
                             break;
                         // I still only care that the top N responses are the flute tracks
-                        var orderedResults = tsm.neural.FeedForward(finalInputs).Select((v, c) => (v, finalExpected[c])).OrderByDescending(v => v.Item1);
+                        var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
 
                         var numFlute = song.Where(s => s != null && s.Active).Count();
-                        bool correct = true;
-
-                        for (int j = 0; j < numFlute; j++)
-                        {
-                            if (orderedResults.ElementAt(j).Item2 != 1f)
-                                correct = false;
-                        }
+                        bool correct = orderedResults.Take(numFlute).All(kvp => kvp.Key.Active);
 
                         if (correct)
                         {
@@ -590,18 +580,24 @@ namespace LuteBot.UI
                     float invokeTotal = costTotal;
                     int numTestCorrect = numActualTestsCorrect;
                     int numTrainingCorrect = numTestsCorrect;
-                    if(InvokeRequired)
-                        Task.Run(() => Invoke((MethodInvoker)delegate
-                        {
-                            richTextBox1.AppendText($"\n{numTestCorrect}/{neuralTestCandidates.Count()} ({(float)numTestCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTrainingCorrect}/{neuralCandidates.Count()}\nTraining #{i++} - TotalCost: {invokeTotal} (This number should go down eventually)");
-                            richTextBox1.ScrollToCaret();
-                            progressBarTraining.Value = numTestCorrect;
-                        }));
-                    else
+                    if (numEpochs % 100 == 0)
                     {
-                        richTextBox1.AppendText($"\n{numActualTestsCorrect}/{neuralTestCandidates.Count()} ({(float)numActualTestsCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTestsCorrect}/{neuralCandidates.Count()}\nTraining #{i++} - TotalCost: {costTotal} (This number should go down eventually)");
-                        richTextBox1.ScrollToCaret();
-                        progressBarTraining.Value = numActualTestsCorrect;
+                        int epochs = numEpochs;
+                        if (InvokeRequired)
+                            Task.Run(() => Invoke((MethodInvoker)delegate
+                            {
+                                if (epochs % 100000 == 0)
+                                    richTextBox1.Clear();
+                                richTextBox1.AppendText($"\n{epochs}: {numTestCorrect}/{neuralTestCandidates.Count()} ({(float)numTestCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTrainingCorrect}/{neuralCandidates.Count()}\nTraining #{numEpochs++} - TotalCost: {invokeTotal} (This number should go down eventually)");
+                                richTextBox1.ScrollToCaret();
+                                progressBarTraining.Value = numTestCorrect;
+                            }));
+                        else
+                        {
+                            richTextBox1.AppendText($"\n{numActualTestsCorrect}/{neuralTestCandidates.Count()} ({(float)numActualTestsCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTestsCorrect}/{neuralCandidates.Count()}\nTraining #{numEpochs++} - TotalCost: {costTotal} (This number should go down eventually)");
+                            richTextBox1.ScrollToCaret();
+                            progressBarTraining.Value = numActualTestsCorrect;
+                        }
                     }
 
                     //orderedCandidates = neuralCandidates.OrderBy(c => random.Next());
@@ -704,7 +700,7 @@ namespace LuteBot.UI
                     textBox2.Enabled = true;
                     pauseTraining = false;
                 });
-                
+
             }
         }
 
