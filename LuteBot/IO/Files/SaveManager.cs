@@ -91,7 +91,7 @@ namespace LuteBot.IO.Files
 
                 using (FileStream sourceStream = new FileStream(filePath + "[" + i + "].sav",
                     FileMode.Create, FileAccess.Write, FileShare.None,
-                    bufferSize: 4096, useAsync: true))
+                    bufferSize: 4096, useAsync: false))
                 {
                     sourceStream.Write(fileHeader, 0, fileHeader.Length);
                     sourceStream.Write(data, index, fileSize);
