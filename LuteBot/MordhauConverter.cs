@@ -100,12 +100,12 @@ namespace LuteMod.Converter
             }
         }
 
-        public void SetEnabledTracksInTrack(int id, List<TrackItem> items)
+        public void SetEnabledTracksInTrack(int id, List<MidiChannelItem> items)
         {
             Track track = GetTrackAt(id);
             if (track != null)
             {
-                foreach (TrackItem item in items)
+                foreach (var item in items)
                 {
                     if (item.Active)
                     {
@@ -130,14 +130,14 @@ namespace LuteMod.Converter
             }
         }
 
-        public List<TrackItem> GetEnabledTracksInTrack(int id)
+        public List<MidiChannelItem> GetEnabledTracksInTrack(int id)
         {
             Track track = GetTrackAt(id);
             if (track != null)
             {
                 return track.MidiTracks;
             }
-            return new List<TrackItem>();
+            return new List<MidiChannelItem>();
         }
 
         public List<MidiChannelItem> GetEnabledChannelsInTrack(int id)

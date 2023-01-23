@@ -131,7 +131,7 @@ ModListWidgetStayTime=5.0";
             hotkeyManager.SynchronizePressed += HotkeyManager_SynchronizePressed;
             hotkeyManager.PreviousKeyPressed += new EventHandler(PreviousButton_Click);
             trackSelectionManager.OutDeviceResetRequest += new EventHandler(ResetDevice);
-            trackSelectionManager.ToggleTrackRequest += new EventHandler<TrackItem>(ToggleTrack);
+            trackSelectionManager.ToggleTrackRequest += new EventHandler<MidiChannelItem>(ToggleTrack);
             liveMidiManager = new LiveMidiManager(trackSelectionManager);
             hotkeyManager.LiveInputManager = liveMidiManager;
 
@@ -882,7 +882,7 @@ ModListWidgetStayTime=5.0";
             ResumeLayout();
         }
 
-        private void ToggleTrack(object sender, TrackItem e)
+        private void ToggleTrack(object sender, MidiChannelItem e)
         {
             timer1.Stop();
             (player as MidiPlayer).UpdateMutedTracks(e);
@@ -1127,6 +1127,9 @@ ModListWidgetStayTime=5.0";
                 //{
                 currentTrackName = fileName;
                 //}
+
+                // Make sure the Track Selection window opens and goes to the top when songs are loaded
+                TrackFilteringToolStripMenuItem_Click(this, null);
             }
         }
 
@@ -1298,12 +1301,18 @@ ModListWidgetStayTime=5.0";
                 var midiPlayer = player as MidiPlayer;
                 trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice, this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
+                trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
                 trackSelectionForm.Left = coords.X;
+                trackSelectionForm.BringToFront();
+                trackSelectionForm.Focus();
             }
-            trackSelectionForm.Show();
-            trackSelectionForm.BringToFront();
-            trackSelectionForm.Focus();
+            else
+            {
+                trackSelectionForm.Show();
+                trackSelectionForm.BringToFront();
+                trackSelectionForm.Focus();
+            }
         }
 
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
