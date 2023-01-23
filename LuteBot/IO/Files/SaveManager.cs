@@ -29,9 +29,12 @@ namespace LuteBot.IO.Files
         private static byte[] fileEnd = new byte[] { 0, 5, 0 };
 
         public static readonly string SaveFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\..\Local\Mordhau\Saved\SaveGames\";
+        private static readonly string DefaultPartitionFile = Path.Combine(Application.StartupPath, "lib", "LuteMod", "PartitionIndex");
 
         public static string ReadSavFile(string filePath)
         {
+            if (fileHeader == null && filePath != DefaultPartitionFile)
+                ReadSavFile(DefaultPartitionFile);
             StringBuilder strbld = new StringBuilder();
             bool fileFound = true;
             string temp;
@@ -50,6 +53,8 @@ namespace LuteBot.IO.Files
 
         public static void WriteSaveFile(string filePath, string content)
         {
+            if (fileHeader == null && filePath != DefaultPartitionFile)
+                ReadSavFile(DefaultPartitionFile);
             // TODO: Rewrite DeleteData as async
             DeleteData(filePath);
 
@@ -73,7 +78,7 @@ namespace LuteBot.IO.Files
 
                 using (FileStream sourceStream = new FileStream(filePath + "[" + i + "].sav",
                     FileMode.Create, FileAccess.Write, FileShare.None,
-                    bufferSize: 4096, useAsync: true))
+                    bufferSize: 4096, useAsync: false))
                 {
                     sourceStream.Write(fileHeader, 0, fileHeader.Length);
                     sourceStream.Write(data, index, fileSize);
