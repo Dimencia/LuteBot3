@@ -13,11 +13,11 @@ namespace LuteBot.TrackSelection
     public class TrackSelectionData
     {
         private List<MidiChannelItem> midiChannels;
-        private List<TrackItem> midiTracks;
+        private List<MidiChannelItem> midiTracks;
         [DataMember]
         public List<MidiChannelItem> MidiChannels { get => midiChannels; set => midiChannels = value; }
         [DataMember]
-        public List<TrackItem> MidiTracks { get => midiTracks; set => midiTracks = value; }
+        public List<MidiChannelItem> MidiTracks { get => midiTracks; set => midiTracks = value; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         [DataMember]
         public Dictionary<int, int> MidiChannelOffsets { get; set; }
@@ -36,7 +36,7 @@ namespace LuteBot.TrackSelection
         public TrackSelectionData(TrackSelectionData oldData, int instrumentId)
         {
             MidiChannels = oldData.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel));
-            MidiTracks = oldData.MidiTracks.ConvertAll(track => new TrackItem(track));
+            MidiTracks = oldData.MidiTracks.ConvertAll(track => new MidiChannelItem(track));
             if (oldData.MidiChannelOffsets != null)
             {
                 foreach (var kvp in oldData.MidiChannelOffsets)
@@ -55,7 +55,7 @@ namespace LuteBot.TrackSelection
         //public TrackSelectionData(SimpleTrackSelectionData oldData)
         //{
         //    MidiChannels = oldData.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel));
-        //    MidiTracks = oldData.MidiTracks.ConvertAll(track => new TrackItem(track));
+        //    MidiTracks = oldData.MidiTracks.ConvertAll(track => new MidiChannelItem(track));
         //    if (oldData.MidiChannelOffsets != null)
         //        foreach (var kvp in oldData.MidiChannelOffsets)
         //        {
@@ -74,7 +74,7 @@ namespace LuteBot.TrackSelection
             // Then the other data is OK to overwrite
 
             //MidiChannels = oldData.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel));
-            //MidiTracks = oldData.MidiTracks.ConvertAll(track => new TrackItem(track));
+            //MidiTracks = oldData.MidiTracks.ConvertAll(track => new MidiChannelItem(track));
 
             var result = new TrackSelectionData(this, newData.InstrumentID);
 
@@ -102,7 +102,7 @@ namespace LuteBot.TrackSelection
                     newChannel = newData.MidiTracks.Where(c => c.Id == channel.Id).SingleOrDefault();
                 if (newChannel != null)
                 {
-                    result.MidiTracks[i] = new TrackItem(channel.WithData(newChannel));
+                    result.MidiTracks[i] = new MidiChannelItem(channel.WithData(newChannel));
                 }
             }
             result.Offset = newData.Offset;

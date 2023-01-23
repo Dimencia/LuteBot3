@@ -21,12 +21,12 @@ namespace LuteBot.TrackSelection
     public class TrackSelectionManager
     {
         private Dictionary<int, MidiChannelItem> midiChannels;
-        private Dictionary<int, TrackItem> midiTracks;
+        private Dictionary<int, MidiChannelItem> midiTracks;
 
         private List<MidiChannelItem> PredictedFluteChannels = null;
 
         public Dictionary<int, MidiChannelItem> MidiChannels { get => midiChannels; private set { midiChannels = value; ResetRequest(); } }
-        public Dictionary<int, TrackItem> MidiTracks { get => midiTracks; private set { midiTracks = value; ResetRequest(); } }
+        public Dictionary<int, MidiChannelItem> MidiTracks { get => midiTracks; private set { midiTracks = value; ResetRequest(); } }
         public bool ActivateAllChannels { get => activateAllChannels; set { activateAllChannels = value; ResetRequest(); } }
         public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
         public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
@@ -43,7 +43,7 @@ namespace LuteBot.TrackSelection
         public string FileName { get; set; }
 
         public event EventHandler TrackChanged;
-        public event EventHandler<TrackItem> ToggleTrackRequest;
+        public event EventHandler<MidiChannelItem> ToggleTrackRequest;
         public event EventHandler OutDeviceResetRequest;
 
         public MidiPlayer Player { get; set; }
@@ -51,7 +51,7 @@ namespace LuteBot.TrackSelection
         public TrackSelectionManager()
         {
             midiChannels = new Dictionary<int, MidiChannelItem>();
-            midiTracks = new Dictionary<int, TrackItem>();
+            midiTracks = new Dictionary<int, MidiChannelItem>();
             activateAllChannels = false;
             activateAllTracks = false;
             autoLoadProfile = true;
@@ -111,13 +111,13 @@ namespace LuteBot.TrackSelection
             {
                 if (MidiTracks.ContainsKey(t.Id))
                 {
-                    MidiTracks[t.Id] = new TrackItem(MidiTracks[t.Id]);
+                    MidiTracks[t.Id] = new MidiChannelItem(MidiTracks[t.Id]);
                     MidiTracks[t.Id].Active = t.Active;
                 }
             }
 
             //this.MidiChannels = data.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel)).ToDictionary(channel => channel.Id);
-            //this.MidiTracks = data.MidiTracks.ConvertAll(track => new TrackItem(track)).ToDictionary(track => track.Id);
+            //this.MidiTracks = data.MidiTracks.ConvertAll(track => new MidiChannelItem(track)).ToDictionary(track => track.Id);
             this.NoteOffset = data.Offset;
             this.NumChords = data.NumChords;
 
@@ -176,7 +176,7 @@ namespace LuteBot.TrackSelection
 
                 foreach (var channel in midiChannels.Values)
                 {
-                    if (PredictedFluteChannels.Any(c => !(c is TrackItem) && c.Id == channel.Id))
+                    if (PredictedFluteChannels.Any(c => !(c is MidiChannelItem) && c.Id == channel.Id))
                         channel.Active = true;
                     else
                         channel.Active = false;
@@ -184,7 +184,7 @@ namespace LuteBot.TrackSelection
 
                 foreach (var channel in midiTracks.Values)
                 {
-                    if (PredictedFluteChannels.Any(c => c is TrackItem && c.Id == channel.Id))
+                    if (PredictedFluteChannels.Any(c => c is MidiChannelItem && c.Id == channel.Id))
                         channel.Active = true;
                     else
                         channel.Active = false;
@@ -199,7 +199,7 @@ namespace LuteBot.TrackSelection
         {
             TrackSelectionData data = new TrackSelectionData();
             data.MidiChannels = MidiChannels.Values.Select(c => new MidiChannelItem(c)).ToList();
-            data.MidiTracks = MidiTracks.Values.Select(c => new TrackItem(c)).ToList();
+            data.MidiTracks = MidiTracks.Values.Select(c => new MidiChannelItem(c)).ToList();
             data.Offset = NoteOffset;
             data.NumChords = NumChords;
             data.InstrumentID = instrumentId;
@@ -258,7 +258,7 @@ namespace LuteBot.TrackSelection
                     {
                         foreach (var channel in midiChannels.Values)
                         {
-                            if (!PredictedFluteChannels.Any(c => !(c is TrackItem) && c.Id == channel.Id))
+                            if (!PredictedFluteChannels.Any(c => !(c is MidiChannelItem) && c.Id == channel.Id))
                                 channel.Active = true;
                             else
                             {
@@ -273,7 +273,7 @@ namespace LuteBot.TrackSelection
 
                         foreach (var channel in midiTracks.Values)
                         {
-                            if (!PredictedFluteChannels.Any(c => c is TrackItem && c.Id == channel.Id))
+                            if (!PredictedFluteChannels.Any(c => c is MidiChannelItem && c.Id == channel.Id))
                                 channel.Active = true;
                             else
                             {
@@ -292,7 +292,7 @@ namespace LuteBot.TrackSelection
                     {
                         foreach (var channel in midiChannels.Values)
                         {
-                            if (PredictedFluteChannels.Any(c => !(c is TrackItem) && c.Id == channel.Id))
+                            if (PredictedFluteChannels.Any(c => !(c is MidiChannelItem) && c.Id == channel.Id))
                                 channel.Active = true;
                             else
                                 channel.Active = false;
@@ -300,7 +300,7 @@ namespace LuteBot.TrackSelection
 
                         foreach (var channel in midiTracks.Values)
                         {
-                            if (PredictedFluteChannels.Any(c => c is TrackItem && c.Id == channel.Id))
+                            if (PredictedFluteChannels.Any(c => c is MidiChannelItem && c.Id == channel.Id))
                                 channel.Active = true;
                             else
                                 channel.Active = false;
@@ -322,7 +322,7 @@ namespace LuteBot.TrackSelection
                 {
                     foreach (var channel in midiChannels.Values)
                     {
-                        if (!PredictedFluteChannels.Any(c => !(c is TrackItem) && c.Id == channel.Id))
+                        if (!PredictedFluteChannels.Any(c => !(c is MidiChannelItem) && c.Id == channel.Id))
                             channel.Active = true;
                         else
                         {
@@ -337,7 +337,7 @@ namespace LuteBot.TrackSelection
 
                     foreach (var channel in midiTracks.Values)
                     {
-                        if (!PredictedFluteChannels.Any(c => c is TrackItem && c.Id == channel.Id))
+                        if (!PredictedFluteChannels.Any(c => c is MidiChannelItem && c.Id == channel.Id))
                             channel.Active = true;
                         else
                         {
@@ -356,7 +356,7 @@ namespace LuteBot.TrackSelection
                 {
                     foreach (var channel in midiChannels.Values)
                     {
-                        if (PredictedFluteChannels.Any(c => !(c is TrackItem) && c.Id == channel.Id))
+                        if (PredictedFluteChannels.Any(c => !(c is MidiChannelItem) && c.Id == channel.Id))
                             channel.Active = true;
                         else
                             channel.Active = false;
@@ -364,7 +364,7 @@ namespace LuteBot.TrackSelection
 
                     foreach (var channel in midiTracks.Values)
                     {
-                        if (PredictedFluteChannels.Any(c => c is TrackItem && c.Id == channel.Id))
+                        if (PredictedFluteChannels.Any(c => c is MidiChannelItem && c.Id == channel.Id))
                             channel.Active = true;
                         else
                             channel.Active = false;
@@ -378,7 +378,7 @@ namespace LuteBot.TrackSelection
             //    kvp.Value.InstrumentID = kvp.Key;
         }
 
-        public void LoadTracks(Dictionary<int, MidiChannelItem> channels, Dictionary<int, TrackItem> tracks)
+        public void LoadTracks(Dictionary<int, MidiChannelItem> channels, Dictionary<int, MidiChannelItem> tracks)
         {
             //midiChannels.Clear();
             //midiTracks.Clear();
@@ -389,7 +389,7 @@ namespace LuteBot.TrackSelection
             //    else // Automatically disable glockenspiel channel
             //        midiChannels.Add(new MidiChannelItem() { Id = kvp.Key, Active = false, Name = kvp.Value });
             //foreach (var kvp in tracks)
-            //    midiTracks.Add(new TrackItem() { Id = kvp.Key, Name = kvp.Value, Active = true });
+            //    midiTracks.Add(new MidiChannelItem() { Id = kvp.Key, Name = kvp.Value, Active = true });
 
             // We don't want to directly copy it... I think we already have some at this point?
             // We do not, yet... 
@@ -483,7 +483,7 @@ namespace LuteBot.TrackSelection
                 int numParamsPerChannel = Extensions.numParamsPerChannel;
                 //int numSupportedChannels = 32;
                 var random = new Random();
-                var tempNeuralCandidates = MidiChannels.Values.Where(c => c.Id != 9).ToArray();
+                var tempNeuralCandidates = MidiChannels.Values.Where(c => c.Id != 9).Concat(MidiTracks.Values).ToArray();
 
                 //if (tempNeuralCandidates.Length > numSupportedChannels)
                 //    tempNeuralCandidates = tempNeuralCandidates.Take(numSupportedChannels).ToArray();
@@ -564,14 +564,13 @@ namespace LuteBot.TrackSelection
                     if (channel != null)
                     {
                         string ident = "Channel";
-                        if (channel is TrackItem)
+                        if (channel is MidiChannelItem)
                             ident = "Track";
                         Console.WriteLine($"{ident} {channel.Name} ({channel.Id}) - Neural Score: {channelResults[channel]}");
                         //Console.WriteLine($"{channel.Name} ({channel.Id}) - Neural Score: {neuralResults[channel.Id]}");
-                        if (channel is TrackItem)
-                            channel.Name += $"(Flute Rank {++trackCount} - {Math.Round(orderedResults2.ElementAt(i).Value * 100, 2)}%)";
-                        else
-                            channel.Name += $"(Flute Rank {++count} - {Math.Round(orderedResults2.ElementAt(i).Value * 100, 2)}%)";
+
+                        channel.fluteRank = ++trackCount;
+                        channel.flutePercent = (float)Math.Round(orderedResults2.ElementAt(i).Value * 100, 2);
                     }
                 }
 
@@ -952,7 +951,7 @@ namespace LuteBot.TrackSelection
             ChannelMessage newMessage = message;
             if (midiTracks.ContainsKey(trackId))
             {
-                TrackItem track = midiTracks[trackId];
+                var track = midiTracks[trackId];
                 if (track != null && track.Active)
                 {
                     if (message.Command == ChannelCommand.NoteOn)
@@ -1006,9 +1005,9 @@ namespace LuteBot.TrackSelection
             handler?.Invoke(this, new EventArgs());
         }
 
-        private void ToggleTrackRequestHelper(TrackItem item)
+        private void ToggleTrackRequestHelper(MidiChannelItem item)
         {
-            EventHandler<TrackItem> handler = ToggleTrackRequest;
+            EventHandler<MidiChannelItem> handler = ToggleTrackRequest;
             handler?.Invoke(this, item);
         }
 

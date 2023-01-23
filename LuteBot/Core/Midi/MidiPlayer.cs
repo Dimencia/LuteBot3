@@ -25,7 +25,7 @@ namespace LuteBot.Core.Midi
 
         private bool isPlaying;
         private Dictionary<int, MidiChannelItem> channels = new Dictionary<int, MidiChannelItem>();
-        private Dictionary<int, TrackItem> tracks = new Dictionary<int, TrackItem>();
+        private Dictionary<int, MidiChannelItem> tracks = new Dictionary<int, MidiChannelItem>();
 
         public Dictionary<int, List<MidiNote>> tickMetaNotes { get; private set; } = new Dictionary<int, List<MidiNote>>();
 
@@ -72,7 +72,7 @@ namespace LuteBot.Core.Midi
             //catch { } // TODO: Somehow alert them that it didn't work
         }
 
-        public void UpdateMutedTracks(TrackItem item)
+        public void UpdateMutedTracks(MidiChannelItem item)
         {
             if (isPlaying)
             {
@@ -92,7 +92,7 @@ namespace LuteBot.Core.Midi
             return channels;
         }
 
-        public Dictionary<int, TrackItem> GetMidiTracks()
+        public Dictionary<int, MidiChannelItem> GetMidiTracks()
         {
             return tracks;
         }
@@ -202,7 +202,7 @@ namespace LuteBot.Core.Midi
             lock (loadLock)
             {
                 channels = new Dictionary<int, MidiChannelItem>();
-                tracks = new Dictionary<int, TrackItem>();
+                tracks = new Dictionary<int, MidiChannelItem>();
                 // Reset the sequence because we can't cancel the load or detect if one is occurring
                 //sequence.LoadCompleted -= HandleLoadCompleted;
                 //sequence.Dispose();
@@ -315,7 +315,7 @@ namespace LuteBot.Core.Midi
                     //trackNames = new Dictionary<int, string>();
 
                     channels = new Dictionary<int, MidiChannelItem>();
-                    tracks = new Dictionary<int, TrackItem>();
+                    tracks = new Dictionary<int, MidiChannelItem>();
 
                     // Set default channel names
                     foreach (var channelNum in sequence.Channels)
@@ -328,7 +328,7 @@ namespace LuteBot.Core.Midi
                     }
                     foreach (var midiTrack in sequence.Tracks)
                     {
-                        var track = new TrackItem();
+                        var track = new MidiChannelItem();
                         track.Id = midiTrack.Id;
                         if (!string.IsNullOrWhiteSpace(midiTrack.Name))
                             track.Name = midiTrack.Name;
@@ -931,7 +931,7 @@ namespace LuteBot.Core.Midi
             }
 
             /*
-            foreach (TrackItem track in trackSelectionManager.MidiTracks.Values)
+            foreach (MidiChannelItem track in trackSelectionManager.MidiTracks.Values)
             {
                 if (track.Active)
                 {

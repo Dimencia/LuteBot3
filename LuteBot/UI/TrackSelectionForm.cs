@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Resources.ResXFileRef;
 
 namespace LuteBot.UI
@@ -21,6 +22,8 @@ namespace LuteBot.UI
         MordhauOutDevice _mordhauOut;
         RustOutDevice _rustOut;
         LuteBotForm mainForm;
+
+        private bool showFluteRanks = true;
 
         // We need only one out device, might as well use rust, but take both for now cuz why not, feels unfair
         // Though they both get updated with the same values at the same time, for what we're doing
@@ -38,15 +41,12 @@ namespace LuteBot.UI
 
             SuspendLayout();
             Instrument.Read();
-            instrumentsBox.DisplayMember = "Name";
             foreach (Instrument i in Instrument.Prefabs)
                 instrumentsBox.Items.Add(i);
             instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-            ResumeLayout();
-
-
+            instrumentsBox.DisplayMember = "Name";
             InitLists();
-            trackSelectionManager.autoLoadProfile = AutoActivateCheckBox.Checked;
+            trackSelectionManager.autoLoadProfile = true;
             typeof(Panel).InvokeMember("DoubleBuffered", BindingFlags.SetProperty
             | BindingFlags.Instance | BindingFlags.NonPublic, null,
             OffsetPanel, new object[] { true }); // Internet suggested this... 
@@ -57,6 +57,7 @@ namespace LuteBot.UI
 
             ChannelsListBox.ContextMenuStrip = contextMenuStrip1;
             TrackListBox.ContextMenuStrip = contextMenuStrip2;
+            ResumeLayout();
 
         }
 
@@ -73,30 +74,30 @@ namespace LuteBot.UI
         private void _mordhauOut_notePlayed(object sender, int channel)
         {
             // Mark the channel to flash and redraw the graphic (twice)
-            if (channelColors.ContainsKey(channel)) // If they have not entered advanced mode on this midi at any point, there will not be a color
-            { // And in that case there's no reason to do anything
-                var original = channelColors[channel];
-                channelColors[channel] = Color.FromArgb(Math.Min(original.R * 2, 255), Math.Min(original.G * 2, 255), Math.Min(original.B * 2, 255));
-                System.Threading.Timer t;
-                t = new System.Threading.Timer(T_Tick, channel, ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown), System.Threading.Timeout.Infinite);
-                BeginInvoke((MethodInvoker)delegate
-                {
-                    OffsetPanel.Refresh();
-                });
-            }
+            //if (channelColors.ContainsKey(channel)) // If they have not entered advanced mode on this midi at any point, there will not be a color
+            //{ // And in that case there's no reason to do anything
+            //    var original = channelColors[channel];
+            //    channelColors[channel] = Color.FromArgb(Math.Min(original.R * 2, 255), Math.Min(original.G * 2, 255), Math.Min(original.B * 2, 255));
+            //    System.Threading.Timer t;
+            //    t = new System.Threading.Timer(T_Tick, channel, ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown), System.Threading.Timeout.Infinite);
+            //    BeginInvoke((MethodInvoker)delegate
+            //    {
+            //        OffsetPanel.Refresh();
+            //    });
+            //}
         }
 
-        private void T_Tick(object state)
-        {
-            int channel = (int)state;
-            //var original = channelColors[channel];
-            //channelColors[channel] = Color.FromArgb(Math.Min(original.R / 2, 255), Math.Min(original.G / 2, 255), Math.Min(original.B / 2, 255));
-            channelColors[channel] = originalChannelColors[channel];
-            BeginInvoke((MethodInvoker)delegate
-            {
-                OffsetPanel.Refresh();
-            });
-        }
+        //private void T_Tick(object state)
+        //{
+        //    int channel = (int)state;
+        //    //var original = channelColors[channel];
+        //    //channelColors[channel] = Color.FromArgb(Math.Min(original.R / 2, 255), Math.Min(original.G / 2, 255), Math.Min(original.B / 2, 255));
+        //    channelColors[channel] = originalChannelColors[channel];
+        //    BeginInvoke((MethodInvoker)delegate
+        //    {
+        //        OffsetPanel.Refresh();
+        //    });
+        //}
 
 
 
@@ -255,7 +256,7 @@ namespace LuteBot.UI
                 selectedNotes.Clear();
                 OffsetPanel.Refresh();
             }
-            else if(keyData == Keys.Insert)
+            else if (keyData == Keys.Insert)
             {
                 foreach (var note in selectedNotes)
                     note.active = true;
@@ -263,7 +264,7 @@ namespace LuteBot.UI
                 selectedNotes.Clear();
                 OffsetPanel.Refresh();
             }
-            return base.ProcessCmdKey(ref msg, keyData); 
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         // This mouse stuff is going to suck
@@ -272,13 +273,13 @@ namespace LuteBot.UI
         private Rectangle draggableRect;
         private int startOffset;
         private int startGlobalOffset;
-        private Dictionary<int, Color> channelColors = new Dictionary<int, Color>();
-        private Dictionary<int, Color> originalChannelColors = new Dictionary<int, Color>();
         private MidiChannelItem dragTarget;
         private List<int> hoverChannels = new List<int>();
 
         private Point lastMousePosition = new Point(0, 0);
         private int lastScrollAmount = 0;
+
+        private Dictionary<int, MidiChannelItem> DrawChannels { get => useChannelColors ? trackSelectionManager.MidiChannels : trackSelectionManager.MidiTracks; }
 
         private double GetDistance(Point p1, Point p2)
         {
@@ -295,9 +296,9 @@ namespace LuteBot.UI
 
                 //if (isAdvanced)
                 //{
-                if (trackSelectionManager.MidiChannels.ContainsKey(dragTarget.Id))
+                if (DrawChannels.ContainsKey(dragTarget.Id))
                 {
-                    var channel = trackSelectionManager.MidiChannels[dragTarget.Id];
+                    var channel = DrawChannels[dragTarget.Id];
 
 
                     int oldOffset = channel.offset;
@@ -340,7 +341,7 @@ namespace LuteBot.UI
                 //        OffsetPanel.Refresh();
                 //}
             }
-            else if(rectDragging)
+            else if (rectDragging)
             {
                 lastMousePosition = e.Location;
                 if (panel1.HorizontalScroll.Value > Int16.MaxValue || e.X < 0) // It's a uint16, can overflow easily, this gives us about double the range but could be a problem still... 
@@ -354,7 +355,7 @@ namespace LuteBot.UI
                 lastMousePosition = e.Location;
                 if (panel1.HorizontalScroll.Value > Int16.MaxValue || e.X < 0) // It's a uint16, can overflow easily, this gives us about double the range but could be a problem still... 
                 {
-                    lastMousePosition = new Point( (int)e.X & 0xffff, e.Y);
+                    lastMousePosition = new Point((int)e.X & 0xffff, e.Y);
                 }
                 List<int> hoveringChannels = new List<int>();
                 // Can I really iterate every note rect for collisions every move?  I can try anyway
@@ -377,7 +378,7 @@ namespace LuteBot.UI
                 // or if they were already hovering last tick, flip it?
                 var refresh = false;
                 //if (hoverChannels.Count > 0)
-                    hoveringChannels.Reverse();
+                hoveringChannels.Reverse();
                 if (hoveringChannels.Count != hoverChannels.Count || !hoveringChannels.SequenceEqual(hoverChannels))
                 {
                     refresh = true;
@@ -388,7 +389,7 @@ namespace LuteBot.UI
 
             }
 
-            
+
 
             //OffsetPanel.Refresh(); // See if this is laggy
             // Yeah a little
@@ -408,7 +409,7 @@ namespace LuteBot.UI
                 rectDragging = false;
                 // TODO: If we stopped at negative sizes, do I need to handle that?
                 Rectangle selectionArea = new Rectangle(Math.Min(rectDragStart.X, e.Location.X), Math.Min(rectDragStart.Y, e.Location.Y), Math.Abs(e.Location.X - rectDragStart.X), Math.Abs(e.Location.Y - rectDragStart.Y));
-                foreach(var note in visibleNotes)
+                foreach (var note in visibleNotes)
                 {
                     if (selectionArea.LooseContains(note.pianoRect))
                     {
@@ -467,9 +468,9 @@ namespace LuteBot.UI
             if (hoverChannels.Count > 0)
             {
                 var targetChannel = hoverChannels.First();
-                if (trackSelectionManager.MidiChannels.ContainsKey(targetChannel))
+                if (DrawChannels.ContainsKey(targetChannel))
                 {
-                    var channel = trackSelectionManager.MidiChannels[targetChannel];
+                    var channel = DrawChannels[targetChannel];
                     dragging = true;
                     dragStart = e.Location;
                     //if (isAdvanced)
@@ -568,7 +569,7 @@ namespace LuteBot.UI
         // And need to know this to calculate where to put them
 
         Brush selectedNotesBrush = new SolidBrush(Color.Blue);
-
+        Pen disabledChannelPen = new Pen(new SolidBrush(Color.FromArgb(200, 0, 150, 200)));
         private void DrawPianoRoll(Graphics g)
         {
             // So for a piano roll, the height is always static, 127 notes worth
@@ -607,20 +608,16 @@ namespace LuteBot.UI
             //foreach (var note in allNotes.OrderBy(n => n.channel).OrderBy(n => hoverChannels.Contains(n.channel) ? hoverChannels.Count-hoverChannels.IndexOf(n.channel) : -1))
 
             // TODO: find out why in one rare case, we don't have a channel that it says we should have.  I think it's related to loading old files
-            foreach(var note in visibleNotes.OrderBy(n => hoverChannels.Contains(n.channel) ? hoverChannels.Count - hoverChannels.IndexOf(n.channel) : -1).Where(n => trackSelectionManager.MidiChannels.ContainsKey(n.channel)))
+            foreach (var note in visibleNotes.OrderBy(n => hoverChannels.Contains(n.channel) ? hoverChannels.Count - hoverChannels.IndexOf(n.channel) : -1).Where(n => trackSelectionManager.MidiChannels.ContainsKey(n.channel)))
             {
+                // Er... not always channel....
 
-                var channel = trackSelectionManager.MidiChannels[note.channel];
+                // Yknow what... I'm gonna just... 
+                // Go ahead and setup the thing to make them one
+                var channel = DrawChannels[note.channel];
                 var channelRect = note.pianoRect;
                 if (channelRect == Rectangle.Empty)
                     channelRect = GetNoteRect(note);
-                    
-
-                if (!channelColors.ContainsKey(channel.Id))
-                {
-                    channelColors[channel.Id] = Color.FromArgb(random.Next(0, 200), random.Next(0, 200), random.Next(0, 200));
-                    originalChannelColors[channel.Id] = channelColors[channel.Id];
-                }
 
                 if (selectedNotes.Contains(note))
                 {
@@ -630,27 +627,32 @@ namespace LuteBot.UI
                 // Draw outline, black if not hovered
                 else if (hoverChannels.Contains(note.channel))
                 {
-                    var baseColor = channelColors[channel.Id];
                     if (note.active)
                     {
-                        g.FillRectangle(new SolidBrush(channelColors[channel.Id]), channelRect);
+                        g.FillRectangle(channel.brush, channelRect);
                     }
                     else
                     {
-                        g.FillRectangle(new SolidBrush(Color.FromArgb(50, baseColor.R, baseColor.G, baseColor.B)), channelRect);
+                        g.FillRectangle(channel.alphaBrush, channelRect);
                     }
                     g.DrawRectangle(Pens.White, channelRect);
                 }
+                else if (!trackSelectionManager.MidiChannels[note.channel].Active || !trackSelectionManager.MidiTracks[note.track].Active)
+                {
+                    // Draw it with alpha
+                    g.FillRectangle(channel.alphaBrush, channelRect);
+                    // And an outline for ones disabled in this way
+                    g.DrawRectangle(disabledChannelPen, channelRect);
+                }
                 else if (note.active)
                 {
-                    g.FillRectangle(new SolidBrush(channelColors[channel.Id]), channelRect);
+                    g.FillRectangle(channel.brush, channelRect);
                     g.DrawRectangle(Pens.Black, channelRect);
                 }
                 else
                 {
                     // Draw it with alpha
-                    var baseColor = channelColors[channel.Id];
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(50, baseColor.R, baseColor.G, baseColor.B)), channelRect);
+                    g.FillRectangle(channel.alphaBrush, channelRect);
                     // And no outline
                     //g.DrawRectangle(Pens.Black, channelRect);
                 }
@@ -665,22 +667,25 @@ namespace LuteBot.UI
                 // Get them in reverse order though so the top one is the one that gets selected
                 var hoverChannel = hoverChannels[numHovers];
 
-                var channel = trackSelectionManager.MidiChannels.ContainsKey(hoverChannel) ? trackSelectionManager.MidiChannels[hoverChannel] : null;
+                var channel = DrawChannels.ContainsKey(hoverChannel) ? DrawChannels[hoverChannel] : null;
                 if (channel == null)
                     continue;
-                var labelSize = g.MeasureString(channel.Name, labelFont);
 
-                Rectangle channelLabelRect = new Rectangle((int)(lastMousePosition.X - labelSize.Width/2 - 2), (int)(lastMousePosition.Y - (pianoRowHeight*1.5f) - ((labelSize.Height+10)*(numHovers+1))), (int)(labelSize.Width+4), (int)(labelSize.Height + 4));
+                var displayName = channel.DisplayName;
+
+                var labelSize = g.MeasureString(displayName, labelFont);
+
+                Rectangle channelLabelRect = new Rectangle((int)(lastMousePosition.X - labelSize.Width / 2 - 2), (int)(lastMousePosition.Y - (pianoRowHeight * 1.5f) - ((labelSize.Height + 10) * (numHovers + 1))), (int)(labelSize.Width + 4), (int)(labelSize.Height + 4));
                 Rectangle channelLabelBgRect = new Rectangle(channelLabelRect.X + 1, channelLabelRect.Y + 1, channelLabelRect.Width + 1, channelLabelRect.Height + 1);
 
                 g.FillRectangle(shadowBrush, channelLabelBgRect);
                 g.FillRectangle(labelBgBrush, channelLabelRect);
                 // If this is the first one of multiple, give it an outline or something
                 if (numHovers == 0 && hoverChannels.Count > 1)
-                    g.DrawRectangle(new Pen(channelColors[channel.Id], 4f), channelLabelRect);
+                    g.DrawRectangle(channel.pen, channelLabelRect);
                 else
-                    g.DrawRectangle(new Pen(channelColors[channel.Id], 2f), channelLabelRect);
-                g.DrawString(channel.Name, labelFont, labelBrush, channelLabelRect);
+                    g.DrawRectangle(channel.pen, channelLabelRect);
+                g.DrawString(displayName, labelFont, labelBrush, channelLabelRect);
             }
 
 
@@ -713,7 +718,7 @@ namespace LuteBot.UI
             //g.FillRectangle(Brushes.White, pianoX, 0, pianoWidth, maxHeight);
 
             // Fill in a greenish rectangle where the instrument goes
-            
+
             int noteCount = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount); //-1 because if noteCount is 60 and start is 0, the high note is 59
             int highest = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId) + ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote) + noteCount - 1;
 
@@ -1059,7 +1064,7 @@ namespace LuteBot.UI
 
         private IEnumerable<MidiNote> GetNotesWithin(Rectangle targetRect, bool forceRegenerate)
         {
-            
+
             if (allNotes.Length == 0)
                 return new MidiNote[0];
             /*
@@ -1185,7 +1190,7 @@ namespace LuteBot.UI
 
             // This was fucking annoying and isn't even that bad at performance if I do a straight linear one
             List<MidiNote> result = new List<MidiNote>();
-            foreach(var note in allNotes)
+            foreach (var note in allNotes)
             {
                 if (forceRegenerate || note.pianoRect == Rectangle.Empty)
                     note.pianoRect = GetNoteRect(note);
@@ -1195,7 +1200,7 @@ namespace LuteBot.UI
             return result;
         }
 
-        
+
 
         private Rectangle GetNoteRect(MidiNote note)
         {
@@ -1212,7 +1217,17 @@ namespace LuteBot.UI
         private int maxNoteLength = 0;
         private void ReloadNotes(bool forceRefresh = false)
         {
-            allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks.ContainsKey(n.track) &&  trackSelectionManager.MidiTracks[n.track].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
+            // This is the number of seconds for each tick... 
+            // And each pixel should be probably 0.016s, minimum usable difference?  
+
+            // Or should I consider that I should display 15-30s of notes on default sizes
+            // To do 30s of notes in every size, I'd have to divide that size by 30, that's how many pixels are per second
+            // Then multiply that by this length
+            var secondsPerTick = (float)((1d / trackSelectionManager.Player.sequence.Division) * trackSelectionManager.Player.sequence.FirstTempo / 1000000d);
+            var pixelsPerSecond = 35; // 35's a good middle ground between the 15-30s, on default size... at least at my dpi... 
+            tickLength = secondsPerTick * pixelsPerSecond;
+            //allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks.ContainsKey(n.track) &&  trackSelectionManager.MidiTracks[n.track].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
+            allNotes = trackSelectionManager.MidiChannels.Values.SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks.ContainsKey(n.track)).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
                 .ToArray();
             // Give it an arbitrary order to make things consistent for draw order
 
@@ -1235,18 +1250,20 @@ namespace LuteBot.UI
 
             TrackListBox.Items.Clear();
             ChannelsListBox.Items.Clear();
+            TrackListBox.UseColor = !useChannelColors;
+            ChannelsListBox.UseColor = useChannelColors;
 
             foreach (MidiChannelItem channel in trackSelectionManager.MidiChannels.Values.OrderBy(c => c.Id))
             {
                 ChannelsListBox.Items.Add(channel, channel.Active);
             }
-            foreach (TrackItem track in trackSelectionManager.MidiTracks.Values.OrderBy(c => c.Id))
+            foreach (MidiChannelItem track in trackSelectionManager.MidiTracks.Values.OrderBy(c => c.Id))
             {
                 TrackListBox.Items.Add(track, track.Active);
             }
 
-            ChannelsListBox.DisplayMember = "Name";
-            TrackListBox.DisplayMember = "Name";
+            ChannelsListBox.DisplayMember = "DisplayName";
+            TrackListBox.DisplayMember = "DisplayName";
 
             instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
@@ -1275,7 +1292,7 @@ namespace LuteBot.UI
 
         private void TrackChangedHandler(object sender, EventArgs e)
         {
-            if(!LuteBotForm.skipUI)
+            if (!LuteBotForm.skipUI)
                 InitLists();
         }
 
@@ -1312,15 +1329,9 @@ namespace LuteBot.UI
             }
         }
 
-        private void AutoActivateCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            trackSelectionManager.autoLoadProfile = AutoActivateCheckBox.Checked;
-            Invalidate();
-        }
-
         private void TrackListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            trackSelectionManager.ToggleTrackActivation(!(e.CurrentValue == CheckState.Checked), (TrackListBox.Items[e.Index] as TrackItem).Id);
+            trackSelectionManager.ToggleTrackActivation(!(e.CurrentValue == CheckState.Checked), (TrackListBox.Items[e.Index] as MidiChannelItem).Id);
             //InitLists();
             //ResetRowSize();
             //Invalidate();
@@ -1481,6 +1492,29 @@ namespace LuteBot.UI
             //Invalidate();
             //OffsetPanel.Refresh();
         }
+
+        private bool useChannelColors = true;
+        private void radioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            var button = sender as RadioButton;
+            if (button.Checked)
+            {
+                // Get all radio buttons that aren't that button
+                var allButtons = button.Parent.Controls.OfType<RadioButton>().Where(b => b != button).ToList();
+                foreach (var b in allButtons)
+                    b.Checked = false;
+            }
+
+            useChannelColors = radioButtonInstrumentColor.Checked;
+            ChannelsListBox.UseColor = useChannelColors;
+            TrackListBox.UseColor = !useChannelColors;
+            SuspendLayout();
+            ChannelsListBox.Refresh();
+            TrackListBox.Refresh();
+            OffsetPanel.Refresh();
+            ResumeLayout();
+        }
+        
     }
 
     public class CustomBufferedPanel : Panel
@@ -1495,4 +1529,29 @@ namespace LuteBot.UI
                           true);
         }
     }
+
+    public class MidiChannelListBox : CheckedListBox
+    {
+        public bool UseColor { get; set; } = true;
+        public MidiChannelListBox() : base()
+        {
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint &
+                          ControlStyles.UserPaint &
+                          ControlStyles.OptimizedDoubleBuffer,
+                          true);
+        }
+
+        protected override void OnDrawItem(DrawItemEventArgs e)
+        {
+            if (e != null && e.Index >= 0 && Items.Count > e.Index && Items[e.Index] is MidiChannelItem channel)
+            // This is janky but really the easiest and best way to do it imo
+            {
+                var color = UseColor ? channel.color : e.ForeColor;
+                e = new DrawItemEventArgs(e.Graphics, e.Font, e.Bounds, e.Index, e.State, color, e.BackColor);
+            }
+            base.OnDrawItem(e);
+        }
+    }
+
 }

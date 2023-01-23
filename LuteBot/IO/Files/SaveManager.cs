@@ -26,30 +26,16 @@ namespace LuteBot.IO.Files
 
         private static int fileSize = 0;
         private static byte[] fileHeader = null;
-        private static byte[] fileEnd = new byte[] { 0, 5, 0 };
+        private static byte[] fileEnd = new byte[] { 0, 5, 0 }; // Just NUL is all it needs, but UTF8 stuff will trigger that on the first byte
 
         public static readonly string SaveFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\..\Local\Mordhau\Saved\SaveGames\";
-
-
-        static SaveManager()
-        {
-            // On startup, try to get fileHeader and fileSize from our included PartitionIndex file
-            // preventing crashes from malformed index files failing to read on startup
-            try
-            {
-                ReadSavFile(Path.Combine(Application.StartupPath, "lib", "LuteMod", "PartitionIndex[0].sav"));
-            }
-            catch
-            {
-                // And if it doesn't work... oh well?  Maybe other things can still work, we won't throw.
-                // It should always work, though
-
-            }
-        }
-
+        private static readonly string DefaultPartitionFile = Path.Combine(Application.StartupPath, "lib", "LuteMod", "PartitionIndex");
 
         public static string ReadSavFile(string filePath)
         {
+            if (fileHeader == null && filePath != DefaultPartitionFile)
+                ReadSavFile(DefaultPartitionFile);
+
             StringBuilder strbld = new StringBuilder();
             bool fileFound = true;
             string temp;
@@ -68,6 +54,9 @@ namespace LuteBot.IO.Files
 
         public static void WriteSaveFile(string filePath, string content)
         {
+            if (fileHeader == null && filePath != DefaultPartitionFile)
+                ReadSavFile(DefaultPartitionFile);
+
             // TODO: Rewrite DeleteData as async
             DeleteData(filePath);
 
@@ -111,8 +100,8 @@ namespace LuteBot.IO.Files
 
         private static string GetDataFromFile(string filePath)
         {
-            try
-            {
+            //try
+            //{
                 byte[] readResult = FileIO.LoadFile(filePath);
                 byte[] retrievedData = null;
                 if (readResult == null)
@@ -172,11 +161,11 @@ namespace LuteBot.IO.Files
                         // We can probably just look for NUL and stop there, but that's more complicated than it sounds with UTF-8
                         // So this will do
                         var lastFooterBytes = new byte[fileEnd.Length];
-                        while (!Enumerable.SequenceEqual(lastFooterBytes, fileEnd))
+                        while (!Enumerable.SequenceEqual(lastFooterBytes, fileEnd) && index < readResult.Length - fileEnd.Length)
                         {
                             Array.Copy(readResult, index++, lastFooterBytes, 0, lastFooterBytes.Length);
                         }
-                        fileSize = index - 1 - fileHeader.Length;
+                        fileSize = index - 2 - fileHeader.Length; // Sub out the index++, and also to backup a char from the nul
                     }
 
                     // And now we know the start/end
@@ -185,14 +174,14 @@ namespace LuteBot.IO.Files
 
                     return Encoding.UTF8.GetString(retrievedData.ToArray()).Replace("\0", "").Replace("@", "");
                 }
-            }
-            catch
-            {
-                var result = GetDataFromFileOld(filePath);
-                // We should already have accurate data and will save it as a new version if anything changes
-                // So we won't bother resaving or doing anything if we had to fallback
-                return result;
-            }
+            //}
+            //catch
+            //{
+            //    var result = GetDataFromFileOld(filePath);
+            //    // We should already have accurate data and will save it as a new version if anything changes
+            //    // So we won't bother resaving or doing anything if we had to fallback
+            //    return result;
+            //}
         }
 
         private static string GetDataFromFileOld(string filePath)
@@ -226,12 +215,6 @@ namespace LuteBot.IO.Files
                     i--;
                 }
                 retrievedData.Reverse();
-                fileEnd.Reverse();
-                fileHeader.Reverse();
-                fileSize = retrievedData.Count;
-                string debug1 = Encoding.UTF8.GetString(fileEnd.ToArray());
-                string debug2 = Encoding.UTF8.GetString(retrievedData.ToArray());
-                string debug3 = Encoding.UTF8.GetString(fileHeader.ToArray());
                 return Encoding.UTF8.GetString(retrievedData.ToArray()).Replace("\0", "").Replace("@", "");
             }
         }

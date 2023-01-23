@@ -63,7 +63,7 @@ namespace LuteBot
                 || candidate.Length > array.Length;
         }
 
-        public static int numParamsPerChannel = 9;
+        
 
         public static float[][] GetRecurrentInput(this MidiChannelItem channel, int noteParams, float maxTickNumber)
         {
@@ -83,8 +83,8 @@ namespace LuteBot
             return inputs;
         }
 
-
-        public static float[] GetNeuralInputs(this MidiChannelItem c)
+        public static int numParamsPerChannel = 8;//9;
+        public static float[] GetNeuralInputsNew(this MidiChannelItem c)
         {
             float[] inputs = new float[numParamsPerChannel];
 
@@ -128,6 +128,34 @@ namespace LuteBot
             inputs[i++] = channel.avgVariation / 128f;
             //inputs[j * 6 + 5] = channel.numNotes;
             inputs[i++] = channel.averageNote;
+
+            return inputs;
+        }
+
+        public static float[] GetNeuralInputs(this MidiChannelItem c)
+        {
+            // We'll try not normalizing 
+
+            float[] inputs = new float[numParamsPerChannel];
+
+
+            var channel = c;
+            //var channel = song.Values[j];
+
+            //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
+            int i = 0;
+            inputs[i++] = channel.avgNoteLength; // And this is new but should be mostly the same
+            inputs[i++] = channel.maxChordSize;
+            inputs[i++] = channel.percentNoteLength; // This is new but should be the same thing, unless it was wrong before...
+            //inputi++lNoteLength;
+            inputs[i++] = channel.highestNote / 128f;
+            inputs[i++] = channel.lowestNote / 128f;
+            inputs[i++] = channel.numNotesPercent; // Also new but should be the same thing... 
+            //inputi++ 6] = channel.Id / 16f;
+            inputs[i++] = channel.midiInstrument / 128f;
+            inputs[i++] = channel.avgVariation;
+            //inputs[j * 6 + 5] = channel.numNotes;
+
 
             return inputs;
         }

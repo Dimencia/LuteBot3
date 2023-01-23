@@ -1,9 +1,18 @@
 Version 3.5.4
 
+- Fixed a MAJOR issue that would cause PartitionIndex files to become malformed
 - Fixed startup crash for malformed PartitionIndex files
+
 - Track Filtering now opens when a midi is loaded to indicate that adjustments are necessary for most songs to work
-- Improved visibility of instrument selection in Track Filtering
+- Improved visibility of instrument selection in Track Filtering (it's at the top now)
+- Improved default Track Filtering scale to actually respect time and tempo, showing 15-30s of notes at default size
+- First pass of Track Filtering feature overhaul:
+	- Added colors to the channel list that matches their note colors
+	- Added 'ghost' notes, with a blue outline, from channels/tracks that are disabled on this instrument
+	- Honestly, didn't want to include this, but forgot to commit the important fixes by themselves, and too lazy to split them out
+
 - Improved neural network speed via SIMD (fancy superfast thing)
-- Improved neural network accuracy via better normalization
-- Fixed issue with training UI causing it to report incorrect success rates
-- Re-trained default neural network for selecting multiple flute tracks
+- Possibly improved neural network accuracy via better normalization
+- Fixed issue with neural network training UI causing it to report incorrect success rates
+- Added ability to pause and continue training
+- Training is still WIP and might not work; the AI is worse than I thought and needs some refactoring as a whole

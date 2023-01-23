@@ -347,7 +347,7 @@ namespace LuteBot.UI
                         await LuteBotForm.luteBotForm.LoadHelperAsync(midiPath, true);
                         // To prevent it from trying to train on re-generated midis, which have incorrect lengths
                         // Require at least 3 channels
-                        if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1))
+                        if (tsm.MidiChannels.Count() > 3 && tsm.DataDictionary.ContainsKey(1))
                         {
                             if (tsm.MidiTracks.All(t => t.Value.Active) && tsm.DataDictionary[1].MidiChannels.Where(c => c.Active).Count() == 1)
                             {
@@ -583,21 +583,15 @@ namespace LuteBot.UI
                     if (numEpochs % 100 == 0)
                     {
                         int epochs = numEpochs;
-                        if (InvokeRequired)
-                            Task.Run(() => Invoke((MethodInvoker)delegate
-                            {
-                                if (epochs % 100000 == 0)
-                                    richTextBox1.Clear();
-                                richTextBox1.AppendText($"\n{epochs}: {numTestCorrect}/{neuralTestCandidates.Count()} ({(float)numTestCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTrainingCorrect}/{neuralCandidates.Count()}\nTraining #{numEpochs++} - TotalCost: {invokeTotal} (This number should go down eventually)");
-                                richTextBox1.ScrollToCaret();
-                                progressBarTraining.Value = numTestCorrect;
-                            }));
-                        else
+                        Task.Run(() => Invoke((MethodInvoker)delegate
                         {
-                            richTextBox1.AppendText($"\n{numActualTestsCorrect}/{neuralTestCandidates.Count()} ({(float)numActualTestsCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTestsCorrect}/{neuralCandidates.Count()}\nTraining #{numEpochs++} - TotalCost: {costTotal} (This number should go down eventually)");
+                            if (epochs % 100000 == 0)
+                                richTextBox1.Clear();
+                            richTextBox1.AppendText($"\n{epochs}: {numTestCorrect}/{numTestCandidates} ({(float)numTestCorrect / numTestCandidates * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTrainingCorrect}/{neuralCandidates.Count()}\nTraining #{numEpochs++} - TotalCost: {invokeTotal} (This number should go down eventually)");
                             richTextBox1.ScrollToCaret();
-                            progressBarTraining.Value = numActualTestsCorrect;
-                        }
+                            progressBarTraining.Value = numTestCorrect;
+                        }));
+                        
                     }
 
                     //orderedCandidates = neuralCandidates.OrderBy(c => random.Next());
