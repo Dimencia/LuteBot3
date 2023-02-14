@@ -262,6 +262,10 @@ namespace LuteBot
                     try
                     {
                         SaveManager.DeleteData(SaveManager.SaveFilePath + index.PartitionNames[selected]);
+                        // Also delete the MIDI file
+                        var midFileName = Path.Combine(partitionMidiPath, index.PartitionNames[selected] + ".mid");
+                        if (File.Exists(midFileName))
+                            File.Delete(midFileName);
                         index.PartitionNames.RemoveAt(selected);
                     }
                     catch { }
@@ -321,7 +325,7 @@ namespace LuteBot
                             }
                             else
                             {
-                                index.PartitionNames.Add(namingForm.textBoxPartName.Text);
+                                index.PartitionNames.Insert(0, namingForm.textBoxPartName.Text);
 
                                 //if (trackConverter == null)
                                 //{

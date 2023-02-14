@@ -25,7 +25,7 @@ namespace LuteBot.Core.Midi
 
         private bool isPlaying;
         private Dictionary<int, MidiChannelItem> channels = new Dictionary<int, MidiChannelItem>();
-        private Dictionary<int, MidiChannelItem> tracks = new Dictionary<int, MidiChannelItem>();
+        private Dictionary<int, TrackItem> tracks = new Dictionary<int, TrackItem>();
 
         public Dictionary<int, List<MidiNote>> tickMetaNotes { get; private set; } = new Dictionary<int, List<MidiNote>>();
 
@@ -54,7 +54,15 @@ namespace LuteBot.Core.Midi
 
             if (!(OutputDevice.DeviceCount == 0))
             {
-                outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
+                try
+                {
+                    outDevice = new OutputDevice(ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice));
+                }
+                catch // If the config's OutputDevice is invalid, default them to 0 since we know there's at least one
+                {
+                    outDevice = new OutputDevice(0);
+                    ConfigManager.SetProperty(PropertyItem.OutputDevice, "0");
+                }
             }
         }
 
@@ -72,7 +80,7 @@ namespace LuteBot.Core.Midi
             //catch { } // TODO: Somehow alert them that it didn't work
         }
 
-        public void UpdateMutedTracks(MidiChannelItem item)
+        public void UpdateMutedTracks(TrackItem item)
         {
             if (isPlaying)
             {
@@ -92,7 +100,7 @@ namespace LuteBot.Core.Midi
             return channels;
         }
 
-        public Dictionary<int, MidiChannelItem> GetMidiTracks()
+        public Dictionary<int, TrackItem> GetMidiTracks()
         {
             return tracks;
         }
@@ -202,7 +210,7 @@ namespace LuteBot.Core.Midi
             lock (loadLock)
             {
                 channels = new Dictionary<int, MidiChannelItem>();
-                tracks = new Dictionary<int, MidiChannelItem>();
+                tracks = new Dictionary<int, TrackItem>();
                 // Reset the sequence because we can't cancel the load or detect if one is occurring
                 //sequence.LoadCompleted -= HandleLoadCompleted;
                 //sequence.Dispose();
@@ -315,7 +323,7 @@ namespace LuteBot.Core.Midi
                     //trackNames = new Dictionary<int, string>();
 
                     channels = new Dictionary<int, MidiChannelItem>();
-                    tracks = new Dictionary<int, MidiChannelItem>();
+                    tracks = new Dictionary<int, TrackItem>();
 
                     // Set default channel names
                     foreach (var channelNum in sequence.Channels)
@@ -328,7 +336,7 @@ namespace LuteBot.Core.Midi
                     }
                     foreach (var midiTrack in sequence.Tracks)
                     {
-                        var track = new MidiChannelItem();
+                        var track = new TrackItem();
                         track.Id = midiTrack.Id;
                         if (!string.IsNullOrWhiteSpace(midiTrack.Name))
                             track.Name = midiTrack.Name;
@@ -343,7 +351,6 @@ namespace LuteBot.Core.Midi
                     //Parallel.ForEach(sequence, track =>
                     //{
                     int lastTempo = sequence.FirstTempo;
-                    int totalNumNotes = 0;
 
                     Dictionary<int, int> lastNote = new Dictionary<int, int>();
                     Dictionary<int, int> lastTrackNote = new Dictionary<int, int>();
@@ -366,7 +373,6 @@ namespace LuteBot.Core.Midi
 
                                 if (c.Data2 > 0 && c.Command == ChannelCommand.NoteOn)
                                 {
-                                    totalNumNotes++;
                                     if (c.MidiChannel == 9) // Glockenspiel - always channel 9
                                     {
                                         drumNoteCounts[c.Data1]++; // They're all 0 by default
@@ -511,7 +517,7 @@ namespace LuteBot.Core.Midi
                     // And then only count new notes if their start+length > thatTick+thatLength
 
 
-                    // Compile noteLengths of channels and setup ML stuff
+                    // Compile noteLengths of channels
                     foreach (var kvp in channels)
                     {
                         var channel = kvp.Value;
@@ -519,7 +525,6 @@ namespace LuteBot.Core.Midi
 
                         int nextValidTick = 0;
                         channel.averageNote = 0;
-                        channel.numNotesPercent = (float)channel.numNotes / totalNumNotes;
 
                         foreach (var noteKvp in channel.tickNotes.OrderBy(n => n.Key))
                         {
@@ -528,13 +533,13 @@ namespace LuteBot.Core.Midi
 
                             if (note.tickNumber > nextValidTick)
                             {
-                                channel.percentNoteLength += note.timeLength;
+                                channel.totalNoteLength += note.timeLength;
                                 nextValidTick = note.tickNumber + note.length;
                             }
                             else if (note.tickNumber + note.length > nextValidTick)
                             {
                                 var diff = (note.tickNumber + note.length) - nextValidTick;
-                                channel.percentNoteLength += note.timeLength * (diff/note.length);
+                                channel.totalNoteLength += note.timeLength * (diff/note.length);
                                 nextValidTick = nextValidTick + diff;
                             }
                             foreach(var n in noteList)
@@ -548,10 +553,7 @@ namespace LuteBot.Core.Midi
                         }
 
                         if (channel.tickNotes.Count > 0)
-                        {
                             channel.maxChordSize = channel.tickNotes.Max(t => t.Value.Count);
-                            channel.avgChordSize = (float)channel.tickNotes.Sum(t => t.Value.Count) / channel.tickNotes.Count;
-                        }
                     }
                     foreach (var kvp in tracks)
                     {
@@ -568,13 +570,13 @@ namespace LuteBot.Core.Midi
 
                             if (note.tickNumber > nextValidTick)
                             {
-                                channel.percentNoteLength += note.timeLength;
+                                channel.totalNoteLength += note.timeLength;
                                 nextValidTick = note.tickNumber + note.length;
                             }
                             else if (note.tickNumber + note.length > nextValidTick)
                             {
                                 var diff = (note.tickNumber + note.length) - nextValidTick;
-                                channel.percentNoteLength += note.timeLength * (diff / note.length);
+                                channel.totalNoteLength += note.timeLength * (diff / note.length);
                                 nextValidTick = nextValidTick + diff;
                             }
                             foreach (var n in noteList)
@@ -588,25 +590,8 @@ namespace LuteBot.Core.Midi
                         }
 
                         if (channel.tickNotes.Count > 0)
-                        {
                             channel.maxChordSize = channel.tickNotes.Max(t => t.Value.Count);
-                            channel.avgChordSize = (float)channel.tickNotes.Sum(t => t.Value.Count) / channel.tickNotes.Count;
-                        }
                     }
-                    var songLength = (float)GetTimeLength().TotalSeconds;
-
-#if DEBUG
-                    Console.WriteLine("Total song duration in seconds: " + songLength);
-                    Console.WriteLine("Total of all channels: " + channels.Sum(c => c.Value.percentNoteLength));
-                    Console.WriteLine("Total of all tracks: " + tracks.Sum(c => c.Value.percentNoteLength));
-#endif
-
-                    foreach (var kvp in channels)
-                        kvp.Value.percentNoteLength /= songLength;
-                    foreach (var kvp in tracks)
-                        kvp.Value.percentNoteLength /= songLength;
-
-                    
 
                     // Add a note on the drum channel
                     if (channels.ContainsKey(9))
@@ -931,7 +916,7 @@ namespace LuteBot.Core.Midi
             }
 
             /*
-            foreach (MidiChannelItem track in trackSelectionManager.MidiTracks.Values)
+            foreach (TrackItem track in trackSelectionManager.MidiTracks.Values)
             {
                 if (track.Active)
                 {

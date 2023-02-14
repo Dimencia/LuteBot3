@@ -1,17 +1,5 @@
 Version 3.5.5
 
-- Track Filtering now opens when a midi is loaded to indicate that adjustments are necessary for most songs to work
-- Improved visibility of instrument selection in Track Filtering (it's in the middle now)
-- Improved default Track Filtering scale to actually respect time and tempo, showing 15-30s of notes at default size
-- First pass of Track Filtering feature overhaul:
-	- Added colors to the channel list that matches their note colors
-	- Added 'ghost' notes, with a blue outline, from channels/tracks that are disabled on this instrument
-
-
-- Improved neural network speed via SIMD (fancy superfast thing)
-- Possibly improved neural network accuracy via better normalization
-- Fixed issue with neural network training UI causing it to report incorrect success rates
-- Added ability to pause and continue training
-- Training is still WIP and might not work; the AI is worse than I thought and needs some refactoring as a whole
-
-Note that this is all still in-progress and not really finished yet but, still better than before
+- New partitions are now inserted at the front of the Partition List
+- Deleted partitions now also delete their accompanying midi file
+- Fixed startup crash if a configured output device no longer exists

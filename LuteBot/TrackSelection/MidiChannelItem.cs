@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -23,7 +22,7 @@ namespace LuteBot.TrackSelection
         public bool active { get; set; } = true;
         [IgnoreDataMember]
         public System.Drawing.Rectangle pianoRect { get; set; }
-        
+
         public MidiNote() { }
 
         public MidiNote(MidiNote old)
@@ -173,42 +172,17 @@ namespace LuteBot.TrackSelection
         public string Name { get; set; }
         public bool Active { get => active; set => active = value; }
         public int numNotes { get; set; }
-        public float numNotesPercent { get; set; }
         public int highestNote { get; set; } = 0;
         public int lowestNote { get; set; } = 127;
         public int averageNote { get; set; }
         public float avgNoteLength { get; set; }
-        public float percentNoteLength { get; set; }
+        public float totalNoteLength { get; set; }
         public int maxChordSize { get; set; }
         public Dictionary<int, int> noteTicks { get; } = new Dictionary<int, int>();
         public int offset { get; set; }
         public Dictionary<int, List<MidiNote>> tickNotes { get; internal set; } = new Dictionary<int, List<MidiNote>>(); // For setup and filtering, as well as disabling/enabling specific notes
         public int midiInstrument { get; set; }
         public float avgVariation { get; set; }
-        public float avgChordSize { get; set; }
-
-        private Color? _color = null;
-        [IgnoreDataMember]
-        public Color color { get { if (_color == null) _color = id < 16 ? Color.FromArgb(255-(int)(id%4*(255/4f)), (int)(id % 8 * (200/8f)), (int)(id % 4 * (255/4f))) : Color.FromArgb(SharedRandom.Next(0, 200), SharedRandom.Next(0, 200), SharedRandom.Next(0, 200)); return _color.Value; }
-        private set { _color = value; } }
-        [IgnoreDataMember]
-        private Brush _brush = null;
-        [IgnoreDataMember]
-        public Brush brush { get { if (_brush == null) _brush = new SolidBrush(color); return _brush; } }
-        [IgnoreDataMember]
-        private Pen _pen = null;
-        [IgnoreDataMember]
-        public Pen pen { get { if (_pen == null) _pen = new Pen(brush, 4); return _pen; } }
-        [IgnoreDataMember]
-        private Brush _alphaBrush = null;
-        [IgnoreDataMember]
-        public Brush alphaBrush { get { if (_alphaBrush == null) _alphaBrush = new SolidBrush(Color.FromArgb(100, color.R, color.G, color.B)); return _alphaBrush; } }
-        [IgnoreDataMember]
-        public float flutePercent { get; set; }
-        [IgnoreDataMember]
-        public float fluteRank { get; set; }
-        [IgnoreDataMember]
-        public string DisplayName => fluteRank > 0 ? $"{id+1}.{Name} (Rank {fluteRank} - {flutePercent}%)" : $"{id + 1}.{Name}";
 
         public MidiChannelItem() { }
 
@@ -223,18 +197,10 @@ namespace LuteBot.TrackSelection
             this.avgNoteLength = old.avgNoteLength;
             this.offset = old.offset;
             this.maxChordSize = old.maxChordSize;
-            this.percentNoteLength = old.percentNoteLength;
+            this.totalNoteLength = old.totalNoteLength;
             this.averageNote = old.averageNote;
             this.midiInstrument = old.midiInstrument;
             this.avgVariation = old.avgVariation;
-            this.avgChordSize = old.avgChordSize;
-            this.numNotesPercent = old.numNotesPercent;
-            this.color = old.color;
-            _brush = old.brush;
-            _pen = old.pen;
-            _alphaBrush = old.alphaBrush;
-            flutePercent = old.flutePercent;
-            fluteRank = old.fluteRank;
             // in tickNotes, the MidiNotes need to be reinstantiated so we don't have them by ref
             this.tickNotes.Clear();
             foreach(var kvp in old.tickNotes)

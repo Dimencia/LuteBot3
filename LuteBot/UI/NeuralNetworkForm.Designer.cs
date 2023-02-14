@@ -40,7 +40,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.checkBoxTrainExisting = new System.Windows.Forms.CheckBox();
+            this.textBoxParallel = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // richTextBox1
@@ -143,23 +144,30 @@
             this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // checkBoxTrainExisting
+            // textBoxParallel
             // 
-            this.checkBoxTrainExisting.AutoSize = true;
-            this.checkBoxTrainExisting.Location = new System.Drawing.Point(12, 525);
-            this.checkBoxTrainExisting.Name = "checkBoxTrainExisting";
-            this.checkBoxTrainExisting.Size = new System.Drawing.Size(109, 20);
-            this.checkBoxTrainExisting.TabIndex = 13;
-            this.checkBoxTrainExisting.Text = "Train Existing";
-            this.checkBoxTrainExisting.UseVisualStyleBackColor = true;
-            this.checkBoxTrainExisting.CheckedChanged += new System.EventHandler(this.checkBoxTrainExisting_CheckedChanged);
+            this.textBoxParallel.Location = new System.Drawing.Point(526, 526);
+            this.textBoxParallel.Name = "textBoxParallel";
+            this.textBoxParallel.Size = new System.Drawing.Size(36, 22);
+            this.textBoxParallel.TabIndex = 11;
+            this.textBoxParallel.Text = "8";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(568, 529);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(93, 20);
+            this.label5.TabIndex = 12;
+            this.label5.Text = "CPU Cores";
             // 
             // NeuralNetworkForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 587);
-            this.Controls.Add(this.checkBoxTrainExisting);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.textBoxParallel);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -191,6 +199,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.CheckBox checkBoxTrainExisting;
+        private System.Windows.Forms.TextBox textBoxParallel;
+        private System.Windows.Forms.Label label5;
     }
 }
