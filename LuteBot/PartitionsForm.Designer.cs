@@ -35,11 +35,12 @@ namespace LuteBot
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openSavFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveMultipleSongsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openMidiFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.exportPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportMidisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -87,6 +88,7 @@ namespace LuteBot
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importPartitionsToolStripMenuItem,
             this.exportPartitionsToolStripMenuItem,
+            this.exportMidisToolStripMenuItem,
             this.openSavFolderToolStripMenuItem,
             this.saveMultipleSongsToolStripMenuItem,
             this.trainToolStripMenuItem});
@@ -100,6 +102,13 @@ namespace LuteBot
             this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.importPartitionsToolStripMenuItem.Text = "Import Partitions";
             this.importPartitionsToolStripMenuItem.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // exportPartitionsToolStripMenuItem
+            // 
+            this.exportPartitionsToolStripMenuItem.Name = "exportPartitionsToolStripMenuItem";
+            this.exportPartitionsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.exportPartitionsToolStripMenuItem.Text = "Export Partitions";
+            this.exportPartitionsToolStripMenuItem.Click += new System.EventHandler(this.exportPartitionsToolStripMenuItem_Click);
             // 
             // openSavFolderToolStripMenuItem
             // 
@@ -127,12 +136,12 @@ namespace LuteBot
             this.openMidiFileDialog.Filter = "MIDI files|*.mid";
             this.openMidiFileDialog.Multiselect = true;
             // 
-            // exportPartitionsToolStripMenuItem
+            // exportMidisToolStripMenuItem
             // 
-            this.exportPartitionsToolStripMenuItem.Name = "exportPartitionsToolStripMenuItem";
-            this.exportPartitionsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
-            this.exportPartitionsToolStripMenuItem.Text = "Export Partitions";
-            this.exportPartitionsToolStripMenuItem.Click += new System.EventHandler(this.exportPartitionsToolStripMenuItem_Click);
+            this.exportMidisToolStripMenuItem.Name = "exportMidisToolStripMenuItem";
+            this.exportMidisToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
+            this.exportMidisToolStripMenuItem.Text = "Export Midis";
+            this.exportMidisToolStripMenuItem.Click += new System.EventHandler(this.exportMidisToolStripMenuItem_Click);
             // 
             // PartitionsForm
             // 
@@ -165,5 +174,6 @@ namespace LuteBot
         private System.Windows.Forms.OpenFileDialog openMidiFileDialog;
         private System.Windows.Forms.ToolStripMenuItem trainToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportPartitionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportMidisToolStripMenuItem;
     }
 }

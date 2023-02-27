@@ -139,6 +139,11 @@ namespace LuteBot
                     editItem.Click += EditItem_Click;
                     //}
                 }
+                else
+                {
+                    MenuItem exportItem = indexContextMenu.MenuItems.Add("Export " + name);
+                    exportItem.Click += ExportItem_Click;
+                }
 
                 listBoxPartitions.ContextMenu = indexContextMenu; // TODO: I'd love to make it popup at the selected item, not at mouse pos, but whatever
                 indexContextMenu.Show(listBoxPartitions, listBoxPartitions.PointToClient(Cursor.Position));
@@ -147,6 +152,11 @@ namespace LuteBot
             {
                 listBoxPartitions.ContextMenu = null;
             }
+        }
+
+        private void ExportItem_Click(object sender, EventArgs e)
+        {
+            ExportMidis(listBoxPartitions.SelectedItems.Cast<string>());
         }
 
         private void EditItem_Click(object sender, EventArgs e)
@@ -499,40 +509,87 @@ namespace LuteBot
         {
             Task.Run(() =>
             {
-                string tempDir = Path.Combine(partitionMidiPath, "TempFiles");
-                if (Directory.Exists(tempDir))
-                    Directory.Delete(tempDir, true);
-                Directory.CreateDirectory(tempDir);
-                foreach (var name in index.PartitionNames)
+                try
                 {
-                    string midiPath = Path.Combine(partitionMidiPath, name + ".mid");
-                    if (File.Exists(midiPath))
-                        File.Copy(midiPath, Path.Combine(tempDir, name + ".mid"), true);
-
-                    int i = 0;
-                    string currentFile = Path.Combine(SaveManager.SaveFilePath, name + "[" + i + "].sav");
-                    while (File.Exists(currentFile))
+                    string tempDir = Path.Combine(partitionMidiPath, "TempFiles");
+                    if (Directory.Exists(tempDir))
+                        Directory.Delete(tempDir, true);
+                    Directory.CreateDirectory(tempDir);
+                    foreach (var name in index.PartitionNames)
                     {
-                        File.Copy(currentFile, Path.Combine(tempDir, name + "[" + i + "].sav"), true);
-                        currentFile = Path.Combine(SaveManager.SaveFilePath, name + "[" + ++i + "].sav");
-                    }
-                }
+                        string midiPath = Path.Combine(partitionMidiPath, name + ".mid");
+                        if (File.Exists(midiPath))
+                            File.Copy(midiPath, Path.Combine(tempDir, name + ".mid"), true);
 
-                int c = 0;
-                string partitionFile = Path.Combine(SaveManager.SaveFilePath, "PartitionIndex[" + c + "].sav");
-                while (File.Exists(partitionFile))
-                {
-                    File.Copy(partitionFile, Path.Combine(tempDir, "PartitionIndex[" + c + "].sav"));
-                    partitionFile = Path.Combine(SaveManager.SaveFilePath, "PartitionIndex[" + ++c + "].sav");
+                        int i = 0;
+                        string currentFile = Path.Combine(SaveManager.SaveFilePath, name + "[" + i + "].sav");
+                        while (File.Exists(currentFile))
+                        {
+                            File.Copy(currentFile, Path.Combine(tempDir, name + "[" + i + "].sav"), true);
+                            currentFile = Path.Combine(SaveManager.SaveFilePath, name + "[" + ++i + "].sav");
+                        }
+                    }
+
+                    int c = 0;
+                    string partitionFile = Path.Combine(SaveManager.SaveFilePath, "PartitionIndex[" + c + "].sav");
+                    while (File.Exists(partitionFile))
+                    {
+                        File.Copy(partitionFile, Path.Combine(tempDir, "PartitionIndex[" + c + "].sav"));
+                        partitionFile = Path.Combine(SaveManager.SaveFilePath, "PartitionIndex[" + ++c + "].sav");
+                    }
+                    var zipDir = Path.Combine(partitionMidiPath, "Export");
+                    Directory.CreateDirectory(zipDir);
+                    // Zip the dir
+                    ZipFile.CreateFromDirectory(tempDir, Path.Combine(zipDir, DateTime.Now.ToString("yyyy-MM-dd-HH-mm") + "-Export.zip"));
+                    // Delete temp
+                    Directory.Delete(tempDir, true);
+                    // Show them the zip
+                    Process.Start(zipDir);
+                    Invoke((MethodInvoker)delegate { MessageBox.Show($"The export folder `{zipDir}` has been opened", "Export Success"); });
                 }
-                var zipDir = Path.Combine(partitionMidiPath, "Export");
-                Directory.CreateDirectory(zipDir);
-                // Zip the dir
-                ZipFile.CreateFromDirectory(tempDir, Path.Combine(zipDir, DateTime.Now.ToString("yyyy-MM-dd-HH-mm") + "-Export.zip"));
-                // Delete temp
-                Directory.Delete(tempDir, true);
-                // Show them the zip
-                Process.Start(zipDir);
+                catch (Exception ex)
+                {
+                    Invoke((MethodInvoker)delegate { MessageBox.Show(ex.StackTrace, ex.Message); });
+                }
+            });
+        }
+
+        private void exportMidisToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ExportMidis(index.PartitionNames);
+        }
+
+        private void ExportMidis(IEnumerable<string> partitionNames)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    string tempDir = Path.Combine(partitionMidiPath, "TempFiles");
+                    if (Directory.Exists(tempDir))
+                        Directory.Delete(tempDir, true);
+                    Directory.CreateDirectory(tempDir);
+                    Parallel.ForEach(partitionNames, name =>
+                    {
+                        string midiPath = Path.Combine(partitionMidiPath, name + ".mid");
+                        if (File.Exists(midiPath))
+                            File.Copy(midiPath, Path.Combine(tempDir, name + ".mid"), true);
+                    });
+
+                    var zipDir = Path.Combine(partitionMidiPath, "Export");
+                    Directory.CreateDirectory(zipDir);
+                    // Zip the dir
+                    ZipFile.CreateFromDirectory(tempDir, Path.Combine(zipDir, DateTime.Now.ToString("yyyy-MM-dd-HH-mm") + "-Export.zip"));
+                    // Delete temp
+                    Directory.Delete(tempDir, true);
+                    // Show them the zip
+                    Process.Start(zipDir);
+                    Invoke((MethodInvoker)delegate { MessageBox.Show(this, $"The export folder `{zipDir}` has been opened", "Export Success"); });
+                }
+                catch (Exception ex)
+                {
+                    Invoke((MethodInvoker)delegate { MessageBox.Show(this, ex.StackTrace, ex.Message); });
+                }
             });
         }
     }
