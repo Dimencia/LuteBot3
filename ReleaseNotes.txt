@@ -1,5 +1,4 @@
-Version 3.5.5
+Version 3.5.6
 
-- New partitions are now inserted at the front of the Partition List
-- Deleted partitions now also delete their accompanying midi file
-- Fixed startup crash if a configured output device no longer exists
+- Added new 'Export Midis' option to Partitions menu, to export only the MIDIs
+- Added right click context menu, when selecting multiple Partitions, to export the selected MIDIs
