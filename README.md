@@ -10,7 +10,7 @@ And Monty, for LuteBot2, and LuteMod which he allowed me to package here https:/
 
 
 ## Usage Instructions
-Download the latest Release from https://github.com/Dimencia/LuteBot3/releases
+Download the latest Release .zip from https://github.com/Dimencia/LuteBot3/releases and extract it to a folder.  Run LuteBot.exe
 
 If prompted to install LuteMod, click yes.
 
