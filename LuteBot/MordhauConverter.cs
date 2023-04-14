@@ -48,9 +48,10 @@ namespace LuteMod.Converter
             return partition.Tracks[id].Notes.Count;
         }
 
-        public void AddTrack()
+        public int AddTrack(int instrumentId = 0)
         {
-            partition.Tracks.Add(new Track());
+            partition.Tracks.Add(new Track() { InstrumentId = instrumentId});
+            return partition.Tracks.Count - 1;
         }
 
         public void DelTrack(int id)
@@ -105,7 +106,7 @@ namespace LuteMod.Converter
             Track track = GetTrackAt(id);
             if (track != null)
             {
-                foreach (TrackItem item in items)
+                foreach (var item in items)
                 {
                     if (item.Active)
                     {
@@ -130,14 +131,14 @@ namespace LuteMod.Converter
             }
         }
 
-        public List<TrackItem> GetEnabledTracksInTrack(int id)
+        public List<MidiChannelItem> GetEnabledTracksInTrack(int id)
         {
             Track track = GetTrackAt(id);
             if (track != null)
             {
                 return track.MidiTracks;
             }
-            return new List<TrackItem>();
+            return new List<MidiChannelItem>();
         }
 
         public List<MidiChannelItem> GetEnabledChannelsInTrack(int id)
@@ -178,33 +179,16 @@ namespace LuteMod.Converter
                 }
 
             }
-            return new Note() { Tick = note.Tick, Tone = note.Tone - LowestPlayed + lowNote, Type = note.Type };
+            return new Note() { Tick = note.Tick, Tone = note.Tone - LowestPlayed + lowNote, Type = note.Type, duration = note.duration };
         }
 
         public void FillTrack(int id, List<Note> notes)
         {
-            notes.Reverse();
+            //notes.Reverse();
             Track track = partition.Tracks[id];
-            bool found = false;
-            int i = 0;
             foreach (Note note in notes)
             {
-                if (track.Notes.Count > 0)
-                {
-                    for (i = 0; !found && i < track.Notes.Count; i++)
-                    {
-                        found = track.Notes[i].Tick >= note.Tick;
-                    }
-                }
-                if (found)
-                {
-                    track.Notes.Insert((i - 1 >= 0) ? i - 1 : i, BuildNote(note));
-                }
-                else
-                {
-                    track.Notes.Add(BuildNote(note));
-                }
-                found = false;
+                track.Notes.Add(BuildNote(note));
             }
         }
 

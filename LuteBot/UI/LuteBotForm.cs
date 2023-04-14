@@ -131,7 +131,7 @@ ModListWidgetStayTime=5.0";
             hotkeyManager.SynchronizePressed += HotkeyManager_SynchronizePressed;
             hotkeyManager.PreviousKeyPressed += new EventHandler(PreviousButton_Click);
             trackSelectionManager.OutDeviceResetRequest += new EventHandler(ResetDevice);
-            trackSelectionManager.ToggleTrackRequest += new EventHandler<TrackItem>(ToggleTrack);
+            trackSelectionManager.ToggleTrackRequest += new EventHandler<MidiChannelItem>(ToggleTrack);
             liveMidiManager = new LiveMidiManager(trackSelectionManager);
             hotkeyManager.LiveInputManager = liveMidiManager;
 
@@ -882,7 +882,7 @@ ModListWidgetStayTime=5.0";
             ResumeLayout();
         }
 
-        private void ToggleTrack(object sender, TrackItem e)
+        private void ToggleTrack(object sender, MidiChannelItem e)
         {
             timer1.Stop();
             (player as MidiPlayer).UpdateMutedTracks(e);

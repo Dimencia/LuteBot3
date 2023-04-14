@@ -135,7 +135,9 @@ namespace LuteBot.TrackSelection
                 {
                     var channel = newData.MidiChannels.Where(c => c.Id == kvp.Key).FirstOrDefault();
                     if (channel != null)
+                    {
                         channel.offset = kvp.Value;
+                    }
                 }
                 newData.MidiChannelOffsets = null;
             }

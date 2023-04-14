@@ -84,6 +84,9 @@
     <Reference Include="CsvHelper, Version=15.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>..\packages\CsvHelper.15.0.1\lib\net45\CsvHelper.dll</HintPath>
     </Reference>
+    <Reference Include="Melanchall.DryWetMidi, Version=6.1.4.0, Culture=neutral, PublicKeyToken=83d0ffad275219ad, processorArchitecture=MSIL">
+      <HintPath>..\packages\Melanchall.DryWetMidi.6.1.4\lib\net45\Melanchall.DryWetMidi.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -418,10 +421,12 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\build\Microsoft.CodeQuality.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\build\Microsoft.CodeQuality.Analyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Melanchall.DryWetMidi.6.1.4\build\Melanchall.DryWetMidi.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Melanchall.DryWetMidi.6.1.4\build\Melanchall.DryWetMidi.targets'))" />
   </Target>
   <PropertyGroup>
     <PostBuildEvent>; Move all assemblies and related files to lib folder
  ROBOCOPY "$(TargetDir) " "$(TargetDir)lib\ " /XF *.exe *.config *.manifest /XD lib logs data /E /IS /MOVE
  if %25errorlevel%25 leq 4 exit 0 else exit %25errorlevel%25</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\Melanchall.DryWetMidi.6.1.4\build\Melanchall.DryWetMidi.targets" Condition="Exists('..\packages\Melanchall.DryWetMidi.6.1.4\build\Melanchall.DryWetMidi.targets')" />
 </Project>

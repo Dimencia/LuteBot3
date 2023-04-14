@@ -116,6 +116,8 @@ namespace LuteBot.TrackSelection
     {
         public int Id { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? Rank { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool? Active { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? offset { get; set; }
@@ -130,6 +132,7 @@ namespace LuteBot.TrackSelection
         public SimpleMidiChannelItem(MidiChannelItem from, MidiChannelItem original)
         {
             this.Id = from.Id;
+            this.Rank = from.Rank ?? original.Rank;
             if (from.Active != original.Active)
                 this.Active = from.Active;
             if (from.offset != original.offset)
@@ -160,12 +163,14 @@ namespace LuteBot.TrackSelection
             this.Id = from.Id;
             this.Active = from.Active;
             this.offset = from.offset;
+            this.Rank = from.Rank;
         }
     }
 
 
     public class MidiChannelItem
     {
+        public int? Rank { get; set; }
         private int id;
         private bool active;
         public int Id { get => id; set => id = value; }
@@ -189,6 +194,7 @@ namespace LuteBot.TrackSelection
         public MidiChannelItem(MidiChannelItem old)
         {
             this.Id = old.Id;
+            this.Rank = old.Rank;
             this.Name = old.Name;
             this.Active = old.Active;
             this.numNotes = old.numNotes;
@@ -217,6 +223,7 @@ namespace LuteBot.TrackSelection
         public MidiChannelItem(SimpleMidiChannelItem old)
         {
             this.Id = old.Id;
+            this.Rank = old.Rank;
             if(old.Active.HasValue)
                 this.Active = old.Active.Value;
             if(old.offset.HasValue)
@@ -231,6 +238,7 @@ namespace LuteBot.TrackSelection
         public MidiChannelItem WithData(SimpleMidiChannelItem newChannel)
         {
             var result = new MidiChannelItem(this);
+            result.Rank = newChannel.Rank ?? result.Rank;
             if (newChannel.Active.HasValue)
                 result.Active = newChannel.Active.Value;
             if (newChannel.offset.HasValue)
@@ -267,7 +275,7 @@ namespace LuteBot.TrackSelection
             if (obj is MidiChannelItem)
             {
                 var other = obj as MidiChannelItem;
-                var result = this.Active == other.Active && this.Id == other.Id && this.offset == other.offset;
+                var result = this.Active == other.Active && this.Id == other.Id && this.offset == other.offset && this.Rank == other.Rank;
                 if(result)
                 {
                     // Try to avoid doing this unless we're already a match from the others

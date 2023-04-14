@@ -22,6 +22,8 @@ namespace LuteBot.UI
         RustOutDevice _rustOut;
         LuteBotForm mainForm;
 
+        bool initializing = true;
+
         // We need only one out device, might as well use rust, but take both for now cuz why not, feels unfair
         // Though they both get updated with the same values at the same time, for what we're doing
         public TrackSelectionForm(TrackSelectionManager trackSelectionManager, MordhauOutDevice mordhauOut, RustOutDevice rustOut, LuteBotForm mainForm)
@@ -58,6 +60,9 @@ namespace LuteBot.UI
             ChannelsListBox.ContextMenuStrip = contextMenuStrip1;
             TrackListBox.ContextMenuStrip = contextMenuStrip2;
 
+            TrackListBox.MouseDown += listBox_MouseDown;
+            TrackListBox.DragOver += listBox_DragOver;
+            TrackListBox.DragDrop += listBox_DragDrop;
         }
 
         private void TrackSelectionForm_SizeChanged(object sender, EventArgs e)
@@ -1230,17 +1235,18 @@ namespace LuteBot.UI
         public void InitLists()
         {
             SuspendLayout();
+            initializing = true;
             textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
             textBoxNotesForChords.Enabled = !ConfigManager.GetBooleanProperty(PropertyItem.ForbidsChords);
 
             TrackListBox.Items.Clear();
             ChannelsListBox.Items.Clear();
 
-            foreach (MidiChannelItem channel in trackSelectionManager.MidiChannels.Values.OrderBy(c => c.Id))
+            foreach (MidiChannelItem channel in trackSelectionManager.MidiChannels.Values.OrderBy(c => c.Rank))
             {
                 ChannelsListBox.Items.Add(channel, channel.Active);
             }
-            foreach (TrackItem track in trackSelectionManager.MidiTracks.Values.OrderBy(c => c.Id))
+            foreach (TrackItem track in trackSelectionManager.MidiTracks.Values.OrderBy(c => c.Rank))
             {
                 TrackListBox.Items.Add(track, track.Active);
             }
@@ -1251,6 +1257,8 @@ namespace LuteBot.UI
             instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
             ReloadNotes(true);
+
+            //UpdateRanks();
 
             ResumeLayout();
             Invalidate();
@@ -1271,6 +1279,7 @@ namespace LuteBot.UI
             //t.Start();
             pianoPanel.Refresh();
             OffsetPanel.Refresh();
+            initializing = false;
         }
 
         private void TrackChangedHandler(object sender, EventArgs e)
@@ -1287,12 +1296,15 @@ namespace LuteBot.UI
 
         private void ChannelListBox_ItemChecked(object sender, ItemCheckEventArgs e)
         {
-            trackSelectionManager.ToggleChannelActivation(!(e.CurrentValue == CheckState.Checked), (ChannelsListBox.Items[e.Index] as MidiChannelItem).Id);
-            //Invalidate();
-            //OffsetPanel.Refresh();
-            //ResetRowSize();
-            //InitLists();
-            ReloadNotes(true);
+            if (!initializing)
+            {
+                trackSelectionManager.ToggleChannelActivation(!(e.CurrentValue == CheckState.Checked), (ChannelsListBox.Items[e.Index] as MidiChannelItem).Id);
+                //Invalidate();
+                //OffsetPanel.Refresh();
+                //ResetRowSize();
+                //InitLists();
+                ReloadNotes(true);
+            }
         }
 
         private void SongProfileSaveButton_Click(object sender, EventArgs e)
@@ -1320,12 +1332,15 @@ namespace LuteBot.UI
 
         private void TrackListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            trackSelectionManager.ToggleTrackActivation(!(e.CurrentValue == CheckState.Checked), (TrackListBox.Items[e.Index] as TrackItem).Id);
-            //InitLists();
-            //ResetRowSize();
-            //Invalidate();
-            //OffsetPanel.Refresh();
-            ReloadNotes(true);
+            if (!initializing)
+            {
+                trackSelectionManager.ToggleTrackActivation(!(e.CurrentValue == CheckState.Checked), (TrackListBox.Items[e.Index] as MidiChannelItem).Id);
+                //InitLists();
+                //ResetRowSize();
+                //Invalidate();
+                //OffsetPanel.Refresh();
+                ReloadNotes(true);
+            }
         }
 
         private Size originalPanelSize;
@@ -1480,6 +1495,46 @@ namespace LuteBot.UI
             //ResetRowSize();
             //Invalidate();
             //OffsetPanel.Refresh();
+        }
+
+        private void listBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            var list = (CheckedListBox)sender;
+            if (list.SelectedItem == null) return;
+            list.SetItemChecked(list.SelectedIndex, !list.GetItemChecked(list.SelectedIndex));
+            list.DoDragDrop(list.SelectedItem, DragDropEffects.Move);
+        }
+
+        private void listBox_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Move;
+        }
+
+        private void listBox_DragDrop(object sender, DragEventArgs e)
+        {
+            var list = (CheckedListBox)sender;
+            Point point = list.PointToClient(new Point(e.X, e.Y));
+            int index = list.IndexFromPoint(point);
+            if (index < 0) index = list.Items.Count - 1;
+            object data = e.Data.GetData(typeof(TrackItem));
+            list.Items.Remove(data);
+            list.Items.Insert(index, data);
+            UpdateRanks();
+        }
+
+        private void UpdateRanks()
+        {
+            var channels = TrackListBox.Items;
+            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            for (int i = 0; i < channels.Count; i++)
+            {
+                TrackItem track = (TrackItem)channels[i];
+                var targetTrack = trackSelectionManager.MidiTracks[track.Id];
+                targetTrack.Rank = i + 1;
+                targetTrack = trackSelectionManager.DataDictionary[currentInstrument].MidiTracks[track.Id];
+                targetTrack.Rank = i + 1;
+            }
+            trackSelectionManager.ResetRequest();
         }
     }
 

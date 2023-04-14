@@ -11,22 +11,25 @@ namespace LuteMod.Sequencing
     {
         private List<Note> notes;
         private List<MidiChannelItem> midiChannels;
-        private List<TrackItem> midiTracks;
+        private List<MidiChannelItem> midiTracks;
+        public int InstrumentId { get; set; }
 
         public List<Note> Notes { get => notes; set => notes = value; }
         public List<MidiChannelItem> MidiChannels { get => midiChannels; set => midiChannels = value; }
-        public List<TrackItem> MidiTracks { get => midiTracks; set => midiTracks = value; }
+        public List<MidiChannelItem> MidiTracks { get => midiTracks; set => midiTracks = value; }
 
         public Track()
         {
             notes = new List<Note>();
             midiChannels = new List<MidiChannelItem>();
-            midiTracks = new List<TrackItem>();
+            midiTracks = new List<MidiChannelItem>();
         }
 
         public override string ToString()
         {
             StringBuilder strbld = new StringBuilder();
+
+            strbld.Append("#" + InstrumentId + ";");
 
             foreach (Note note in notes)
             {

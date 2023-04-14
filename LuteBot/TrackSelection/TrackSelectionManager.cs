@@ -43,7 +43,7 @@ namespace LuteBot.TrackSelection
         public string FileName { get; set; }
 
         public event EventHandler TrackChanged;
-        public event EventHandler<TrackItem> ToggleTrackRequest;
+        public event EventHandler<MidiChannelItem> ToggleTrackRequest;
         public event EventHandler OutDeviceResetRequest;
 
         public MidiPlayer Player { get; set; }
@@ -162,7 +162,8 @@ namespace LuteBot.TrackSelection
                 SetTrackSelectionData(new TrackSelectionData(DataDictionary[1], instrumentId));
                 var fluteData = DataDictionary[1];
 
-                foreach (var channel in MidiChannels.Values)
+                var rank = 0;
+                foreach (var channel in MidiChannels.Values.OrderByDescending(t => t.Rank))
                 {
                     // There's no real situation where they should have any disparity between their channels
                     if (fluteData.MidiChannels.Where(d => d.Id == channel.Id).Single().Active)
@@ -385,6 +386,7 @@ namespace LuteBot.TrackSelection
 
         public void LoadTracks(Dictionary<int, MidiChannelItem> channels, Dictionary<int, TrackItem> tracks)
         {
+            UnloadTracks();
             //midiChannels.Clear();
             //midiTracks.Clear();
             //
@@ -531,6 +533,9 @@ namespace LuteBot.TrackSelection
 
                 int count = 0; // Separately track count for rank... 
                 int trackCount = 0;
+
+                var numResults = orderedResults.Count();
+
                 for (int i = 0; i < orderedResults.Count(); i++)
                 //foreach (var channel in activeChannels)
                 {
@@ -540,13 +545,20 @@ namespace LuteBot.TrackSelection
                     {
                         string ident = "Channel";
                         if (channel is TrackItem)
+                        {
                             ident = "Track";
+                            if (!channel.Rank.HasValue)
+                            {
+                                channel.Rank = i;
+                            }
+                        }
+
                         Console.WriteLine($"{ident} {channel.Name} ({channel.Id}) - Neural Score: {channelResults[channel]}");
                         //Console.WriteLine($"{channel.Name} ({channel.Id}) - Neural Score: {neuralResults[channel.Id]}");
                         if (channel is TrackItem)
-                            channel.Name += $"(Flute Rank {++trackCount} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
+                            channel.Name += $"{channel.Id}(Flute Rank {++trackCount} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
                         else
-                            channel.Name += $"(Flute Rank {++count} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
+                            channel.Name += $"{channel.Id}(Flute Rank {++count} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
                     }
                 }
 
@@ -927,7 +939,7 @@ namespace LuteBot.TrackSelection
             ChannelMessage newMessage = message;
             if (midiTracks.ContainsKey(trackId))
             {
-                TrackItem track = midiTracks[trackId];
+                var track = midiTracks[trackId];
                 if (track != null && track.Active)
                 {
                     if (message.Command == ChannelCommand.NoteOn)
@@ -954,6 +966,7 @@ namespace LuteBot.TrackSelection
         {
             midiChannels.Clear();
             midiTracks.Clear();
+            DataDictionary.Clear();
             NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
             //EventHelper();
         }
@@ -981,9 +994,9 @@ namespace LuteBot.TrackSelection
             handler?.Invoke(this, new EventArgs());
         }
 
-        private void ToggleTrackRequestHelper(TrackItem item)
+        private void ToggleTrackRequestHelper(MidiChannelItem item)
         {
-            EventHandler<TrackItem> handler = ToggleTrackRequest;
+            EventHandler<MidiChannelItem> handler = ToggleTrackRequest;
             handler?.Invoke(this, item);
         }
 

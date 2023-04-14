@@ -65,6 +65,7 @@ namespace LuteBot.UI
             // 
             this.ChannelsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.ChannelsListBox.CheckOnClick = true;
             this.ChannelsListBox.FormattingEnabled = true;
             this.ChannelsListBox.Location = new System.Drawing.Point(16, 47);
             this.ChannelsListBox.Margin = new System.Windows.Forms.Padding(4);
@@ -101,10 +102,10 @@ namespace LuteBot.UI
             this.AutoActivateCheckBox.AutoSize = true;
             this.AutoActivateCheckBox.Checked = true;
             this.AutoActivateCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.AutoActivateCheckBox.Location = new System.Drawing.Point(267, 897);
+            this.AutoActivateCheckBox.Location = new System.Drawing.Point(267, 899);
             this.AutoActivateCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.AutoActivateCheckBox.Name = "AutoActivateCheckBox";
-            this.AutoActivateCheckBox.Size = new System.Drawing.Size(203, 38);
+            this.AutoActivateCheckBox.Size = new System.Drawing.Size(193, 36);
             this.AutoActivateCheckBox.TabIndex = 11;
             this.AutoActivateCheckBox.Text = "Automatically load a profile \r\non song selection";
             this.AutoActivateCheckBox.UseVisualStyleBackColor = true;
@@ -136,7 +137,9 @@ namespace LuteBot.UI
             // 
             // TrackListBox
             // 
+            this.TrackListBox.AllowDrop = true;
             this.TrackListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.TrackListBox.CheckOnClick = true;
             this.TrackListBox.FormattingEnabled = true;
             this.TrackListBox.Location = new System.Drawing.Point(383, 47);
             this.TrackListBox.Margin = new System.Windows.Forms.Padding(4);
@@ -170,7 +173,7 @@ namespace LuteBot.UI
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(13, 268);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(113, 17);
+            this.label2.Size = new System.Drawing.Size(106, 16);
             this.label2.TabIndex = 21;
             this.label2.Text = "Notes Per Chord";
             // 
@@ -208,7 +211,7 @@ namespace LuteBot.UI
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(404, 270);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(74, 17);
+            this.label3.Size = new System.Drawing.Size(67, 16);
             this.label3.TabIndex = 24;
             this.label3.Text = "Instrument";
             // 

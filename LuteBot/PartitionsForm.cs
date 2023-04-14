@@ -24,6 +24,10 @@ using static System.Resources.ResXFileRef;
 using System.Xml.Linq;
 using System.IO.Compression;
 using System.Diagnostics;
+using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Interaction;
+using Melanchall.DryWetMidi.Tools;
+using Melanchall.DryWetMidi.MusicTheory;
 
 namespace LuteBot
 {
@@ -105,6 +109,7 @@ namespace LuteBot
                 MessageBox.Show("No partition index found.  If LuteMod is installed, you can't add songs until you start Mordhau, go into a game, and kick with a Lute until the menu opens\n\nOr choose Settings -> Install LuteMod, which now includes the partition file, and will update an existing install if necessary");
                 Hide();
             }
+            
             PopulateIndexList();
         }
 
@@ -315,80 +320,76 @@ namespace LuteBot
             {
                 var namingForm = new TrackNamingForm(Path.GetFileNameWithoutExtension(tsm.FileName));
                 namingForm.ShowDialog(this);
+                //await Task.Run(() =>
+                //{
                 if (namingForm.DialogResult == DialogResult.OK)
+                    SavePartition(namingForm.textBoxPartName.Text);
+
+            }
+            else
+            {
+                MessageBox.Show("The partition is empty");
+            }
+
+        }
+
+        private void SavePartition(string name, bool multiple = false)
+        {
+            var dryWetFile = Melanchall.DryWetMidi.Core.MidiFile.Read(player.fileName,
+                                new ReadingSettings
+                                {
+                                    ExtraTrackChunkPolicy = ExtraTrackChunkPolicy.Skip,
+                                    UnknownChunkIdPolicy = UnknownChunkIdPolicy.Skip,
+                                    InvalidChunkSizePolicy = InvalidChunkSizePolicy.Ignore,
+                                     
+                                    
+                                });
+
+            //var quant = new Quantizer();
+            //var tempoMap = dryWetFile.GetTempoMap();
+            //quant.Quantize(dryWetFile.GetTimedEvents(), new SteppedGrid(new MetricTimeSpan(TimeSpan.FromSeconds(0.017))), tempoMap, new QuantizingSettings { QuantizingLevel = 1, RandomizingSettings = new RandomizingSettings { Filter = t => false } });
+
+            if (name == "Partition Name" || name.Trim() == "")
+            {
+                MessageBox.Show("Please name your partition");
+            }
+            else
+            {
+                if (index.PartitionNames.Contains(name) && !multiple)
                 {
-                    if (namingForm.textBoxPartName.Text == "Partition Name" || namingForm.textBoxPartName.Text.Trim() == "")
+                    MessageBox.Show("That name already exists");
+                }
+                else
+                {
+                    if (multiple && index.PartitionNames.Contains(name))
+                        index.PartitionNames.Remove(name);
+
+                    if (!Regex.IsMatch(name, "^([a-zA-Z0-9][a-zA-Z0-9 -]*[a-zA-Z0-9])$"))
                     {
-                        MessageBox.Show("Please name your partition");
+                        MessageBox.Show("That name contains invalid characters");
                     }
                     else
                     {
-                        if (index.PartitionNames.Contains(namingForm.textBoxPartName.Text))
+                        index.PartitionNames.Insert(0, name);
+
+                        //if (trackConverter == null)
+                        //{
+                        var converter = new LuteMod.Converter.MordhauConverter();
+
+                        int firstInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                        // Step 1, load solo lute into track 0 - this profile should always exist
+                        // Actually, all of the first 4 instruments get loaded in, under the same ID we use in lutebot.  Convenient.
+                        for (int i = 0; i < 2; i++)
                         {
-                            MessageBox.Show("That name already exists");
-                        }
-                        else
-                        {
-                            if (!Regex.IsMatch(namingForm.textBoxPartName.Text, "^([a-zA-Z0-9][a-zA-Z0-9 -]*[a-zA-Z0-9])$"))
+                            int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+
+                            if (tsm.DataDictionary.ContainsKey(i))
                             {
-                                MessageBox.Show("That name contains invalid characters");
-                            }
-                            else
-                            {
-                                index.PartitionNames.Insert(0, namingForm.textBoxPartName.Text);
 
-                                //if (trackConverter == null)
-                                //{
-                                var converter = new LuteMod.Converter.MordhauConverter();
-                                int firstInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-                                // Step 1, load solo lute into track 0 - this profile should always exist
-                                // Actually, all of the first 4 instruments get loaded in, under the same ID we use in lutebot.  Convenient.
-                                for (int i = 0; i < 2; i++)
+                                if (oldInstrument != i)
                                 {
-                                    int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-
-                                    if (tsm.DataDictionary.ContainsKey(i))
-                                    {
-
-                                        if (oldInstrument != i)
-                                        {
-                                            ConfigManager.SetProperty(PropertyItem.Instrument, i.ToString());
-                                            Instrument target = Instrument.Prefabs[i];
-
-                                            bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
-                                            ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
-                                            tsm.UpdateTrackSelectionForInstrument(oldInstrument);
-                                            player.mordhauOutDevice.UpdateNoteIdBounds();
-                                        }
-
-                                        converter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
-                                        converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
-                                        converter.LowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
-                                        converter.IsConversionEnabled = true;
-                                        converter.SetDivision(player.sequence.Division);
-                                        converter.SetPartitionTempo(player.sequence.FirstTempo);
-                                        converter.AddTrack();
-                                        converter.SetEnabledTracksInTrack(i, tsm.MidiTracks.Values.ToList());
-                                        converter.SetEnabledMidiChannelsInTrack(i, tsm.MidiChannels.Values.ToList());
-
-                                        converter.FillTrack(i, player.ExtractMidiContent());
-                                    }
-                                }
-
-                                SaveManager.WriteSaveFile(Path.Combine(SaveManager.SaveFilePath, namingForm.textBoxPartName.Text), converter.GetPartitionToString());
-                                index.SaveIndex();
-                                PopulateIndexList();
-                                // And put the instrument back
-                                if (ConfigManager.GetIntegerProperty(PropertyItem.Instrument) != firstInstrument)
-                                {
-                                    int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-                                    ConfigManager.SetProperty(PropertyItem.Instrument, firstInstrument.ToString());
-                                    Instrument target = Instrument.Prefabs[firstInstrument];
+                                    ConfigManager.SetProperty(PropertyItem.Instrument, i.ToString());
+                                    Instrument target = Instrument.Prefabs[i];
 
                                     bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
                                     ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
@@ -400,50 +401,73 @@ namespace LuteBot
                                     tsm.UpdateTrackSelectionForInstrument(oldInstrument);
                                     player.mordhauOutDevice.UpdateNoteIdBounds();
                                 }
-                                //}
-                                //else
-                                //{
-                                //    SaveManager.WriteSaveFile(SaveManager.SaveFilePath + namingForm.textBoxPartName.Text, trackConverter.GetPartitionToString());
-                                //    index.SaveIndex();
-                                //    PopulateIndexList();
-                                //    trackConverter = null;
-                                //}
 
-                                // Lastly, save the settings in a midi file with the same name, in the same folder, for ease of sharing...
-                                // TODO: Consider storing these in appdata, and providing a button to access them.  Both might get complicated if I make partition playlists
-                                // Actually... I think I will store them in appdata.
-                                var midFileName = Path.Combine(partitionMidiPath, namingForm.textBoxPartName.Text + ".mid");
-                                if (File.Exists(midFileName))
-                                    File.Delete(midFileName);
-                                Directory.CreateDirectory(partitionMidiPath);
-                                Task.Run(() => tsm.SaveTrackManager(midFileName)); // Lutebot doesn't need this anytime soon - and shouldn't offer the option to load it until it exists anyway
+                                converter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
+                                converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
+                                converter.LowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
+                                converter.IsConversionEnabled = true;
+                                converter.SetDivision(((TicksPerQuarterNoteTimeDivision)dryWetFile.TimeDivision).TicksPerQuarterNote);
+                                converter.SetPartitionTempo(player.sequence.FirstTempo);
+                                converter.SetPartitionTempo((int)dryWetFile.GetTempoMap().GetTempoAtTime(new MetricTimeSpan(0)).MicrosecondsPerQuarterNote);
+
+                                //converter.AddTrack(i);
+                                //converter.FillTrack(i, player.ExtractMidiContent());
+                                var activeTracks = tsm.MidiTracks.Values.Where(t => t.Active && t.tickNotes.Any(tn => tn.Value.Any(n => n.active && tsm.MidiChannels.ContainsKey(n.channel) && tsm.MidiChannels[n.channel].Active))).OrderBy(t => t.Rank).ToList();
+                                for (int j = 0; j < activeTracks.Count; j++)
+                                {
+                                    var trackID = converter.AddTrack(i);
+                                    //converter.SetEnabledTracksInTrack(trackID, new List<MidiChannelItem> { activeTracks[j] });
+                                    //converter.SetEnabledMidiChannelsInTrack(trackID, tsm.MidiChannels.Values.ToList());
+
+                                    converter.FillTrack(trackID, player.ExtractMidiContent(dryWetFile, activeTracks[j].Id));
+                                }
                             }
                         }
+
+                        SaveManager.WriteSaveFile(Path.Combine(SaveManager.SaveFilePath, name), converter.GetPartitionToString());
+                        index.SaveIndex();
+
+                        // And put the instrument back
+                        if (ConfigManager.GetIntegerProperty(PropertyItem.Instrument) != firstInstrument)
+                        {
+                            int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                            ConfigManager.SetProperty(PropertyItem.Instrument, firstInstrument.ToString());
+                            Instrument target = Instrument.Prefabs[firstInstrument];
+
+                            bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
+                            ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
+                            ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
+                            ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
+                            ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
+                            ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
+                            ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
+                            tsm.UpdateTrackSelectionForInstrument(oldInstrument);
+                            player.mordhauOutDevice.UpdateNoteIdBounds();
+                        }
+                        //}
+                        //else
+                        //{
+                        //    SaveManager.WriteSaveFile(SaveManager.SaveFilePath + namingForm.textBoxPartName.Text, trackConverter.GetPartitionToString());
+                        //    index.SaveIndex();
+                        //    PopulateIndexList();
+                        //    trackConverter = null;
+                        //}
+
+                        // Lastly, save the settings in a midi file with the same name, in the same folder, for ease of sharing...
+                        // TODO: Consider storing these in appdata, and providing a button to access them.  Both might get complicated if I make partition playlists
+                        // Actually... I think I will store them in appdata.
+                        var midFileName = Path.Combine(partitionMidiPath, name + ".mid");
+                        if (File.Exists(midFileName))
+                            File.Delete(midFileName);
+                        Directory.CreateDirectory(partitionMidiPath);
+                        Task.Run(() => tsm.SaveTrackManager(midFileName)); // Lutebot doesn't need this anytime soon - and shouldn't offer the option to load it until it exists anyway
+
+                        //Invoke((MethodInvoker)delegate {
+                        PopulateIndexList();
+                        //});
                     }
                 }
-                else if (namingForm.DialogResult == DialogResult.Yes)
-                {
-                    // They wanted to just add it as a track
-                    if (trackConverter == null)
-                        trackConverter = new LuteMod.Converter.MordhauConverter();
-                    // These ranges and settings only matter for FillTrack.  So re-setting them each time isn't a problem
-                    trackConverter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
-                    trackConverter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
-                    trackConverter.LowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
-                    trackConverter.IsConversionEnabled = true;
-                    trackConverter.SetDivision(player.sequence.Division); // This one could be weird
-                    trackConverter.AddTrack();
-                    trackConverter.SetEnabledTracksInTrack(trackConverter.GetTrackCount() - 1, tsm.MidiTracks.Values.ToList());
-                    trackConverter.SetEnabledMidiChannelsInTrack(trackConverter.GetTrackCount() - 1, tsm.MidiChannels.Values.ToList());
-
-                    trackConverter.FillTrack(trackConverter.GetTrackCount() - 1, player.ExtractMidiContent());
-                }
             }
-            else
-            {
-                MessageBox.Show("The partition is empty");
-            }
-
         }
 
         private void PartitionsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -485,10 +509,10 @@ namespace LuteBot
                 if (openMidiFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     var filenames = openMidiFileDialog.FileNames;
-                    foreach (var f in filenames)
+                    foreach (var f in filenames.Reverse()) // So the first ones are first again
                     {
                         await LuteBotForm.luteBotForm.LoadHelperAsync(f);
-                        savePartitionsButton_Click(null, null);
+                        SavePartition(Path.GetFileName(f).Replace(".mid", " Auto"), true);
                     }
                 }
             }

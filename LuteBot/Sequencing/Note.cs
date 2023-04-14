@@ -8,11 +8,13 @@ namespace LuteMod.Sequencing
 {
     public class Note
     {
-        private float tick;
+        private long tick;
         private int tone;
         private NoteType type;
 
-        public float Tick { get => tick; set => tick = value; }
+        public float duration { get; set; }
+
+        public long Tick { get => tick; set => tick = value; }
         public int Tone { get => tone; set => tone = value; }
 
         public NoteType Type { get => type; set => type = value; }
@@ -34,7 +36,7 @@ namespace LuteMod.Sequencing
                 default:
                     break;
             }
-            return tick.ToString() + "-" + tone.ToString() + "-" + stringType;
+            return tick.ToString() + "-" + tone.ToString() + "-" + stringType + "-" + duration;
         }
     }
 }
