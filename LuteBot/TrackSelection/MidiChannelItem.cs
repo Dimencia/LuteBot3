@@ -22,6 +22,8 @@ namespace LuteBot.TrackSelection
         public bool active { get; set; } = true;
         [IgnoreDataMember]
         public System.Drawing.Rectangle pianoRect { get; set; }
+        [IgnoreDataMember]
+        public TimeSpan startTime { get; set; }
 
         public MidiNote() { }
 
@@ -34,6 +36,7 @@ namespace LuteBot.TrackSelection
             this.track = old.track;
             this.channel = old.channel;
             this.active = old.active;
+            this.startTime = old.startTime;
             // We don't copy the pianoRect I guess, force it to regenerate it...
         }
 

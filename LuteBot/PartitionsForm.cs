@@ -407,7 +407,6 @@ namespace LuteBot
                                 converter.LowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
                                 converter.IsConversionEnabled = true;
                                 converter.SetDivision(((TicksPerQuarterNoteTimeDivision)dryWetFile.TimeDivision).TicksPerQuarterNote);
-                                converter.SetPartitionTempo(player.sequence.FirstTempo);
                                 converter.SetPartitionTempo((int)dryWetFile.GetTempoMap().GetTempoAtTime(new MetricTimeSpan(0)).MicrosecondsPerQuarterNote);
 
                                 //converter.AddTrack(i);
@@ -457,8 +456,6 @@ namespace LuteBot
                         // TODO: Consider storing these in appdata, and providing a button to access them.  Both might get complicated if I make partition playlists
                         // Actually... I think I will store them in appdata.
                         var midFileName = Path.Combine(partitionMidiPath, name + ".mid");
-                        if (File.Exists(midFileName))
-                            File.Delete(midFileName);
                         Directory.CreateDirectory(partitionMidiPath);
                         Task.Run(() => tsm.SaveTrackManager(midFileName)); // Lutebot doesn't need this anytime soon - and shouldn't offer the option to load it until it exists anyway
 
@@ -512,7 +509,7 @@ namespace LuteBot
                     foreach (var f in filenames.Reverse()) // So the first ones are first again
                     {
                         await LuteBotForm.luteBotForm.LoadHelperAsync(f);
-                        SavePartition(Path.GetFileName(f).Replace(".mid", " Auto"), true);
+                        SavePartition(Path.GetFileName(f).Replace(".mid", ""), true);
                     }
                 }
             }

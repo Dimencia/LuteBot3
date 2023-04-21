@@ -12,7 +12,7 @@ namespace LuteBot.UI.Utils
     public class Instrument
     {
         public string Name { get; set; }
-        public int LowestSentNote { get; set; }// These are for the idea that lute sends a 0, when it's playing a 24... Actually a 36 but all my logic assumes 0 is C0 even though it's not...
+        public int LowestSentNote { get; set; }// These are for the idDea that lute sends a 0, when it's playing a 24... Actually a 36 but all my logic assumes 0 is C0 even though it's not...
         public int NoteCount { get; set; }
         public int NoteCooldown { get; set; }
         public int LowestPlayedNote { get; set; }

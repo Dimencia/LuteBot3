@@ -778,11 +778,13 @@ namespace LuteBot.TrackSelection
                 //ksb.Build();
                 //metaTrack.Insert(0, ksb.Result);
 
+                sequence.Channels.Add(0);
+
                 int trackNum = 0;
                 foreach (var trackString in trackSplit)
                 {
+                    
                     var track = new Track();
-                    sequence.Channels.Add(trackNum);
 
                     if (trackNum == 0)
                     {
@@ -801,55 +803,30 @@ namespace LuteBot.TrackSelection
                     Dictionary<int, int> activeNoteTicks = new Dictionary<int, int>();
                     // NoteNum:TickNumber, the notes that are ongoing, so we can find collisions
 
+                    bool first = true;
+                    int curTrackNum = 0;
                     foreach (var noteString in noteSplit)
                     {
+                        if (first) // We don't care about the first, that's the mordhau instrument... TODO: Later map that
+                        {
+                            curTrackNum = int.Parse(noteString.Replace("#", ""));
+                            first = false;
+                            continue;
+                        }
                         var noteValueSplit = noteString.Split('-');
                         // 0 is the tick number, 1 is the value, 2 is the type
 
-                        int noteTrackNum = trackNum;
-                        if (trackNum > 1)
-                            noteTrackNum = 0;
+                        int noteTrackNum = curTrackNum;
 
                         IMidiMessage message;
                         curTick = int.Parse(noteValueSplit[0]);
                         if (noteValueSplit[2] == "1")
                         {
                             int curNote = int.Parse(noteValueSplit[1]) + Instrument.Prefabs[noteTrackNum].LowestPlayedNote;
-                            message = new ChannelMessage(ChannelCommand.NoteOn, trackNum, curNote, 100);
+                            message = new ChannelMessage(ChannelCommand.NoteOn, 0, curNote, 100);
                             track.Insert(curTick, message);
-                            // So for the noteOff, we have to be careful to turn it off before another note plays on this same track/note
-                            // And so, what we'll do is store the last note we played on this track, and its tick
-                            // And if we encounter the same one, we'll *then* insert the noteOff for the previous one, right before our next one, if it's close enough
-                            // Or we'll put it at some arbitrary distance if not
-
-                            if (activeNoteTicks.TryGetValue(curNote, out int prevNoteStartTick))
-                            {
-                                if (prevNoteStartTick + prevNoteLength >= curTick)
-                                {
-                                    // Maybe we don't need a NoteOff if it overlaps
-                                    //track.Insert(curTick, new ChannelMessage(ChannelCommand.NoteOff, trackNum, curNote));
-                                    activeNoteTicks.Remove(curNote);
-                                }
-                            }
-
-                            // Removing them as we iterate is annoyingly difficult, so... 
-                            List<int> toRemove = new List<int>();
-                            foreach (var kvp in activeNoteTicks)
-                            {
-                                if (kvp.Value + prevNoteLength <= curTick)
-                                {
-                                    track.Insert(kvp.Value + prevNoteLength, new ChannelMessage(ChannelCommand.NoteOff, trackNum, kvp.Key));
-                                    toRemove.Add(kvp.Key);
-                                }
-                                else if (trackNum == 1)
-                                {
-                                    // If it's flute, cut off their old one at our new one, if the old one is >= curTick
-                                    track.Insert(curTick, new ChannelMessage(ChannelCommand.NoteOff, trackNum, kvp.Key));
-                                    toRemove.Add(kvp.Key);
-                                }
-                            }
-                            foreach (var r in toRemove)
-                                activeNoteTicks.Remove(r);
+                            track.Insert(curTick + 1, new ChannelMessage(ChannelCommand.NoteOff, 0, curNote));
+                            
 
                             activeNoteTicks[curNote] = curTick;
                         }
@@ -863,12 +840,6 @@ namespace LuteBot.TrackSelection
                             // But we don't know what the division is/was
                             track.Insert(curTick, message);
                         }
-                    }
-
-                    foreach (var kvp in activeNoteTicks)
-                    {
-                        //if (kvp.Value + prevNoteLength < curTick)
-                        track.Insert(kvp.Value + prevNoteLength, new ChannelMessage(ChannelCommand.NoteOff, trackNum, kvp.Key));
                     }
 
                     string trackName = null;
@@ -885,7 +856,7 @@ namespace LuteBot.TrackSelection
                         track.Insert(0, new MetaMessage(MetaType.TrackName, Encoding.ASCII.GetBytes(trackName)));
                     }
                     if (instrumentId > 0)
-                        track.Insert(0, new ChannelMessage(ChannelCommand.ProgramChange, trackNum, instrumentId));
+                        track.Insert(0, new ChannelMessage(ChannelCommand.ProgramChange, 0, instrumentId));
 
                     //track.Insert(lastTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
 
