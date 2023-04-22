@@ -1,4 +1,20 @@
-Version 3.5.6
+Version 3.6.0
 
-- Added new 'Export Midis' option to Partitions menu, to export only the MIDIs
-- Added right click context menu, when selecting multiple Partitions, to export the selected MIDIs
+- Warning: This is currently a 'Beta' (LuteBot can't handle a different versioning style though), it includes major changes that may have accidentally broken obscure things.  It also is missing a few extra things I wanted to add.  Use with caution and wait for the next update for probably lots of bugfixes
+
+- Warning: Old partitions will no longer play correctly on flute.  Select all your songs and use the new 'Resave' button to reload them all with the new settings
+
+- Revamped UI slightly
+- Added default path for Epic Mordhau install
+- Added note duration and track ordering to LuteMod midis
+	- Use Track Selection and click+drag tracks up or down; tracks at the top have priority
+	- Higher priority tracks can interrupt lower priority tracks
+	- Lower priority tracks can't play until the higher priority notes are done playing
+	- Lutes ignore these restrictions but still play the highest priority tracks first
+	- Track priority is ordered by the flute-estimation AI by default
+- LuteMod updated to handle this new system
+	- LuteMod now also forces server update to help ensure all your notes are heard, and has improved timing
+- Removed unused/broken functionality; LuteBot no longer supports Rust, Scrap Mechanic, Time Sync, Playlists, Soundboards, or Midi playback
+	- Use older versions if necessary (use a real Midi player for Midi playback)
+- Removed LuteBot's ability to play in Mordhau (and its related hotkeys and settings) to prevent confusion.  LuteMod should be used instead, check the Help button for more information
+- Swapped MIDI parsing engine to use DryWetMidi (should be more consistent and with less lockups and failures)

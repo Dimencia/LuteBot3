@@ -272,13 +272,6 @@ namespace LuteBot.UI
             }
             while (totalLength < targetSecondsLength);
 
-            tsm.Player.sequence.Clear();
-            tsm.Player.sequence.Add(track);
-
-            if (File.Exists("Testmidi.mid"))
-                File.Delete("Testmidi.mid");
-
-            tsm.Player.sequence.Save("Testmidi.mid");
 
             Console.WriteLine("Done");
         }
@@ -329,7 +322,7 @@ namespace LuteBot.UI
                     string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, part + ".mid");
                     if (File.Exists(midiPath))
                     {
-                        await LuteBotForm.luteBotForm.LoadHelperAsync(midiPath, true);
+                        await LuteBotForm.luteBotForm.LoadFile(midiPath, true).ConfigureAwait(false);
                         // To prevent it from trying to train on re-generated midis, which have incorrect lengths
                         // Require at least 3 channels
                         if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1)) // To keep the percentages from getting weird in training, at least 4 channels?

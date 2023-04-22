@@ -39,7 +39,7 @@ namespace LuteBot.TrackSelection
         private bool activateAllChannels;
         private bool activateAllTracks;
 
-        public bool autoLoadProfile;
+        public bool autoLoadProfile = true;
         public string FileName { get; set; }
 
         public event EventHandler TrackChanged;
@@ -681,7 +681,7 @@ namespace LuteBot.TrackSelection
 
 
         Regex savStartRegex = new Regex(@"\|\w*;[0-9]+\|");
-        public void LoadSavFiles(string directory, string songname)
+        public async Task LoadSavFiles(string directory, string songname)
         {
             try
             {
@@ -896,7 +896,7 @@ namespace LuteBot.TrackSelection
                 string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, songname + ".mid");
                 sequence.Save(midiPath);
 
-                LuteBotForm.luteBotForm.LoadHelper(midiPath);
+                await LuteBotForm.luteBotForm.LoadFile(midiPath).ConfigureAwait(false);
             }
             catch (Exception e)
             {

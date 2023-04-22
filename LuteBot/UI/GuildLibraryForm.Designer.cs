@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.buttonAddToPlaylist = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -40,18 +39,6 @@
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.songGrid)).BeginInit();
             this.SuspendLayout();
-            // 
-            // buttonAddToPlaylist
-            // 
-            this.buttonAddToPlaylist.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonAddToPlaylist.Location = new System.Drawing.Point(147, 372);
-            this.buttonAddToPlaylist.Margin = new System.Windows.Forms.Padding(4);
-            this.buttonAddToPlaylist.Name = "buttonAddToPlaylist";
-            this.buttonAddToPlaylist.Size = new System.Drawing.Size(123, 28);
-            this.buttonAddToPlaylist.TabIndex = 1;
-            this.buttonAddToPlaylist.Text = "Add to Playlist";
-            this.buttonAddToPlaylist.UseVisualStyleBackColor = true;
-            this.buttonAddToPlaylist.Click += new System.EventHandler(this.ButtonAddToPlaylist_Click);
             // 
             // statusStrip1
             // 
@@ -93,7 +80,7 @@
             this.label1.Location = new System.Drawing.Point(12, 26);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(684, 17);
+            this.label1.Size = new System.Drawing.Size(631, 16);
             this.label1.TabIndex = 4;
             this.label1.Text = "Search the online Bard\'s Guild Library for MIDIs (Only top 20 results returned, s" +
     "orted by most notes played)";
@@ -127,7 +114,7 @@
             this.buttonPlay.Name = "buttonPlay";
             this.buttonPlay.Size = new System.Drawing.Size(123, 28);
             this.buttonPlay.TabIndex = 6;
-            this.buttonPlay.Text = "Play";
+            this.buttonPlay.Text = "Load";
             this.buttonPlay.UseVisualStyleBackColor = true;
             this.buttonPlay.Click += new System.EventHandler(this.buttonPlay_Click);
             // 
@@ -154,7 +141,6 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.searchBox);
             this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.buttonAddToPlaylist);
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "GuildLibraryForm";
             this.Text = "Guild Library & Search";
@@ -167,7 +153,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Button buttonAddToPlaylist;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;

@@ -217,8 +217,6 @@ namespace LuteBot.UI
             {
                 if (play)
                     PlaySong(path);
-                else
-                    AddSongToPlaylist(song, path);
                 return;
             }
 
@@ -239,8 +237,6 @@ namespace LuteBot.UI
                         wc.DownloadFile(song.source_url, path);
                         if (play)
                             PlaySong(path);
-                        else
-                            AddSongToPlaylist(song, path);
                     }
                     catch (Exception e)
                     {
@@ -263,44 +259,11 @@ namespace LuteBot.UI
         }
 
 
-        private void PlaySong(string path)
+        private async Task PlaySong(string path)
         {
-            mainForm.Invoke((MethodInvoker)delegate
-            {
-                mainForm.LoadHelper(path);
-            });
+            await mainForm.LoadFile(path).ConfigureAwait(false);
         }
 
-        private void AddSongToPlaylist(GuildSong song, string path)
-        {
-            mainForm.Invoke((MethodInvoker)delegate
-            {
-                PlayListItem plsong = new PlayListItem { Name = song.filename, Path = path };
-                // If the playlist form isn't open, we can add it to the playlist manager and it will show up when opened
-                if (mainForm.playListForm == null || mainForm.playListForm.IsDisposed)
-                {
-                    LuteBotForm.playList.AddTrack(plsong);
-                }
-                else // If it is open, we need to add it directly do it, so just pass it to the form
-                {
-                    mainForm.playListForm.Invoke((MethodInvoker)delegate
-                    {
-                        mainForm.playListForm.AddSongToPlaylist(plsong);
-                    });
-                }
-                Log($"Successfully added {song.filename} to current playlist");
-            });
-        }
-
-        private void ButtonAddToPlaylist_Click(object sender, EventArgs e)
-        {
-            // Iterate over all selected rows and get the Song from each one
-            // Then ... add to current playlist?  
-            foreach (DataGridViewRow row in songGrid.SelectedRows)
-            {
-                downloadAndAddSong((GuildSong)row.DataBoundItem);
-            }
-        }
 
         private void buttonPlay_Click(object sender, EventArgs e)
         {

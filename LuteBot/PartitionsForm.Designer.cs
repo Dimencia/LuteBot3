@@ -30,19 +30,136 @@ namespace LuteBot
         /// </summary>
         private void InitializeComponent()
         {
-            this.listBoxPartitions = new LuteBot.UI.Utils.CustomListBox();
             this.savePartitionButton = new System.Windows.Forms.Button();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openSavFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveMultipleSongsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openMidiFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.exportMidisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuStrip1.SuspendLayout();
+            this.label1 = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label2 = new System.Windows.Forms.Label();
+            this.editSelectedButton = new System.Windows.Forms.Button();
+            this.reloadSelectedButton = new System.Windows.Forms.Button();
+            this.exportSelectedButton = new System.Windows.Forms.Button();
+            this.renameSelectedButton = new System.Windows.Forms.Button();
+            this.listBoxPartitions = new LuteBot.UI.Utils.CustomListBox();
             this.SuspendLayout();
+            // 
+            // savePartitionButton
+            // 
+            this.savePartitionButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.savePartitionButton.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.savePartitionButton.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveBorder;
+            this.savePartitionButton.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.savePartitionButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.savePartitionButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
+            this.savePartitionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.savePartitionButton.Location = new System.Drawing.Point(12, 6);
+            this.savePartitionButton.Name = "savePartitionButton";
+            this.savePartitionButton.Size = new System.Drawing.Size(448, 26);
+            this.savePartitionButton.TabIndex = 2;
+            this.savePartitionButton.Text = "Add Midis";
+            this.savePartitionButton.UseVisualStyleBackColor = false;
+            this.savePartitionButton.Click += new System.EventHandler(this.saveMultipleSongsToolStripMenuItem_Click);
+            // 
+            // openMidiFileDialog
+            // 
+            this.openMidiFileDialog.Filter = "MIDI files|*.mid";
+            this.openMidiFileDialog.Multiselect = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(9, 58);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(114, 16);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "LuteMod Songs";
+            // 
+            // panel1
+            // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panel1.Location = new System.Drawing.Point(12, 39);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(448, 4);
+            this.panel1.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.label2.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.label2.Location = new System.Drawing.Point(331, 11);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(113, 16);
+            this.label2.TabIndex = 14;
+            this.label2.Text = "Or Drag and Drop";
+            // 
+            // editSelectedButton
+            // 
+            this.editSelectedButton.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.editSelectedButton.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveBorder;
+            this.editSelectedButton.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.editSelectedButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.editSelectedButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
+            this.editSelectedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.editSelectedButton.Location = new System.Drawing.Point(154, 47);
+            this.editSelectedButton.Name = "editSelectedButton";
+            this.editSelectedButton.Size = new System.Drawing.Size(53, 39);
+            this.editSelectedButton.TabIndex = 15;
+            this.editSelectedButton.Text = "Edit";
+            this.editSelectedButton.UseVisualStyleBackColor = false;
+            this.editSelectedButton.Click += new System.EventHandler(this.EditItem_Click);
+            // 
+            // reloadSelectedButton
+            // 
+            this.reloadSelectedButton.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.reloadSelectedButton.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveBorder;
+            this.reloadSelectedButton.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.reloadSelectedButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.reloadSelectedButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
+            this.reloadSelectedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.reloadSelectedButton.Location = new System.Drawing.Point(213, 47);
+            this.reloadSelectedButton.Name = "reloadSelectedButton";
+            this.reloadSelectedButton.Size = new System.Drawing.Size(79, 39);
+            this.reloadSelectedButton.TabIndex = 16;
+            this.reloadSelectedButton.Text = "Resave";
+            this.reloadSelectedButton.UseVisualStyleBackColor = false;
+            this.reloadSelectedButton.Click += new System.EventHandler(this.reloadSelectedButton_Click);
+            // 
+            // exportSelectedButton
+            // 
+            this.exportSelectedButton.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.exportSelectedButton.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveBorder;
+            this.exportSelectedButton.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.exportSelectedButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.exportSelectedButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
+            this.exportSelectedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.exportSelectedButton.Location = new System.Drawing.Point(298, 47);
+            this.exportSelectedButton.Name = "exportSelectedButton";
+            this.exportSelectedButton.Size = new System.Drawing.Size(79, 39);
+            this.exportSelectedButton.TabIndex = 17;
+            this.exportSelectedButton.Text = "Export";
+            this.exportSelectedButton.UseVisualStyleBackColor = false;
+            this.exportSelectedButton.Click += new System.EventHandler(this.ExportItem_Click);
+            // 
+            // renameSelectedButton
+            // 
+            this.renameSelectedButton.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.renameSelectedButton.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveBorder;
+            this.renameSelectedButton.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.renameSelectedButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.renameSelectedButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
+            this.renameSelectedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.renameSelectedButton.Location = new System.Drawing.Point(383, 47);
+            this.renameSelectedButton.Name = "renameSelectedButton";
+            this.renameSelectedButton.Size = new System.Drawing.Size(79, 39);
+            this.renameSelectedButton.TabIndex = 18;
+            this.renameSelectedButton.Text = "Rename";
+            this.renameSelectedButton.UseVisualStyleBackColor = false;
+            this.renameSelectedButton.Click += new System.EventHandler(this.renameSelectedButton_Click);
             // 
             // listBoxPartitions
             // 
@@ -52,111 +169,32 @@ namespace LuteBot
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listBoxPartitions.FormattingEnabled = true;
             this.listBoxPartitions.ItemHeight = 16;
-            this.listBoxPartitions.Location = new System.Drawing.Point(12, 65);
+            this.listBoxPartitions.Location = new System.Drawing.Point(12, 93);
             this.listBoxPartitions.Name = "listBoxPartitions";
             this.listBoxPartitions.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBoxPartitions.Size = new System.Drawing.Size(497, 484);
+            this.listBoxPartitions.Size = new System.Drawing.Size(448, 484);
             this.listBoxPartitions.TabIndex = 0;
             this.listBoxPartitions.DragDrop += new System.Windows.Forms.DragEventHandler(this.PartitionIndexBox_DragDrop);
             this.listBoxPartitions.DragOver += new System.Windows.Forms.DragEventHandler(this.PartitionIndexBox_DragOver);
             this.listBoxPartitions.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PartitionIndexBox_MouseDown);
             // 
-            // savePartitionButton
-            // 
-            this.savePartitionButton.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.savePartitionButton.Location = new System.Drawing.Point(173, 33);
-            this.savePartitionButton.Name = "savePartitionButton";
-            this.savePartitionButton.Size = new System.Drawing.Size(155, 26);
-            this.savePartitionButton.TabIndex = 2;
-            this.savePartitionButton.Text = "Save Current Song";
-            this.savePartitionButton.UseVisualStyleBackColor = true;
-            this.savePartitionButton.Click += new System.EventHandler(this.savePartitionsButton_Click);
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.optionsToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(524, 28);
-            this.menuStrip1.TabIndex = 5;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // optionsToolStripMenuItem
-            // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.importPartitionsToolStripMenuItem,
-            this.exportPartitionsToolStripMenuItem,
-            this.exportMidisToolStripMenuItem,
-            this.openSavFolderToolStripMenuItem,
-            this.saveMultipleSongsToolStripMenuItem,
-            this.trainToolStripMenuItem});
-            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
-            this.optionsToolStripMenuItem.Text = "Options";
-            // 
-            // importPartitionsToolStripMenuItem
-            // 
-            this.importPartitionsToolStripMenuItem.Name = "importPartitionsToolStripMenuItem";
-            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
-            this.importPartitionsToolStripMenuItem.Text = "Import Partitions";
-            this.importPartitionsToolStripMenuItem.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // exportPartitionsToolStripMenuItem
-            // 
-            this.exportPartitionsToolStripMenuItem.Name = "exportPartitionsToolStripMenuItem";
-            this.exportPartitionsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
-            this.exportPartitionsToolStripMenuItem.Text = "Export Partitions";
-            this.exportPartitionsToolStripMenuItem.Click += new System.EventHandler(this.exportPartitionsToolStripMenuItem_Click);
-            // 
-            // openSavFolderToolStripMenuItem
-            // 
-            this.openSavFolderToolStripMenuItem.Name = "openSavFolderToolStripMenuItem";
-            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
-            this.openSavFolderToolStripMenuItem.Text = "Open Sav Folder";
-            this.openSavFolderToolStripMenuItem.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // saveMultipleSongsToolStripMenuItem
-            // 
-            this.saveMultipleSongsToolStripMenuItem.Name = "saveMultipleSongsToolStripMenuItem";
-            this.saveMultipleSongsToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
-            this.saveMultipleSongsToolStripMenuItem.Text = "Save Multiple Songs...";
-            this.saveMultipleSongsToolStripMenuItem.Click += new System.EventHandler(this.saveMultipleSongsToolStripMenuItem_Click);
-            // 
-            // trainToolStripMenuItem
-            // 
-            this.trainToolStripMenuItem.Name = "trainToolStripMenuItem";
-            this.trainToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
-            this.trainToolStripMenuItem.Text = "Train...";
-            this.trainToolStripMenuItem.Click += new System.EventHandler(this.trainToolStripMenuItem_Click);
-            // 
-            // openMidiFileDialog
-            // 
-            this.openMidiFileDialog.Filter = "MIDI files|*.mid";
-            this.openMidiFileDialog.Multiselect = true;
-            // 
-            // exportMidisToolStripMenuItem
-            // 
-            this.exportMidisToolStripMenuItem.Name = "exportMidisToolStripMenuItem";
-            this.exportMidisToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
-            this.exportMidisToolStripMenuItem.Text = "Export Midis";
-            this.exportMidisToolStripMenuItem.Click += new System.EventHandler(this.exportMidisToolStripMenuItem_Click);
-            // 
             // PartitionsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(524, 557);
+            this.ClientSize = new System.Drawing.Size(475, 588);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.renameSelectedButton);
+            this.Controls.Add(this.exportSelectedButton);
+            this.Controls.Add(this.reloadSelectedButton);
+            this.Controls.Add(this.editSelectedButton);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.savePartitionButton);
             this.Controls.Add(this.listBoxPartitions);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
             this.Name = "PartitionsForm";
             this.Text = "LuteMod Partitions";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PartitionsForm_FormClosing);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -165,15 +203,14 @@ namespace LuteBot
         #endregion
 
         private CustomListBox listBoxPartitions;
-        private System.Windows.Forms.Button savePartitionButton;
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem importPartitionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openSavFolderToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem saveMultipleSongsToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openMidiFileDialog;
-        private System.Windows.Forms.ToolStripMenuItem trainToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exportPartitionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exportMidisToolStripMenuItem;
+        public System.Windows.Forms.Button savePartitionButton;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button editSelectedButton;
+        private System.Windows.Forms.Button reloadSelectedButton;
+        private System.Windows.Forms.Button exportSelectedButton;
+        private System.Windows.Forms.Button renameSelectedButton;
     }
 }

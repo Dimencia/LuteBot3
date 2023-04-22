@@ -183,6 +183,10 @@
     {
       "Item": "MordhauPakPath",
       "Value": ""
+    },
+    {
+      "Item": "OverwritePartitions",
+      "Value": "False"
     }
   ]
 }

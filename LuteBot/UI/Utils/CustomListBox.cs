@@ -12,7 +12,6 @@ namespace LuteBot.UI.Utils
         private const int WM_LBUTTONDOWN = 0x201;
 
         public event EventHandler PreSelect;
-
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LuteBot.Config;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,6 +17,7 @@ namespace LuteBot
         {
             InitializeComponent();
             textBoxPartName.Text = filename;
+            checkBoxOverwrite.Checked = ConfigManager.GetBooleanProperty(PropertyItem.OverwritePartitions);
             if (labelValue != null)
             {
                 this.Text = labelValue;
@@ -33,6 +35,11 @@ namespace LuteBot
         {
             DialogResult = DialogResult.Yes;
             Close();
+        }
+
+        private void checkBoxOverwrite_CheckedChanged(object sender, EventArgs e)
+        {
+            ConfigManager.SetProperty(PropertyItem.OverwritePartitions, checkBoxOverwrite.Checked ? "True" : "False");
         }
     }
 }

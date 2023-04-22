@@ -21,13 +21,11 @@ namespace LuteBot
     public partial class SettingsForm : Form
     {
         private static string GUILD_URL = "https://discord.gg/4xnJVuz";
-        private MidiPlayer player;
         private LuteBotForm mainForm;
 
-        public SettingsForm(MidiPlayer player, LuteBotForm mainForm)
+        public SettingsForm(LuteBotForm mainForm)
         {
             InitializeComponent();
-            this.player = player;
             this.mainForm = mainForm;
             SetVersion();
             InitSettings();
@@ -35,19 +33,11 @@ namespace LuteBot
 
         private void InitSettings()
         {
-            SoundBoardCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.SoundBoard);
-            PlaylistCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.PlayList);
             TrackSelectionCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.TrackSelection);
             PartitionListCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.PartitionList);
-            SoundEffectsCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.SoundEffects);
-
-            InitRadioButtons();
-
-            NoteConversionMode.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.NoteConversionMode);
             LowestNoteNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
             NoteCountNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
             NoteCooldownNumeric.Value = ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown);
-            LiveMidiCheckBox.Checked = ConfigManager.GetBooleanProperty(PropertyItem.LiveMidi);
 
             checkBoxCheckUpdates.Checked = ConfigManager.GetBooleanProperty(PropertyItem.CheckForUpdates);
             checkBoxMajorUpdates.Checked = ConfigManager.GetBooleanProperty(PropertyItem.MajorUpdates);
@@ -65,7 +55,6 @@ namespace LuteBot
             }
 
             InitInstruments();
-            InitOutputDevice();
         }
 
         private void InitInstruments()
@@ -77,33 +66,9 @@ namespace LuteBot
             instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
         }
 
-        private void InitOutputDevice()
-        {
-            // Add each output device to the combobox in order...
-            int numDevices = OutputDevice.DeviceCount;
-            for (int i = 0; i < numDevices; i++)
-                outputDeviceBox.Items.Add(OutputDevice.GetDeviceCapabilities(i).name);
-
-            try
-            {
-                outputDeviceBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.OutputDevice);
-            }
-            catch { } // Some people have no output devices and that's awkward
-        }
-
         private void SetVersion()
         {
             VersionLabel.Text = VersionLabel.Text.Replace("[VERSION]", ConfigManager.GetVersion());
-        }
-
-        private void PlaylistCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            ConfigManager.SetProperty(PropertyItem.PlayList, PlaylistCheckBox.Checked.ToString());
-        }
-
-        private void SoundBoardCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            ConfigManager.SetProperty(PropertyItem.SoundBoard, SoundBoardCheckBox.Checked.ToString());
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -118,11 +83,6 @@ namespace LuteBot
             this.Close();
         }
 
-        private void SoundEffectsCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            ConfigManager.SetProperty(PropertyItem.SoundEffects, SoundEffectsCheckBox.Checked.ToString());
-        }
-
         private void TrackSelectionCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             ConfigManager.SetProperty(PropertyItem.TrackSelection, TrackSelectionCheckBox.Checked.ToString());
@@ -131,11 +91,6 @@ namespace LuteBot
         private void PartitionListCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             ConfigManager.SetProperty(PropertyItem.PartitionList, PartitionListCheckBox.Checked.ToString());
-        }
-
-        private void NoteConversionMode_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ConfigManager.SetProperty(PropertyItem.NoteConversionMode, NoteConversionMode.SelectedIndex.ToString());
         }
 
         private void LowestNoteNumeric_ValueChanged(object sender, EventArgs e)
@@ -153,70 +108,6 @@ namespace LuteBot
             ConfigManager.SetProperty(PropertyItem.NoteCooldown, NoteCooldownNumeric.Value.ToString());
         }
 
-        private void LiveMidiCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            ConfigManager.SetProperty(PropertyItem.LiveMidi, LiveMidiCheckBox.Checked.ToString());
-        }
-
-        private void InitRadioButtons()
-        {
-            ActionManager.AutoConsoleMode consoleMode = ActionManager.AutoConsoleModeFromString(ConfigManager.GetProperty(PropertyItem.ConsoleOpenMode));
-            switch (consoleMode)
-            {
-                case ActionManager.AutoConsoleMode.New:
-                    NewAutoConsoleRadio.Checked = true;
-                    OldAutoConsoleRadio.Checked = false;
-                    OffAutoConsoleRadio.Checked = false;
-                    return;
-                case ActionManager.AutoConsoleMode.Old:
-                    NewAutoConsoleRadio.Checked = false;
-                    OldAutoConsoleRadio.Checked = true;
-                    OffAutoConsoleRadio.Checked = false;
-                    return;
-                case ActionManager.AutoConsoleMode.Off:
-                    NewAutoConsoleRadio.Checked = false;
-                    OldAutoConsoleRadio.Checked = false;
-                    OffAutoConsoleRadio.Checked = true;
-                    return;
-            }
-        }
-
-        private void OldAutoConsoleRadio_CheckedChanged(object sender, EventArgs e)
-        {
-            if (OldAutoConsoleRadio.Checked)
-            {
-                ConfigManager.SetProperty(PropertyItem.ConsoleOpenMode, ActionManager.AutoConsoleModeToString(ActionManager.AutoConsoleMode.Old));
-                NewAutoConsoleRadio.Checked = false;
-                OffAutoConsoleRadio.Checked = false;
-            }
-        }
-
-        private void NewAutoConsoleRadio_CheckedChanged(object sender, EventArgs e)
-        {
-            if (NewAutoConsoleRadio.Checked)
-            {
-                ConfigManager.SetProperty(PropertyItem.ConsoleOpenMode, ActionManager.AutoConsoleModeToString(ActionManager.AutoConsoleMode.New));
-                OldAutoConsoleRadio.Checked = false;
-                OffAutoConsoleRadio.Checked = false;
-            }
-        }
-
-        private void OffAutoConsoleRadio_CheckedChanged(object sender, EventArgs e)
-        {
-            if (OffAutoConsoleRadio.Checked)
-            {
-                ConfigManager.SetProperty(PropertyItem.ConsoleOpenMode, ActionManager.AutoConsoleModeToString(ActionManager.AutoConsoleMode.Off));
-                NewAutoConsoleRadio.Checked = false;
-                OldAutoConsoleRadio.Checked = false;
-            }
-        }
-
-        private void OutputDeviceBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ConfigManager.SetProperty(PropertyItem.OutputDevice, outputDeviceBox.SelectedIndex.ToString());
-            player.ResetDevice(); // I hate that we had to pass this just to do this, but whatever
-        }
-
         private void InstrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             // If it's already the instrument we have as our property
@@ -226,9 +117,6 @@ namespace LuteBot
             {
                 ConfigManager.SetProperty(PropertyItem.Instrument, instrumentsBox.SelectedIndex.ToString());
                 Instrument target = (Instrument)instrumentsBox.SelectedItem;
-
-                SoundEffectsCheckBox.Checked = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
-                ConfigManager.SetProperty(PropertyItem.SoundEffects, SoundEffectsCheckBox.Checked.ToString());
 
                 LowestNoteNumeric.Value = target.LowestSentNote;
                 ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());

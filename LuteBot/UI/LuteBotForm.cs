@@ -32,64 +32,30 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Threading;
 
 namespace LuteBot
 {
     public partial class LuteBotForm : Form
     {
-        private const int WH_KEYBOARD_LL = 13;
-        private const int WM_KEYDOWN = 0x0100;
-        private static LowLevelKeyboardProc _proc = HookCallback;
-        private static IntPtr _hookID = IntPtr.Zero;
 
         public static readonly string lutebotPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot");
         public static readonly string libraryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "GuildLibrary");
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        static HotkeyManager hotkeyManager;
-
-        TrackSelectionForm trackSelectionForm = null;
-        OnlineSyncForm onlineSyncForm;
-        SoundBoardForm soundBoardForm;
-        public PlayListForm playListForm;
-        LiveInputForm liveInputForm;
-        TimeSyncForm timeSyncForm = null;
-        PartitionsForm partitionsForm = null;
+        public TrackSelectionForm trackSelectionForm = null;
+        public PartitionsForm partitionsForm = null;
 
         MidiPlayer player;
         public static LuteBotForm luteBotForm;
 
-
-        string playButtonStartString = "Play";
-        string playButtonStopString = "Pause";
-        string musicNameLabelHeader = "Playing : ";
-        bool playButtonIsPlaying = false;
         public string currentTrackName { get; set; } = "";
-        bool autoplay = false;
-        bool isDonePlaying = false;
 
-        public static PlayListManager playList;
-        static SoundBoardManager soundBoardManager;
         public static TrackSelectionManager trackSelectionManager;
-        static OnlineSyncManager onlineManager;
-        static LiveMidiManager liveMidiManager;
-        static KeyBindingForm keyBindingForm = null;
 
-        private static string lutemodPakName = "FLuteMod_2.1.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private const string musicNameLabelHeader = "Loaded: ";
+        private static string lutemodPakName = "FLuteMod_2.6.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
         private static int lutemodVersion1 = 2;
-        private static int lutemodVersion2 = 1;
+        private static int lutemodVersion2 = 6;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
         private static string loaderString1 = @"[/AutoLoader/BP_AutoLoaderActor.BP_AutoLoaderActor_C]
@@ -112,41 +78,14 @@ ModListWidgetStayTime=5.0";
         {
             luteBotForm = this;
             InitializeComponent();
-            hotkeyManager = new HotkeyManager();
+
 
             MordhauPakPath = GetPakPath();
 
-            onlineManager = new OnlineSyncManager();
-            playList = new PlayListManager();
             trackSelectionManager = new TrackSelectionManager();
-            playList.PlayListUpdatedEvent += new EventHandler<PlayListEventArgs>(HandlePlayListChanged);
-            soundBoardManager = new SoundBoardManager();
-            soundBoardManager.SoundBoardTrackRequest += new EventHandler<SoundBoardEventArgs>(HandleSoundBoardTrackRequest);
             player = new MidiPlayer(trackSelectionManager);
-            player.SongLoaded += new EventHandler<AsyncCompletedEventArgs>(PlayerLoadCompleted);
-            
-            hotkeyManager.NextKeyPressed += new EventHandler(NextButton_Click);
-            hotkeyManager.PlayKeyPressed += new EventHandler(PlayButton_Click);
-            hotkeyManager.StopKeyPressed += new EventHandler(StopButton_Click);
-            hotkeyManager.SynchronizePressed += HotkeyManager_SynchronizePressed;
-            hotkeyManager.PreviousKeyPressed += new EventHandler(PreviousButton_Click);
-            trackSelectionManager.OutDeviceResetRequest += new EventHandler(ResetDevice);
-            trackSelectionManager.ToggleTrackRequest += new EventHandler<MidiChannelItem>(ToggleTrack);
-            liveMidiManager = new LiveMidiManager(trackSelectionManager);
-            hotkeyManager.LiveInputManager = liveMidiManager;
-
-            PlayButton.Enabled = false;
-            StopButton.Enabled = false;
-            PreviousButton.Enabled = false;
-            NextButton.Enabled = false;
-            MusicProgressBar.Enabled = false;
 
             this.Shown += LuteBotForm_Shown;
-
-
-            _hookID = SetHook(_proc);
-
-            SetConsoleKey(); // Sets up an appropriate path for the mordhau ini, and sets the key if necessary.  Only alerts if it changes something
 
             OpenDialogs();
             this.StartPosition = FormStartPosition.Manual;
@@ -248,7 +187,7 @@ ModListWidgetStayTime=5.0";
                     }
                 }
             }
-            catch 
+            catch
             {
                 MessageBox.Show("Could not perform version upgrade\nYou may need to use the option to Install Lutemod\nAnd may need to delete and re-generate your configuration", "Version upgrade failed");
             }
@@ -527,7 +466,7 @@ ModListWidgetStayTime=5.0";
                 bool replace1 = false;
                 string loaderString1Modified = loaderLines[0] + "\n";
 
-                if(!content.Contains(loaderLines[1]))
+                if (!content.Contains(loaderLines[1]))
                 {
                     replace1 = true;
                     loaderString1Modified += loaderLines[1] + "\n";
@@ -605,7 +544,7 @@ ModListWidgetStayTime=5.0";
             try
             {
                 string originalPath = ConfigManager.GetProperty(PropertyItem.MordhauPakPath);
-                if(IsMordhauPakPathValid(originalPath))
+                if (IsMordhauPakPathValid(originalPath))
                 {
                     return originalPath;
                 }
@@ -703,6 +642,9 @@ ModListWidgetStayTime=5.0";
             {
                 MessageBox.Show($"General failure... \n{e.Message}\n{e.StackTrace}");
             }
+            var epicDefaultPath = "C:\\Program Files\\Epic Games\\Mordhau\\Mordhau\\Content\\CustomPaks";
+            if (IsMordhauPakPathValid(epicDefaultPath))
+                return epicDefaultPath;
 
             return GetMordhauPathFromPrompt();
         }
@@ -739,159 +681,33 @@ ModListWidgetStayTime=5.0";
             return File.Exists(exePath);
         }
 
-        // Are arrow keys valid?  These names are all good WinForms names, are they good Mordhau names?  
-        private static string[] validConsoleKeys = new string[] { "PageDown", "PageUp", "Home", "End", "Insert", "Delete", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12" };
-
-        // Quiet is to do it automatically and not alert if there were changes.  Clicking the button explicitly makes quiet false
-        // forceMordhau is to force Mordhau to update to LuteBot and not the other way around; used when explicitly applying a new Console Key in LuteBot
-        public static void SetConsoleKey(bool quiet = true, bool forceMordhau = false)
-        {
-            // Checks the contents of the config file for valid console keys
-            // If any match the LuteBot setting, good
-            // If any valid ones are found and none match, set the LuteBot setting to one of the valid ones
-            // If no valid ones are found and no matches, add one
-            string configLocation = ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation);
-            string configContent = SaveManager.LoadMordhauConfig(configLocation);
-            configLocation = ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation); // Loading it may have changed it, make sure we're updated
-            string userKey = ConfigManager.GetProperty(PropertyItem.OpenConsole).Replace("Next", "PageDown"); // I think this is the only bad one
-            string newBind = $"ConsoleKeys={userKey}";
-            if (configContent != null)
-            {
-                if (!configContent.Contains(newBind))
-                {
-                    // The bind we have isn't set.  Check the ones that are set, and see if any are valid
-                    // While also setting up to insert, if we need to
-                    int index = -1;
-                    int length = -1;
-                    foreach (Match match in Regex.Matches(configContent, @"ConsoleKeys=(.*)"))
-                    {
-                        index = match.Index;
-                        length = match.Length;
-                        var detectedKey = match.Groups[1].Value.Trim();
-                        if (!forceMordhau && validConsoleKeys.Contains(detectedKey))
-                        {
-                            // They have a valid key bound, it just doesn't match ours
-                            // So, set ours to match.  Store the old one into UserSavedConsoleKey for reversion
-                            ConfigManager.SetProperty(PropertyItem.UserSavedConsoleKey, ConfigManager.GetProperty(PropertyItem.OpenConsole));
-                            ConfigManager.SetProperty(PropertyItem.OpenConsole, detectedKey);
-                            ConfigManager.SaveConfig();
-                            if (keyBindingForm != null)
-                                keyBindingForm.InitPropertiesList();
-                            MessageBox.Show($"Valid console key already bound in Mordhau: {detectedKey}\nLuteBot will use this console key", "Setup Complete");
-                            return;
-                        }
-                    }
-
-                    // If we get here, there were no valid keys bound.  So we insert the LuteBot key
-                    // TODO: make sure VoteNo is unbound or we might just spam no when playing; we are potentially double-binding
-                    if (index >= 0 && length > 0)
-                    {
-                        configContent = configContent.Insert((index + length), $"\n{newBind}");
-                        SaveManager.SaveMordhauConfig(configLocation, configContent);
-                        MessageBox.Show($"Successfully configured Mordhau Console Key to {userKey}\n\nIf Mordhau is open, you should restart it\nYou can revert this change in the Key Binding window", "Setup Complete");
-                    }
-                    else
-                    {
-                        MessageBox.Show("Could not find existing ConsoleKey binding in config to insert at\nYou will need to set the key yourself inside Mordhau Settings", "Setup Failed");
-                    }
-                }
-                else
-                {
-                    // If it already has the bind, do we alert them?  I think we want to run this automatically on startup and on binding change, so, no if it's already set
-                    // Unless we make this only explicit-run because maybe it could cause issues with localization?  But let's make it auto and if there are problems, fix them
-                    if (!quiet)
-                    {
-                        MessageBox.Show($"Your console key is already correctly bound to {userKey} in Mordhau", "Setup Complete");
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("Could not retrieve mordhau config to update your Console Key\nYou will need to set the key yourself inside Mordhau Settings", "Setup Failed");
-            }
-
-        }
-
-        public static void AutoConfigMordhau(object sender, EventArgs e)
-        {
-            SetConsoleKey(true);
-        }
-
-        private void HotkeyManager_SynchronizePressed(object sender, EventArgs e)
-        {
-            if (timeSyncForm != null)
-            {
-                timeSyncForm.StartAtNextInterval(10);
-            }
-        }
-
-        private TaskCompletionSource<bool> asyncLoadTask = null;
-
-        private void PlayerLoadCompleted(object sender, AsyncCompletedEventArgs e)
+        private async Task PlayerLoadCompleted(bool skipUI)
         {
             SuspendLayout();
-            if (e.Error == null)
-            {
-                if (!skipUI)
-                {
-                    StopButton_Click(null, null);
-                    PlayButton.Enabled = true;
-                    MusicProgressBar.Enabled = true;
-                    StopButton.Enabled = true;
-                }
 
-                    trackSelectionManager.UnloadTracks();
-                    if (player.GetType() == typeof(MidiPlayer))
-                    {
-                        MidiPlayer midiPlayer = player as MidiPlayer;
-                        trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
-                        trackSelectionManager.FileName = currentTrackName;
-                    }
+            trackSelectionManager.UnloadTracks();
+            if (player.GetType() == typeof(MidiPlayer))
+            {
+                MidiPlayer midiPlayer = player as MidiPlayer;
+                trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
+                trackSelectionManager.FileName = currentTrackName;
+            }
 
-                    if (trackSelectionManager.autoLoadProfile)
-                    {
-                        trackSelectionManager.LoadTrackManager();
-                    }
-                if (!skipUI)
+            if (trackSelectionManager.autoLoadProfile)
+            {
+                trackSelectionManager.LoadTrackManager();
+            }
+            if (!skipUI)
+            {
+                await InvokeAsync(() =>
                 {
-                    MusicProgressBar.Value = 0;
-                    MusicProgressBar.Maximum = player.GetLength();
-                    StartLabel.Text = TimeSpan.FromSeconds(0).ToString(@"mm\:ss");
-                    EndTimeLabel.Text = player.GetFormattedLength();
-                    CurrentMusicLabel.Text = musicNameLabelHeader + Path.GetFileNameWithoutExtension(currentTrackName);
-                    if (autoplay)
+                    if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated)
                     {
-                        Play();
-                        autoplay = false;
+                        trackSelectionForm.InitLists();
                     }
-                    //if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated)
-                    //    trackSelectionForm.Invoke((MethodInvoker)delegate
-                    //    {
-                    //        trackSelectionForm.Invalidate(); //trackSelectionForm.RefreshOffsetPanel();
-                    //    }); // Invoking just in case this is on a diff thread somehow
-                }
-            }
-            else
-            {
-                MessageBox.Show(e.Error.Message + " in " + e.Error.Source + e.Error.TargetSite + "\n" + e.Error.InnerException + "\n" + e.Error.StackTrace);
-            }
-            if (asyncLoadTask != null)
-            {
-                asyncLoadTask.SetResult(e.Error != null);
+                }).ConfigureAwait(false);
             }
             ResumeLayout();
-        }
-
-        private void ToggleTrack(object sender, MidiChannelItem e)
-        {
-            timer1.Stop();
-            (player as MidiPlayer).UpdateMutedTracks(e);
-            timer1.Start();
-        }
-
-        private void ResetDevice(object sender, EventArgs e)
-        {
-            (player as MidiPlayer).ResetDevice();
         }
 
         private void LuteBotForm_Focus(object sender, EventArgs e)
@@ -904,210 +720,56 @@ ModListWidgetStayTime=5.0";
                 }
                 trackSelectionForm.Focus();
             }
-            if (onlineSyncForm != null && !onlineSyncForm.IsDisposed)
-            {
-                if (onlineSyncForm.WindowState == FormWindowState.Minimized)
-                {
-                    onlineSyncForm.WindowState = FormWindowState.Normal;
-                }
-                onlineSyncForm.Focus();
-            }
-            if (soundBoardForm != null && !soundBoardForm.IsDisposed)
-            {
-                if (soundBoardForm.WindowState == FormWindowState.Minimized)
-                {
-                    soundBoardForm.WindowState = FormWindowState.Normal;
-                }
-                soundBoardForm.Focus();
-            }
-            if (playListForm != null && !playListForm.IsDisposed)
-            {
-                if (playListForm.WindowState == FormWindowState.Minimized)
-                {
-                    playListForm.WindowState = FormWindowState.Normal;
-                }
-                playListForm.Focus();
-            }
-            if (liveInputForm != null && !liveInputForm.IsDisposed)
-            {
-                if (liveInputForm.WindowState == FormWindowState.Minimized)
-                {
-                    liveInputForm.WindowState = FormWindowState.Normal;
-                }
-                liveInputForm.Focus();
-            }
+
             this.Focus();
-        }
-
-        private void HandleSoundBoardTrackRequest(object sender, SoundBoardEventArgs e)
-        {
-            isDonePlaying = false;
-            Pause();
-            LoadHelper(e.SelectedTrack);
-            autoplay = true;
-        }
-
-        private void HandlePlayListChanged(object sender, PlayListEventArgs e)
-        {
-            if (e.EventType == PlayListEventArgs.UpdatedComponent.UpdateNavButtons)
-            {
-                ToggleNavButtons(playList.HasNext());
-            }
-            if (e.EventType == PlayListEventArgs.UpdatedComponent.PlayRequest)
-            {
-                isDonePlaying = false;
-                Pause();
-                LoadHelper(playList.Get(e.Id));
-                autoplay = true;
-            }
-        }
-
-        private void ToggleNavButtons(bool enable)
-        {
-            PreviousButton.Enabled = enable;
-            NextButton.Enabled = enable;
-        }
-
-        private void MusicProgressBar_Scroll(object sender, EventArgs e)
-        {
-            player.SetPosition(MusicProgressBar.Value);
-        }
-
-        private void Timer1_Tick(object sender, EventArgs e)
-        {
-            if (player.GetPosition() < MusicProgressBar.Maximum)
-            {
-                MusicProgressBar.Value = player.GetPosition();
-                StartLabel.Text = player.GetFormattedPosition();
-            }
-            else
-            {
-                if (ActionManager.AutoConsoleModeFromString(ConfigManager.GetProperty(PropertyItem.ConsoleOpenMode)) == ActionManager.AutoConsoleMode.Old)
-                {
-                    ActionManager.ToggleConsole(false);
-                }
-                StartLabel.Text = EndTimeLabel.Text;
-                PlayButton.Text = playButtonStartString;
-                isDonePlaying = true;
-                timer1.Stop();
-                if (NextButton.Enabled)
-                {
-                    NextButton.PerformClick();
-                }
-            }
         }
 
         private void OpenDialogs()
         {
-            if (ConfigManager.GetBooleanProperty(PropertyItem.SoundBoard))
-            {
-                soundBoardForm = new SoundBoardForm(soundBoardManager);
-                soundBoardForm.StartPosition = FormStartPosition.Manual;
-                soundBoardForm.Location = new Point(0, 0);
-                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.SoundBoardPos));
-                soundBoardForm.Show();
-                soundBoardForm.Top = coords.Y;
-                soundBoardForm.Left = coords.X;
-            }
-            if (ConfigManager.GetBooleanProperty(PropertyItem.PlayList))
-            {
-                playListForm = new PlayListForm(playList);
-                playListForm.StartPosition = FormStartPosition.Manual;
-                playListForm.Location = new Point(0, 0);
-                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.PlayListPos));
-                playListForm.Show();
-                playListForm.Top = coords.Y;
-                playListForm.Left = coords.X;
-
-            }
+            trackSelectionForm = new TrackSelectionForm(trackSelectionManager, this);
+            trackSelectionForm.StartPosition = FormStartPosition.Manual;
+            trackSelectionForm.Location = new Point(0, 0);
             if (ConfigManager.GetBooleanProperty(PropertyItem.TrackSelection))
             {
-                var midiPlayer = player as MidiPlayer;
-                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice, this);
-                trackSelectionForm.StartPosition = FormStartPosition.Manual;
-                trackSelectionForm.Location = new Point(0, 0);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
                 trackSelectionForm.Show();
                 trackSelectionForm.Top = coords.Y;
                 trackSelectionForm.Left = coords.X;
             }
-            if (ConfigManager.GetBooleanProperty(PropertyItem.LiveMidi))
-            {
-                liveInputForm = new LiveInputForm(liveMidiManager);
-                liveInputForm.StartPosition = FormStartPosition.Manual;
-                liveInputForm.Location = new Point(0, 0);
-                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.LiveMidiPos));
-                liveInputForm.Show();
-                liveInputForm.Top = coords.Y;
-                liveInputForm.Left = coords.X;
-            }
-            if (ConfigManager.GetBooleanProperty(PropertyItem.PartitionList))
-            {
-                partitionsForm = new PartitionsForm(trackSelectionManager, player);
-                partitionsForm.StartPosition = FormStartPosition.Manual;
-                partitionsForm.Location = new Point(0, 0);
-                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.PartitionListPos));
-                partitionsForm.Show();
-                partitionsForm.Top = coords.Y;
-                partitionsForm.Left = coords.X;
-            }
+
+            partitionsForm = new PartitionsForm(trackSelectionManager, player);
+            partitionsForm.TopLevel = false;
+            partitionsForm.FormBorderStyle = FormBorderStyle.None;
+            partitionsForm.Dock = DockStyle.Fill;
+            partitionPanel.Controls.Add(partitionsForm);
+            partitionsForm.Show();
         }
 
-        protected override void WndProc(ref Message m)
-        {
-            hotkeyManager.HotkeyPressed(m.Msg);
-            base.WndProc(ref m);
-        }
-
-        private void KeyBindingToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (keyBindingForm == null)
-                keyBindingForm = new KeyBindingForm();
-            keyBindingForm.InitPropertiesList();
-            keyBindingForm.ShowDialog();
-        }
 
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (new SettingsForm(player as MidiPlayer, this)).ShowDialog();
-            player.Pause();
+            (new SettingsForm(this)).ShowDialog();
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            player.Dispose();
             WindowPositionUtils.UpdateBounds(PropertyItem.MainWindowPos, new Point() { X = Left, Y = Top });
-            if (soundBoardForm != null)
-            {
-                soundBoardForm.Close();
-            }
-            if (playListForm != null)
-            {
-                playListForm.Close();
-            }
+
             if (trackSelectionForm != null)
             {
                 trackSelectionForm.Close();
-            }
-            if (liveInputForm != null)
-            {
-                liveInputForm.Close();
+                //trackSelectionForm.Dispose(); // Uncomment this after I'm done messing everything else up
             }
             if (partitionsForm != null)
             {
                 partitionsForm.Close();
+                partitionsForm.Dispose();
             }
             ConfigManager.SaveConfig();
             base.OnClosing(e);
         }
 
-        protected override void OnClosed(EventArgs e)
-        {
-            UnhookWindowsHookEx(_hookID);
-            base.OnClosed(e);
-        }
-
-        private void LoadFileButton_Click(object sender, EventArgs e)
+        private async void LoadFileButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openMidiFileDialog = new OpenFileDialog();
             openMidiFileDialog.DefaultExt = "mid";
@@ -1116,179 +778,61 @@ ModListWidgetStayTime=5.0";
             if (openMidiFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string fileName = openMidiFileDialog.FileName;
-                player.LoadFile(fileName);
-                //if (fileName.Contains("\\"))
-                //{
-                //    string[] fileNameSplit = fileName.Split('\\');
-                //    string filteredFileName = fileNameSplit[fileNameSplit.Length - 1].Replace(".mid", "");
-                //    currentTrackName = filteredFileName;
-                //}
-                //else
-                //{
+                await LoadFile(fileName).ConfigureAwait(false);
+            }
+        }
+
+        public async Task HandleError(Exception ex, string message)
+        {
+            await InvokeAsync(() =>
+            {
+                splitContainer1.Panel2Collapsed = false;
+                richTextBox1.AppendText($"{Environment.NewLine} [{DateTime.Now.ToString("T")}] Error: " + message);
+                richTextBox1.ScrollToCaret();
+            }).ConfigureAwait(false);
+        }
+
+
+        public async Task InvokeAsync(Action action)
+        {
+            if (InvokeRequired)
+            {
+                await Task.CompletedTask.ConfigureAwait(false);
+                Invoke((MethodInvoker)delegate
+                {
+                    action();
+                });
+            }
+            else
+                action();
+        }
+
+
+        public async Task LoadFile(string fileName, bool skipUI = false)
+        {
+            if (!skipUI)
+                await InvokeAsync(() =>
+                {
+                    partitionsForm.savePartitionButton.Enabled = false;
+                }).ConfigureAwait(false);
+            try
+            {
+                await player.LoadFileAsync(fileName).ConfigureAwait(false);
                 currentTrackName = fileName;
-                //}
+                await PlayerLoadCompleted(skipUI).ConfigureAwait(false);
             }
-        }
-
-
-        private void LoadHelper(PlayListItem item)
-        {
-            player.LoadFile(item.Path);
-            currentTrackName = item.Path;
-        }
-
-        private void LoadHelper(SoundBoardItem item)
-        {
-            player.LoadFile(item.Path);
-            currentTrackName = item.Path;
-        }
-
-        public void LoadHelper(string path)
-        {
-            player.LoadFile(path);
-            currentTrackName = path;
-        }
-
-        public static bool skipUI = false;
-
-        public async Task LoadHelperAsync(string path, bool skipUI = false)
-        {
-            LuteBotForm.skipUI = skipUI;
-            asyncLoadTask = new TaskCompletionSource<bool>();
-            player.LoadFile(path);
-            currentTrackName = path;
-
-            await asyncLoadTask.Task;
-            asyncLoadTask = null;
-            LuteBotForm.skipUI = false;
-        }
-
-        private void PlayButton_Click(object sender, EventArgs e)
-        {
-            if (PlayButton.Enabled)
+            catch (Exception ex)
             {
-
-                if (isDonePlaying)
-                {
-                    player.Stop();
-                    player.Play();
-                    playButtonIsPlaying = false;
-                    isDonePlaying = false;
-                }
-                if (!playButtonIsPlaying)
-                {
-                    Play();
-                }
-                else
-                {
-                    Pause();
-                }
+                await HandleError(ex, "Failed to load file").ConfigureAwait(false);
             }
-        }
-
-        public void Play()
-        {
-            if (ActionManager.AutoConsoleModeFromString(ConfigManager.GetProperty(PropertyItem.ConsoleOpenMode)) == ActionManager.AutoConsoleMode.Old)
+            finally
             {
-                ActionManager.ToggleConsole(true);
+                if (!skipUI)
+                    await InvokeAsync(() =>
+                    {
+                        partitionsForm.savePartitionButton.Enabled = true;
+                    }).ConfigureAwait(false);
             }
-            PlayButton.Text = playButtonStopString;
-            player.Play();
-
-            timer1.Start();
-            playButtonIsPlaying = true;
-        }
-
-        private void Pause()
-        {
-            if (ActionManager.AutoConsoleModeFromString(ConfigManager.GetProperty(PropertyItem.ConsoleOpenMode)) == ActionManager.AutoConsoleMode.Old)
-            {
-                ActionManager.ToggleConsole(false);
-            }
-            PlayButton.Text = playButtonStartString;
-            player.Pause();
-            timer1.Stop();
-            playButtonIsPlaying = false;
-        }
-
-        private void PlayListToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (playListForm == null || playListForm.IsDisposed)
-            {
-                playListForm = new PlayListForm(playList);
-                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.PlayListPos));
-                playListForm.Show();
-                playListForm.Top = coords.Y;
-                playListForm.Left = coords.X;
-            }
-
-
-        }
-
-        private void SoundBoardToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (soundBoardForm == null || soundBoardForm.IsDisposed)
-            {
-                soundBoardForm = new SoundBoardForm(soundBoardManager);
-                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.SoundBoardPos));
-                soundBoardForm.Show();
-                soundBoardForm.Top = coords.Y;
-                soundBoardForm.Left = coords.X;
-            }
-
-        }
-
-        private void StopButton_Click(object sender, EventArgs e)
-        {
-            player.Stop();
-            timer1.Stop();
-            MusicProgressBar.Value = 0;
-            //PlayButton.Enabled = false;
-            //MusicProgressBar.Enabled = false;
-            //StopButton.Enabled = false;
-            StartLabel.Text = "00:00";
-            //EndTimeLabel.Text = "00:00";
-            //CurrentMusicLabel.Text = "";
-            playButtonIsPlaying = false;
-            PlayButton.Text = playButtonStartString;
-        }
-
-        private void NextButton_Click(object sender, EventArgs e)
-        {
-            if (NextButton.Enabled)
-            {
-                PlayButton.Enabled = false;
-                StopButton.Enabled = false;
-                MusicProgressBar.Enabled = false;
-                Pause();
-                playList.Next();
-                autoplay = true;
-                LoadHelper(playList.Get(playList.CurrentTrackIndex));
-                playButtonIsPlaying = true;
-                isDonePlaying = false;
-            }
-        }
-
-        private void PreviousButton_Click(object sender, EventArgs e)
-        {
-            if (PreviousButton.Enabled)
-            {
-                PlayButton.Enabled = false;
-                StopButton.Enabled = false;
-                MusicProgressBar.Enabled = false;
-                Pause();
-                playList.Previous();
-                autoplay = true;
-                LoadHelper(playList.Get(playList.CurrentTrackIndex));
-                playButtonIsPlaying = true;
-                isDonePlaying = false;
-            }
-        }
-
-        private void OnlineSyncToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            onlineSyncForm = new OnlineSyncForm(onlineManager);
-            onlineSyncForm.Show();
         }
 
         private void TrackFilteringToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1296,7 +840,7 @@ ModListWidgetStayTime=5.0";
             if (trackSelectionForm == null || trackSelectionForm.IsDisposed)
             {
                 var midiPlayer = player as MidiPlayer;
-                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, midiPlayer.mordhauOutDevice, midiPlayer.rustOutDevice, this);
+                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
                 trackSelectionForm.Top = coords.Y;
                 trackSelectionForm.Left = coords.X;
@@ -1306,43 +850,6 @@ ModListWidgetStayTime=5.0";
             trackSelectionForm.Focus();
         }
 
-        private static IntPtr SetHook(LowLevelKeyboardProc proc)
-        {
-            using (Process curProcess = Process.GetCurrentProcess())
-            using (ProcessModule curModule = curProcess.MainModule)
-            {
-                return SetWindowsHookEx(WH_KEYBOARD_LL, proc,
-                    GetModuleHandle(curModule.ModuleName), 0);
-            }
-        }
-
-        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-
-        private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
-            {
-                int vkCode = Marshal.ReadInt32(lParam);
-                hotkeyManager.HotkeyPressed(vkCode);
-                if (Enum.TryParse(vkCode.ToString(), out Keys tempkey))
-                {
-                    soundBoardManager.KeyPressed(tempkey);
-                }
-            }
-            return CallNextHookEx(_hookID, nCode, wParam, lParam);
-        }
-
-        private void liveInputToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (liveInputForm == null || liveInputForm.IsDisposed)
-            {
-                liveInputForm = new LiveInputForm(liveMidiManager);
-                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.LiveMidiPos));
-                liveInputForm.Show();
-                liveInputForm.Top = coords.Y;
-                liveInputForm.Left = coords.X;
-            }
-        }
 
         private void GuildLibraryToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1353,16 +860,7 @@ ModListWidgetStayTime=5.0";
         }
 
 
-        private void TimeSyncToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (timeSyncForm != null)
-                timeSyncForm.Dispose();
-            timeSyncForm = new TimeSyncForm(this);
-            timeSyncForm.Show();
-
-        }
-
-        private void ReloadButton_Click(object sender, EventArgs e)
+        private async void ReloadButton_Click(object sender, EventArgs e)
         {
             // First grab the Track Filtering settings for our current track
             // Re-load the same midi track from file
@@ -1370,14 +868,21 @@ ModListWidgetStayTime=5.0";
 
             // I don't think getting the settings is that easy but we'll try
             // Oh hey it can be.
-            var instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-            var data = trackSelectionManager.GetTrackSelectionData(instrumentId);
-            player.LoadFile(currentTrackName);
-            trackSelectionManager.SetTrackSelectionData(data);
-            //trackSelectionManager.SaveTrackManager(); // Don't save when we reload, that's bad.  
-            if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
-                trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.Invalidate(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
-            Refresh();
+            try
+            {
+                var instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                var data = trackSelectionManager.GetTrackSelectionData(instrumentId);
+                await LoadFile(currentTrackName).ConfigureAwait(false);
+                trackSelectionManager.SetTrackSelectionData(data);
+                //trackSelectionManager.SaveTrackManager(); // Don't save when we reload, that's bad.  
+                if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
+                    trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.Invalidate(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
+                Refresh();
+            }
+            catch (Exception ex)
+            {
+                await HandleError(ex, "Failed to reload file");
+            }
         }
 
 
@@ -1386,586 +891,10 @@ ModListWidgetStayTime=5.0";
             // This is called when an instrument is changed.  TrackSelectionManager should be updated with the new config values
             // Though first we'll have to setup the data to actually have different values based on the currently selected instrument.
             trackSelectionManager.UpdateTrackSelectionForInstrument(oldInstrument);
-            // MordhauOutDevice should be refreshed
-            player.mordhauOutDevice.UpdateNoteIdBounds();
             // And TrackSelectionForm should be refreshed
             if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
                 trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.InitLists(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
 
-        }
-
-        public enum Totebots
-        {
-            Default,
-            Bass,
-            Synth,
-            Percussion
-        }
-
-        public enum TotebotTypes
-        {
-            Dance = 0,
-            Retro = 1
-        }
-        // Totebot object IDs: 
-        // Default: 1c04327f-1de4-4b06-92a8-2c9b40e491aa
-        // Bass: 161786c1-1290-4817-8f8b-7f80de755a06
-        // Synth: a052e116-f273-4d73-872c-924a97b86720
-        // Perc: 4c6e27a2-4c35-4df3-9794-5e206fef9012
-        private Dictionary<Totebots, string> TotebotIds = new Dictionary<Totebots, string>()
-        {
-            { Totebots.Default,  "1c04327f-1de4-4b06-92a8-2c9b40e491aa"},
-            { Totebots.Bass,  "161786c1-1290-4817-8f8b-7f80de755a06" },
-            { Totebots.Synth,  "a052e116-f273-4d73-872c-924a97b86720"},
-            { Totebots.Percussion, "4c6e27a2-4c35-4df3-9794-5e206fef9012" }
-        };
-
-        private void exportToScrapMechanicToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Should save a .json file with scrap mechanic info to play the song
-            // This is going to be long and hard.
-
-
-            // Pitch on the totebot heads is a value from 0.0 to 1.0, and covers two octaves (0-23)
-            // 1 tick is 25ms
-
-            // Make all the axes and positions match, except the switch, for a tiny version
-
-            // So the way we handle this, if we construct a List<SMNote> of each note in order
-            // We just pass it in to our function that we just wrote and get this whole thing out
-
-            // We need to convert Midi ticks to game ticks, where a game tick is 25ms
-            // Formula: ms = 60000 / (BPM * PPQ)
-            // BPM and PPQ should be in the player somewhere - PPQ = Division, BPM = Tempo
-
-            // Let's popup a settings window...
-
-            ScrapMechanicConfigForm configForm = new ScrapMechanicConfigForm(player);
-            var dialogResult = configForm.ShowDialog(this);
-            if (dialogResult != DialogResult.OK)
-                return;
-
-
-            List<SMNote> onNotes = new List<SMNote>();
-            List<SMNote> notes = new List<SMNote>();
-            toteHeads = new List<ToteHead>();
-            durationTimers = new List<SMTimer>();
-            startTimers = new List<SMTimer>();
-            extensionTimers = new List<SMTimer>();
-
-            // Enforce loading of filtering values
-            player.mordhauOutDevice.UpdateNoteIdBounds();
-            int tempo = player.sequence.FirstTempo;
-
-            if (!string.IsNullOrEmpty(currentTrackName))
-                foreach (var track in player.sequence)
-                {
-                    foreach (var note in track.Iterator())
-                    {
-                        if (note.MidiMessage.MessageType == MessageType.Channel)
-                        {
-                            ChannelMessage cm = note.MidiMessage as ChannelMessage;
-                            double msPerTick = tempo / player.sequence.Division; // tempo may change as we move along, watch for issues with getting this now
-
-                            if (cm.Command == ChannelCommand.NoteOn && cm.Data2 > 0) // Velocity > 0
-                            {
-                                int gameTicksStart = (int)Math.Ceiling(note.AbsoluteTicks * msPerTick / 1000 / 25); // Hopefully we don't have to turn this into seconds also
-
-                                // Temporarily...
-                                //if (gameTicksStart > 800)
-                                //    break;
-
-
-                                var filtered = player.mordhauOutDevice.FilterNote(cm, 0);
-
-                                var newNote = new SMNote()
-                                {
-                                    channel = cm.MidiChannel,
-                                    midiEvent = note,
-                                    startTicks = gameTicksStart,
-                                    noteNum = filtered.Data1 - player.mordhauOutDevice.LowNoteId,
-                                    velocity = filtered.Data2,
-                                    flavor = (TotebotTypes)configForm.TrackTypeDict[filtered.MidiChannel],
-                                    instrument = (Totebots)configForm.TrackCategoryDict[filtered.MidiChannel],
-                                    internalId = onNotes.Count + notes.Count, // I don't think I use this, oh well
-                                    filtered = filtered,
-                                    durationTicks = -1
-                                };
-
-                                // And the duration... we need a NoteOff before we can know
-                                onNotes.Add(newNote);
-                                // But we need to add it now to preserve the order... 
-                                // We'll just sort them afterward
-                            }
-                            else if (cm.Command == ChannelCommand.NoteOff || (cm.Command == ChannelCommand.NoteOn && cm.Data2 == 0))
-                            {
-                                var onNote = onNotes.Where(n => ((ChannelMessage)n.midiEvent.MidiMessage).MidiChannel == cm.MidiChannel && ((ChannelMessage)n.midiEvent.MidiMessage).Data1 == cm.Data1).FirstOrDefault();
-
-                                // Same channel and note... must be us
-                                if (onNote != null)
-                                {
-                                    int gameTicksDuration = (int)Math.Ceiling((note.AbsoluteTicks - onNote.midiEvent.AbsoluteTicks) * msPerTick / 1000 / 25);
-                                    // Everything was a bit too fast, a ceil should help
-                                    onNotes.Remove(onNote);
-                                    if (onNote.filtered.Data2 > 0) // Still not muted
-                                    {
-                                        onNote.durationTicks = gameTicksDuration;
-                                        notes.Add(onNote);
-                                    }
-
-                                }
-                            }
-                        }
-                        else if (note.MidiMessage.MessageType == MessageType.Meta)
-                        {
-                            MetaMessage mm = note.MidiMessage as MetaMessage;
-                            if (mm.MetaType == MetaType.Tempo)
-                            {
-                                // As for getting the actual Tempo out of it... 
-                                var bytes = mm.GetBytes();
-                                // Apparently it's... backwards?  Different endianness or whatever...
-                                byte[] tempoBytes = new byte[4];
-                                tempoBytes[2] = bytes[0];
-                                tempoBytes[1] = bytes[1];
-                                tempoBytes[0] = bytes[2];
-                                tempo = BitConverter.ToInt32(tempoBytes, 0);
-                            }
-                        }
-                    }
-                }
-
-            // Now sort notes list by the startTicks ... hopefully ascending
-            notes.Sort(new Comparison<SMNote>((n, m) => n.startTicks - m.startTicks));
-            // And make the files
-            Guid guid = Guid.NewGuid();
-            string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "SM Blueprints" + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(currentTrackName) + Path.DirectorySeparatorChar + guid + Path.DirectorySeparatorChar;
-            Directory.CreateDirectory(baseDir);
-
-
-            using (StreamWriter writer = new StreamWriter(baseDir + Path.DirectorySeparatorChar + "blueprint.json"))
-            {
-                writer.Write(getSMBlueprint(notes));
-            }
-            using (StreamWriter writer = new StreamWriter(baseDir + "description.json"))
-            {
-                writer.WriteLine("{");
-                writer.WriteLine("\"description\" : \"" + Path.GetFileNameWithoutExtension(currentTrackName) + " MIDI converted using LuteBot3\",");
-                writer.WriteLine("\"localId\" : \"" + guid + "\",");
-                writer.WriteLine("\"name\" : \"" + Path.GetFileNameWithoutExtension(currentTrackName) + "\",");
-                writer.WriteLine("\"type\" : \"Blueprint\",");
-                writer.WriteLine("\"version\" : 0");
-                writer.WriteLine("}");
-            }
-            Process.Start(baseDir);
-            if (!configForm.IsDisposed)
-                configForm.Dispose();
-        }
-
-        public class SMNote
-        {
-            public int startTicks { get; set; }
-            public int durationTicks { get; set; }
-            public int noteNum { get; set; }
-            public int channel { get; set; }
-            public int velocity { get; set; } // IDK, not yet implemented but could be
-            // Some velocity values seem to not work for some notes, it's weird.  Maybe if they're not a multiple of 5?
-            public Totebots instrument { get; set; }
-            public TotebotTypes flavor { get; set; }
-            public ToteHead totehead { get; set; }
-            public MidiEvent midiEvent { get; set; }
-            public int internalId { get; set; }
-            public ChannelMessage filtered { get; set; }
-            public SMTimer startTimer { get; set; }
-            public SMTimer durationTimer { get; set; }
-        }
-
-        public class SMTimer
-        {
-            private List<SMNote> attachedNotes = new List<SMNote>();
-            public List<SMNote> AttachedNotes { get { return attachedNotes; } }
-            private int durationTicks;
-            public int DurationTicks
-            {
-                get { return durationTicks; }
-                set {
-                    if (value > 40) // 40 game ticks/second
-                    {
-                        DurationSeconds = value / 40;
-                        durationTicks = value % 40;
-                    }
-                    else
-                        durationTicks = value;
-                }
-            }
-            public int DurationSeconds { get; set; } // Auto-sets from ticks
-            public ToteHead Totehead { get; set; }
-            public int InternalId { get; set; }
-            public int Id { get; set; }
-            private List<SMTimer> linkedTimers = new List<SMTimer>();
-            public List<SMTimer> LinkedTimers { get { return linkedTimers; } }
-            public int NorGateId { get; set; }
-            public int AndGateId { get; set; }
-
-        }
-
-        public class ToteHead
-        {
-            public Totebots Instrument { get; set; }
-            public TotebotTypes Flavor { get; set; }
-            public int Id { get; set; }
-            public int Note { get; set; }
-            public int InternalId { get; set; }
-            private List<SMNote> playingNotes = new List<SMNote>();
-            public List<SMNote> PlayingNotes { get { return playingNotes; } }
-            public int SetGateId { get; set; }
-            public int ResetGateId { get; set; }
-            public int OrGateId { get; set; }
-        }
-
-        public void SetToteHeadForNote(SMNote note)
-        {
-            var availableTotes = toteHeads.Where(t => t.Instrument == note.instrument && t.Note == note.noteNum && t.Flavor == note.flavor && (t.PlayingNotes.Count == 0 || t.PlayingNotes.All(pn => pn.startTicks + pn.durationTicks < note.startTicks - 1 || note.startTicks + note.durationTicks < pn.startTicks - 1)));
-            //var availableTotes = new List<ToteHead>();
-            ToteHead tote;
-            if (availableTotes.Count() == 0)
-            {
-                // Make a new Tote and return it
-                tote = new ToteHead() { Flavor = note.flavor, Instrument = note.instrument, Note = note.noteNum, Id = -1, InternalId = toteHeads.Count }; // We mark ID as unset yet
-                toteHeads.Add(tote);
-            }
-            else
-                tote = availableTotes.First();
-            tote.PlayingNotes.Add(note);
-            note.totehead = tote;
-
-        }
-
-        // Meant to be called after a tote is assigned of course
-        public void SetDurationTimerForNote(SMNote note)
-        {
-            //var availableTimers = durationTimers.Where(t => t.Totehead.InternalId == note.totehead.InternalId && t.DurationTicks + t.DurationSeconds*40 == note.durationTicks && t.AttachedNotes.All(an => an.startTicks + an.durationTicks < note.startTicks - 3 || note.startTicks + note.durationTicks < an.startTicks - 3));
-            var availableTimers = new List<SMTimer>(); // Always make a new timer, we can't re-use circuits
-            SMTimer timer;
-            if (availableTimers.Count() == 0)
-            {
-                timer = new SMTimer() { DurationTicks = note.durationTicks, Totehead = note.totehead, InternalId = durationTimers.Count };
-                durationTimers.Add(timer);
-            }
-            else
-                timer = availableTimers.First();
-
-            note.durationTimer = timer;
-            timer.AttachedNotes.Add(note);
-            SetExtensionTimers(timer);
-        }
-
-        // Meant to be called after a tote is assigned of course
-        public void SetStartTimerForNote(SMNote note)
-        { // These will have to be the same note and everything...which is handled by being the same tote
-            // This will basically never have anything in it except in very rare cases
-            var availableTimers = startTimers.Where(t => t.Totehead.InternalId == note.totehead.InternalId && t.DurationTicks + t.DurationSeconds * 40 == note.startTicks && t.AttachedNotes.All(an => an.durationTicks == note.durationTicks));
-            SMTimer timer;
-            if (availableTimers.Count() == 0)
-            {
-                timer = new SMTimer() { DurationTicks = note.startTicks, Totehead = note.totehead, InternalId = startTimers.Count };
-                startTimers.Add(timer);
-            }
-            else
-                timer = availableTimers.First();
-            note.startTimer = timer;
-            timer.AttachedNotes.Add(note);
-            SetExtensionTimers(timer);
-        }
-
-        public void SetExtensionTimers(SMTimer timer)
-        {
-            if (timer.DurationSeconds > 60 || (timer.DurationSeconds == 60 && timer.DurationTicks > 0))
-            {
-                int extensionNum = (timer.DurationSeconds / 60) - 1;
-                SMTimer extension;
-                if (extensionNum >= extensionTimers.Count)
-                {
-                    // Make a new extension timer, linked to by the previous one
-                    // We assume we're only 1 above, if not, a lot of things are probably wrong everywhere - these have to go in order
-                    extension = new SMTimer() { InternalId = extensionTimers.Count, DurationSeconds = 60 };
-                    if (extensionNum > 0)
-                        extensionTimers[extensionNum - 1].LinkedTimers.Add(extension);
-                    extensionTimers.Add(extension);
-                }
-                else
-                {
-                    extension = extensionTimers[extensionNum];
-                }
-                // Link the existing extension timer to this one
-                extension.LinkedTimers.Add(timer);
-                timer.DurationSeconds = timer.DurationSeconds % 60;
-
-            }
-        }
-
-        private List<ToteHead> toteHeads = new List<ToteHead>();
-        private List<SMTimer> durationTimers = new List<SMTimer>();
-        private List<SMTimer> startTimers = new List<SMTimer>();
-        private List<SMTimer> extensionTimers = new List<SMTimer>();
-
-        // Requires that you pass it a sorted list that happens in order
-        private string getSMBlueprint(List<SMNote> notes)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("{\"bodies\":[{\"childs\":[");
-
-            int xAxis = -2;
-            int zAxis = -1;
-            int posX = 0;
-            int posY = 0;
-            int posZ = 0;
-
-            List<List<int>> timerComponents = new List<List<int>>(); // has 1 list for each timer, containing all the Ids that it should connect to
-            timerComponents.Add(new List<int>()); // List 0 is for our switch
-
-            int id = 0; // We'll use and increment this everytime we place a part, easy enough
-
-            foreach (var note in notes)
-            {
-                SetToteHeadForNote(note);
-                SetStartTimerForNote(note);
-                SetDurationTimerForNote(note);
-            }
-
-            // Okay... Our steps, probably in this order
-            // Update/set all our notes' timers and such
-            // Create each totebot-setup with the RS-latches for each totebot in our list
-            // Create each timer in our durationTimer list, linking them to the appropriate totebot NOR gate
-            // Create each timer in our startTimer list, linking them to the appropriate durationTimer
-            // Create each timer in our extensionTimers list, linking them to the appropriate startTimers
-            // Add a button cuz it's cooler than the switch and should work the same, we can't turn them off without adding more chips, linking to start timers that have no extension...
-            // We'll do this by iterating notes in order until we reach ones that are too far, they're linked to the startTimers
-
-            // In this order, we can get to the Ids after making them through our traversals
-            bool first = true;
-            foreach (var tote in toteHeads)
-            {
-                // We need: NOR gate1 linked to OR linked to NOR gate2 linked to OR linked to NOR gate1
-                // Gate2 linked to totehead
-                tote.Id = id++;
-                tote.OrGateId = id++;
-
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                    sb.Append(","); // So we don't have to worry about things missing
-                // Logic OR - Links to totehead, other things link to this
-                sb.Append("{\"color\":\"df7f01\",\"controller\":{\"active\":true,\"controllers\":[{\"id\":" + tote.Id + "}],\"id\":" + tote.OrGateId + ",\"joints\":null,\"mode\":1},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"9f0f56e8-2c31-4d83-996c-d00a9b296c3f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-
-                // Totehead, no link
-                var r = String.Format("{0:X2}", (int)(255 * (tote.Note / 24f))).ToLower();
-                var color = r + r + r; // = ex "a197b9"
-                sb.Append(",{\"color\":\"" + color + "\",\"controller\":{\"audioIndex\":" + (int)tote.Flavor + ",\"controllers\":null,\"id\":" + tote.Id + ",\"joints\":null,\"pitch\":" + (tote.Note / 24f) + ",\"volume\":50},\"pos\":{\"x\":" + (posX) + ",\"y\":" + (posY) + ",\"z\":" + (posZ) + "},\"shapeId\":\"" + TotebotIds[tote.Instrument] + "\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-            }
-            // Now create durationTimers, and link them to a Nor gate
-            foreach (var timer in durationTimers)
-            {
-                timer.Id = id++;
-                timer.NorGateId = id++;
-                timer.AndGateId = id++;
-                // Duration Timer, links to Nor gate
-                sb.Append(",{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":[{\"id\":" + timer.NorGateId + "}],\"id\":" + timer.Id + ",\"joints\":null,\"seconds\":" + timer.DurationSeconds + ",\"ticks\":" + timer.DurationTicks + "},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"8f7fd0e7-c46e-4944-a414-7ce2437bb30f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-                // Logic NOR - Links to and gate
-                sb.Append(",{\"color\":\"df7f01\",\"controller\":{\"active\":true,\"controllers\":[{\"id\":" + timer.AndGateId + "}],\"id\":" + timer.NorGateId + ",\"joints\":null,\"mode\":4},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"9f0f56e8-2c31-4d83-996c-d00a9b296c3f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-                // Logic AND - Links to OR of totebot
-                sb.Append(",{\"color\":\"df7f01\",\"controller\":{\"active\":true,\"controllers\":[{\"id\":" + timer.Totehead.OrGateId + "}],\"id\":" + timer.AndGateId + ",\"joints\":null,\"mode\":0},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"9f0f56e8-2c31-4d83-996c-d00a9b296c3f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-            }
-            // Now create startTimers, and link them to the note's durationTimer.Id and the AND (stored in the note's durationTimer)
-            foreach (var timer in startTimers)
-            {
-                timer.Id = id++;
-                // Start Timer, links to durationTimer of each of its notes
-                sb.Append(",{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":["); // An empty array here seems fine
-                first = true;
-                foreach (var note in timer.AttachedNotes)
-                {
-                    if (first)
-                        first = false;
-                    else
-                        sb.Append(",");
-                    sb.Append("{\"id\":" + note.durationTimer.Id + "},{\"id\":" + note.durationTimer.AndGateId + "}");
-                }
-                // Then finish the timer
-                sb.Append("],\"id\":" + timer.Id + ",\"joints\":null,\"seconds\":" + timer.DurationSeconds + ",\"ticks\":" + timer.DurationTicks + "},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"8f7fd0e7-c46e-4944-a414-7ce2437bb30f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-            }
-            // Now create extensionTimers, and link them to their linkedTimers
-            foreach (var timer in extensionTimers)
-            {
-                timer.Id = id++;
-                sb.Append(",{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":["); // An empty array here seems fine
-                first = true;
-                foreach (var linkedTimer in timer.LinkedTimers)
-                {
-                    if (first)
-                        first = false;
-                    else
-                        sb.Append(",");
-                    sb.Append("{\"id\":" + linkedTimer.Id + "}");
-                } // Then finish the timer
-                sb.Append("],\"id\":" + timer.Id + ",\"joints\":null,\"seconds\":" + timer.DurationSeconds + ",\"ticks\":" + timer.DurationTicks + "},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"8f7fd0e7-c46e-4944-a414-7ce2437bb30f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-            }
-            // And add a switch, linking it to the first extenion and every note's startTimer that has duration 60 seconds or less
-
-            sb.Append(",{\"color\":\"df7f01\",\"controller\":{\"active\":true,\"controllers\":[");
-            List<int> addedIds = new List<int>();
-            first = true;
-            foreach (SMNote note in notes)
-            {
-                if (!addedIds.Contains(note.startTimer.Id) && (note.startTimer.DurationSeconds < 60 || (note.startTimer.DurationSeconds == 60 && note.startTimer.DurationTicks == 0)))
-                {
-                    if (first)
-                        first = false;
-                    else
-                        sb.Append(",");
-                    addedIds.Add(note.startTimer.Id);
-                    sb.Append("{\"id\":" + note.startTimer.Id + "}");
-                }
-                else // Should be in order, so break once we're past them
-                    break;
-            }
-            // And to the first extensionTimer, if there are any
-            if (extensionTimers.Count > 0)
-                sb.Append(",{\"id\":" + extensionTimers[0].Id + "}");
-            sb.Append("],\"id\":" + (id++) + ",\"joints\":null},\"pos\":{\"x\":0,\"y\":0,\"z\":1},\"shapeId\":\"7cf717d7-d167-4f2d-a6e7-6b2c70aa3986\",\"xaxis\":3,\"zaxis\":-1}");
-
-
-            // And finish the json
-            sb.Append("]}],\"version\":3}");
-            return sb.ToString();
-            /*
-
-
-
-
-
-
-
-            for (int i = 0; i < notes.Count; i++)
-            {
-                SMNote note = notes[i];
-
-                int startSeconds = 0;
-                if (note.startTicks > 40) // 40 game ticks/second
-                {
-                    startSeconds = note.startTicks / 40;
-                    note.startTicks = note.startTicks % 40;
-                }
-
-                startSeconds -= 60 * (timerComponents.Count - 1); // Remove 60 seconds for each timer we've already made
-
-                if (startSeconds >= 60)
-                {
-                    timerComponents.Add(new List<int>());
-                    startSeconds -= 60;
-                    // We've hit the limit for how much our timers can delay
-                    // Increase to the next timer and decrement a minute
-                }
-
-                // timerComponents should never be empty... 
-                timerComponents[timerComponents.Count - 1].Add(i * 5);
-
-                double pitch = note.noteNum / 24f; // 25 notes, we have 3 C's oddly enough... 
-                                                   // Build our objects... 
-
-                // Here's our base Totebot head, id i*5
-                //sb.Append("{\"color\":\"49642d\",\"controller\":{\"audioIndex\":" + (int)note.flavor + ",\"controllers\":null,\"id\":" + (i * 5) + ",\"joints\":null,\"pitch\":" + pitch + ",\"volume\":100},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"" + TotebotIds[note.instrument] + "\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "},");
-
-
-
-
-                
-
-
-
-
-
-                // Logic (And) - Links to Totebot head, id i*5+1
-                sb.Append("{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":[{\"id\":" + totehead.Id + "}],\"id\":" + (i * 5 + 1) + ",\"joints\":null,\"mode\":0},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"9f0f56e8-2c31-4d83-996c-d00a9b296c3f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "},");
-                // Logic (Nor) - Links to Logic And, id i*5+2
-                sb.Append("{\"color\":\"df7f01\",\"controller\":{\"active\":true,\"controllers\":[{\"id\":" + (i * 5 + 1) + "}],\"id\":" + (i * 5 + 2) + ",\"joints\":null,\"mode\":4},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"9f0f56e8-2c31-4d83-996c-d00a9b296c3f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "},");
-                // Timer - How long to play current note - links to our Nor, id i*5+3
-                sb.Append("{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":[{\"id\":" + (i * 5 + 2) + "}],\"id\":" + (i * 5 + 3) + ",\"joints\":null,\"seconds\":0,\"ticks\":" + note.durationTicks + "},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"8f7fd0e7-c46e-4944-a414-7ce2437bb30f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "},");
-                // Timer - How long to delay before playing our note - links to our DurationTimer and our And, id i*5+4
-                sb.Append("{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":[{\"id\":" + (i * 5 + 1) + "},{\"id\":" + (i * 5 + 3) + "}],\"id\":" + (i * 5 + 4) + ",\"joints\":null,\"seconds\":" + startSeconds + ",\"ticks\":" + note.startTicks + "},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"8f7fd0e7-c46e-4944-a414-7ce2437bb30f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "},");
-            }
-            // Slap a switch on at the end
-            // And all the intermediate timers we need
-
-            // Switch - links to every start Timer at i*5+4
-            sb.Append("{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":[");
-            for (int i = 0; i < timerComponents[0].Count; i++) // Guaranteed to run at least once
-            {
-                if (i != 0)
-                    sb.Append(",");
-                sb.Append("{\"id\":" + (timerComponents[0][i] + 4) + "}"); // timerComponents is our base, +4 is our start Timer that it links to
-            }
-            // TODO: Then also links to every And no matter what so it actually works
-            for(int i = 0; i < notes.Count; i++)
-            {
-                // These are id i*5+1
-                sb.Append(",{\"id\":" + (i * 5 + 1) + "}");
-            }
-
-            // Link it to only the first timer we're about to make, if any, id notes.Count*5+1
-            if (timerComponents.Count > 1)
-                sb.Append(",{\"id\":" + (notes.Count * 5 + 1) + "}");
-            // Finish the switch
-            sb.Append("],\"id\":" + (notes.Count * 5) + ",\"joints\":null},\"pos\":{\"x\":0,\"y\":0,\"z\":1},\"shapeId\":\"7cf717d7-d167-4f2d-a6e7-6b2c70aa3986\",\"xaxis\":3,\"zaxis\":-1}");
-
-            // Make any timers
-            for (int i = 1; i < timerComponents.Count; i++)
-            {
-                sb.Append(",{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":[");
-                // Iterate the inner list
-                bool first = true;
-                foreach (int j in timerComponents[i])
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                        sb.Append(",");
-                    sb.Append("{\"id\":" + (j + 4) + "}"); // Attach to the timer of the target
-                }
-                // If there's another timer, link to it
-                if (i < timerComponents.Count - 1)
-                    sb.Append(",{\"id\":" + (notes.Count * 5 + i + 1) + "}");
-                // Finish the timer for 60 seconds
-                sb.Append("],\"id\":" + (notes.Count * 5 + i) + ",\"joints\":null,\"seconds\":60,\"ticks\":0},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"8f7fd0e7-c46e-4944-a414-7ce2437bb30f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-            }
-
-            // Make the totebot heads and OR gates
-            // Currently everything points to the totebot.Id, which we'll actually make the OR gates
-            // And then heads themselves get Ids starting at notes.Count*5 + timerComponents.Count
-
-            var random = new Random();
-            for (int i = 0; i < toteHeads.Count; i++)
-            {
-                int headId = notes.Count * 5 + timerComponents.Count + i;
-                var totehead = toteHeads[i];
-                // Make an OR gate
-                // Logic (Or) - Links to Totebot head
-                sb.Append(",{\"color\":\"df7f01\",\"controller\":{\"active\":false,\"controllers\":[{\"id\":" + headId + "}],\"id\":" + totehead.Id + ",\"joints\":null,\"mode\":1},\"pos\":{\"x\":" + posX + ",\"y\":" + posY + ",\"z\":" + posZ + "},\"shapeId\":\"9f0f56e8-2c31-4d83-996c-d00a9b296c3f\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-
-                // Make the head.  You can actually see the color poke through when it plays
-                // So let's make the color black to white dependent on the pitch
-                
-                var color = String.Format("{0:X6}", 0x1000000 * totehead.Note / 24f).ToLower(); // = ex "a197b9"
-                sb.Append(",{\"color\":\"" + color + "\",\"controller\":{\"audioIndex\":" + (int)totehead.Flavor + ",\"controllers\":null,\"id\":" + headId + ",\"joints\":null,\"pitch\":" + (totehead.Note / 24f) + ",\"volume\":50},\"pos\":{\"x\":" + posX + ",\"y\":" + (posY) + ",\"z\":" + (posZ) + "},\"shapeId\":\"" + TotebotIds[totehead.Instrument] + "\",\"xaxis\":" + xAxis + ",\"zaxis\":" + zAxis + "}");
-            }
-
-
-            sb.Append("]}],\"version\":3}");
-            return sb.ToString();
-            */
         }
 
         private void authToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2010,13 +939,53 @@ ModListWidgetStayTime=5.0";
 
         private async void checkInstallUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CheckUpdates(true);
+            await CheckUpdates(true); // .ConfigureAwait(false)...? Don't want to do it rn cuz I'm in the middle of a breaking refactor, don't want this breaking too
         }
 
         private void setMordhauPathToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MordhauPakPath = GetMordhauPathFromPrompt();
             ConfigManager.SetProperty(PropertyItem.MordhauPakPath, MordhauPakPath);
+        }
+
+        private void importPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            partitionsForm.importPartitions_Click(sender, e);
+        }
+
+        private void exportPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            partitionsForm.exportPartitionsToolStripMenuItem_Click(sender, e);
+        }
+
+        private void exportMidisToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            partitionsForm.exportMidisToolStripMenuItem_Click(sender, e);
+        }
+
+        private void openSavFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            partitionsForm.openSaveFolder_Click(sender, e);
+        }
+
+        private void saveMultipleSongsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            partitionsForm.saveMultipleSongsToolStripMenuItem_Click(sender, e);
+        }
+
+        private void trainToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            partitionsForm.trainToolStripMenuItem_Click(sender, e);
+        }
+
+        private void buttonConsoleToggle_Click(object sender, EventArgs e)
+        {
+            splitContainer1.Panel2Collapsed = !splitContainer1.Panel2Collapsed;
+        }
+
+        private void openMidiFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            partitionsForm.openMidiFolderToolStripMenuItem_Click(sender, e);
         }
     }
 }

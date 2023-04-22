@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
@@ -18,21 +19,16 @@ namespace LuteBot.UI
     public partial class TrackSelectionForm : Form
     {
         TrackSelectionManager trackSelectionManager;
-        MordhauOutDevice _mordhauOut;
-        RustOutDevice _rustOut;
         LuteBotForm mainForm;
 
         bool initializing = true;
 
         // We need only one out device, might as well use rust, but take both for now cuz why not, feels unfair
         // Though they both get updated with the same values at the same time, for what we're doing
-        public TrackSelectionForm(TrackSelectionManager trackSelectionManager, MordhauOutDevice mordhauOut, RustOutDevice rustOut, LuteBotForm mainForm)
+        public TrackSelectionForm(TrackSelectionManager trackSelectionManager, LuteBotForm mainForm)
         {
-            _mordhauOut = mordhauOut;
-            _rustOut = rustOut;
             this.mainForm = mainForm;
             this.trackSelectionManager = trackSelectionManager;
-            trackSelectionManager.TrackChanged += new EventHandler(TrackChangedHandler);
             this.Load += TrackSelectionForm_Load;
             InitializeComponent();
 
@@ -48,12 +44,11 @@ namespace LuteBot.UI
 
 
             InitLists();
-            trackSelectionManager.autoLoadProfile = AutoActivateCheckBox.Checked;
+            trackSelectionManager.autoLoadProfile = true;
             typeof(Panel).InvokeMember("DoubleBuffered", BindingFlags.SetProperty
             | BindingFlags.Instance | BindingFlags.NonPublic, null,
             OffsetPanel, new object[] { true }); // Internet suggested this... 
 
-            textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
 
             IO.KB.ActionManager.NotePlayed += _mordhauOut_notePlayed;
 
@@ -260,7 +255,7 @@ namespace LuteBot.UI
                 selectedNotes.Clear();
                 OffsetPanel.Refresh();
             }
-            else if(keyData == Keys.Insert)
+            else if (keyData == Keys.Insert)
             {
                 foreach (var note in selectedNotes)
                     note.active = true;
@@ -268,7 +263,7 @@ namespace LuteBot.UI
                 selectedNotes.Clear();
                 OffsetPanel.Refresh();
             }
-            return base.ProcessCmdKey(ref msg, keyData); 
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         // This mouse stuff is going to suck
@@ -345,7 +340,7 @@ namespace LuteBot.UI
                 //        OffsetPanel.Refresh();
                 //}
             }
-            else if(rectDragging)
+            else if (rectDragging)
             {
                 lastMousePosition = e.Location;
                 if (panel1.HorizontalScroll.Value > Int16.MaxValue || e.X < 0) // It's a uint16, can overflow easily, this gives us about double the range but could be a problem still... 
@@ -359,7 +354,7 @@ namespace LuteBot.UI
                 lastMousePosition = e.Location;
                 if (panel1.HorizontalScroll.Value > Int16.MaxValue || e.X < 0) // It's a uint16, can overflow easily, this gives us about double the range but could be a problem still... 
                 {
-                    lastMousePosition = new Point( (int)e.X & 0xffff, e.Y);
+                    lastMousePosition = new Point((int)e.X & 0xffff, e.Y);
                 }
                 List<int> hoveringChannels = new List<int>();
                 // Can I really iterate every note rect for collisions every move?  I can try anyway
@@ -382,7 +377,7 @@ namespace LuteBot.UI
                 // or if they were already hovering last tick, flip it?
                 var refresh = false;
                 //if (hoverChannels.Count > 0)
-                    hoveringChannels.Reverse();
+                hoveringChannels.Reverse();
                 if (hoveringChannels.Count != hoverChannels.Count || !hoveringChannels.SequenceEqual(hoverChannels))
                 {
                     refresh = true;
@@ -393,7 +388,7 @@ namespace LuteBot.UI
 
             }
 
-            
+
 
             //OffsetPanel.Refresh(); // See if this is laggy
             // Yeah a little
@@ -413,7 +408,7 @@ namespace LuteBot.UI
                 rectDragging = false;
                 // TODO: If we stopped at negative sizes, do I need to handle that?
                 Rectangle selectionArea = new Rectangle(Math.Min(rectDragStart.X, e.Location.X), Math.Min(rectDragStart.Y, e.Location.Y), Math.Abs(e.Location.X - rectDragStart.X), Math.Abs(e.Location.Y - rectDragStart.Y));
-                foreach(var note in visibleNotes)
+                foreach (var note in visibleNotes)
                 {
                     if (selectionArea.LooseContains(note.pianoRect))
                     {
@@ -612,14 +607,14 @@ namespace LuteBot.UI
             //foreach (var note in allNotes.OrderBy(n => n.channel).OrderBy(n => hoverChannels.Contains(n.channel) ? hoverChannels.Count-hoverChannels.IndexOf(n.channel) : -1))
 
             // TODO: find out why in one rare case, we don't have a channel that it says we should have.  I think it's related to loading old files
-            foreach(var note in visibleNotes.OrderBy(n => hoverChannels.Contains(n.channel) ? hoverChannels.Count - hoverChannels.IndexOf(n.channel) : -1).Where(n => trackSelectionManager.MidiChannels.ContainsKey(n.channel)))
+            foreach (var note in visibleNotes.OrderBy(n => hoverChannels.Contains(n.channel) ? hoverChannels.Count - hoverChannels.IndexOf(n.channel) : -1).Where(n => trackSelectionManager.MidiChannels.ContainsKey(n.channel)))
             {
 
                 var channel = trackSelectionManager.MidiChannels[note.channel];
                 var channelRect = note.pianoRect;
                 if (channelRect == Rectangle.Empty)
                     channelRect = GetNoteRect(note);
-                    
+
 
                 if (!channelColors.ContainsKey(channel.Id))
                 {
@@ -675,7 +670,7 @@ namespace LuteBot.UI
                     continue;
                 var labelSize = g.MeasureString(channel.Name, labelFont);
 
-                Rectangle channelLabelRect = new Rectangle((int)(lastMousePosition.X - labelSize.Width/2 - 2), (int)(lastMousePosition.Y - (pianoRowHeight*1.5f) - ((labelSize.Height+10)*(numHovers+1))), (int)(labelSize.Width+4), (int)(labelSize.Height + 4));
+                Rectangle channelLabelRect = new Rectangle((int)(lastMousePosition.X - labelSize.Width / 2 - 2), (int)(lastMousePosition.Y - (pianoRowHeight * 1.5f) - ((labelSize.Height + 10) * (numHovers + 1))), (int)(labelSize.Width + 4), (int)(labelSize.Height + 4));
                 Rectangle channelLabelBgRect = new Rectangle(channelLabelRect.X + 1, channelLabelRect.Y + 1, channelLabelRect.Width + 1, channelLabelRect.Height + 1);
 
                 g.FillRectangle(shadowBrush, channelLabelBgRect);
@@ -718,7 +713,7 @@ namespace LuteBot.UI
             //g.FillRectangle(Brushes.White, pianoX, 0, pianoWidth, maxHeight);
 
             // Fill in a greenish rectangle where the instrument goes
-            
+
             int noteCount = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount); //-1 because if noteCount is 60 and start is 0, the high note is 59
             int highest = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId) + ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote) + noteCount - 1;
 
@@ -1064,7 +1059,7 @@ namespace LuteBot.UI
 
         private IEnumerable<MidiNote> GetNotesWithin(Rectangle targetRect, bool forceRegenerate)
         {
-            
+
             if (allNotes.Length == 0)
                 return new MidiNote[0];
             /*
@@ -1190,7 +1185,7 @@ namespace LuteBot.UI
 
             // This was fucking annoying and isn't even that bad at performance if I do a straight linear one
             List<MidiNote> result = new List<MidiNote>();
-            foreach(var note in allNotes)
+            foreach (var note in allNotes)
             {
                 if (forceRegenerate || note.pianoRect == Rectangle.Empty)
                     note.pianoRect = GetNoteRect(note);
@@ -1200,7 +1195,7 @@ namespace LuteBot.UI
             return result;
         }
 
-        
+
 
         private Rectangle GetNoteRect(MidiNote note)
         {
@@ -1217,7 +1212,7 @@ namespace LuteBot.UI
         private int maxNoteLength = 0;
         private void ReloadNotes(bool forceRefresh = false)
         {
-            allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks.ContainsKey(n.track) &&  trackSelectionManager.MidiTracks[n.track].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
+            allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks.ContainsKey(n.track) && trackSelectionManager.MidiTracks[n.track].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
                 .ToArray();
             // Give it an arbitrary order to make things consistent for draw order
 
@@ -1236,8 +1231,7 @@ namespace LuteBot.UI
         {
             SuspendLayout();
             initializing = true;
-            textBoxNotesForChords.Text = trackSelectionManager.NumChords.ToString();
-            textBoxNotesForChords.Enabled = !ConfigManager.GetBooleanProperty(PropertyItem.ForbidsChords);
+            songLabel.Text = Path.GetFileNameWithoutExtension(trackSelectionManager.Player.fileName);
 
             TrackListBox.Items.Clear();
             ChannelsListBox.Items.Clear();
@@ -1282,16 +1276,17 @@ namespace LuteBot.UI
             initializing = false;
         }
 
-        private void TrackChangedHandler(object sender, EventArgs e)
+        public void TrackChangedHandler(object sender, EventArgs e)
         {
-            if(!LuteBotForm.skipUI)
-                InitLists();
+            InitLists();
         }
 
         private void TrackSelectionForm_Closing(object sender, FormClosingEventArgs e)
         {
             WindowPositionUtils.UpdateBounds(PropertyItem.TrackSelectionPos, new Point() { X = Left, Y = Top });
             ConfigManager.SaveConfig();
+            e.Cancel = true;
+            Hide();
         }
 
         private void ChannelListBox_ItemChecked(object sender, ItemCheckEventArgs e)
@@ -1307,11 +1302,19 @@ namespace LuteBot.UI
             }
         }
 
-        private void SongProfileSaveButton_Click(object sender, EventArgs e)
+        private async void SongProfileSaveButton_Click(object sender, EventArgs e)
         {
             if (trackSelectionManager.FileName != null)
             {
                 trackSelectionManager.SaveTrackManager();
+                try
+                {
+                    await LuteBotForm.luteBotForm.partitionsForm.ShowPartitionSaveForm().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await LuteBotForm.luteBotForm.HandleError(ex, "Failed to save partition").ConfigureAwait(false);
+                }
             }
         }
 
@@ -1322,12 +1325,6 @@ namespace LuteBot.UI
                 trackSelectionManager.LoadTrackManager();
                 InitLists();
             }
-        }
-
-        private void AutoActivateCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            trackSelectionManager.autoLoadProfile = AutoActivateCheckBox.Checked;
-            Invalidate();
         }
 
         private void TrackListBox_ItemCheck(object sender, ItemCheckEventArgs e)
@@ -1384,16 +1381,14 @@ namespace LuteBot.UI
             {
                 channel.offset = 0;
             }
-            Invalidate();
-        }
-
-        private void textBoxNotesForChords_TextChanged(object sender, EventArgs e)
-        {
-            if (int.TryParse(textBoxNotesForChords.Text, out int v))
+            foreach (var track in trackSelectionManager.MidiTracks.Values)
             {
-                trackSelectionManager.NumChords = v;
+                track.offset = 0;
             }
+            Invalidate();
 
+            pianoPanel.Refresh();
+            OffsetPanel.Refresh();
         }
 
         private void button2_Click(object sender, EventArgs e)

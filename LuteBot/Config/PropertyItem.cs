@@ -63,6 +63,7 @@
         LiveMidiListen,
         PartitionListPos,
 
-        MordhauPakPath
+        MordhauPakPath,
+        OverwritePartitions
     }
 }
