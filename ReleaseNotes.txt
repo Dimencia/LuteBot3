@@ -1,6 +1,7 @@
 Version 3.6.0
 
 - Warning: This is currently a 'Beta' (LuteBot can't handle a different versioning style though), it includes major changes that may have accidentally broken obscure things.  It also is missing a few extra things I wanted to add.  Use with caution and wait for the next update for probably lots of bugfixes
+- But, hopefully it helps the new Epic players in the meantime
 
 - Warning: Old partitions will no longer play correctly on flute.  Select all your songs and use the new 'Resave' button to reload them all with the new settings
 
