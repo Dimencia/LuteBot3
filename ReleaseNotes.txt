@@ -31,3 +31,7 @@ Details:
 - Swapped MIDI parsing engine to use DryWetMidi (should be more consistent and with less lockups and failures)
 - Track Filtering now scales based on tempo to show 30s by default
 - Maybe fixed concurrency issue when training the AI with more than one CPU Core
+- Fixed many potential memory leaks in LuteBot
+- Partitions are loaded in Track Selection when a single one is selected
+- Guild library form now supports adding multiple songs at once
+- Guild library form has better error reporting

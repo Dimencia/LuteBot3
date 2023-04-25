@@ -114,7 +114,7 @@
             this.buttonPlay.Name = "buttonPlay";
             this.buttonPlay.Size = new System.Drawing.Size(123, 28);
             this.buttonPlay.TabIndex = 6;
-            this.buttonPlay.Text = "Load";
+            this.buttonPlay.Text = "Save to LuteMod";
             this.buttonPlay.UseVisualStyleBackColor = true;
             this.buttonPlay.Click += new System.EventHandler(this.buttonPlay_Click);
             // 

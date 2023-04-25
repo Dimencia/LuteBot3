@@ -84,17 +84,17 @@ namespace LuteBot.Core
                     }
                     else
                     {
-                        new UI.PopupForm("Version Check Failed", $"Could not determine the latest LuteBot version",
-                    $"Connection to Github timed out\nYou may want to manually check for an updated version at the following link", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                        using (var popup = new UI.PopupForm("Version Check Failed", $"Could not determine the latest LuteBot version",
+                    $"Connection to Github timed out\nYou may want to manually check for an updated version at the following link", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }))
+                        popup.ShowDialog();
                     }
                 }
             }
             catch (Exception ex)
             {
-                new UI.PopupForm("Version Check Failed", $"Could not determine the latest LuteBot version",
-                    $"You are offline, or something is wrong\nYou may want to manually check for an updated version at the following link\n\n{ex.Message}\n{ex.StackTrace}", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                using (var popup = new UI.PopupForm("Version Check Failed", $"Could not determine the latest LuteBot version",
+                    $"You are offline, or something is wrong\nYou may want to manually check for an updated version at the following link\n\n{ex.Message}\n{ex.StackTrace}", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }))
+                    popup.ShowDialog();
             }
             return null;
         }

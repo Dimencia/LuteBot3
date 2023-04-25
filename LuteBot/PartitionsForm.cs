@@ -51,19 +51,21 @@ namespace LuteBot
 
             if (!LuteBotForm.luteBotForm.IsLuteModInstalled())
             {
-                var popup = new PopupForm("Install LuteMod", "Would you like to update/install LuteMod?", "You need this to play music.\n\nIf you already have a working LuteMod installed, this means there's an important update\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
+                using (var popup = new PopupForm("Install LuteMod", "Would you like to update/install LuteMod?", "You need this to play music.\n\nIf you already have a working LuteMod installed, this means there's an important update\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
                 new Dictionary<string, string>() {
                     { "What is LuteMod", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod" } ,
                     { "LuteMod mod.io page", "https://mordhau.mod.io/lutemod" },
                     { "Autoloader mod.io page", "https://mordhau.mod.io/clientside-mod-autoloader" },
                     { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
                     { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" },
-                }, MessageBoxButtons.YesNo);
-                popup.ShowDialog(this);
-                if (popup.DialogResult == DialogResult.Yes)
-                    LuteBotForm.luteBotForm.InstallLuteMod();
-                else
-                    Hide();
+                }, MessageBoxButtons.YesNo))
+                {
+                    popup.ShowDialog(this);
+                    if (popup.DialogResult == DialogResult.Yes)
+                        LuteBotForm.luteBotForm.InstallLuteMod();
+                    else
+                        Hide();
+                }
             }
             RefreshPartitionList();
         }
@@ -272,7 +274,7 @@ namespace LuteBot
 
         private async Task SelectedItemsChanged()
         {
-            await LuteBotForm.luteBotForm.InvokeAsync(() =>
+            await LuteBotForm.luteBotForm.InvokeAsync(async () =>
             {
                 if (listBoxPartitions.SelectedIndices.Count == 0)
                 {
@@ -287,6 +289,8 @@ namespace LuteBot
                     reloadSelectedButton.Enabled = true;
                     exportSelectedButton.Enabled = true;
                     renameSelectedButton.Enabled = true;
+                    var filePath = Path.Combine(partitionMidiPath, (string)(listBoxPartitions.SelectedItems[0]) + ".mid");
+                    await LuteBotForm.luteBotForm.LoadFile(filePath).ConfigureAwait(false);
                 }
                 else
                 {
@@ -752,7 +756,7 @@ namespace LuteBot
             }
         }
 
-        private async Task AutoSaveFiles(IEnumerable<string> filenames)
+        public async Task AutoSaveFiles(IEnumerable<string> filenames)
         {
             string warnings = "";
             await LuteBotForm.luteBotForm.InvokeAsync(() =>

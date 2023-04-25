@@ -16,6 +16,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using CsvHelper;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace LuteBot.UI
 {
@@ -38,13 +39,13 @@ namespace LuteBot.UI
             searchBox.TextChanged += SearchBox_TextChanged;
             searchBox.KeyPress += SearchBox_KeyPress;
 
-            Directory.CreateDirectory(Path.Combine(appdata_PATH,songs_FOLDER));
+            Directory.CreateDirectory(Path.Combine(appdata_PATH, songs_FOLDER));
 
-            if (File.Exists(Path.Combine(appdata_PATH,log_FILENAME)))
+            if (File.Exists(Path.Combine(appdata_PATH, log_FILENAME)))
             {
                 //File.Copy(appdata_PATH + log_FILENAME, appdata_PATH + log_FILENAME + DateTime.Now.ToString("MM.dd-HH.mm.ss") + ".backup");
                 // No need to keep backups of the log files really
-                File.Delete(Path.Combine(appdata_PATH,log_FILENAME));
+                File.Delete(Path.Combine(appdata_PATH, log_FILENAME));
             }
         }
 
@@ -184,7 +185,7 @@ namespace LuteBot.UI
                 {
                     lock (locker)
                         using (StreamWriter writer =
-                            File.AppendText(Path.Combine(appdata_PATH,log_FILENAME)))
+                            File.AppendText(Path.Combine(appdata_PATH, log_FILENAME)))
                         {
                             writer.WriteLine(message);
                         }
@@ -209,68 +210,72 @@ namespace LuteBot.UI
         }
 
 
-        private void downloadSong(GuildSong song, bool play)
+        private async Task downloadSongs(IEnumerable<GuildSong> songs)
         {
-            // Downloads midi from the URL and plays, or adds to playlist, as appropriate
-            string path = Path.Combine(appdata_PATH,songs_FOLDER,song.filename);
-            if (File.Exists(path)) // No need to redownload if we have it
+            List<string> paths = new List<string>();
+            foreach (var song in songs)
             {
-                if (play)
-                    PlaySong(path);
-                return;
-            }
+                // Downloads midi from the URL and plays, or adds to playlist, as appropriate
+                string path = Path.Combine(appdata_PATH, songs_FOLDER, song.filename);
+                if (File.Exists(path)) // No need to redownload if we have it
+                {
+                    paths.Add(path);
+                    continue;
+                }
 
-            if (song.source_url == null || song.source_url.Equals(string.Empty))
-            {
-                // Try the CDN
-                song.source_url = $"https://storage.googleapis.com/bgml/mid/{song.checksum}.mid";
-            }
+                if (song.source_url == null || song.source_url.Equals(string.Empty))
+                {
+                    // Try the CDN
+                    song.source_url = $"https://storage.googleapis.com/bgml/mid/{song.checksum}.mid";
+                }
 
-            // We need to pass the song when download is completed
-            // So we'll do a Task.Run that handles that... hopefully
-            Task.Run(() =>
-            {
-                using (WebClient wc = new WebClient())
+                // We need to pass the song when download is completed
+                // So we'll do a Task.Run that handles that... hopefully
+
+                using (HttpClient wc = new HttpClient())
                 {
                     try
                     {
-                        wc.DownloadFile(song.source_url, path);
-                        if (play)
-                            PlaySong(path);
+                        using (var stream = await wc.GetStreamAsync(song.source_url).ConfigureAwait(false))
+                        using (var fs = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None, 4096, true))
+                        {
+                            await stream.CopyToAsync(fs).ConfigureAwait(false);
+                            await fs.FlushAsync().ConfigureAwait(false);
+                        }
+                        paths.Add(path);
                     }
                     catch (Exception e)
                     {
-                        Log(e.StackTrace);
-                        Log(e.Message);
+                        await mainForm.HandleError(e, $"Failed to download/add {song.filename} from {song.source_url}").ConfigureAwait(false);
                         Log($"Failed to download/add {song.filename}");
                     }
                 }
-            });
+            }
+            await PlaySongs(paths).ConfigureAwait(false);
         }
 
-        private void downloadAndPlaySong(GuildSong song)
+        private async Task downloadAndPlaySongs(IEnumerable<GuildSong> songs)
         {
-            downloadSong(song, true);
+            await downloadSongs(songs).ConfigureAwait(false);
         }
 
-        private void downloadAndAddSong(GuildSong song)
+
+        private async Task PlaySongs(IEnumerable<string> paths)
         {
-            downloadSong(song, false);
+            await mainForm.partitionsForm.AutoSaveFiles(paths).ConfigureAwait(false);
         }
 
 
-        private async Task PlaySong(string path)
-        {
-            await mainForm.LoadFile(path).ConfigureAwait(false);
-        }
-
-
-        private void buttonPlay_Click(object sender, EventArgs e)
+        private async void buttonPlay_Click(object sender, EventArgs e)
         {
             if (songGrid.SelectedRows.Count > 0)
             {
-                GuildSong selectedSong = (GuildSong)songGrid.SelectedRows[0].DataBoundItem;
-                downloadAndPlaySong(selectedSong);
+                var selected = new List<GuildSong>();
+                foreach (DataGridViewRow s in songGrid.SelectedRows)
+                {
+                    selected.Add(s.DataBoundItem as GuildSong);
+                }
+                await downloadAndPlaySongs(selected);
             }
         }
     }
