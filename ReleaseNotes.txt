@@ -1,17 +1,10 @@
+Version 3.6.2
+
+- Fixed issue where neural network would not get scaled values if rating Tracks instead of Channels
+
 Version 3.6.1
 
-- Fixed startup crash for new users
-- Updated Resave to overwrite without asking
-- Fixed issue that Resave would remove spaces
-- Fixed potential issue causing midis to not be saved to folder when creating a partition
-- Fixed incorrect numbers and percentages being displayed in Neural Network training
-- Added Neural Network pause/resume during training; it saves when paused
-- Improved training model to include more data (if you have your own trained model, it won't work and you'll need to re-train)
-- Added menu option to Resave all and to resave all with forced reordering (I suggest using this if you already resaved, to resave again with the improved Neural Network)
-- Added crash reporting back
-- LuteMod 2.61
-	- Re-enabled loading of voice config settings
-	- Fixed issue where playing sometimes pauses itself immediately
+- Bugfixes, improved Neural Network
 
 Version 3.6.0
 

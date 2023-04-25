@@ -95,12 +95,12 @@ namespace LuteBot.UI
 
             var neural = new NeuralNetwork(layers, activations);
 
-            
+
 
 
             int numIterations = 50000;
 
-            var candidates = neuralTrainingCandidates.Select(s => s.SelectMany(c => c.tickNotes.Values.Select(nl => nl.OrderBy(n => n.note).Where((n,i) => (i == 0 || i == c.tickNotes.Count-1 || (c.tickNotes.Count > 2 && i == c.tickNotes.Count/2)) && n.channel != 9 && n.length > 0 && n.timeLength >= 0.005f))).SelectMany(nl => nl.GroupBy(n => n.note).Select(ng => ng.FirstOrDefault())).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray()).Where(nl => nl.Count() > numNotes).ToArray();
+            var candidates = neuralTrainingCandidates.Select(s => s.SelectMany(c => c.tickNotes.Values.Select(nl => nl.OrderBy(n => n.note).Where((n, i) => (i == 0 || i == c.tickNotes.Count - 1 || (c.tickNotes.Count > 2 && i == c.tickNotes.Count / 2)) && n.channel != 9 && n.length > 0 && n.timeLength >= 0.005f))).SelectMany(nl => nl.GroupBy(n => n.note).Select(ng => ng.FirstOrDefault())).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray()).Where(nl => nl.Count() > numNotes).ToArray();
 
             for (int iteration = 0; iteration < numIterations; iteration++)
             {
@@ -164,7 +164,7 @@ namespace LuteBot.UI
             int[] pentatonics = new int[] { 0, 2, 4, 7, 9 };
             int targetIndex = (int)((original % 12) / 12f * pentatonics.Length);
 
-            return (original - original%12) + pentatonics[targetIndex];
+            return (original - original % 12) + pentatonics[targetIndex];
         }
 
 
@@ -176,7 +176,7 @@ namespace LuteBot.UI
             var activations = new string[] { "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh" };
             var neural = new NeuralNetwork(layers, activations);
 
-            
+
 
             neural.Load("TestSongMaker");
 
@@ -247,8 +247,8 @@ namespace LuteBot.UI
 
                 //int noteNum = GetPentatonicNote((int)Math.Floor(result[0] * 64f + 64));
                 int noteNum = (int)Math.Floor(result[0] * 64f + 64);
-                var durationTime = Math.Max(Math.Round((result[2] + 1)/1f),0.1f);
-                
+                var durationTime = Math.Max(Math.Round((result[2] + 1) / 1f), 0.1f);
+
                 int durationTicks = (int)(durationTime * ticksPerSecond);
                 //ticksPerSecond = (float)(durationTicks / durationTime);
 
@@ -272,7 +272,7 @@ namespace LuteBot.UI
                     totalLength += deltaTick / ticksPerSecond;
                     notesThisTick = 0;
                 }
-                
+
                 //position = Math.Max(0, position - position % 20);// rounding...?
 
                 track.Insert(position, new Sanford.Multimedia.Midi.ChannelMessage(Sanford.Multimedia.Midi.ChannelCommand.NoteOn, 0, noteNum, 100));
@@ -284,9 +284,9 @@ namespace LuteBot.UI
                 result[2] = (float)Math.Max(Math.Min((Math.Max(durationTime, 0.005f) - 1f), 1), -1);
 
 
-                inputs = (inputs.Skip(3).Take(inputs.Length-3-1)
-                    .Concat(result)).Select((i,index) => (index-1)%3 == 0 ? Math.Max(i-inputs[1],0) : i)
-                    .Concat(new float[] { totalLength/ targetSecondsLength }).ToArray();
+                inputs = (inputs.Skip(3).Take(inputs.Length - 3 - 1)
+                    .Concat(result)).Select((i, index) => (index - 1) % 3 == 0 ? Math.Max(i - inputs[1], 0) : i)
+                    .Concat(new float[] { totalLength / targetSecondsLength }).ToArray();
             }
             while (totalLength < targetSecondsLength);
 
@@ -435,10 +435,10 @@ namespace LuteBot.UI
                 int numActualTestsCorrect = 0;
 
 
-//#if DEBUG
-//                TrainMusicMaker(neuralCandidates);
-//                return;
-//#endif
+                //#if DEBUG
+                //                TrainMusicMaker(neuralCandidates);
+                //                return;
+                //#endif
 
 
                 BeginInvoke((MethodInvoker)delegate
@@ -456,74 +456,73 @@ namespace LuteBot.UI
                 {
                     costTotal = 0;
                     object songCostLock = new object();
-                    //foreach (var song in neuralTrainingCandidates)
-                    Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
-                    {
-
-                        float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
-                        var songCostTotal = 0f;
-                        foreach (var channel in song)
-                        {
-                            // So for the 'recurrent memory' implementation, we have memory_count*noteParams*2 inputs; 16 notes, each time we process another note, we push the others up the chain
-                            // and pop off the oldest.  Then we have memory_count*noteParams in the final hidden layer, which should be fed back into the last memory_count*noteParams*2 inputs next time
-
-                            // We need an alternate backPropagation that doesn't feedforward, or rather, does all of this before it tries correcting
-                            //var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
-
-
-
-                            var inputs = channel.GetNeuralInputs();
-                            var expected = new float[1];
-
-                            if (channel.Active)
-                                expected[0] = 0.5f;
-                            else
-                                expected[0] = -0.5f;
-
-                            /*
-                            var inputs = song.GetNeuralInput();
-
-                            float numActive = song.Count(c => c.Active);
-                            float[] expected = new float[16];
-
-                            for(int j = 0; j < 16; j++)
-                            {
-                                var channel = song.Where(c => c.Id == j).SingleOrDefault();
-                                //var channel = song.Values[j];
-
-                                expected[j] = 0;
-
-                                if (channel != null) {
-                                    if (channel.Active)
-                                        expected[j] = 1 / numActive;
-                                }
-                                else
-                                {
-                                    for (int k = 0; k < numParamsPerChannel; k++)
-                                        inputs[j * numParamsPerChannel + k] = 0; // Tanh should evaluate this as -1 to keep it from taking weight
-                                }
-                            }
-                            */
-
-                            //tsm.neural.BackPropagateRecurrent(inputs, expected);
-                            tsm.neural.BackPropagate(inputs, expected);
-                            songCostTotal += tsm.neural.cost;
-                        }
-                        lock (songCostLock)
-                            costTotal += songCostTotal;
-                    });
                     numTestsCorrect = 0;
                     numActualTestsCorrect = 0;
                     Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
                     {
                         if (!cancelled)
                         {
-                            float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
+                            var songCostTotal = 0f;
+                            foreach (var channel in song)
+                            {
+                                // So for the 'recurrent memory' implementation, we have memory_count*noteParams*2 inputs; 16 notes, each time we process another note, we push the others up the chain
+                                // and pop off the oldest.  Then we have memory_count*noteParams in the final hidden layer, which should be fed back into the last memory_count*noteParams*2 inputs next time
 
+                                // We need an alternate backPropagation that doesn't feedforward, or rather, does all of this before it tries correcting
+                                //var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
+
+
+
+                                var inputs = channel.GetNeuralInputs(song.Length);
+                                var expected = new float[1];
+
+                                if (channel.Active)
+                                    expected[0] = 0.5f;
+                                else
+                                    expected[0] = -0.5f;
+
+                                /*
+                                var inputs = song.GetNeuralInput();
+
+                                float numActive = song.Count(c => c.Active);
+                                float[] expected = new float[16];
+
+                                for(int j = 0; j < 16; j++)
+                                {
+                                    var channel = song.Where(c => c.Id == j).SingleOrDefault();
+                                    //var channel = song.Values[j];
+
+                                    expected[j] = 0;
+
+                                    if (channel != null) {
+                                        if (channel.Active)
+                                            expected[j] = 1 / numActive;
+                                    }
+                                    else
+                                    {
+                                        for (int k = 0; k < numParamsPerChannel; k++)
+                                            inputs[j * numParamsPerChannel + k] = 0; // Tanh should evaluate this as -1 to keep it from taking weight
+                                    }
+                                }
+                                */
+
+                                //tsm.neural.BackPropagateRecurrent(inputs, expected);
+                                tsm.neural.BackPropagate(inputs, expected);
+                                songCostTotal += tsm.neural.cost;
+                            }
+                            lock (songCostLock)
+                                costTotal += songCostTotal;
+                        }
+                    });
+
+                    Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
+                    {
+                        if (!cancelled)
+                        {
                             Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
                             foreach (var channel in song)
                             {
-                                var inputs = channel.GetNeuralInputs();
+                                var inputs = channel.GetNeuralInputs(song.Length);
                                 //var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
                                 //var neuralResults = tsm.neural.FeedForwardRecurrent(inputs);
                                 var neuralResults = tsm.neural.FeedForward(inputs);
@@ -570,14 +569,12 @@ namespace LuteBot.UI
                     {
                         if (!cancelled)
                         {
-                            float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
-
                             Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
                             foreach (var channel in song)
                             {
                                 //var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
                                 //var neuralResults = tsm.neural.FeedForwardRecurrent(inputs);
-                                var inputs = channel.GetNeuralInputs();
+                                var inputs = channel.GetNeuralInputs(song.Length);
                                 var neuralResults = tsm.neural.FeedForward(inputs);
                                 channelResults[channel] = neuralResults[0];
                             }
@@ -640,12 +637,16 @@ namespace LuteBot.UI
                     int numTrainingCorrect = numTestsCorrect;
                     Interlocked.Increment(ref i);
                     int trainingNum = i;
-                    BeginInvoke((MethodInvoker)delegate
+                    if (i % 100 == 0)
                     {
-                        richTextBox1.AppendText($"\n{numTestCorrect}/{neuralTestCandidates.Length} ({(float)numTestCorrect / neuralTestCandidates.Length * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTrainingCorrect}/{neuralTrainingCandidates.Length}\nTraining #{trainingNum} - TotalCost: {invokeTotal} (This number should go down eventually)");
-                        richTextBox1.ScrollToCaret();
-                        progressBarTraining.Value = numActualTestsCorrect;
-                    });
+                        BeginInvoke((MethodInvoker)delegate
+                        {
+                            richTextBox1.AppendText($"\n{numTestCorrect}/{neuralTestCandidates.Length} ({(float)numTestCorrect / neuralTestCandidates.Length * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTrainingCorrect}/{neuralTrainingCandidates.Length}\nTraining #{trainingNum} - TotalCost: {invokeTotal} (This number should go down eventually)");
+                            richTextBox1.ScrollToCaret();
+                            progressBarTraining.Value = numActualTestsCorrect;
+                        });
+                        await Task.Delay(1); // Let the form live between iterations
+                    }
 
                     //orderedCandidates = neuralCandidates.OrderBy(c => random.Next());
                     //neuralTrainingCandidates = orderedCandidates.Take(numTrainingCandidates);
@@ -656,7 +657,7 @@ namespace LuteBot.UI
                     else
                         Interlocked.Increment(ref numSuccesses);
 
-                    await Task.Delay(1); // Let the form live between iterations
+
                 }
 
                 BeginInvoke((MethodInvoker)delegate

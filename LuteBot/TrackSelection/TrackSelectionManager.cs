@@ -429,7 +429,7 @@ namespace LuteBot.TrackSelection
         // Returns the channel ID of the channel most likely to be good for flute
         private MidiChannelItem GetFlutePrediction(bool reorderTracks = false)
         {
-            var activeChannels = midiChannels.Values;//.Where(c => c.Active); // Wait ... how...?  
+            var activeChannels = midiChannels.Values.ToArray();//.Where(c => c.Active); // Wait ... how...?  
             // I don't understand how anything was even getting labeled if we were using this
 
             if (neural == null)
@@ -475,25 +475,22 @@ namespace LuteBot.TrackSelection
                 }
             }
 
-            if (activeChannels.Count() < 2)
+            if (activeChannels.Length < 2)
                 return null;
             else // if(simpleML != null && simpleML.Trained)
             {
                 Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
 
-                float maxAvgNoteLength = activeChannels.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
-                float maxNoteLength = activeChannels.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
-                float totalNumNotes = activeChannels.Max(c => c.Id == 9 ? 0 : c.numNotes);
 
                 foreach (var channel in activeChannels)
                 {
-                    var inputs = channel.GetNeuralInputs();
+                    var inputs = channel.GetNeuralInputs(activeChannels.Length);
                     var neuralResults = neural.FeedForward(inputs);
                     channelResults[channel] = neuralResults[0];
                 }
                 foreach (var channel in MidiTracks.Values)
                 {
-                    var inputs = channel.GetNeuralInputs();
+                    var inputs = channel.GetNeuralInputs(activeChannels.Length);
                     var neuralResults = neural.FeedForward(inputs);
                     channelResults[channel] = neuralResults[0]; // The tracks are MidiChannels and can work in this way; later we just check if they are a MidiTrack
                 }
