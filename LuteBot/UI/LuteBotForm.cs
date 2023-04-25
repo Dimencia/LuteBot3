@@ -13,7 +13,8 @@ using LuteBot.TrackSelection;
 using LuteBot.UI;
 using LuteBot.UI.Utils;
 using LuteBot.Utils;
-
+using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Interaction;
 using Microsoft.Win32;
 
 using Sanford.Multimedia.Midi;
@@ -161,7 +162,7 @@ ModListWidgetStayTime=5.0";
                 {
 
                     // Parse the version into something we can compare
-                    var firstGoodVersions = "3.5.3".Split('.');
+                    var firstGoodVersions = "3.6.0".Split('.');
                     var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
 
 
@@ -184,6 +185,9 @@ ModListWidgetStayTime=5.0";
                             // We might should messagebox to let them know, but that'd be like a third messagebox for new installs, and that's just annoying at that point
                             InstallLuteMod(); // Update their lutemod
                         }
+                        else if (int.Parse(lastversions[i]) > int.Parse(firstGoodVersions[i]))
+                            break; // Their last version was higher than we need
+                            
                     }
                 }
             }
@@ -195,6 +199,7 @@ ModListWidgetStayTime=5.0";
             ConfigManager.SaveConfig();
 
             this.Text = "LuteBot v" + ConfigManager.GetVersion();
+            
         }
 
         private async void LuteBotForm_Shown(object sender, EventArgs e)
@@ -357,16 +362,14 @@ ModListWidgetStayTime=5.0";
             {
                 try
                 {
-                    // Check if they have a newer version instead
+                    // Check if they have a similar version instead
                     Directory.CreateDirectory(MordhauPakPath); // Prevent crash if it doesn't exist
                     foreach (var f in Directory.GetFiles(MordhauPakPath))
                     {
                         Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9]*)");
                         if (m.Success)
                         {
-                            var v1 = int.Parse(m.Groups[1].Value);
-                            var v2 = int.Parse(m.Groups[2].Value);
-                            return v1 > lutemodVersion1 || (v1 == lutemodVersion1 && v2 >= lutemodVersion2);
+                            return true;
                         }
                     }
                 }
@@ -531,6 +534,7 @@ ModListWidgetStayTime=5.0";
 
             new PopupForm("Install Complete", "LuteMod Successfully Installed", "Use LuteBot to create Partitions out of your songs for LuteMod\n\nUse Kick in-game with a lute to open the LuteMod menu\n\nIf Mordhau is open, restart it",
                 new Dictionary<string, string>() {
+                    { "Controls", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Controls" },
                     { "Adding Songs", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Adding_Songs" } ,
                     { "Playing Songs", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Playing_Songs" },
                     { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
@@ -703,6 +707,12 @@ ModListWidgetStayTime=5.0";
                 {
                     if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated)
                     {
+                        var tempoMap = player.dryWetFile.GetTempoMap();
+                        var tempo = tempoMap.GetTempoAtTime(new MetricTimeSpan(1));
+                        var secondsPerTick = ((float)tempo.MicrosecondsPerQuarterNote / ((TicksPerQuarterNoteTimeDivision)player.dryWetFile.TimeDivision).TicksPerQuarterNote) / 1000f;
+                        // TickLength is pixels per tick
+                        // I'd like to fit 30s into the window of about 700px
+                        trackSelectionForm.tickLength = 30f/700f*secondsPerTick;
                         trackSelectionForm.InitLists();
                     }
                 }).ConfigureAwait(false);
@@ -928,6 +938,7 @@ ModListWidgetStayTime=5.0";
             var popup = new PopupForm("Help", "Useful Links and Info", "The Bard's Guild Wiki contains all information about LuteMod and LuteBot - and if it doesn't, you can add to it\n\nFurther troubleshooting is available in the #mordhau channel of the Bard's Guild Discord",
                 new Dictionary<string, string>() {
                     { "What is LuteMod", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod" } ,
+                    { "Controls", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Controls" },
                     { "Getting Songs", "https://mordhau-bards-guild.fandom.com/wiki/Getting_Songs" },
                     { "LuteBot Usage", "https://mordhau-bards-guild.fandom.com/wiki/LuteBot#Usage" },
                     { "LuteMod Usage", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Playing_Songs" },

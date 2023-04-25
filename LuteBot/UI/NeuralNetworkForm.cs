@@ -10,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -323,39 +324,42 @@ namespace LuteBot.UI
                     if (File.Exists(midiPath))
                     {
                         await LuteBotForm.luteBotForm.LoadFile(midiPath, true).ConfigureAwait(false);
-                        // To prevent it from trying to train on re-generated midis, which have incorrect lengths
-                        // Require at least 3 channels
-                        if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1)) // To keep the percentages from getting weird in training, at least 4 channels?
+                        if (tsm.Player.dryWetFile != null)
                         {
-                            if (tsm.MidiTracks.All(t => t.Value.Active))
+                            // To prevent it from trying to train on re-generated midis, which have incorrect lengths
+                            // Require at least 3 channels
+                            if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1)) // To keep the percentages from getting weird in training, at least 4 channels?
                             {
-                                // Actually, I think the flute track may not have the appropriate data...
-                                var tempNeuralCandidates = tsm.MidiChannels.Values.Where(c => c.Id != 9).ToArray();
-                                foreach (var ca in tempNeuralCandidates)
+                                if (tsm.MidiTracks.All(t => t.Value.Active))
                                 {
-                                    ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
+                                    // Actually, I think the flute track may not have the appropriate data...
+                                    var tempNeuralCandidates = tsm.MidiChannels.Values.Where(c => c.Id != 9).ToArray();
+                                    foreach (var ca in tempNeuralCandidates)
+                                    {
+                                        ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
+                                    }
+                                    neuralCandidates.Add(tempNeuralCandidates);
+                                    var fluteChannels = tsm.DataDictionary[1].MidiChannels.Where(c => c.Active);
+                                    if (fluteChannels.Count() == 1)
+                                    {
+                                        var fluteChannel = fluteChannels.First();
+                                        // We have what we need, one flute track and more than one total track
+                                        // We need to make sure our passed target exactly matches the one in our passed list
+                                        var candidate = new TrainingCandidate<MidiChannelItem>(tsm.MidiChannels.Values, fluteChannel);
+                                        candidates.Add(candidate);
+                                    }
                                 }
-                                neuralCandidates.Add(tempNeuralCandidates);
-                                var fluteChannels = tsm.DataDictionary[1].MidiChannels.Where(c => c.Active);
-                                if (fluteChannels.Count() == 1)
+                                else if (tsm.MidiChannels.All(c => c.Value.Active))
                                 {
-                                    var fluteChannel = fluteChannels.First();
-                                    // We have what we need, one flute track and more than one total track
-                                    // We need to make sure our passed target exactly matches the one in our passed list
-                                    var candidate = new TrainingCandidate<MidiChannelItem>(tsm.MidiChannels.Values, fluteChannel);
-                                    candidates.Add(candidate);
+                                    // If some tracks are disabled and all channels are enabled, we'll take the tracks as data
+                                    // Track notes should already have discarded anything with channel 9
+                                    MidiChannelItem[] tempNeuralCandidates = tsm.MidiTracks.Values.ToArray();
+                                    foreach (var ca in tempNeuralCandidates)
+                                    { // This may not be necessary; I could probably just take the MidiTracks from DataDictionary[1] but, it seemed to give odd results like it didn't have everything
+                                        ca.Active = tsm.DataDictionary[1].MidiTracks.Where(c => c.Id == ca.Id).Single().Active;
+                                    }
+                                    neuralCandidates.Add(tempNeuralCandidates);
                                 }
-                            }
-                            else if (tsm.MidiChannels.All(c => c.Value.Active))
-                            {
-                                // If some tracks are disabled and all channels are enabled, we'll take the tracks as data
-                                // Track notes should already have discarded anything with channel 9
-                                MidiChannelItem[] tempNeuralCandidates = tsm.MidiTracks.Values.ToArray();
-                                foreach (var ca in tempNeuralCandidates)
-                                { // This may not be necessary; I could probably just take the MidiTracks from DataDictionary[1] but, it seemed to give odd results like it didn't have everything
-                                    ca.Active = tsm.DataDictionary[1].MidiTracks.Where(c => c.Id == ca.Id).Single().Active;
-                                }
-                                neuralCandidates.Add(tempNeuralCandidates);
                             }
                         }
                     }
@@ -394,10 +398,10 @@ namespace LuteBot.UI
                 int numActualTestsCorrect = 0;
 
 
-#if DEBUG
-                TrainMusicMaker(neuralCandidates);
-                return;
-#endif
+//#if DEBUG
+//                TrainMusicMaker(neuralCandidates);
+//                return;
+//#endif
 
 
                 BeginInvoke((MethodInvoker)delegate
@@ -414,6 +418,7 @@ namespace LuteBot.UI
                 //for (int i = 0; i < trainCount; i++)
                 {
                     costTotal = 0;
+                    object songCostLock = new object();
                     //foreach (var song in neuralTrainingCandidates)
                     Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
                     {
@@ -422,7 +427,7 @@ namespace LuteBot.UI
                         float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
 
                         float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
-
+                        var songCostTotal = 0f;
                         foreach (var channel in song)
                         {
                             // So for the 'recurrent memory' implementation, we have memory_count*noteParams*2 inputs; 16 notes, each time we process another note, we push the others up the chain
@@ -468,8 +473,10 @@ namespace LuteBot.UI
 
                             //tsm.neural.BackPropagateRecurrent(inputs, expected);
                             tsm.neural.BackPropagate(inputs, expected);
-                            costTotal += tsm.neural.cost;
+                            songCostTotal += tsm.neural.cost;
                         }
+                        lock (songCostLock)
+                            costTotal += songCostTotal;
                     });
                     numTestsCorrect = 0;
                     numActualTestsCorrect = 0;
@@ -522,7 +529,7 @@ namespace LuteBot.UI
                         }
 
                         if (correct)
-                            numTestsCorrect++;
+                            Interlocked.Increment(ref numTestsCorrect);
 
                         //await Task.Delay(0); // Let the form live between iterations
                     });
@@ -576,8 +583,8 @@ namespace LuteBot.UI
 
                         if (correct)
                         {
-                            numTestsCorrect++;
-                            numActualTestsCorrect++;
+                            Interlocked.Increment(ref numTestsCorrect);
+                            Interlocked.Increment(ref numActualTestsCorrect);
                         }
 
                         //int fluteCount = 0;
@@ -610,7 +617,7 @@ namespace LuteBot.UI
                     if ((float)numActualTestsCorrect / neuralTestCandidates.Count() < (percentForSuccess / 100f))
                         numSuccesses = 0;
                     else
-                        numSuccesses++;
+                        Interlocked.Increment(ref numSuccesses);
 
                     await Task.Delay(1); // Let the form live between iterations
                 }

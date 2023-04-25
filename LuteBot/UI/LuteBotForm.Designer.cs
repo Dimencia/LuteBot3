@@ -136,7 +136,7 @@ namespace LuteBot
             // installLuteModToolStripMenuItem
             // 
             this.installLuteModToolStripMenuItem.Name = "installLuteModToolStripMenuItem";
-            this.installLuteModToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.installLuteModToolStripMenuItem.Size = new System.Drawing.Size(229, 26);
             this.installLuteModToolStripMenuItem.Text = "Install LuteMod";
             this.installLuteModToolStripMenuItem.Click += new System.EventHandler(this.installLuteModToolStripMenuItem_Click);
             // 
@@ -144,47 +144,47 @@ namespace LuteBot
             // 
             this.toolStripSeparator1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(226, 6);
             // 
             // importPartitionsToolStripMenuItem
             // 
             this.importPartitionsToolStripMenuItem.Name = "importPartitionsToolStripMenuItem";
-            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.importPartitionsToolStripMenuItem.Text = "Import Songs";
+            this.importPartitionsToolStripMenuItem.Size = new System.Drawing.Size(229, 26);
+            this.importPartitionsToolStripMenuItem.Text = "Import Partition Files";
             this.importPartitionsToolStripMenuItem.Click += new System.EventHandler(this.importPartitionsToolStripMenuItem_Click);
             // 
             // exportPartitionsToolStripMenuItem
             // 
             this.exportPartitionsToolStripMenuItem.Name = "exportPartitionsToolStripMenuItem";
-            this.exportPartitionsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.exportPartitionsToolStripMenuItem.Text = "Export Songs";
+            this.exportPartitionsToolStripMenuItem.Size = new System.Drawing.Size(229, 26);
+            this.exportPartitionsToolStripMenuItem.Text = "Export Partition Files";
             this.exportPartitionsToolStripMenuItem.Click += new System.EventHandler(this.exportPartitionsToolStripMenuItem_Click);
             // 
             // exportMidisToolStripMenuItem
             // 
             this.exportMidisToolStripMenuItem.Name = "exportMidisToolStripMenuItem";
-            this.exportMidisToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.exportMidisToolStripMenuItem.Size = new System.Drawing.Size(229, 26);
             this.exportMidisToolStripMenuItem.Text = "Export Midis";
             this.exportMidisToolStripMenuItem.Click += new System.EventHandler(this.exportMidisToolStripMenuItem_Click);
             // 
             // openSavFolderToolStripMenuItem
             // 
             this.openSavFolderToolStripMenuItem.Name = "openSavFolderToolStripMenuItem";
-            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.openSavFolderToolStripMenuItem.Size = new System.Drawing.Size(229, 26);
             this.openSavFolderToolStripMenuItem.Text = "Open Sav Folder";
             this.openSavFolderToolStripMenuItem.Click += new System.EventHandler(this.openSavFolderToolStripMenuItem_Click);
             // 
             // openMidiFolderToolStripMenuItem
             // 
             this.openMidiFolderToolStripMenuItem.Name = "openMidiFolderToolStripMenuItem";
-            this.openMidiFolderToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.openMidiFolderToolStripMenuItem.Size = new System.Drawing.Size(229, 26);
             this.openMidiFolderToolStripMenuItem.Text = "Open Midi Folder";
             this.openMidiFolderToolStripMenuItem.Click += new System.EventHandler(this.openMidiFolderToolStripMenuItem_Click);
             // 
             // trainToolStripMenuItem
             // 
             this.trainToolStripMenuItem.Name = "trainToolStripMenuItem";
-            this.trainToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.trainToolStripMenuItem.Size = new System.Drawing.Size(229, 26);
             this.trainToolStripMenuItem.Text = "Train...";
             this.trainToolStripMenuItem.Click += new System.EventHandler(this.trainToolStripMenuItem_Click);
             // 
@@ -201,21 +201,21 @@ namespace LuteBot
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(224, 26);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(184, 26);
             this.toolStripMenuItem2.Text = "Guild Library";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.GuildLibraryToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(184, 26);
             this.toolStripMenuItem1.Text = "Track Filtering";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.TrackFilteringToolStripMenuItem_Click);
             // 
             // focusToolStripMenuItem
             // 
             this.focusToolStripMenuItem.Name = "focusToolStripMenuItem";
-            this.focusToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.focusToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.focusToolStripMenuItem.Text = "Focus";
             this.focusToolStripMenuItem.Click += new System.EventHandler(this.LuteBotForm_Focus);
             // 
@@ -320,7 +320,7 @@ namespace LuteBot
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(500, 500);
+            this.MinimumSize = new System.Drawing.Size(600, 500);
             this.Name = "LuteBotForm";
             this.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.Text = "LuteBot";

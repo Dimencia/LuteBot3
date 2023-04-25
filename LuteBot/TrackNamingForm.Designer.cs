@@ -82,7 +82,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxPartName);
             this.Name = "TrackNamingForm";
-            this.Text = "TrackNamingForm";
+            this.Text = "Enter Partition Name";
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -156,7 +156,9 @@ namespace LuteBot.Core.Midi
                     {
                         ExtraTrackChunkPolicy = ExtraTrackChunkPolicy.Skip,
                         UnknownChunkIdPolicy = UnknownChunkIdPolicy.Skip,
-                        InvalidChunkSizePolicy = InvalidChunkSizePolicy.Ignore
+                        InvalidChunkSizePolicy = InvalidChunkSizePolicy.Ignore,
+                        InvalidMetaEventParameterValuePolicy = InvalidMetaEventParameterValuePolicy.SnapToLimits,
+                        InvalidChannelEventParameterValuePolicy = InvalidChannelEventParameterValuePolicy.ReadValid
                     });
                 }
 
@@ -441,7 +443,7 @@ namespace LuteBot.Core.Midi
             {
                 chunkNumber++; return t.GetNotes(new NoteDetectionSettings { NoteSearchContext = NoteSearchContext.AllEventsCollections, NoteStartDetectionPolicy = NoteStartDetectionPolicy.LastNoteOn }).Where(n => (!trackSelectionManager.MidiTracks.ContainsKey(chunkNumber) || trackSelectionManager.MidiTracks[chunkNumber].Active) && (!trackId.HasValue || trackId.Value == chunkNumber)
                     && (!trackSelectionManager.MidiChannels.ContainsKey(n.Channel) || trackSelectionManager.MidiChannels[n.Channel].Active) && n.Velocity > 0 && n.Channel != 9)
-                    .Select(n => new LuteMod.Sequencing.Note() { duration = Math.Min((float)n.LengthAs<MetricTimeSpan>(tempoMap).TotalSeconds - 0.0171f, 1), Tick = n.Time, Tone = n.NoteNumber + trackSelectionManager.MidiChannels[n.Channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
+                    .Select(n => new LuteMod.Sequencing.Note() { duration = Math.Min((float)n.LengthAs<MetricTimeSpan>(tempoMap).TotalSeconds - (0.0171f*2), 1), Tick = n.Time, Tone = n.NoteNumber + trackSelectionManager.MidiChannels[n.Channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
             }).ToList();
             // Always add the tempo at 0 time
             var startTempo = tempoMap.GetTempoAtTime(new MetricTimeSpan(0));

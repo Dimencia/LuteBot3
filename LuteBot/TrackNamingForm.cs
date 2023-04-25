@@ -15,6 +15,7 @@ namespace LuteBot
     {
         public TrackNamingForm(string filename, string labelValue = null)
         {
+            StartPosition = FormStartPosition.CenterParent;
             InitializeComponent();
             textBoxPartName.Text = filename;
             checkBoxOverwrite.Checked = ConfigManager.GetBooleanProperty(PropertyItem.OverwritePartitions);

@@ -58,17 +58,18 @@ namespace LuteBot.UI
             }
 
             this.AutoSize = true;
-            this.AutoSizeMode = AutoSizeMode.GrowOnly;
+            this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             this.Shown += PopupForm_Shown;
         }
 
         private void PopupForm_Shown(object sender, EventArgs e)
         {
+            this.AutoSize = false;
             using (var g = Graphics.FromHwnd(this.Handle))
             {
                 var titleWidth = g.MeasureString(titleLabel.Text, titleLabel.Font).Width * g.DpiX/96;
                 this.Width = Math.Max(this.Width, (int)titleWidth + 20);
-                this.Height = (int)((titleLabel.PreferredHeight + contentLabel.PreferredHeight + linkPanel.PreferredSize.Height + buttonPanel.PreferredSize.Height + 200) * g.DpiX/96);
+                this.Height = (int)((titleLabel.PreferredHeight + contentLabel.PreferredHeight + linkPanel.PreferredSize.Height + buttonPanel.PreferredSize.Height + 50) * g.DpiY/96);
             }
             
         }

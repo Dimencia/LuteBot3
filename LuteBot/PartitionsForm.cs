@@ -51,7 +51,7 @@ namespace LuteBot
 
             if (!LuteBotForm.luteBotForm.IsLuteModInstalled())
             {
-                var popup = new PopupForm("Install LuteMod", "Would you like to update/install LuteMod?", "LuteMod is a Mordhau Mod that lets you manage your songs in game and move freely, and play duets with lute and flute\n\nLuteMod was not detected as installed, or an old version was detected\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
+                var popup = new PopupForm("Install LuteMod", "Would you like to update/install LuteMod?", "You need this to play music.\n\nIf you already have a working LuteMod installed, this means there's an important update\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
                 new Dictionary<string, string>() {
                     { "What is LuteMod", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod" } ,
                     { "LuteMod mod.io page", "https://mordhau.mod.io/lutemod" },
@@ -153,8 +153,6 @@ namespace LuteBot
                 if (listBoxPartitions.SelectedItems.Count > 1)
                     name += " + ...";
 
-                MenuItem deleteItem = indexContextMenu.MenuItems.Add("Delete " + name);
-                deleteItem.Click += new EventHandler(DeleteItem_Click);
 
                 if (listBoxPartitions.SelectedIndices.Count == 1)
                 {
@@ -170,6 +168,9 @@ namespace LuteBot
                     MenuItem exportItem = indexContextMenu.MenuItems.Add("Export " + name);
                     exportItem.Click += ExportItem_Click;
                 }
+
+                MenuItem deleteItem = indexContextMenu.MenuItems.Add("Delete " + name);
+                deleteItem.Click += new EventHandler(DeleteItem_Click);
 
                 listBoxPartitions.ContextMenu = indexContextMenu; // TODO: I'd love to make it popup at the selected item, not at mouse pos, but whatever
                 indexContextMenu.Show(listBoxPartitions, listBoxPartitions.PointToClient(Cursor.Position));
@@ -409,6 +410,7 @@ namespace LuteBot
             if (tsm.MidiTracks.Values.Where(t => t.Active).Count() > 0)
             {
                 var namingForm = new TrackNamingForm(Path.GetFileNameWithoutExtension(tsm.FileName));
+
                 await LuteBotForm.luteBotForm.InvokeAsync(() =>
                 {
                     namingForm.ShowDialog(this);
@@ -430,7 +432,7 @@ namespace LuteBot
         {
             try
             {
-                await LuteBotForm.luteBotForm.InvokeAsync(async () =>
+                await LuteBotForm.luteBotForm.InvokeAsync(() =>
                 {
 
                     var dryWetFile = player.dryWetFile;
@@ -445,21 +447,46 @@ namespace LuteBot
                     }
                     else
                     {
-                        if (index.PartitionNames.Contains(name) && !overwrite)
+                        while (index.PartitionNames.Contains(name) && !overwrite)
                         {
-                            throw new Exception($"A song already exists named {name}");
-                        }
-                        else
-                        {
-                            if (overwrite && index.PartitionNames.Contains(name))
-                                index.PartitionNames.Remove(name);
-
-                            if (!Regex.IsMatch(name, "^([a-zA-Z0-9][a-zA-Z0-9 -]*[a-zA-Z0-9])$"))
+                            var namingForm = new TrackNamingForm(name);
+                            namingForm.Text = "Name already exists - Enter new Song Name";
+                            namingForm.ShowDialog(this);
+                            if (namingForm.DialogResult == DialogResult.OK)
                             {
-                                throw new Exception($"The song name {name} contains invalid characters");
+                                name = namingForm.textBoxPartName.Text;
+                                overwrite = namingForm.checkBoxOverwrite.Checked;
                             }
                             else
                             {
+                                name = null;
+                                break;
+                            }
+
+                        }
+                        if (name != null)
+                        {
+                            while (!Regex.IsMatch(name, "^([a-zA-Z0-9][a-zA-Z0-9 -]*[a-zA-Z0-9])$"))
+                            {
+                                var namingForm = new TrackNamingForm(name);
+                                namingForm.Text = "Name contains invalid characters - Enter new Song Name";
+                                namingForm.ShowDialog(this);
+                                if (namingForm.DialogResult == DialogResult.OK)
+                                {
+                                    name = namingForm.textBoxPartName.Text;
+                                    overwrite = namingForm.checkBoxOverwrite.Checked;
+                                }
+                                else
+                                {
+                                    name = null;
+                                    break;
+                                }
+                            }
+                            if (name != null)
+                            {
+                                if (overwrite && index.PartitionNames.Contains(name))
+                                    index.PartitionNames.Remove(name);
+
                                 index.PartitionNames.Insert(0, name);
 
                                 //if (trackConverter == null)
@@ -560,7 +587,7 @@ namespace LuteBot
                 await LuteBotForm.luteBotForm.HandleError(ex, $"Failed to save {name} to LuteMod").ConfigureAwait(false);
                 return false;
             }
-            return true;
+            return name != null;
         }
 
         private void PartitionsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -721,39 +748,54 @@ namespace LuteBot
             {
                 var filenames = listBoxPartitions.SelectedItems.Cast<string>().Reverse();
 
-                await AutoSaveFiles(filenames);
+                await AutoSaveFiles(filenames).ConfigureAwait(false);
             }
         }
 
         private async Task AutoSaveFiles(IEnumerable<string> filenames)
         {
             string warnings = "";
-
-            foreach (var f in filenames) // So the first ones are first again
+            await LuteBotForm.luteBotForm.InvokeAsync(() =>
             {
-                var filePath = f;
-                if (!Path.IsPathRooted(filePath))
-                    filePath = Path.Combine(partitionMidiPath, filePath + ".mid");
-                if (!File.Exists(filePath))
+                savePartitionButton.Enabled = false;
+                savePartitionButton.Text = "Processing Midis...";
+            }).ConfigureAwait(false);
+            try
+            {
+                foreach (var f in filenames) // So the first ones are first again
                 {
-                    warnings += $"Could not reload {f} because it was saved with an old LuteBot version\n";
-                    continue;
-                }
-                try
-                {
-                    await LuteBotForm.luteBotForm.LoadFile(filePath, true).ConfigureAwait(false);
-                    await SavePartition(Path.GetFileName(filePath).Replace(".mid", ""), true).ConfigureAwait(false);
+                    var filePath = f;
+                    if (!Path.IsPathRooted(filePath))
+                        filePath = Path.Combine(partitionMidiPath, filePath + ".mid");
+                    if (!File.Exists(filePath))
+                    {
+                        warnings += $"Could not reload {f} because it was saved with an old LuteBot version\n";
+                        continue;
+                    }
+                    try
+                    {
+                        await LuteBotForm.luteBotForm.LoadFile(filePath, true).ConfigureAwait(false);
+                        if (player.dryWetFile != null)
+                            await SavePartition(Regex.Replace(Path.GetFileName(filePath).Replace(".mid", ""), "[^a-zA-Z0-9]", ""), false).ConfigureAwait(false);
 
-                }
-                catch (Exception ex)
-                {
-                    warnings += $"Failed to reload file {f}: {ex.Message}";
+                    }
+                    catch (Exception ex)
+                    {
+                        warnings += $"Failed to reload file {f}: {ex.Message}";
+                    }
                 }
             }
-
-            if (warnings != "")
+            finally
             {
-                await LuteBotForm.luteBotForm.HandleError(new Exception(warnings), "Some Midis failed to reload: \n" + warnings).ConfigureAwait(false);
+                if (warnings != "")
+                {
+                    await LuteBotForm.luteBotForm.HandleError(new Exception(warnings), "Some Midis failed to reload: \n" + warnings).ConfigureAwait(false);
+                }
+                await LuteBotForm.luteBotForm.InvokeAsync(() =>
+                {
+                    savePartitionButton.Enabled = true;
+                    savePartitionButton.Text = "Add Midis";
+                }).ConfigureAwait(false);
             }
         }
 

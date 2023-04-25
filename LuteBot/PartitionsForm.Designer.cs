@@ -54,7 +54,7 @@ namespace LuteBot
             this.savePartitionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.savePartitionButton.Location = new System.Drawing.Point(12, 6);
             this.savePartitionButton.Name = "savePartitionButton";
-            this.savePartitionButton.Size = new System.Drawing.Size(448, 26);
+            this.savePartitionButton.Size = new System.Drawing.Size(560, 26);
             this.savePartitionButton.TabIndex = 2;
             this.savePartitionButton.Text = "Add Midis";
             this.savePartitionButton.UseVisualStyleBackColor = false;
@@ -68,12 +68,12 @@ namespace LuteBot
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(9, 58);
+            this.label1.Font = new System.Drawing.Font("Georgia", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(12, 55);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(114, 16);
+            this.label1.Size = new System.Drawing.Size(211, 24);
             this.label1.TabIndex = 3;
-            this.label1.Text = "LuteMod Songs";
+            this.label1.Text = "LuteMod Partitions";
             // 
             // panel1
             // 
@@ -82,7 +82,7 @@ namespace LuteBot
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panel1.Location = new System.Drawing.Point(12, 39);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(448, 4);
+            this.panel1.Size = new System.Drawing.Size(560, 4);
             this.panel1.TabIndex = 4;
             // 
             // label2
@@ -91,7 +91,7 @@ namespace LuteBot
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.label2.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label2.Location = new System.Drawing.Point(331, 11);
+            this.label2.Location = new System.Drawing.Point(443, 11);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(113, 16);
             this.label2.TabIndex = 14;
@@ -105,7 +105,7 @@ namespace LuteBot
             this.editSelectedButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.editSelectedButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
             this.editSelectedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.editSelectedButton.Location = new System.Drawing.Point(154, 47);
+            this.editSelectedButton.Location = new System.Drawing.Point(263, 47);
             this.editSelectedButton.Name = "editSelectedButton";
             this.editSelectedButton.Size = new System.Drawing.Size(53, 39);
             this.editSelectedButton.TabIndex = 15;
@@ -121,7 +121,7 @@ namespace LuteBot
             this.reloadSelectedButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.reloadSelectedButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
             this.reloadSelectedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.reloadSelectedButton.Location = new System.Drawing.Point(213, 47);
+            this.reloadSelectedButton.Location = new System.Drawing.Point(322, 47);
             this.reloadSelectedButton.Name = "reloadSelectedButton";
             this.reloadSelectedButton.Size = new System.Drawing.Size(79, 39);
             this.reloadSelectedButton.TabIndex = 16;
@@ -137,7 +137,7 @@ namespace LuteBot
             this.exportSelectedButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.exportSelectedButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
             this.exportSelectedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.exportSelectedButton.Location = new System.Drawing.Point(298, 47);
+            this.exportSelectedButton.Location = new System.Drawing.Point(407, 47);
             this.exportSelectedButton.Name = "exportSelectedButton";
             this.exportSelectedButton.Size = new System.Drawing.Size(79, 39);
             this.exportSelectedButton.TabIndex = 17;
@@ -153,7 +153,7 @@ namespace LuteBot
             this.renameSelectedButton.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.renameSelectedButton.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLight;
             this.renameSelectedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.renameSelectedButton.Location = new System.Drawing.Point(383, 47);
+            this.renameSelectedButton.Location = new System.Drawing.Point(492, 47);
             this.renameSelectedButton.Name = "renameSelectedButton";
             this.renameSelectedButton.Size = new System.Drawing.Size(79, 39);
             this.renameSelectedButton.TabIndex = 18;
@@ -172,7 +172,7 @@ namespace LuteBot
             this.listBoxPartitions.Location = new System.Drawing.Point(12, 93);
             this.listBoxPartitions.Name = "listBoxPartitions";
             this.listBoxPartitions.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBoxPartitions.Size = new System.Drawing.Size(448, 484);
+            this.listBoxPartitions.Size = new System.Drawing.Size(560, 484);
             this.listBoxPartitions.TabIndex = 0;
             this.listBoxPartitions.DragDrop += new System.Windows.Forms.DragEventHandler(this.PartitionIndexBox_DragDrop);
             this.listBoxPartitions.DragOver += new System.Windows.Forms.DragEventHandler(this.PartitionIndexBox_DragOver);
@@ -182,7 +182,7 @@ namespace LuteBot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(475, 588);
+            this.ClientSize = new System.Drawing.Size(587, 588);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.renameSelectedButton);
             this.Controls.Add(this.exportSelectedButton);
@@ -192,6 +192,7 @@ namespace LuteBot
             this.Controls.Add(this.label1);
             this.Controls.Add(this.savePartitionButton);
             this.Controls.Add(this.listBoxPartitions);
+            this.MinimumSize = new System.Drawing.Size(605, 47);
             this.Name = "PartitionsForm";
             this.Text = "LuteMod Partitions";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PartitionsForm_FormClosing);

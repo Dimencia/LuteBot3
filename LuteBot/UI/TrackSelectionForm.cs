@@ -552,7 +552,7 @@ namespace LuteBot.UI
         // Or maybe I could have the left and bottom regions not inside the scroll panel, and manually redraw them based on that scroll...
         // Might look awkward with the bottom one being below the bar, but, we could put it ontop but not inside... 
 
-        private float tickLength = 0.25f; // IDK, 1px per tick sounds ok to me
+        public float tickLength = 0.25f; // IDK, 1px per tick sounds ok to me
         private int pianoWidth = 60;
         private int pianoRowHeight = 10;
 
@@ -1491,12 +1491,13 @@ namespace LuteBot.UI
             //Invalidate();
             //OffsetPanel.Refresh();
         }
-
+        bool prevChecked;
         private void listBox_MouseDown(object sender, MouseEventArgs e)
         {
             var list = (CheckedListBox)sender;
             if (list.SelectedItem == null) return;
-            list.SetItemChecked(list.SelectedIndex, !list.GetItemChecked(list.SelectedIndex));
+            
+            prevChecked = list.GetItemChecked(list.SelectedIndex);
             list.DoDragDrop(list.SelectedItem, DragDropEffects.Move);
         }
 
@@ -1514,6 +1515,7 @@ namespace LuteBot.UI
             object data = e.Data.GetData(typeof(TrackItem));
             list.Items.Remove(data);
             list.Items.Insert(index, data);
+            list.SetItemChecked(index, prevChecked);
             UpdateRanks();
         }
 
