@@ -355,7 +355,7 @@ namespace LuteBot.UI
                                 if (tsm.MidiTracks.All(t => t.Value.Active))
                                 {
                                     // Actually, I think the flute track may not have the appropriate data...
-                                    var tempNeuralCandidates = tsm.MidiChannels.Values.Where(c => c.Id != 9).ToArray();
+                                    var tempNeuralCandidates = tsm.MidiChannels.Values.ToArray();
                                     foreach (var ca in tempNeuralCandidates)
                                     {
                                         ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
@@ -414,8 +414,8 @@ namespace LuteBot.UI
 
                 var orderedCandidates = neuralCandidates.OrderBy(c => random.Next());
                 var numTestCandidates = (int)(orderedCandidates.Count() * 0.3f);
-                var neuralTrainingCandidates = orderedCandidates.Skip(numTestCandidates);
-                var neuralTestCandidates = orderedCandidates.Take(numTestCandidates);
+                var neuralTrainingCandidates = orderedCandidates.Skip(numTestCandidates).ToArray();
+                var neuralTestCandidates = orderedCandidates.Take(numTestCandidates).ToArray();
 
                 int numTestsCorrect = 0;
                 int numActualTestsCorrect = 0;
@@ -632,9 +632,14 @@ namespace LuteBot.UI
                             //await Task.Delay(0); // Let the form live between iterations
                         }
                     });
+                    float invokeTotal = costTotal;
+                    int numTestCorrect = numActualTestsCorrect;
+                    int numTrainingCorrect = numTestsCorrect;
+                    Interlocked.Increment(ref i);
+                    int trainingNum = i;
                     BeginInvoke((MethodInvoker)delegate
                     {
-                        richTextBox1.AppendText($"\n{numActualTestsCorrect}/{neuralTestCandidates.Count()} ({(float)numActualTestsCorrect / neuralTestCandidates.Count() * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTestsCorrect}/{neuralCandidates.Count()}\nTraining #{i++} - TotalCost: {costTotal} (This number should go down eventually)");
+                        richTextBox1.AppendText($"\n{numTestCorrect}/{neuralTestCandidates.Length} ({(float)numTestCorrect / neuralTestCandidates.Length * 100}%) tests correct; {percentForSuccess}% {numPerfect} times in a row to finish.  Training Set: {numTrainingCorrect}/{neuralTrainingCandidates.Length}\nTraining #{trainingNum} - TotalCost: {invokeTotal} (This number should go down eventually)");
                         richTextBox1.ScrollToCaret();
                         progressBarTraining.Value = numActualTestsCorrect;
                     });

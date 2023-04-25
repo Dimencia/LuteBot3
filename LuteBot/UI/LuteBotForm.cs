@@ -334,6 +334,17 @@ ModListWidgetStayTime=5.0";
 
         public bool IsLuteModInstalled()
         {
+            var inputIniPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Mordhau", "Saved", "Config", "WindowsClient", "Input.ini");
+            if (File.Exists(inputIniPath) && string.IsNullOrEmpty(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation)))
+            {
+                Config.ConfigManager.SetProperty(Config.PropertyItem.MordhauInputIniLocation, inputIniPath);
+                Config.ConfigManager.SaveConfig();
+            }
+            else
+                inputIniPath = ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation);
+            // If the file exists, save it into config... this doesn't really go here... oh well.
+            
+
             if (string.IsNullOrWhiteSpace(MordhauPakPath))
             {
                 return true; // They have disabled installs or otherwise didn't input the path correctly, so don't check
@@ -348,13 +359,13 @@ ModListWidgetStayTime=5.0";
             }
             // Just check for the lutemod pak in CustomPaks, if they messed it up beyond that they can click the install button themselves, this is just to prompt them to install if necessary
             var pakPath = Path.Combine(MordhauPakPath, lutemodPakName);
-            if (File.Exists(pakPath))
+            if (File.Exists(pakPath) && !string.IsNullOrWhiteSpace(inputIniPath))
             {
-                // Actually.  If they have it, we should check engine.ini for the bad line, and if it's there, recommend install
-                string engineIniPath = Path.Combine(Path.GetDirectoryName(ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation)), "Engine.ini");
-
                 try
                 {
+                    // Actually.  If they have it, we should check engine.ini for the bad line, and if it's there, recommend install
+                    string engineIniPath = Path.Combine(Path.GetDirectoryName(inputIniPath), "Engine.ini");
+
                     var content = File.ReadAllText(engineIniPath);
                     return !content.Contains(removeFromEngine);
                 }

@@ -656,7 +656,7 @@ namespace LuteBot
         public async void trainToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var trainingForm = new NeuralNetworkForm(tsm, this);
-            trainingForm.ShowDialog(this);
+            trainingForm.Show(this);
 
         }
 

@@ -1,6 +1,9 @@
 Version 3.6.1
 
-- Maybe fix startup crashes for Epic users
+- Fixed startup crash for new users
+- Fixed incorrect numbers and percentages being displayed in Neural Network training
+- Added Neural Network pause/resume during training; it saves when paused
+- Added crash reporting back
 - LuteMod 2.61
 	- Re-enabled loading of voice config settings
 	- Fixed issue where playing sometimes pauses itself immediately
@@ -8,37 +11,7 @@ Version 3.6.1
 Version 3.6.0
 
 - Major rework of LuteBot and LuteMod note handling and configuration
-	- LuteMod now sounds much better on most songs; it now respects note durations and the order of Tracks, which you can set in LuteBot by clicking and dragging tracks (not channels)
-	- LuteBot now uses a different library for loading midis, to hopefully have fewer midis that fail
-	- 'Notes Per Chord' was removed because it is obsolete; LuteMod now plays midis well even when all tracks are enabled for all instruments, trimming is not necessary
-	- LuteMod now forces a server update when playing each note, so should sound better across the network
-	- Added keybindings menu to LuteMod, accessible by entering "~Keybinds" in chat
+See previous release notes for more information
 
-- Warning: Old partitions will no longer play correctly on flute.  Select all your partitions (select the first one, scroll to the bottom, hold shift, click the last one) and use the new 'Resave' button to reload them all with note durations
-
-Details: 
-
-- Added default path for Epic Mordhau install
-- Revamped LuteBot UI (More revamp later)
-- Added validation that Mordhau is closed before installing LuteMod
-- Simplified MIDI loading process to save directly to LuteMod as soon as they're loaded, with options to edit afterward
-- Added note duration and track ordering to LuteBot/LuteMod Partitions
-	- Use Track Selection and click+drag tracks up or down; tracks at the top have priority
-	- Higher priority tracks can interrupt lower priority tracks
-	- Lower priority tracks can't play until the higher priority notes are done playing
-	- Lutes ignore these restrictions but still play the highest priority tracks first
-	- Track priority is ordered by the flute-estimation AI by default
-- LuteMod updated to 2.6 to handle this new system
-	- LuteMod now also forces server update to help ensure all your notes are heard, and has improved timing
-	- Cleans up most songs by prioritizing track order (on lute and flute), and playing multiple flute tracks no longer sounds like a trainwreck
-- Added keybindings menu to LuteMod; Enter "~Keybinds" in the chat to open it
-- Removed unused/broken functionality; LuteBot no longer supports Rust, Scrap Mechanic, Time Sync, Playlists, Soundboards, or Midi playback
-	- Use older versions if necessary (use a real Midi player for Midi playback)
-- Removed LuteBot's ability to play through Mordhau Console (and its related hotkeys and settings) to prevent confusion.  LuteMod should be used instead, check the Help button for more information
-- Swapped MIDI parsing engine to use DryWetMidi (should be more consistent and with less lockups and failures)
-- Track Filtering now scales based on tempo to show 30s by default
-- Maybe fixed concurrency issue when training the AI with more than one CPU Core
-- Fixed many potential memory leaks in LuteBot
-- Partitions are loaded in Track Selection when a single one is selected
-- Guild library form now supports adding multiple songs at once
-- Guild library form has better error reporting
+**NOTE** You need to Re-save your partitions (with the new button) for them to play correctly in the new version
+**NOTE** Use "~Keybinds" in chat to set keybindings, they are no longer tied to Mordhau bindings
