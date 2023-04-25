@@ -636,7 +636,7 @@ namespace LuteBot
                     foreach (var f in filenames.Reverse()) // So the first ones are first again
                     {
                         await LuteBotForm.luteBotForm.LoadFile(f, true).ConfigureAwait(false);
-                        await SavePartition(Path.GetFileName(f).Replace(".mid", ""), true).ConfigureAwait(false);
+                        await SavePartition(Regex.Replace(Path.GetFileName(f).Replace(".mid", ""), "[^a-zA-Z0-9]", "")).ConfigureAwait(false);
                     }
                 }
             }
