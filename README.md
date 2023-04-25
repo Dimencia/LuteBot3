@@ -10,7 +10,7 @@ And Monty, for LuteBot2, and LuteMod which he allowed me to package here https:/
 
 
 ## Usage Instructions
-Download the latest Release from https://github.com/Dimencia/LuteBot3/releases
+Download the latest Release .zip from https://github.com/Dimencia/LuteBot3/releases and extract it to a folder.  Run LuteBot.exe
 
 If prompted to install LuteMod, click yes.
 
@@ -20,25 +20,56 @@ In-game with an instrument in hand, press Kick to open the partition list, press
 
 Further support is provided at the [Bard's Guild Discord](https://discord.gg/4xnJVuz)
 
-![Track Filtering Example](https://github.com/Dimencia/LuteBot3/blob/master/LutebotExample1.PNG)
+## LuteMod Controls
 
-![Guild Library Example](https://github.com/Dimencia/LuteBot3/blob/master/LutebotExample2.PNG)
+Lutemod's base controls are based on Mordhau controls, so that you can change them
+
+* **Kick**: Open Menu, next page when Menu is open
+* **Arrow Keys Left/Right**: Change menu page
+* **Ctrl+Arrow Keys Left/Right**: Change menu page 5 pages at a time
+* **Equipment Select 0-9**: Select song or mirror target from Menu
+* **Feint (not Parry/Feint)**: Play/Pause
+* **Numpad 1**: Toggle Voice (Warning: Use sparingly.  Mods may ban you for using it in a way that makes it hard to hear combat)
+
+Other controls are unfortunately hardcoded (including Numpad1) because there was no more Mordhau controls that aren't being used for important things
+
+* **Arrow Key Up**: Pitch Up (Currently held instrument)
+* **Arrow Key Down**: Pitch Down (Currently held instrument)
+* **Arrow Key Left**: FluteCutting -1 Octave (Flute ignores the lowest {FluteCutting} octaves when copying from lute)
+* **Arrow Key Right**: FluteCutting +1 Octave (Flute ignores the lowest {FluteCutting} octaves when copying from lute)
+* **Ctrl+Arrow Key Up**: Toggle 'Duplication' (Currently held instrument) (Doubles all notes played on this instrument, these notes play on other instruments)
+* **Ctrl+Arrow Key Down**: Toggle 'Copying' (Currently held instrument type) (Copies all notes from other instrument types to the equipped instrument type)
+
 
 ## New Features v Lutebot-2
-* Rust compatibility
+
+LuteMod
+
+* Plays all equipped instruments at once
+* Notes first try to go to the currently held instrument.  A held flute will also usually get longer notes than not-held flutes
+* If an instrument is busy when it needs to play a note, another equipped instrument of the same type (lute/flute) may be used
+* Can play extremely complex songs, extremely quickly
+* Offers the ability to 'Mirror' other bards (play the same thing they're playing)
+  * Note: If your ping, or the target's ping, is higher than 100, avoid doing this - it just sounds bad
+    * The person doing the mirroring does not hear any delay, but everyone else on the server does, including the person being mirrored
+  * Press 'Kick' to open the LuteMod menu
+  * Mirror-able bards should be at the beginning of the list
+  * Press 'Feint' to pause/play as normal
+* Offers hotkeys for modifying songs on the fly: See 'LuteMod Controls', above (all of these persist after death but reset on a new game)
+* Allows you to define specific tracks for each of Lute and Flute (LuteBot handles this)
+* Performs transposition for out of range notes (so LuteBot doesn't have to)
+
+LuteBot
+
+* LuteMod Installer
+* Export MIDI to LuteMod Partitions
 * Searching/filtering/downloading of any song in the Bards Guild Midi Library - Bard's Guild: https://discord.gg/4xnJVuz
-* Automatic search/download of BitMidi when searching for a song not in the Library
-* Ability to visually align songs or individual channels to match your instrument
+* Ability to visually align songs, channels, or tracks to fit the instrument
+* Piano roll and ability to view and add/remove individual notes in Track Selection
 * Song preferences are now injected into the midi file, so the mid can be distributed easily with settings intact
 * Automatic drum removal for Mordhau
-* TimeSync option using an NTP server to attempt to synchronize playing with a friend
-* QOL tweaks, such as a stop hotkey, not unloading song on stop, song reload button
-
-## Rust Features v MidiPlayer
-* Drum mapping so any midi with a glockenspiel track is automatically converted (usually)
-* Note Duplicate Filtering - cleans up tracks to play with Rust's instrument limitations
-* Note conversion - like Mordhau, moves all notes into the instrument's range
-* Song/channel filtering and alignment
+* Partition editing, import, export
+* Self update detection and install
 
 
 ### Guild Library
@@ -48,12 +79,8 @@ This allows you to search the entire Bard's Guild Library, courtesy of the Offic
 
 Songs are automatically downloaded when selected from this library
 
-### Track Alignment
-New feature lets you align channels individually to the instrument range, as shown in the image
+![Guild Library Example](https://github.com/Dimencia/LuteBot3/blob/master/LutebotExample2.PNG)
 
-This helps you accentuate or soften parts of the song based on where you put them on the instrument range
-
-These changes are all saved with the midi
 
 ### Midi Embed
 Starting with v2.41, Track Filtering selections and track alignment data are all stored inside the .mid file itself
@@ -65,13 +92,9 @@ Now, once you find the perfect settings for a mid, you can send that adjusted mi
 All mids with embedded data are still compatible with any other midi players
 
 ### Rust
-Using this with Rust requires you to download and install [LoopMidi](https://www.tobias-erichsen.de/software/loopmidi.html) or equivalent midi loopback device.  Simply create a port in LoopMidi with any name, and then in Lutebot, select that port as the Output device.  Then select your instrument and make sure Rust Mode is enabled in Settings
+Rust is no longer supported, but should still work, though it may require older versions.  Requires LoopMidi
 
-Rust is interesting because there already exists a good solution for playing mids there - LoopMidi and MidiPlayer.  Unfortunately, depending on the octaves, some songs don't translate well, and Rust doesn't do any remapping to make the song fit.  It also tends to send delayed-duplicate notes when the midi has notes on top of eachother.  
-
-So, this now solves those problems, as well as providing the same customization options and Guild Library to Mordhau and Rust users
-
-All instruments are supported and available to select from a dropdown box
+LuteBot offers transposition to the Rust instrument, and mapping from MIDI Drums to Rust Drums.  But for most purposes, any midi player should work fine for Rust
 
 
 ### Like my work?
