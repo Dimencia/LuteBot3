@@ -136,6 +136,7 @@
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.bottomPanel);
             this.Name = "PopupForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Info";
             this.bottomPanel.ResumeLayout(false);
             this.bottomPanel.PerformLayout();

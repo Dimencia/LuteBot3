@@ -24,6 +24,8 @@ namespace LuteBot
                 this.Text = labelValue;
                 label1.Text = labelValue;
             }
+            this.BringToFront();
+            this.Focus();
         }
 
         private void button1_Click(object sender, EventArgs e)

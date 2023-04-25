@@ -320,8 +320,8 @@ ModListWidgetStayTime=5.0";
                 catch (Exception ex)
                 {
                     new UI.PopupForm("Version Check/Update Failed", $"Could not determine the latest LuteBot version",
-                        $"Please report this bug in our Discord\nThis is likely not a network issue, and something I did wrong in the code\n\nYou may want to manually check for an updated version at the following link\n\n{ex.Message}\n{ex.StackTrace}", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                        .ShowDialog();
+                        $"You may want to manually check for an updated version at the following link\n\n{ex.Message}\n{ex.StackTrace}", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
+                        .ShowDialog(this);
                 }
             }
         }
@@ -354,7 +354,7 @@ ModListWidgetStayTime=5.0";
                 catch (Exception e)
                 {
                     new PopupForm("Mordhau Detection Failed", $"Could not access Engine.ini at {engineIniPath}", $"LuteBot will be unable to fix the LuteMod startup crash from old versions\nThis also indicates something is generally wrong.  You may want to run LuteBot as Administrator\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "LuteMod Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                    .ShowDialog(this);
                     return false;
                 }
             }
@@ -376,7 +376,7 @@ ModListWidgetStayTime=5.0";
                 catch (Exception e)
                 {
                     new PopupForm("Mordhau Detection Failed", $"Could not access the Mordhau path at {MordhauPakPath}", $"If you wish to enable LuteMod installs, choose Settings -> Set Mordhau Path\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "LuteMod Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                    .ShowDialog(this);
                     installLuteModToolStripMenuItem.Enabled = false;
                     return true;
                 }
@@ -386,6 +386,21 @@ ModListWidgetStayTime=5.0";
 
         public void InstallLuteMod()
         {
+            var mordhauProcesses = Process.GetProcessesByName("Mordhau");
+            while(mordhauProcesses.Length > 0)
+            {
+                var popup = new PopupForm("Close Mordhau to Continue", $"Close Mordhau to Continue", $"LuteMod can't be installed while Mordhau is open");
+                popup.ShowDialog(this);
+                if (popup.DialogResult== DialogResult.OK)
+                {
+                    mordhauProcesses = Process.GetProcessesByName("Mordhau");
+                }
+                else
+                {
+                    return;
+                }
+            }
+
             // This may require admin access.  TODO: Detect if we need it and prompt them for it
             var pakPath = MordhauPakPath;
             if (!IsMordhauPakPathValid())
@@ -412,7 +427,7 @@ ModListWidgetStayTime=5.0";
             catch (Exception e)
             {
                 new PopupForm("Install Failed", $"Could not copy LuteMod files to {pakPath}", $"LuteBot may need to run as Administrator\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                    .ShowDialog(this);
                 return;
             }
 
@@ -450,7 +465,7 @@ ModListWidgetStayTime=5.0";
             catch (Exception e)
             {
                 new PopupForm("Could not remove old versions", $"Could not remove old versions of Paks at {pakPath}", $"Install will continue, but you may have conflicts if these files are not removed\n\nLuteBot may need to run as Administrator, or Mordhau may need to be closed\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                    .ShowDialog(this);
             }
 
 
@@ -494,7 +509,7 @@ ModListWidgetStayTime=5.0";
             catch (Exception e)
             {
                 new PopupForm("Install Failed", $"Could not access Game.ini at {gameIniPath}", $"LuteBot may need to run as Administrator\nYou can set a custom path in the Key Bindings menu\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                    .ShowDialog(this);
                 return;
             }
 
@@ -515,7 +530,7 @@ ModListWidgetStayTime=5.0";
             catch (Exception e)
             {
                 new PopupForm("Crash Fix Failed", $"Could not access Engine.ini at {engineIniPath}", $"This is not fatal, and install will continue, but if you are experiencing startup crashes from an old version, they will not be fixed\n\nLuteBot may need to run as Administrator\nYou can set a custom path in the Key Bindings menu\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                    .ShowDialog(this);
             }
 
             string partitionIndexTarget = Path.Combine(SaveManager.SaveFilePath, partitionIndexName);
@@ -529,10 +544,10 @@ ModListWidgetStayTime=5.0";
             catch (Exception e)
             {
                 new PopupForm("Could not create PartitionIndex", $"Could not copy to {partitionIndexTarget}", $"This is not fatal, and install will continue\n\nYou must initialize LuteMod yourself by pressing Kick with a Lute until the menu appears\n\n\n{e.Message}\n{e.StackTrace}", new Dictionary<string, string>() { { "Manual Install", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Install" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } })
-                    .ShowDialog();
+                    .ShowDialog(this);
             }
 
-            new PopupForm("Install Complete", "LuteMod Successfully Installed", "Use LuteBot to create Partitions out of your songs for LuteMod\n\nUse Kick in-game with a lute to open the LuteMod menu\n\nIf Mordhau is open, restart it",
+            new PopupForm("Install Complete", "LuteMod Successfully Installed", "Use LuteBot to create Partitions out of your songs for LuteMod\n\nUse Kick in-game with a lute to open the LuteMod menu",
                 new Dictionary<string, string>() {
                     { "Controls", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Controls" },
                     { "Adding Songs", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Adding_Songs" } ,
@@ -540,7 +555,7 @@ ModListWidgetStayTime=5.0";
                     { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
                     { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" },
                 })
-                    .ShowDialog();
+                    .ShowDialog(this);
         }
 
         private string GetPakPath()
@@ -758,7 +773,7 @@ ModListWidgetStayTime=5.0";
 
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (new SettingsForm(this)).ShowDialog();
+            (new SettingsForm(this)).ShowDialog(this);
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -785,7 +800,7 @@ ModListWidgetStayTime=5.0";
             openMidiFileDialog.DefaultExt = "mid";
             openMidiFileDialog.Filter = "MIDI files|*.mid|All files|*.*";
             openMidiFileDialog.Title = "Open MIDI file";
-            if (openMidiFileDialog.ShowDialog() == DialogResult.OK)
+            if (openMidiFileDialog.ShowDialog(this) == DialogResult.OK)
             {
                 string fileName = openMidiFileDialog.FileName;
                 await LoadFile(fileName).ConfigureAwait(false);
@@ -945,7 +960,7 @@ ModListWidgetStayTime=5.0";
                     { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
                     { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" },
                 });
-            popup.ShowDialog();
+            popup.ShowDialog(this);
         }
 
         private async void checkInstallUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
