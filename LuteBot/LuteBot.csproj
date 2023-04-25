@@ -304,7 +304,7 @@
     <None Include="app.config" />
     <None Include="app.manifest" />
     <None Include="channelNeural">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="LuteMod\AutoLoaderWindowsClient.pak">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

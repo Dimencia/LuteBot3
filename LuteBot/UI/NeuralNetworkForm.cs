@@ -34,7 +34,7 @@ namespace LuteBot.UI
             }
         }
 
-        public static string savePath = Path.Combine(LuteBotForm.lutebotPath, "CustomNetwork");
+        public static string savePath = Path.Combine(LuteBotForm.lutebotPath, "CustomNetworkv2");
 
         private async void buttonTrain_Click(object sender, EventArgs e)
         {
@@ -339,9 +339,21 @@ namespace LuteBot.UI
                 var candidates = new List<TrainingCandidate<MidiChannelItem>>();
 
                 var neuralCandidates = new List<MidiChannelItem[]>(); // It can accept multiple correct answers
-
+                BeginInvoke((MethodInvoker)delegate
+                {
+                    progressBarTraining.Maximum = pf.index.PartitionNames.Count + 1;
+                    progressBarTraining.Value = 0;
+                });
+                int progress = 0;
                 foreach (var part in pf.index.PartitionNames)
                 {
+                    progress++;
+                    int barProgress = progress;
+                    BeginInvoke((MethodInvoker)delegate
+                    {
+                        progressBarTraining.Maximum = pf.index.PartitionNames.Count + 1;
+                        progressBarTraining.Value = barProgress;
+                    });
                     string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, part + ".mid");
                     if (File.Exists(midiPath))
                     {
@@ -352,7 +364,8 @@ namespace LuteBot.UI
                             // Require at least 3 channels
                             if (tsm.MidiChannels.Count() > 2 && tsm.DataDictionary.ContainsKey(1)) // To keep the percentages from getting weird in training, at least 4 channels?
                             {
-                                if (tsm.MidiTracks.All(t => t.Value.Active))
+                                if (tsm.DataDictionary[1].MidiTracks.All(t => t.Active) && !tsm.DataDictionary[1].MidiChannels.Where(c => c.Id != 9).All(c => c.Active)
+                                     && tsm.DataDictionary[1].MidiChannels.Any(c => tsm.DataDictionary[0].MidiChannels.All(lc => lc.Id != c.Id || (!lc.Active && c.Active))))
                                 {
                                     // Actually, I think the flute track may not have the appropriate data...
                                     var tempNeuralCandidates = tsm.MidiChannels.Values.ToArray();
@@ -371,7 +384,8 @@ namespace LuteBot.UI
                                         candidates.Add(candidate);
                                     }
                                 }
-                                else if (tsm.MidiChannels.All(c => c.Value.Active))
+                                else if (tsm.DataDictionary[1].MidiChannels.Where(c => c.Id != 9).All(t => t.Active) && !tsm.DataDictionary[1].MidiTracks.All(c => c.Active)
+                                     && tsm.DataDictionary[1].MidiTracks.Any(c => tsm.DataDictionary[0].MidiTracks.All(lc => lc.Id != c.Id || (!lc.Active && c.Active))))
                                 {
                                     // If some tracks are disabled and all channels are enabled, we'll take the tracks as data
                                     // Track notes should already have discarded anything with channel 9
@@ -445,9 +459,6 @@ namespace LuteBot.UI
                     //foreach (var song in neuralTrainingCandidates)
                     Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
                     {
-                        float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
-                        float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
-                        float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
 
                         float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
                         var songCostTotal = 0f;
@@ -461,7 +472,7 @@ namespace LuteBot.UI
 
 
 
-                            var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                            var inputs = channel.GetNeuralInputs();
                             var expected = new float[1];
 
                             if (channel.Active)
@@ -507,16 +518,12 @@ namespace LuteBot.UI
                     {
                         if (!cancelled)
                         {
-                            float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
-                            float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
-                            float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
-
                             float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
 
                             Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
                             foreach (var channel in song)
                             {
-                                var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                                var inputs = channel.GetNeuralInputs();
                                 //var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
                                 //var neuralResults = tsm.neural.FeedForwardRecurrent(inputs);
                                 var neuralResults = tsm.neural.FeedForward(inputs);
@@ -563,10 +570,6 @@ namespace LuteBot.UI
                     {
                         if (!cancelled)
                         {
-                            float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
-                            float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
-                            float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
-
                             float maxTickNumber = song.SelectMany(c => c.tickNotes).SelectMany(kvp => kvp.Value).Max(n => n.tickNumber);
 
                             Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
@@ -574,7 +577,7 @@ namespace LuteBot.UI
                             {
                                 //var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
                                 //var neuralResults = tsm.neural.FeedForwardRecurrent(inputs);
-                                var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                                var inputs = channel.GetNeuralInputs();
                                 var neuralResults = tsm.neural.FeedForward(inputs);
                                 channelResults[channel] = neuralResults[0];
                             }
@@ -658,7 +661,7 @@ namespace LuteBot.UI
 
                 BeginInvoke((MethodInvoker)delegate
                 {
-                    richTextBox1.AppendText($"\n\n----Training Complete----\n\nNetwork saved to CustomNetwork file to {savePath}\nYou may now load midis and check it for yourself, and this will be your new default network. \n\nYou can revert at any time by deleting this file, or train again to replace it");
+                    richTextBox1.AppendText($"\n\n----Training Complete----\n\nNetwork saved to {savePath}\nYou may now load midis and check it for yourself, and this will be your new default network. \n\nYou can revert at any time by deleting this file, or train again to replace it");
                     richTextBox1.ScrollToCaret();
                     buttonTrain.Enabled = true;
                     textBox1.Enabled = true;

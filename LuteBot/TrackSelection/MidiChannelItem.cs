@@ -191,6 +191,8 @@ namespace LuteBot.TrackSelection
         public Dictionary<int, List<MidiNote>> tickNotes { get; internal set; } = new Dictionary<int, List<MidiNote>>(); // For setup and filtering, as well as disabling/enabling specific notes
         public int midiInstrument { get; set; }
         public float avgVariation { get; set; }
+        public float percentTimePlaying { get; set; }
+        public float percentSongNotes { get; set; }
 
         public MidiChannelItem() { }
 

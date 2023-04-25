@@ -361,10 +361,11 @@ ModListWidgetStayTime=5.0";
             var pakPath = Path.Combine(MordhauPakPath, lutemodPakName);
             if (File.Exists(pakPath) && !string.IsNullOrWhiteSpace(inputIniPath))
             {
+                string engineIniPath = "";
                 try
                 {
                     // Actually.  If they have it, we should check engine.ini for the bad line, and if it's there, recommend install
-                    string engineIniPath = Path.Combine(Path.GetDirectoryName(inputIniPath), "Engine.ini");
+                    engineIniPath = Path.Combine(Path.GetDirectoryName(inputIniPath), "Engine.ini");
 
                     var content = File.ReadAllText(engineIniPath);
                     return !content.Contains(removeFromEngine);
@@ -757,7 +758,7 @@ ModListWidgetStayTime=5.0";
             }
         }
 
-        private async Task PlayerLoadCompleted(bool skipUI)
+        private async Task PlayerLoadCompleted(bool skipUI, bool reorderTracks = false)
         {
             SuspendLayout();
 
@@ -765,7 +766,7 @@ ModListWidgetStayTime=5.0";
             if (player.GetType() == typeof(MidiPlayer))
             {
                 MidiPlayer midiPlayer = player as MidiPlayer;
-                trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
+                trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks(), reorderTracks);
                 trackSelectionManager.FileName = currentTrackName;
             }
 
@@ -891,7 +892,7 @@ ModListWidgetStayTime=5.0";
         }
 
 
-        public async Task LoadFile(string fileName, bool skipUI = false)
+        public async Task<bool> LoadFile(string fileName, bool skipUI = false, bool reorderTracks = false)
         {
             if (!skipUI)
                 await InvokeAsync(() =>
@@ -902,7 +903,8 @@ ModListWidgetStayTime=5.0";
             {
                 await player.LoadFileAsync(fileName).ConfigureAwait(false);
                 currentTrackName = fileName;
-                await PlayerLoadCompleted(skipUI).ConfigureAwait(false);
+                await PlayerLoadCompleted(skipUI, reorderTracks).ConfigureAwait(false);
+                return player.dryWetFile != null;
             }
             catch (Exception ex)
             {
@@ -916,6 +918,7 @@ ModListWidgetStayTime=5.0";
                         partitionsForm.savePartitionButton.Enabled = true;
                     }).ConfigureAwait(false);
             }
+            return false;
         }
 
         private void TrackFilteringToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1079,6 +1082,16 @@ ModListWidgetStayTime=5.0";
             trackSelectionForm?.Dispose();
             guildLibraryForm?.Dispose();
             base.Dispose();
+        }
+
+        private async void withoutReorderingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await partitionsForm.reloadAll(false).ConfigureAwait(false);
+        }
+
+        private async void forceAIReorderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await partitionsForm.reloadAll(true).ConfigureAwait(false);
         }
     }
 }

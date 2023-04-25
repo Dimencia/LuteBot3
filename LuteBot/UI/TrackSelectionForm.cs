@@ -1306,7 +1306,7 @@ namespace LuteBot.UI
         {
             if (trackSelectionManager.FileName != null)
             {
-                trackSelectionManager.SaveTrackManager();
+                await trackSelectionManager.SaveTrackManager().ConfigureAwait(false);
                 try
                 {
                     await LuteBotForm.luteBotForm.partitionsForm.ShowPartitionSaveForm().ConfigureAwait(false);
@@ -1391,12 +1391,12 @@ namespace LuteBot.UI
             OffsetPanel.Refresh();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private async void button2_Click(object sender, EventArgs e)
         {
             var result = saveFileDialog1.ShowDialog(this);
             if (result == DialogResult.OK)
             {
-                trackSelectionManager.SaveTrackManager(saveFileDialog1.FileName);
+                await trackSelectionManager.SaveTrackManager(saveFileDialog1.FileName).ConfigureAwait(false);
             }
         }
 

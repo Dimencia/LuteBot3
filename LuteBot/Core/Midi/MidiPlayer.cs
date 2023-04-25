@@ -35,9 +35,9 @@ namespace LuteBot.Core.Midi
         public MidiPlayer(TrackSelectionManager trackSelectionManager)
         {
             trackSelectionManager.Player = this;
-            
+
             this.trackSelectionManager = trackSelectionManager;
-            
+
         }
 
         public Dictionary<int, MidiChannelItem> GetMidiChannels()
@@ -239,6 +239,7 @@ namespace LuteBot.Core.Midi
                                     var prog = (int)dryNote.Channel;
                                     if (programNumbers.TryGetValue(dryNote.Channel, out var pn))
                                         prog = pn.ProgramNumber;
+                                    channel.midiInstrument = prog;
 
                                     var absoluteTicks = (int)dryNote.TimeAs<MidiTimeSpan>(tempoMap).TimeSpan;
 
@@ -262,7 +263,7 @@ namespace LuteBot.Core.Midi
                                     channels[dryNote.Channel].tickNotes[absoluteTicks].Add(note);
                                     tracks[trackNum].tickNotes[absoluteTicks].Add(note);
 
-                                    channel.totalNoteLength += note.timeLength;
+
                                     if (dryNote.NoteNumber < channel.lowestNote)
                                         channel.lowestNote = dryNote.NoteNumber;
                                     if (dryNote.NoteNumber > channel.highestNote)
@@ -270,7 +271,7 @@ namespace LuteBot.Core.Midi
                                     channel.averageNote += dryNote.NoteNumber;
                                     channel.numNotes++;
 
-                                    track.totalNoteLength += note.timeLength;
+
                                     if (dryNote.NoteNumber < track.lowestNote)
                                         track.lowestNote = dryNote.NoteNumber;
                                     if (dryNote.NoteNumber > track.highestNote)
@@ -297,24 +298,50 @@ namespace LuteBot.Core.Midi
 
                         trackNum++;
                     }
-
+                    var totalNumNotes = channels.Values.Sum(c => c.numNotes);
                     foreach (var channel in channels.Values)
                     {
                         if (channel.numNotes > 0)
                         {
-                            channel.avgNoteLength = channel.totalNoteLength / channel.numNotes;
-                            channel.averageNote = (int)((float)channel.averageNote / channel.numNotes);
-                            // avg Variation: iterate notes, find difference to last note, add up and divide
+                            // Total note length... Can't just sum durations
+                            TimeSpan lastTime = TimeSpan.Zero;
+                            TimeSpan lastDuration = TimeSpan.Zero;
                             int lastNote = -1;
                             int totalVariation = 0;
-                            foreach (var noteList in channel.tickNotes.Values)
-                                foreach (var note in noteList)
+                            foreach (var tickNote in channel.tickNotes)
+                            {
+                                if (tickNote.Value.Any())
                                 {
-                                    if (lastNote > -1)
-                                        totalVariation += Math.Abs(note.note - lastNote);
-                                    lastNote = note.note;
+                                    var tickDuration = TimeSpan.FromSeconds(tickNote.Value.Max(n => n.timeLength));
+                                    var noteStartTime = tickNote.Value.First().startTime;
+                                    if (noteStartTime > lastTime + lastDuration)
+                                    {
+                                        channel.totalNoteLength += (float)tickDuration.TotalSeconds;
+                                    }
+                                    else if (noteStartTime + tickDuration > lastTime + lastDuration)
+                                    {
+                                        channel.totalNoteLength += (float)((noteStartTime + tickDuration) - (lastTime + lastDuration)).TotalSeconds;
+                                    }
+                                    lastTime = noteStartTime;
+                                    lastDuration = tickDuration;
+                                    // avg Variation: iterate notes, find difference to last note, add up and divide
+                                    foreach (var note in tickNote.Value)
+                                    {
+                                        if (lastNote > -1)
+                                            totalVariation += Math.Abs(note.note - lastNote);
+                                        lastNote = note.note;
+                                    }
                                 }
+                            }
+
+                            channel.avgNoteLength = channel.totalNoteLength / channel.numNotes;
+                            channel.averageNote = (int)((float)channel.averageNote / channel.numNotes);
                             channel.avgVariation = totalVariation / channel.numNotes;
+                            if (currentTimeLength.TotalSeconds > 0)
+                                channel.percentTimePlaying = (float)(channel.totalNoteLength / currentTimeLength.TotalSeconds);
+                            else
+                                channel.percentTimePlaying = 0;
+                            channel.percentSongNotes = channel.numNotes / (float)totalNumNotes;
                         }
                     }
 
@@ -443,7 +470,7 @@ namespace LuteBot.Core.Midi
             {
                 chunkNumber++; return t.GetNotes(new NoteDetectionSettings { NoteSearchContext = NoteSearchContext.AllEventsCollections, NoteStartDetectionPolicy = NoteStartDetectionPolicy.LastNoteOn }).Where(n => (!trackSelectionManager.MidiTracks.ContainsKey(chunkNumber) || trackSelectionManager.MidiTracks[chunkNumber].Active) && (!trackId.HasValue || trackId.Value == chunkNumber)
                     && (!trackSelectionManager.MidiChannels.ContainsKey(n.Channel) || trackSelectionManager.MidiChannels[n.Channel].Active) && n.Velocity > 0 && n.Channel != 9)
-                    .Select(n => new LuteMod.Sequencing.Note() { duration = Math.Min((float)n.LengthAs<MetricTimeSpan>(tempoMap).TotalSeconds - (0.0171f*2), 1), Tick = n.Time, Tone = n.NoteNumber + trackSelectionManager.MidiChannels[n.Channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
+                    .Select(n => new LuteMod.Sequencing.Note() { duration = Math.Min((float)n.LengthAs<MetricTimeSpan>(tempoMap).TotalSeconds - (0.0171f * 2), 1), Tick = n.Time, Tone = n.NoteNumber + trackSelectionManager.MidiChannels[n.Channel].offset + trackSelectionManager.NoteOffset, Type = LuteMod.Sequencing.NoteType.On });
             }).ToList();
             // Always add the tempo at 0 time
             var startTempo = tempoMap.GetTempoAtTime(new MetricTimeSpan(0));

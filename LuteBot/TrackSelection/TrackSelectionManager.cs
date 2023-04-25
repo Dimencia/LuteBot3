@@ -219,7 +219,7 @@ namespace LuteBot.TrackSelection
             return data;
         }
 
-        public void SaveTrackManager(string filename = null)
+        public async Task SaveTrackManager(string filename = null)
         {
             int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
             DataDictionary[instrumentId] = GetTrackSelectionData(instrumentId);
@@ -230,7 +230,7 @@ namespace LuteBot.TrackSelection
                 simpleDataDictionary[kvp.Key] = new SimpleTrackSelectionData(kvp.Value, kvp.Value.InstrumentID, OriginalDataDictionary[kvp.Key]);
             }
 
-            SaveManager.SaveTrackSelectionData(simpleDataDictionary, FileName, filename);
+            await SaveManager.SaveTrackSelectionData(simpleDataDictionary, FileName, filename).ConfigureAwait(false);
         }
 
         public void LoadTrackManager()
@@ -384,7 +384,7 @@ namespace LuteBot.TrackSelection
             //    kvp.Value.InstrumentID = kvp.Key;
         }
 
-        public void LoadTracks(Dictionary<int, MidiChannelItem> channels, Dictionary<int, TrackItem> tracks)
+        public void LoadTracks(Dictionary<int, MidiChannelItem> channels, Dictionary<int, TrackItem> tracks, bool reorderTracks = false)
         {
             UnloadTracks();
             //midiChannels.Clear();
@@ -416,7 +416,7 @@ namespace LuteBot.TrackSelection
             }
 
             // Now is a good time to predict a flute channel - PredictedFluteChannel
-            PredictedFluteChannel = GetFlutePrediction();
+            PredictedFluteChannel = GetFlutePrediction(reorderTracks);
 
             ResetRequest();
             //EventHelper();
@@ -427,7 +427,7 @@ namespace LuteBot.TrackSelection
         public NeuralNetwork neural = null;
 
         // Returns the channel ID of the channel most likely to be good for flute
-        private MidiChannelItem GetFlutePrediction()
+        private MidiChannelItem GetFlutePrediction(bool reorderTracks = false)
         {
             var activeChannels = midiChannels.Values;//.Where(c => c.Active); // Wait ... how...?  
             // I don't understand how anything was even getting labeled if we were using this
@@ -483,17 +483,17 @@ namespace LuteBot.TrackSelection
 
                 float maxAvgNoteLength = activeChannels.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
                 float maxNoteLength = activeChannels.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
-                float maxNumNotes = activeChannels.Max(c => c.Id == 9 ? 0 : c.numNotes);
+                float totalNumNotes = activeChannels.Max(c => c.Id == 9 ? 0 : c.numNotes);
 
                 foreach (var channel in activeChannels)
                 {
-                    var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                    var inputs = channel.GetNeuralInputs();
                     var neuralResults = neural.FeedForward(inputs);
                     channelResults[channel] = neuralResults[0];
                 }
                 foreach (var channel in MidiTracks.Values)
                 {
-                    var inputs = channel.GetNeuralInputs(maxAvgNoteLength, maxNumNotes, maxNoteLength);
+                    var inputs = channel.GetNeuralInputs();
                     var neuralResults = neural.FeedForward(inputs);
                     channelResults[channel] = neuralResults[0]; // The tracks are MidiChannels and can work in this way; later we just check if they are a MidiTrack
                 }
@@ -547,7 +547,7 @@ namespace LuteBot.TrackSelection
                         if (channel is TrackItem)
                         {
                             ident = "Track";
-                            if (!channel.Rank.HasValue)
+                            if (!channel.Rank.HasValue || reorderTracks)
                             {
                                 channel.Rank = i;
                             }

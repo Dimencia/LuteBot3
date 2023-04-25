@@ -63,7 +63,7 @@ namespace LuteBot
                 || candidate.Length > array.Length;
         }
 
-        public static int numParamsPerChannel = 8;
+        public static int numParamsPerChannel = 10;
 
         public static float[][] GetRecurrentInput(this MidiChannelItem channel, int noteParams, float maxTickNumber)
         {
@@ -129,7 +129,7 @@ namespace LuteBot
         }
 
 
-        public static float[] GetNeuralInputs(this MidiChannelItem c, float maxAvgNoteLength, float maxNumNotes, float maxTotalNoteLength)
+        public static float[] GetNeuralInputs(this MidiChannelItem c)
         {
             // We'll try not normalizing 
 
@@ -141,18 +141,20 @@ namespace LuteBot
 
             //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
             int i = 0;
-            inputs[i++] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
+            inputs[i++] = channel.avgNoteLength;
             inputs[i++] = channel.maxChordSize;
-            inputs[i++] = (maxTotalNoteLength > 0 ? channel.totalNoteLength / maxTotalNoteLength : 0);
+            inputs[i++] = channel.percentTimePlaying;
             //inputi++lNoteLength;
             inputs[i++] = channel.highestNote / 128f;
             inputs[i++] = channel.lowestNote / 128f;
-            inputs[i++] = (maxNumNotes > 0 ? channel.numNotes / maxNumNotes : 0);
-            //inputi++ 6] = channel.Id / 16f;
+            
+            inputs[i++] = channel.percentSongNotes;
+            
             inputs[i++] = channel.midiInstrument / 128f;
-            inputs[i++] = channel.avgVariation;
+            inputs[i++] = channel.avgVariation / 64f; // Doubt this ever gets above 64, which this handles
             //inputs[j * 6 + 5] = channel.numNotes;
-
+            inputs[i++] = channel.averageNote / 128f;
+            inputs[i++] = channel.Id / 16f;
 
             return inputs;
         }

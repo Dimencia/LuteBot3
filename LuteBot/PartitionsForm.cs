@@ -443,6 +443,7 @@ namespace LuteBot
         {
             try
             {
+                string midiFileName = null;
                 await LuteBotForm.luteBotForm.InvokeAsync(() =>
                 {
 
@@ -581,10 +582,7 @@ namespace LuteBot
                                 // Lastly, save the settings in a midi file with the same name, in the same folder, for ease of sharing...
                                 // TODO: Consider storing these in appdata, and providing a button to access them.  Both might get complicated if I make partition playlists
                                 // Actually... I think I will store them in appdata.
-                                var midFileName = Path.Combine(partitionMidiPath, name + ".mid");
-                                Directory.CreateDirectory(partitionMidiPath);
-                                Task.Run(() => tsm.SaveTrackManager(midFileName)); // Lutebot doesn't need this anytime soon - and shouldn't offer the option to load it until it exists anyway
-
+                                
                                 //Invoke((MethodInvoker)delegate {
                                 PopulateIndexList();
                                 //});
@@ -592,6 +590,10 @@ namespace LuteBot
                         }
                     }
                 }).ConfigureAwait(false);
+                midiFileName = Path.Combine(partitionMidiPath, name + ".mid");
+                Directory.CreateDirectory(partitionMidiPath);
+                await tsm.SaveTrackManager(midiFileName).ConfigureAwait(false); // Lutebot doesn't need this anytime soon - and shouldn't offer the option to load it until it exists anyway
+
             }
             catch (Exception ex)
             {
@@ -643,7 +645,7 @@ namespace LuteBot
                     foreach (var f in filenames.Reverse()) // So the first ones are first again
                     {
                         await LuteBotForm.luteBotForm.LoadFile(f, true).ConfigureAwait(false);
-                        await SavePartition(Regex.Replace(Path.GetFileName(f).Replace(".mid", ""), "[^a-zA-Z0-9]", "")).ConfigureAwait(false);
+                        await SavePartition(Regex.Replace(Path.GetFileName(f).Replace(".mid", ""), "[^a-zA-Z0-9 ]", "")).ConfigureAwait(false);
                     }
                 }
             }
@@ -753,17 +755,24 @@ namespace LuteBot
             });
         }
 
+        public async Task reloadAll(bool reorderTracks)
+        {
+            var filenames = listBoxPartitions.Items.Cast<string>().Reverse().ToArray();
+
+            await AutoSaveFiles(filenames, true, reorderTracks).ConfigureAwait(false);
+        }
+
         private async void reloadSelectedButton_Click(object sender, EventArgs e)
         {
             if (listBoxPartitions.SelectedItems.Count > 0)
             {
-                var filenames = listBoxPartitions.SelectedItems.Cast<string>().Reverse();
+                var filenames = listBoxPartitions.SelectedItems.Cast<string>().Reverse().ToArray();
 
-                await AutoSaveFiles(filenames).ConfigureAwait(false);
+                await AutoSaveFiles(filenames, true).ConfigureAwait(false);
             }
         }
 
-        public async Task AutoSaveFiles(IEnumerable<string> filenames)
+        public async Task AutoSaveFiles(IEnumerable<string> filenames, bool overwrite = false, bool reorderTracks = false)
         {
             string warnings = "";
             await LuteBotForm.luteBotForm.InvokeAsync(() =>
@@ -785,9 +794,9 @@ namespace LuteBot
                     }
                     try
                     {
-                        await LuteBotForm.luteBotForm.LoadFile(filePath, true).ConfigureAwait(false);
+                        await LuteBotForm.luteBotForm.LoadFile(filePath, true, reorderTracks).ConfigureAwait(false);
                         if (player.dryWetFile != null)
-                            await SavePartition(Regex.Replace(Path.GetFileName(filePath).Replace(".mid", ""), "[^a-zA-Z0-9]", ""), false).ConfigureAwait(false);
+                            await SavePartition(Regex.Replace(Path.GetFileName(filePath).Replace(".mid", ""), "[^a-zA-Z0-9 ]", ""), overwrite).ConfigureAwait(false);
 
                     }
                     catch (Exception ex)

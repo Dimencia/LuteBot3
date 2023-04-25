@@ -288,9 +288,9 @@ namespace LuteBot.IO.Files
             return LoadNoDialog<SoundBoard>(path);
         }
 
-        public static void SaveTrackSelectionData(Dictionary<int, SimpleTrackSelectionData> data, string fileName, string targetPath = null)
+        public static async Task SaveTrackSelectionData(Dictionary<int, SimpleTrackSelectionData> data, string fileName, string targetPath = null)
         {
-            SaveNoDialog(data, fileName, targetPath);
+            await SaveNoDialog(data, fileName, targetPath).ConfigureAwait(false);
         }
 
         public static Dictionary<int, SimpleTrackSelectionData> LoadTrackSelectionData(string fileName)
@@ -483,7 +483,7 @@ namespace LuteBot.IO.Files
             return result;
         }
 
-        private static void SaveNoDialog<T>(T target, string path, string targetPath = null)
+        private static async Task SaveNoDialog<T>(T target, string path, string targetPath = null)
         {
             if (targetPath == null)
                 targetPath = path;
@@ -526,7 +526,12 @@ namespace LuteBot.IO.Files
 
                         midiDataBytes = midiDataBytes.Concat(Encoding.ASCII.GetBytes(json)).ToArray();
 
-                        File.WriteAllBytes(targetPath, midiDataBytes);
+                        using (var fs = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
+                        using (var ms = new MemoryStream(midiDataBytes))
+                        {
+                            await ms.CopyToAsync(fs).ConfigureAwait(false);
+                            await fs.FlushAsync().ConfigureAwait(false);
+                        }
 
                         // First read in the existing data
                         //byte[] midiData;
