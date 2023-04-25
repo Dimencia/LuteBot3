@@ -533,7 +533,7 @@ namespace LuteBot.UI
 
                         //await Task.Delay(0); // Let the form live between iterations
                     });
-                    Parallel.ForEach(neuralTrainingCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
+                    Parallel.ForEach(neuralTestCandidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, song =>
                     {
                         float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
                         float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);

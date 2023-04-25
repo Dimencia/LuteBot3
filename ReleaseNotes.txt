@@ -1,3 +1,10 @@
+Version 3.6.1
+
+- Maybe fix startup crashes for Epic users
+- LuteMod 2.61
+	- Re-enabled loading of voice config settings
+	- Fixed issue where playing sometimes pauses itself immediately
+
 Version 3.6.0
 
 - Major rework of LuteBot and LuteMod note handling and configuration

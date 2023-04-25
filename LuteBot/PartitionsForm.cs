@@ -49,23 +49,30 @@ namespace LuteBot
             exportSelectedButton.Enabled = false;
             renameSelectedButton.Enabled = false;
 
-            if (!LuteBotForm.luteBotForm.IsLuteModInstalled())
+            try
             {
-                using (var popup = new PopupForm("Install LuteMod", "Would you like to update/install LuteMod?", "You need this to play music.\n\nIf you already have a working LuteMod installed, this means there's an important update\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
-                new Dictionary<string, string>() {
+                if (!LuteBotForm.luteBotForm.IsLuteModInstalled())
+                {
+                    using (var popup = new PopupForm("Install LuteMod", "Would you like to update/install LuteMod?", "You need this to play music.\n\nIf you already have a working LuteMod installed, this means there's an important update\n\nThanks to Monty for LuteMod, and cswic for the autoloader\n\nFor more information, see:",
+                    new Dictionary<string, string>() {
                     { "What is LuteMod", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod" } ,
                     { "LuteMod mod.io page", "https://mordhau.mod.io/lutemod" },
                     { "Autoloader mod.io page", "https://mordhau.mod.io/clientside-mod-autoloader" },
                     { "Flute and Duets", "https://mordhau-bards-guild.fandom.com/wiki/LuteMod#Flute_and_Duets" },
                     { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" },
-                }, MessageBoxButtons.YesNo))
-                {
-                    popup.ShowDialog(this);
-                    if (popup.DialogResult == DialogResult.Yes)
-                        LuteBotForm.luteBotForm.InstallLuteMod();
-                    else
-                        Hide();
+                    }, MessageBoxButtons.YesNo))
+                    {
+                        popup.ShowDialog(this);
+                        if (popup.DialogResult == DialogResult.Yes)
+                            LuteBotForm.luteBotForm.InstallLuteMod();
+                        else
+                            Hide();
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+
             }
             RefreshPartitionList();
         }

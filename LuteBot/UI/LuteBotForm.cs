@@ -29,6 +29,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace LuteBot
         public static TrackSelectionManager trackSelectionManager;
 
         private const string musicNameLabelHeader = "Loaded: ";
-        private static string lutemodPakName = "FLuteMod_2.6.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string lutemodPakName = "FLuteMod_2.61.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
         private static int lutemodVersion1 = 2;
         private static int lutemodVersion2 = 6;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
@@ -205,7 +206,7 @@ ModListWidgetStayTime=5.0";
 
         private async void LuteBotForm_Shown(object sender, EventArgs e)
         {
-            await CheckUpdates(false);
+            await CheckUpdates(false).ConfigureAwait(false);
         }
 
         public async Task CheckUpdates(bool ignoreSettings = false)
@@ -213,7 +214,7 @@ ModListWidgetStayTime=5.0";
             if (ConfigManager.GetBooleanProperty(PropertyItem.CheckForUpdates))
             {
                 // Try to update the version.  This is an async void by necessity, so errors will be dropped if we don't log them - but they get logged in there
-                LatestVersion = await UpdateManager.GetLatestVersion();
+                LatestVersion = await UpdateManager.GetLatestVersion().ConfigureAwait(false);
                 try
                 {
                     if (LatestVersion != null && LatestVersion.VersionArray != null)
@@ -337,6 +338,7 @@ ModListWidgetStayTime=5.0";
             {
                 return true; // They have disabled installs or otherwise didn't input the path correctly, so don't check
             }
+
             if (!IsMordhauPakPathValid())
             {
                 MordhauPakPath = GetMordhauPathFromPrompt();
@@ -370,12 +372,26 @@ ModListWidgetStayTime=5.0";
                 {
                     // Check if they have a similar version instead
                     Directory.CreateDirectory(MordhauPakPath); // Prevent crash if it doesn't exist
+                    var curVers = Regex.Replace(lutemodPakName, "[^0-9]", "").Select(c => int.Parse(c.ToString())).ToArray();
                     foreach (var f in Directory.GetFiles(MordhauPakPath))
                     {
-                        Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9]*)");
+                        Match m = Regex.Match(Path.GetFileName(f), @"LuteMod_([0-9])\.([0-9])([0-9]*)");
                         if (m.Success)
                         {
+                            var existingVers = Regex.Replace(Path.GetFileName(f), "[^0-9]", "").Select(c => int.Parse(c.ToString())).ToArray();
+                            for(int i = 0; i < curVers.Length; i++)
+                            {
+                                if (existingVers.Length > i && existingVers[i] > curVers[i])
+                                    return true;
+                                if (existingVers.Length <= i || existingVers[i] < curVers[i])
+                                {
+                                    // This doesn't really go here but oh well; if they have an existing old version, force an update then return true
+                                    InstallLuteMod();
+                                    return true;
+                                }
+                            }
                             return true;
+                            
                         }
                     }
                 }
@@ -675,7 +691,7 @@ ModListWidgetStayTime=5.0";
             {
                 MessageBox.Show($"General failure... \n{e.Message}\n{e.StackTrace}");
             }
-            var epicDefaultPath = "C:\\Program Files\\Epic Games\\Mordhau\\Mordhau\\Content\\CustomPaks";
+            var epicDefaultPath = @"C:\Program Files\Epic Games\Mordhau\Mordhau\Content\CustomPaks";
             if (IsMordhauPakPathValid(epicDefaultPath))
                 return epicDefaultPath;
 
@@ -687,7 +703,7 @@ ModListWidgetStayTime=5.0";
             var inputForm = new MordhauPathInputForm(MordhauPakPath);
             inputForm.ShowDialog(this);
 
-            if (inputForm.result == DialogResult.OK && inputForm.path != string.Empty && File.Exists(inputForm.path))
+            if (inputForm.result == DialogResult.OK && inputForm.path != string.Empty && IsMordhauPakPathValid(inputForm.path))
             {
                 installLuteModToolStripMenuItem.Enabled = true;
                 var result = Path.Combine(Path.GetDirectoryName(inputForm.path), "Mordhau", "Content", "CustomPaks");
@@ -710,8 +726,24 @@ ModListWidgetStayTime=5.0";
             // See if the mordhau exe is where it should be
             if (string.IsNullOrWhiteSpace(path))
                 return false;
-            var exePath = Path.Combine(path, ".." + Path.DirectorySeparatorChar, ".." + Path.DirectorySeparatorChar, ".." + Path.DirectorySeparatorChar, "Mordhau.exe");
-            return File.Exists(exePath);
+            var exePath = Path.Combine(path, "..", "..", "..", "Mordhau.exe");
+
+            System.IO.FileInfo fi = null;
+            try
+            {
+                fi = new System.IO.FileInfo(exePath);
+            }
+            catch (ArgumentException) { }
+            catch (System.IO.PathTooLongException) { }
+            catch (NotSupportedException) { }
+            if (ReferenceEquals(fi, null))
+            {
+                return false;
+            }
+            else
+            {
+                return fi.Exists;
+            }
         }
 
         private async Task PlayerLoadCompleted(bool skipUI)

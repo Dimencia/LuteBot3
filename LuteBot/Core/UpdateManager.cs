@@ -33,7 +33,7 @@ namespace LuteBot.Core
         public static async Task<LuteBotVersion> GetLatestVersion()
         {
             var result = new LuteBotVersion();
-            var versionPage = await GetVersionPage(10000); // Arbitrary 10s timeout seems fine
+            var versionPage = await GetVersionPage(10000).ConfigureAwait(false); // Arbitrary 10s timeout seems fine
             if (versionPage != null)
             {
                 var versionMatch = versionRegex.Match(versionPage);
