@@ -157,7 +157,7 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(568, 529);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(93, 20);
+            this.label5.Size = new System.Drawing.Size(74, 16);
             this.label5.TabIndex = 12;
             this.label5.Text = "CPU Cores";
             // 
