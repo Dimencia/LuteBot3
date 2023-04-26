@@ -169,7 +169,7 @@ ModListWidgetStayTime=5.0";
                 {
 
                     // Parse the version into something we can compare
-                    var firstGoodVersions = "3.6.0".Split('.');
+                    var firstGoodVersions = "3.6.2".Split('.');
                     var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
 
 
@@ -403,7 +403,7 @@ ModListWidgetStayTime=5.0";
                                 if (existingVers.Length <= i || existingVers[i] < curVers[i])
                                 {
                                     // This doesn't really go here but oh well; if they have an existing old version, force an update then return true
-                                    InstallLuteMod();
+                                    //InstallLuteMod();  // People got whiny about this
                                     return true;
                                 }
                             }
