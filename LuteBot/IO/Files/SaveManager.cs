@@ -638,7 +638,6 @@ namespace LuteBot.IO.Files
                         }
                     } // If it fails, fallback and write to the old path, and write just the stream
                 }
-
             }
         }
 

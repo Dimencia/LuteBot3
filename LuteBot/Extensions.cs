@@ -63,7 +63,7 @@ namespace LuteBot
                 || candidate.Length > array.Length;
         }
 
-        public static int numParamsPerChannel = 10;
+        public static int numParamsPerChannel = 9;
 
         public static float[][] GetRecurrentInput(this MidiChannelItem channel, int noteParams, float maxTickNumber)
         {
@@ -150,7 +150,7 @@ namespace LuteBot
             
             inputs[i++] = channel.percentSongNotes;
             
-            inputs[i++] = channel.midiInstrument / 128f;
+            //inputs[i++] = channel.midiInstrument / 128f;
             inputs[i++] = channel.avgVariation / 64f; // Doubt this ever gets above 64, which this handles
             //inputs[j * 6 + 5] = channel.numNotes;
             inputs[i++] = channel.averageNote / 128f;

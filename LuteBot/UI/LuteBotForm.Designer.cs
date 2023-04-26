@@ -48,6 +48,9 @@ namespace LuteBot
             this.openSavFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openMidiFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reSaveAllPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.forceAIReorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.withoutReorderingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,9 +65,7 @@ namespace LuteBot
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.partitionPanel = new System.Windows.Forms.Panel();
-            this.reSaveAllPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.forceAIReorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.withoutReorderingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoEnableFlutesAbove50ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.consoleDisplayPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -192,6 +193,31 @@ namespace LuteBot
             this.trainToolStripMenuItem.Text = "Train...";
             this.trainToolStripMenuItem.Click += new System.EventHandler(this.trainToolStripMenuItem_Click);
             // 
+            // reSaveAllPartitionsToolStripMenuItem
+            // 
+            this.reSaveAllPartitionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.forceAIReorderToolStripMenuItem,
+            this.withoutReorderingToolStripMenuItem});
+            this.reSaveAllPartitionsToolStripMenuItem.Name = "reSaveAllPartitionsToolStripMenuItem";
+            this.reSaveAllPartitionsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
+            this.reSaveAllPartitionsToolStripMenuItem.Text = "Re-Save All Partitions";
+            // 
+            // forceAIReorderToolStripMenuItem
+            // 
+            this.forceAIReorderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.autoEnableFlutesAbove50ToolStripMenuItem});
+            this.forceAIReorderToolStripMenuItem.Name = "forceAIReorderToolStripMenuItem";
+            this.forceAIReorderToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.forceAIReorderToolStripMenuItem.Text = "Force AI Reorder";
+            this.forceAIReorderToolStripMenuItem.Click += new System.EventHandler(this.forceAIReorderToolStripMenuItem_Click);
+            // 
+            // withoutReorderingToolStripMenuItem
+            // 
+            this.withoutReorderingToolStripMenuItem.Name = "withoutReorderingToolStripMenuItem";
+            this.withoutReorderingToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.withoutReorderingToolStripMenuItem.Text = "Without Reordering";
+            this.withoutReorderingToolStripMenuItem.Click += new System.EventHandler(this.withoutReorderingToolStripMenuItem_Click);
+            // 
             // windowToolStripMenuItem
             // 
             this.windowToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -312,28 +338,12 @@ namespace LuteBot
             this.partitionPanel.Size = new System.Drawing.Size(626, 582);
             this.partitionPanel.TabIndex = 15;
             // 
-            // reSaveAllPartitionsToolStripMenuItem
+            // autoEnableFlutesAbove50ToolStripMenuItem
             // 
-            this.reSaveAllPartitionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.forceAIReorderToolStripMenuItem,
-            this.withoutReorderingToolStripMenuItem});
-            this.reSaveAllPartitionsToolStripMenuItem.Name = "reSaveAllPartitionsToolStripMenuItem";
-            this.reSaveAllPartitionsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
-            this.reSaveAllPartitionsToolStripMenuItem.Text = "Re-Save All Partitions";
-            // 
-            // forceAIReorderToolStripMenuItem
-            // 
-            this.forceAIReorderToolStripMenuItem.Name = "forceAIReorderToolStripMenuItem";
-            this.forceAIReorderToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.forceAIReorderToolStripMenuItem.Text = "Force AI Reorder";
-            this.forceAIReorderToolStripMenuItem.Click += new System.EventHandler(this.forceAIReorderToolStripMenuItem_Click);
-            // 
-            // withoutReorderingToolStripMenuItem
-            // 
-            this.withoutReorderingToolStripMenuItem.Name = "withoutReorderingToolStripMenuItem";
-            this.withoutReorderingToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.withoutReorderingToolStripMenuItem.Text = "Without Reordering";
-            this.withoutReorderingToolStripMenuItem.Click += new System.EventHandler(this.withoutReorderingToolStripMenuItem_Click);
+            this.autoEnableFlutesAbove50ToolStripMenuItem.Name = "autoEnableFlutesAbove50ToolStripMenuItem";
+            this.autoEnableFlutesAbove50ToolStripMenuItem.Size = new System.Drawing.Size(294, 26);
+            this.autoEnableFlutesAbove50ToolStripMenuItem.Text = "Auto Enable Flutes Above 50%";
+            this.autoEnableFlutesAbove50ToolStripMenuItem.Click += new System.EventHandler(this.autoEnableFlutesAbove50ToolStripMenuItem_Click);
             // 
             // LuteBotForm
             // 
@@ -397,6 +407,7 @@ namespace LuteBot
         private ToolStripMenuItem reSaveAllPartitionsToolStripMenuItem;
         private ToolStripMenuItem forceAIReorderToolStripMenuItem;
         private ToolStripMenuItem withoutReorderingToolStripMenuItem;
+        private ToolStripMenuItem autoEnableFlutesAbove50ToolStripMenuItem;
     }
 }
 

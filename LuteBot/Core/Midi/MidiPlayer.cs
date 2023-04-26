@@ -240,6 +240,7 @@ namespace LuteBot.Core.Midi
                                     if (programNumbers.TryGetValue(dryNote.Channel, out var pn))
                                         prog = pn.ProgramNumber;
                                     channel.midiInstrument = prog;
+                                    track.midiInstrument = prog;
 
                                     var absoluteTicks = (int)dryNote.TimeAs<MidiTimeSpan>(tempoMap).TimeSpan;
 
@@ -345,23 +346,49 @@ namespace LuteBot.Core.Midi
                         }
                     }
 
-                    foreach (var track in tracks.Values)
+                    foreach (var channel in tracks.Values)
                     {
-                        if (track.numNotes > 0)
+                        if (channel.numNotes > 0)
                         {
-                            track.avgNoteLength = track.totalNoteLength / track.numNotes;
-                            track.averageNote = (int)((float)track.averageNote / track.numNotes);
-                            // avg Variation: iterate notes, find difference to last note, add up and divide
+                            // Total note length... Can't just sum durations
+                            TimeSpan lastTime = TimeSpan.Zero;
+                            TimeSpan lastDuration = TimeSpan.Zero;
                             int lastNote = -1;
                             int totalVariation = 0;
-                            foreach (var noteList in track.tickNotes.Values)
-                                foreach (var note in noteList)
+                            foreach (var tickNote in channel.tickNotes)
+                            {
+                                if (tickNote.Value.Any())
                                 {
-                                    if (lastNote > -1)
-                                        totalVariation += Math.Abs(note.note - lastNote);
-                                    lastNote = note.note;
+                                    var tickDuration = TimeSpan.FromSeconds(tickNote.Value.Max(n => n.timeLength));
+                                    var noteStartTime = tickNote.Value.First().startTime;
+                                    if (noteStartTime > lastTime + lastDuration)
+                                    {
+                                        channel.totalNoteLength += (float)tickDuration.TotalSeconds;
+                                    }
+                                    else if (noteStartTime + tickDuration > lastTime + lastDuration)
+                                    {
+                                        channel.totalNoteLength += (float)((noteStartTime + tickDuration) - (lastTime + lastDuration)).TotalSeconds;
+                                    }
+                                    lastTime = noteStartTime;
+                                    lastDuration = tickDuration;
+                                    // avg Variation: iterate notes, find difference to last note, add up and divide
+                                    foreach (var note in tickNote.Value)
+                                    {
+                                        if (lastNote > -1)
+                                            totalVariation += Math.Abs(note.note - lastNote);
+                                        lastNote = note.note;
+                                    }
                                 }
-                            track.avgVariation = totalVariation / track.numNotes;
+                            }
+
+                            channel.avgNoteLength = channel.totalNoteLength / channel.numNotes;
+                            channel.averageNote = (int)((float)channel.averageNote / channel.numNotes);
+                            channel.avgVariation = totalVariation / channel.numNotes;
+                            if (currentTimeLength.TotalSeconds > 0)
+                                channel.percentTimePlaying = (float)(channel.totalNoteLength / currentTimeLength.TotalSeconds);
+                            else
+                                channel.percentTimePlaying = 0;
+                            channel.percentSongNotes = channel.numNotes / (float)totalNumNotes;
                         }
                     }
 

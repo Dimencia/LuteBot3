@@ -191,7 +191,7 @@ namespace SimpleML
         }
 
         // I want to use this, but our outputs are just... one value.  Unless I can rework this to take in a whole song and make it try
-        public float[] Softmax(float[] oSums)
+        public static float[] Softmax(float[] oSums)
         {
             // determine max output sum
             // does all output nodes at once so scale doesn't have to be re-computed each time
@@ -214,15 +214,15 @@ namespace SimpleML
 
         public object ParallelLock = new object();
 
-        public void BackPropagate(float[] inputs, float[] expected)//backpropogation;
+        public float BackPropagate(float[] inputs, float[] expected)//backpropogation;
         {
+            float[] output = FeedForward(inputs);//runs feed forward to ensure neurons are populated correctly
             lock (ParallelLock) // Well this is pointless.  Obviously I can't go parallel when the inputs need to be populated throughout all of this
             {
                 // One way to make this parallel might involve locking, deep-copying the neurons, unlocking, 
                 // Doing our math and calculating a final set of adjustments to make
                 // Then lock and apply them
 
-                float[] output = FeedForward(inputs);//runs feed forward to ensure neurons are populated correctly
                 cost = 0;
                 for (int i = 0; i < output.Length; i++) cost += (float)Math.Pow(output[i] - expected[i], 2);//calculated cost of network
                                                                                                             //for (int i = 0; i < output.Length; i++) cost += (output[i] - expected[i]);//calculated cost of network - removed pow because we were overflowing to nan
@@ -273,6 +273,7 @@ namespace SimpleML
                         }
                     }
                 }
+                return cost;
             }
         }
 
@@ -463,32 +464,35 @@ namespace SimpleML
         // It then returns the final set of neuron values
         public float[] FeedForward(float[] inputs)
         {
-            for (int i = 0; i < inputs.Length; i++)
+            lock (ParallelLock)
             {
-                neurons[0][i] = inputs[i]; // The inputs go straight into the 0th layer
-            }
-            for (int i = 1; i < layers.Length; i++) // Start at layer 1, the first with any previous nuerons to work on
-            {
-                int layer = i - 1;
-                for (int j = 0; j < layers[i]; j++)
+                for (int i = 0; i < inputs.Length; i++)
                 {
-                    float value = 0f;
-                    for (int k = 0; k < layers[i - 1]; k++)
-                    {
-                        value += weights[i - 1][j][k] * neurons[i - 1][k];
-                    }// For each neuron in this layer, get each neuron's value * weight from the previous layer, and sum them
-                    // Then add the bias and activate
-                    //if (i != layers.Length - 1)
-                    if (activations[layer] != 4)
-                        neurons[i][j] = Activate(value + biases[i - 1][j], layer);
-                    else // Force softmax, which must run on the whole set
-                        neurons[i][j] = value + biases[i - 1][j];
+                    neurons[0][i] = inputs[i]; // The inputs go straight into the 0th layer
                 }
-                if (activations[layer] == 4)
-                    neurons[i] = Softmax(neurons[i]);
+                for (int i = 1; i < layers.Length; i++) // Start at layer 1, the first with any previous nuerons to work on
+                {
+                    int layer = i - 1;
+                    for (int j = 0; j < layers[i]; j++)
+                    {
+                        float value = 0f;
+                        for (int k = 0; k < layers[i - 1]; k++)
+                        {
+                            value += weights[i - 1][j][k] * neurons[i - 1][k];
+                        }// For each neuron in this layer, get each neuron's value * weight from the previous layer, and sum them
+                         // Then add the bias and activate
+                         //if (i != layers.Length - 1)
+                        if (activations[layer] != 4)
+                            neurons[i][j] = Activate(value + biases[i - 1][j], layer);
+                        else // Force softmax, which must run on the whole set
+                            neurons[i][j] = value + biases[i - 1][j];
+                    }
+                    if (activations[layer] == 4)
+                        neurons[i] = Softmax(neurons[i]);
+                }
+                //neurons[layers.Length - 1] = Softmax(neurons[layers.Length - 1]);
+                return neurons[layers.Length - 1];
             }
-            //neurons[layers.Length - 1] = Softmax(neurons[layers.Length - 1]);
-            return neurons[layers.Length - 1];
         }
 
 

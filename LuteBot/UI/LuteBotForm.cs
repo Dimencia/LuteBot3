@@ -56,7 +56,7 @@ namespace LuteBot
         public static TrackSelectionManager trackSelectionManager;
 
         private const string musicNameLabelHeader = "Loaded: ";
-        private static string lutemodPakName = "FLuteMod_2.61.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string lutemodPakName = "FLuteMod_2.62.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
         private static int lutemodVersion1 = 2;
         private static int lutemodVersion2 = 6;
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
@@ -84,6 +84,11 @@ ModListWidgetStayTime=5.0";
 
 
             MordhauPakPath = GetPakPath();
+            if (MordhauPakPath != ConfigManager.GetProperty(PropertyItem.MordhauPakPath))
+            {
+                ConfigManager.SetProperty(PropertyItem.MordhauPakPath, MordhauPakPath);
+                ConfigManager.SaveConfig();
+            }
 
             trackSelectionManager = new TrackSelectionManager();
             player = new MidiPlayer(trackSelectionManager);
@@ -343,7 +348,7 @@ ModListWidgetStayTime=5.0";
             else
                 inputIniPath = ConfigManager.GetProperty(PropertyItem.MordhauInputIniLocation);
             // If the file exists, save it into config... this doesn't really go here... oh well.
-            
+
 
             if (string.IsNullOrWhiteSpace(MordhauPakPath))
             {
@@ -391,7 +396,7 @@ ModListWidgetStayTime=5.0";
                         if (m.Success)
                         {
                             var existingVers = Regex.Replace(Path.GetFileName(f), "[^0-9]", "").Select(c => int.Parse(c.ToString())).ToArray();
-                            for(int i = 0; i < curVers.Length; i++)
+                            for (int i = 0; i < curVers.Length; i++)
                             {
                                 if (existingVers.Length > i && existingVers[i] > curVers[i])
                                     return true;
@@ -403,7 +408,7 @@ ModListWidgetStayTime=5.0";
                                 }
                             }
                             return true;
-                            
+
                         }
                     }
                 }
@@ -710,24 +715,39 @@ ModListWidgetStayTime=5.0";
             return GetMordhauPathFromPrompt();
         }
 
-        private string GetMordhauPathFromPrompt()
+        private string GetMordhauPathFromPrompt(string title = "Enter Mordhau Path")
         {
             var inputForm = new MordhauPathInputForm(MordhauPakPath);
+            inputForm.Text = title;
             inputForm.ShowDialog(this);
 
-            if (inputForm.result == DialogResult.OK && inputForm.path != string.Empty && IsMordhauPakPathValid(inputForm.path))
+            if (inputForm.result == DialogResult.OK)
             {
                 installLuteModToolStripMenuItem.Enabled = true;
                 var result = Path.Combine(Path.GetDirectoryName(inputForm.path), "Mordhau", "Content", "CustomPaks");
-                Directory.CreateDirectory(result);
-                ConfigManager.SetProperty(PropertyItem.MordhauPakPath, result);
-                installLuteModToolStripMenuItem.Enabled = true;
-                return result;
+                if (IsMordhauPakPathValid(result))
+                {
+                    Directory.CreateDirectory(result);
+                    ConfigManager.SetProperty(PropertyItem.MordhauPakPath, result);
+                    installLuteModToolStripMenuItem.Enabled = true;
+                    return result;
+                }
+                else
+                {
+                    installLuteModToolStripMenuItem.Enabled = false;
+                    return GetMordhauPathFromPrompt("Entered path was invalid");
+                }
             }
             else
             {
                 if (!IsMordhauPakPathValid())
+                {
                     installLuteModToolStripMenuItem.Enabled = false;
+                }
+                else
+                {
+                    installLuteModToolStripMenuItem.Enabled = true;
+                }
                 return MordhauPakPath;
             }
         }
@@ -766,14 +786,10 @@ ModListWidgetStayTime=5.0";
             if (player.GetType() == typeof(MidiPlayer))
             {
                 MidiPlayer midiPlayer = player as MidiPlayer;
-                trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks(), reorderTracks);
+                trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
                 trackSelectionManager.FileName = currentTrackName;
             }
-
-            if (trackSelectionManager.autoLoadProfile)
-            {
-                trackSelectionManager.LoadTrackManager();
-            }
+            trackSelectionManager.LoadTrackManager(reorderTracks);
             if (!skipUI)
             {
                 await InvokeAsync(() =>
@@ -1092,6 +1108,13 @@ ModListWidgetStayTime=5.0";
         private async void forceAIReorderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             await partitionsForm.reloadAll(true).ConfigureAwait(false);
+        }
+
+        private async void autoEnableFlutesAbove50ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            trackSelectionManager.autoEnableFlutes = true;
+            await partitionsForm.reloadAll(true).ConfigureAwait(false);
+            trackSelectionManager.autoEnableFlutes = false;
         }
     }
 }

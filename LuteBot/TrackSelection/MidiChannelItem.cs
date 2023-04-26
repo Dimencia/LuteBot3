@@ -243,7 +243,7 @@ namespace LuteBot.TrackSelection
         public MidiChannelItem WithData(SimpleMidiChannelItem newChannel)
         {
             var result = new MidiChannelItem(this);
-            result.Rank = newChannel.Rank ?? result.Rank;
+            result.Rank = newChannel?.Rank ?? result.Rank;
             if (newChannel.Active.HasValue)
                 result.Active = newChannel.Active.Value;
             if (newChannel.offset.HasValue)

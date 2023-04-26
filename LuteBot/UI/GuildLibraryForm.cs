@@ -275,7 +275,7 @@ namespace LuteBot.UI
                 {
                     selected.Add(s.DataBoundItem as GuildSong);
                 }
-                await downloadAndPlaySongs(selected);
+                await downloadAndPlaySongs(selected).ConfigureAwait(false);
             }
         }
     }

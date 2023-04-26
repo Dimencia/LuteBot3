@@ -42,6 +42,8 @@
             this.button1 = new System.Windows.Forms.Button();
             this.textBoxParallel = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBoxTrainingRate = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // richTextBox1
@@ -161,11 +163,30 @@
             this.label5.TabIndex = 12;
             this.label5.Text = "CPU Cores";
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(9, 526);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(88, 16);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "Training Rate";
+            // 
+            // textBoxTrainingRate
+            // 
+            this.textBoxTrainingRate.Location = new System.Drawing.Point(104, 523);
+            this.textBoxTrainingRate.Name = "textBoxTrainingRate";
+            this.textBoxTrainingRate.Size = new System.Drawing.Size(50, 22);
+            this.textBoxTrainingRate.TabIndex = 13;
+            this.textBoxTrainingRate.Text = "0.015";
+            // 
             // NeuralNetworkForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 587);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.textBoxTrainingRate);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textBoxParallel);
             this.Controls.Add(this.button1);
@@ -201,5 +222,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBoxParallel;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox textBoxTrainingRate;
     }
 }

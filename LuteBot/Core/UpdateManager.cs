@@ -78,7 +78,7 @@ namespace LuteBot.Core
                     //string downloadString = UTF8Encoding.UTF8.GetString(data);
                     var downloadTask = client.DownloadStringTaskAsync("https://github.com/Dimencia/LuteBot3/releases/latest");
                     var timeoutTask = Task.Delay(timeout);
-                    if (await Task.WhenAny(downloadTask, timeoutTask) == downloadTask)
+                    if (await Task.WhenAny(downloadTask, timeoutTask).ConfigureAwait(false) == downloadTask)
                     {
                         return downloadTask.Result;
                     }

@@ -1,6 +1,20 @@
 Version 3.6.2
 
 - Fixed issue where neural network would not get scaled values if rating Tracks instead of Channels
+- Improved default AI (You should probably re-save your songs)
+- Fixed issue that resaving would only reorder the currently selected instrument, instead of both lute and flute
+- Added menu option to resave all with AI choosing flute tracks (not recommended, the AI isn't that good yet)
+- Fixed issue where Mordhau Pak Path wasn't being saved between launches
+- Fixed issue where Mordhau Pak Path wasn't being validated correctly
+
+	LuteMod 2.62
+	- LuteMod can now play old partitions without resaving them, but you should still resave them for best results
+
+Known Issues:
+- Midis saved with 3.5.5 incorrectly fail to load because drum tracks were removed from them; otherwise versions above 3.3 should all be loadable
+	- WARNING: If you drag these midis from the PartitionMidis folder to reload them, they will be deleted when they fail to load.  Copy them somewhere else first, if you want to do that
+- New songs (without any config) do not automatically reorder the first time they are loaded (but they should).  Use Resave on new midis, after adding them, for now
+- Malformed midis can't be loaded.  Load them in a Midi Editor and re-save them until I can find a way to ignore the errors
 
 Version 3.6.1
 

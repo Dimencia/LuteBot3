@@ -29,6 +29,7 @@ using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Tools;
 using Melanchall.DryWetMidi.MusicTheory;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace LuteBot
 {
@@ -145,11 +146,13 @@ namespace LuteBot
 
         public void PopulateIndexList()
         {
+            SuspendLayout();
             listBoxPartitions.Items.Clear();
             foreach (string item in index.PartitionNames)
             {
                 listBoxPartitions.Items.Add(item);
             }
+            ResumeLayout();
         }
 
         private void ContextMenuHelper()
@@ -655,7 +658,7 @@ namespace LuteBot
             }
         }
 
-        public async void trainToolStripMenuItem_Click(object sender, EventArgs e)
+        public void trainToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var trainingForm = new NeuralNetworkForm(tsm, this);
             trainingForm.Show(this);
@@ -768,10 +771,10 @@ namespace LuteBot
             {
                 var filenames = listBoxPartitions.SelectedItems.Cast<string>().Reverse().ToArray();
 
-                await AutoSaveFiles(filenames, true).ConfigureAwait(false);
+                await AutoSaveFiles(filenames, true, true).ConfigureAwait(false);
             }
         }
-
+        private SemaphoreSlim saveSem = new SemaphoreSlim(1, 1);
         public async Task AutoSaveFiles(IEnumerable<string> filenames, bool overwrite = false, bool reorderTracks = false)
         {
             string warnings = "";
@@ -794,6 +797,7 @@ namespace LuteBot
                     }
                     try
                     {
+                        await saveSem.WaitAsync().ConfigureAwait(false);
                         await LuteBotForm.luteBotForm.LoadFile(filePath, true, reorderTracks).ConfigureAwait(false);
                         if (player.dryWetFile != null)
                             await SavePartition(Regex.Replace(Path.GetFileName(filePath).Replace(".mid", ""), "[^a-zA-Z0-9 ]", ""), overwrite).ConfigureAwait(false);
@@ -802,6 +806,10 @@ namespace LuteBot
                     catch (Exception ex)
                     {
                         warnings += $"Failed to reload file {f}: {ex.Message}";
+                    }
+                    finally
+                    {
+                        saveSem.Release();
                     }
                 }
             }

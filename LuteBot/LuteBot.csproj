@@ -310,9 +310,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="LuteBot_TemporaryKey.pfx" />
-    <None Include="LuteMod\FLuteMod_2.61.pak">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="LuteMod\FLuteMod_2.62.pak" />
     <None Include="LuteMod\PartitionIndex[0].sav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
