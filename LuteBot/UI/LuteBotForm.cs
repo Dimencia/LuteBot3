@@ -171,8 +171,7 @@ ModListWidgetStayTime=5.0";
                     // Parse the version into something we can compare
                     var firstGoodVersions = "3.6.2".Split('.');
                     var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
-
-
+                     
                     for (int i = 0; i < firstGoodVersions.Length; i++)
                     {
                         // If we've run out of numbers to compare on either side and none have been less yet, or if any of the numbers are less, the version is below our target
