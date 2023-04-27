@@ -193,6 +193,7 @@ namespace LuteBot.TrackSelection
         public float avgVariation { get; set; }
         public float percentTimePlaying { get; set; }
         public float percentSongNotes { get; set; }
+        public bool isTrack { get; protected set; } = false;
 
         public MidiChannelItem() { }
 
@@ -228,7 +229,7 @@ namespace LuteBot.TrackSelection
         public MidiChannelItem(SimpleMidiChannelItem old)
         {
             this.Id = old.Id;
-            this.Rank = old.Rank;
+            this.Rank = old.Rank ?? this.Rank;
             if(old.Active.HasValue)
                 this.Active = old.Active.Value;
             if(old.offset.HasValue)
@@ -280,7 +281,7 @@ namespace LuteBot.TrackSelection
             if (obj is MidiChannelItem)
             {
                 var other = obj as MidiChannelItem;
-                var result = this.Active == other.Active && this.Id == other.Id && this.offset == other.offset && this.Rank == other.Rank;
+                var result = this.isTrack == other.isTrack && this.Active == other.Active && this.Id == other.Id && this.offset == other.offset && this.Rank == other.Rank;
                 if(result)
                 {
                     // Try to avoid doing this unless we're already a match from the others

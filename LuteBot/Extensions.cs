@@ -129,7 +129,7 @@ namespace LuteBot
         }
 
 
-        public static float[] GetNeuralInputs(this MidiChannelItem c, int numChannels)
+        public static float[] GetNeuralInputs(this MidiChannelItem c,int channelCount,  int numChannels)
         {
             // We'll try not normalizing 
 
@@ -154,7 +154,7 @@ namespace LuteBot
             inputs[i++] = channel.avgVariation / 64f; // Doubt this ever gets above 64, which this handles
             //inputs[j * 6 + 5] = channel.numNotes;
             inputs[i++] = channel.averageNote / 128f;
-            inputs[i++] = channel.Id / (float)numChannels;
+            inputs[i++] = channelCount / (float)numChannels;
 
             return inputs;
         }

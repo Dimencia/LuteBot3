@@ -56,9 +56,8 @@ namespace LuteBot
         public static TrackSelectionManager trackSelectionManager;
 
         private const string musicNameLabelHeader = "Loaded: ";
-        private static string lutemodPakName = "FLuteMod_2.62.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
-        private static int lutemodVersion1 = 2;
-        private static int lutemodVersion2 = 6;
+        private static string lutemodPakName = "FLuteMod_2.63.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
         private static string loaderString1 = @"[/AutoLoader/BP_AutoLoaderActor.BP_AutoLoaderActor_C]
@@ -169,7 +168,7 @@ ModListWidgetStayTime=5.0";
                 {
 
                     // Parse the version into something we can compare
-                    var firstGoodVersions = "3.6.2".Split('.');
+                    var firstGoodVersions = "3.6.3".Split('.');
                     var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
                      
                     for (int i = 0; i < firstGoodVersions.Length; i++)
@@ -716,38 +715,40 @@ ModListWidgetStayTime=5.0";
 
         private string GetMordhauPathFromPrompt(string title = "Enter Mordhau Path")
         {
-            var inputForm = new MordhauPathInputForm(MordhauPakPath);
-            inputForm.Text = title;
-            inputForm.ShowDialog(this);
+            using (var inputForm = new MordhauPathInputForm(MordhauPakPath))
+            {
+                inputForm.Text = title;
+                inputForm.ShowDialog(this);
 
-            if (inputForm.result == DialogResult.OK)
-            {
-                installLuteModToolStripMenuItem.Enabled = true;
-                var result = Path.Combine(Path.GetDirectoryName(inputForm.path), "Mordhau", "Content", "CustomPaks");
-                if (IsMordhauPakPathValid(result))
+                if (inputForm.result == DialogResult.OK)
                 {
-                    Directory.CreateDirectory(result);
-                    ConfigManager.SetProperty(PropertyItem.MordhauPakPath, result);
                     installLuteModToolStripMenuItem.Enabled = true;
-                    return result;
+                    var result = Path.Combine(Path.GetDirectoryName(inputForm.path), "Mordhau", "Content", "CustomPaks");
+                    if (IsMordhauPakPathValid(result))
+                    {
+                        Directory.CreateDirectory(result);
+                        ConfigManager.SetProperty(PropertyItem.MordhauPakPath, result);
+                        installLuteModToolStripMenuItem.Enabled = true;
+                        return result;
+                    }
+                    else
+                    {
+                        installLuteModToolStripMenuItem.Enabled = false;
+                        return GetMordhauPathFromPrompt("Entered path was invalid");
+                    }
                 }
                 else
                 {
-                    installLuteModToolStripMenuItem.Enabled = false;
-                    return GetMordhauPathFromPrompt("Entered path was invalid");
+                    if (!IsMordhauPakPathValid())
+                    {
+                        installLuteModToolStripMenuItem.Enabled = false;
+                    }
+                    else
+                    {
+                        installLuteModToolStripMenuItem.Enabled = true;
+                    }
+                    return MordhauPakPath;
                 }
-            }
-            else
-            {
-                if (!IsMordhauPakPathValid())
-                {
-                    installLuteModToolStripMenuItem.Enabled = false;
-                }
-                else
-                {
-                    installLuteModToolStripMenuItem.Enabled = true;
-                }
-                return MordhauPakPath;
             }
         }
 

@@ -184,6 +184,9 @@ namespace LuteBot
                 MenuItem deleteItem = indexContextMenu.MenuItems.Add("Delete " + name);
                 deleteItem.Click += new EventHandler(DeleteItem_Click);
 
+                MenuItem moveItem = indexContextMenu.MenuItems.Add("Move to Top: " + name);
+                moveItem.Click += new EventHandler(MoveToTop_Click);
+
                 listBoxPartitions.ContextMenu = indexContextMenu; // TODO: I'd love to make it popup at the selected item, not at mouse pos, but whatever
                 indexContextMenu.Show(listBoxPartitions, listBoxPartitions.PointToClient(Cursor.Position));
             }
@@ -341,6 +344,45 @@ namespace LuteBot
             }
         }
 
+        private void MoveToTop_Click(object sender, EventArgs e)
+        {
+            var selectedIndices = listBoxPartitions.SelectedIndices.Cast<int>().ToArray();
+            //var selectedItems = listBoxPartitions.SelectedItems.Cast<string>().ToArray();
+            //int[] selectedIndices = e.Data.GetData(typeof(int[])) as int[];
+            string[] selectedItems = new string[selectedIndices.Length];
+            for (int j = 0; j < selectedIndices.Length; j++)
+                selectedItems[j] = (string)listBoxPartitions.Items[selectedIndices[j]];
+
+            int i = 0;
+
+            if (selectedItems != null && selectedItems.Length > 0 && i != selectedIndices[0])
+            {
+                foreach (string data in selectedItems)
+                {
+                    // First just remove them all
+                    this.listBoxPartitions.Items.Remove(data);
+                    //this.listBoxPartitions.Items.Insert(i, data);
+                    index.PartitionNames.Remove((string)data);
+                    //index.PartitionNames.Insert(i, (string)data);
+
+                }
+                if (i < 0 || i >= listBoxPartitions.Items.Count)
+                    i = this.listBoxPartitions.Items.Count - 1;
+                // Then insert them at i+j in their original order
+                for (int j = 0; j < selectedItems.Length; j++)
+                {
+                    this.listBoxPartitions.Items.Insert(i + j, selectedItems[j]);
+                    index.PartitionNames.Insert(i + j, (string)selectedItems[j]);
+                }
+                // Then re-select all the same things
+                listBoxPartitions.ClearSelected();
+                for (int j = 0; j < selectedItems.Length; j++)
+                {
+                    listBoxPartitions.SetSelected(i + j, true);
+                }
+                index.SaveIndex();
+            }
+        }
         private void DeleteItem_Click(object sender, EventArgs e)
         {
             DialogResult confirmResult = MessageBox.Show("Do you want to delete this partition ?",

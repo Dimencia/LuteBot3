@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -164,7 +165,6 @@ namespace LuteBot.TrackSelection
                 SetTrackSelectionData(new TrackSelectionData(DataDictionary[1], instrumentId));
                 var fluteData = DataDictionary[1];
 
-                var rank = 0;
                 foreach (var channel in MidiChannels.Values.OrderBy(t => t.Rank))
                 {
                     // There's no real situation where they should have any disparity between their channels
@@ -237,12 +237,14 @@ namespace LuteBot.TrackSelection
 
         public void LoadTrackManager(bool reorderTracks = false)
         {
+            // Meant to be called after LoadTracks
+            int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
             var simpleDataDict = SaveManager.LoadTrackSelectionData(FileName);
             if (simpleDataDict != null)
             {
-                int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                
                 // The only reason we need simple data is so we can pull out and handle the Notes from within the channels and tracks, if there are any
-                DataDictionary.Clear();
+                //DataDictionary.Clear();
                 var currentData = GetTrackSelectionData(instrumentId);
                 foreach (var kvp in simpleDataDict)
                 {
@@ -258,129 +260,49 @@ namespace LuteBot.TrackSelection
 
                 if (data != null)
                 {
-                    SetTrackSelectionData(data);
                     PredictedFluteChannel = GetFlutePrediction(reorderTracks);
+                    SetTrackSelectionData(data);
                 }
                 else
                 { // Reset these if there's no settings for something
-                    DataDictionary.Clear();
+                    //DataDictionary.Clear();
                     this.NoteOffset = 0;
                     //this.midiChannels.Clear();
                     //this.midiTracks.Clear();
                     this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
                     // There was no saved data... So, for lute, disable the PredictedFluteChannel, and enable it for flute
-                    if (PredictedFluteChannel != null)
-                    {
-                        if (PredictedFluteChannel is TrackItem)
-                        {
-                            midiTracks[PredictedFluteChannel.Id].Active = false;
-                            if (!midiTracks[PredictedFluteChannel.Id].Name.Contains("Shawm"))
-                                midiTracks[PredictedFluteChannel.Id].Name += " (Shawm?)";
-                        }
-                        else
-                        {
-                            midiChannels[PredictedFluteChannel.Id].Active = false;
-                            if (!midiChannels[PredictedFluteChannel.Id].Name.Contains("Shawm"))
-                                midiChannels[PredictedFluteChannel.Id].Name += " (Shawm?)";
-                        }
-                    }
+                    autoEnableFlutes = true;
+                    PredictedFluteChannel = GetFlutePrediction(true);
+                    autoEnableFlutes = false;
 
-                    UpdateTrackSelectionForInstrument(0, reorderTracks); // Force the settings into both instrument 0 and the current one
-
-                    // Setup the flute and make that happen too
-                    if (PredictedFluteChannel != null)
-                    {
-                        if (PredictedFluteChannel is TrackItem)
-                        {
-                            foreach (var channel in midiTracks.Values)
-                            {
-                                if (channel.Id != PredictedFluteChannel.Id)
-                                    channel.Active = false;
-                                else
-                                {
-                                    //channel.Name += " (Flute?)";
-                                    channel.Active = true;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            foreach (var channel in midiChannels.Values)
-                            {
-                                if (channel.Id != PredictedFluteChannel.Id)
-                                    channel.Active = false;
-                                else
-                                {
-                                    //channel.Name += " (Flute?)";
-                                    channel.Active = true;
-                                }
-                            }
-                        }
-                    }
-                    UpdateTrackSelectionForInstrument(1, reorderTracks);
-                    PredictedFluteChannel = GetFlutePrediction(reorderTracks);
+                    UpdateTrackSelectionForInstrument(instrumentId);
+                    foreach (var t in midiTracks.Values)
+                        t.Active = !t.Active;
+                    if (instrumentId == 0)
+                        UpdateTrackSelectionForInstrument(1);
+                    else
+                        UpdateTrackSelectionForInstrument(0);
                 }
                 EventHelper();
             }
             else
             {
-                DataDictionary.Clear();
                 this.NoteOffset = 0;
                 //this.midiChannels.Clear();
                 //this.midiTracks.Clear();
                 this.NumChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
-                PredictedFluteChannel = GetFlutePrediction(reorderTracks);
+                autoEnableFlutes = true;
+                PredictedFluteChannel = GetFlutePrediction(true); // This sets them as active or not with autoEnableFlutes on
+                autoEnableFlutes = false;
 
-                // There was no saved data... So, for lute, disable the PredictedFluteChannel, and enable it for flute
-                if (PredictedFluteChannel != null)
-                {
-                    if (PredictedFluteChannel is TrackItem)
-                    {
-                        midiTracks[PredictedFluteChannel.Id].Active = false;
-                        if (!midiTracks[PredictedFluteChannel.Id].Name.Contains("Shawm"))
-                            midiTracks[PredictedFluteChannel.Id].Name += " (Shawm?)";
-                    }
-                    else
-                    {
-                        midiChannels[PredictedFluteChannel.Id].Active = false;
-                        if (!midiChannels[PredictedFluteChannel.Id].Name.Contains("Shawm"))
-                            midiChannels[PredictedFluteChannel.Id].Name += " (Shawm?)";
-                    }
-                }
+                UpdateTrackSelectionForInstrument(instrumentId);
+                foreach (var t in midiTracks.Values)
+                    t.Active = !t.Active;
+                if (instrumentId == 0)
+                    UpdateTrackSelectionForInstrument(1);
+                else
+                    UpdateTrackSelectionForInstrument(0);
 
-                UpdateTrackSelectionForInstrument(0); // Force the settings into both instrument 0 and the current one
-
-                // Setup the flute and make that happen too
-                if (PredictedFluteChannel != null)
-                {
-                    if (PredictedFluteChannel is TrackItem)
-                    {
-                        foreach (var channel in midiTracks.Values)
-                        {
-                            if (channel.Id != PredictedFluteChannel.Id)
-                                channel.Active = false;
-                            else
-                            {
-                                //channel.Name += " (Flute?)";
-                                channel.Active = true;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach (var channel in midiChannels.Values)
-                        {
-                            if (channel.Id != PredictedFluteChannel.Id)
-                                channel.Active = false;
-                            else
-                            {
-                                //channel.Name += " (Flute?)";
-                                channel.Active = true;
-                            }
-                        }
-                    }
-                }
-                UpdateTrackSelectionForInstrument(1);
                 EventHelper();
             }
             // Fix up the instrument IDs in case we didn't get them before... unsure why they're included at all tbh but, future compatibility I guess
@@ -413,13 +335,13 @@ namespace LuteBot.TrackSelection
 
             // Before we screw with it by predicting flutes, we should store this current TrackSelectionData into our OriginalDataDictionary in every feasible slot
             OriginalDataDictionary.Clear();
+            DataDictionary.Clear();
             for (int i = 0; i < 16; i++)
             {
                 var data = GetTrackSelectionData(i);
                 data.InstrumentID = i;
                 OriginalDataDictionary[i] = data;
             }
-
 
 
             ResetRequest();
@@ -433,8 +355,6 @@ namespace LuteBot.TrackSelection
         // Returns the channel ID of the channel most likely to be good for flute
         private MidiChannelItem GetFlutePrediction(bool reorderTracks = false)
         {
-            var activeChannels = midiChannels.Values.ToArray();//.Where(c => c.Active); // Wait ... how...?  
-            // I don't understand how anything was even getting labeled if we were using this
 
             if (neural == null)
             {
@@ -478,23 +398,25 @@ namespace LuteBot.TrackSelection
                     neural.Load(Path.Combine(AppContext.BaseDirectory, "lib", "channelNeural"));
                 }
             }
-
+            var activeChannels = midiChannels.Values.Where(c => c.Id != 9 && c.midiInstrument != 9 && c.tickNotes.Any(tn => tn.Value.Any())).OrderBy(c => c.Id).ToArray();
+            var activeTracks = midiTracks.Values.Where(c => c.tickNotes.Any(tn => tn.Value.Any(n => n.channel != 9 && !midiChannels.Values.Any(mc => mc.Id == n.channel && mc.midiInstrument == 9)))).OrderBy(c => c.Id).ToArray();
             if (activeChannels.Length < 2)
                 return null;
             else // if(simpleML != null && simpleML.Trained)
             {
                 Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
 
-
+                int index = 0;
                 foreach (var channel in activeChannels)
                 {
-                    var inputs = channel.GetNeuralInputs(activeChannels.Length);
+                    var inputs = channel.GetNeuralInputs(index++, activeChannels.Length);
                     var neuralResults = neural.FeedForward(inputs);
                     channelResults[channel] = neuralResults[0];
                 }
-                foreach (var channel in MidiTracks.Values)
+                index = 0;
+                foreach (var channel in activeTracks)
                 {
-                    var inputs = channel.GetNeuralInputs(MidiTracks.Count);
+                    var inputs = channel.GetNeuralInputs(index++, activeTracks.Length); // When training, I gave it all of them; this time I'm trimming some out, but the IDs still need to be ok
                     var neuralResults = neural.FeedForward(inputs);
                     channelResults[channel] = neuralResults[0]; // The tracks are MidiChannels and can work in this way; later we just check if they are a MidiTrack
                 }
@@ -513,7 +435,7 @@ namespace LuteBot.TrackSelection
                 // Just adding 0.5 gets us from 0 to 1 for most purposes, let's try that
                 // It's funny when they're above 100% or below 0%, but messy
                 // 
-                orderedResults = orderedResults.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + 1)/2).OrderByDescending(kvp => kvp.Value);
+                orderedResults = orderedResults.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + 1) / 2).OrderByDescending(kvp => kvp.Value);
 
 
                 /*
@@ -546,6 +468,9 @@ namespace LuteBot.TrackSelection
                 var numResults = orderedResults.Count();
                 int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
+                //float autoThreshold = 0.50f;
+                float autoThreshold = orderedResults.Average(kvp => kvp.Value);
+
                 for (int i = 0; i < orderedResults.Count(); i++)
                 //foreach (var channel in activeChannels)
                 {
@@ -553,26 +478,27 @@ namespace LuteBot.TrackSelection
                     var channel = orderedResults.ElementAt(i).Key;
                     if (channel != null)
                     {
-                        if (instrumentId == 1)
-                        {
-                            if (autoEnableFlutes && orderedResults.ElementAt(i).Value > 0.50f)
-                            {
-                                channel.Active = true;
-                            }
-                            else if (autoEnableFlutes)
-                                channel.Active = false;
-                        }
-                        else if (autoEnableFlutes && instrumentId == 0)
-                        {
-                            channel.Active = orderedResults.ElementAt(i).Value <= 0.50f;
-                        }
+                        
                         if (!channel.Rank.HasValue || reorderTracks)
                         {
                             channel.Rank = i;
                         }
                         string ident = "Channel";
-                        if (channel is TrackItem)
+                        if (channel.isTrack)
                         {
+                            if (instrumentId == 1)
+                            {
+                                if (autoEnableFlutes && orderedResults.ElementAt(i).Value > autoThreshold)
+                                {
+                                    channel.Active = true;
+                                }
+                                else if (autoEnableFlutes)
+                                    channel.Active = false;
+                            }
+                            else if (autoEnableFlutes && instrumentId == 0)
+                            {
+                                channel.Active = orderedResults.ElementAt(i).Value <= autoThreshold;
+                            }
                             ident = "Track";
                             channel.Name += $"{channel.Id}(Flute Rank {trackCount + 1} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
                             if (DataDictionary.ContainsKey(0))
@@ -584,7 +510,7 @@ namespace LuteBot.TrackSelection
                                     }
                                     DataDictionary[0].MidiTracks.Where(t => t.Id == channel.Id).First().Name += $"{channel.Id}(Flute Rank {trackCount + 1} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
                                     if (autoEnableFlutes)
-                                        DataDictionary[0].MidiTracks.Where(t => t.Id == channel.Id).First().Active = orderedResults.ElementAt(i).Value <= 0.50f;
+                                        DataDictionary[0].MidiTracks.Where(t => t.Id == channel.Id).First().Active = orderedResults.ElementAt(i).Value <= autoThreshold;
                                 }
                             if (DataDictionary.ContainsKey(1))
                                 if (DataDictionary[1].MidiTracks.Any(t => t.Id == channel.Id))
@@ -593,7 +519,7 @@ namespace LuteBot.TrackSelection
                                         DataDictionary[1].MidiTracks.Where(t => t.Id == channel.Id).First().Rank = i;
                                     DataDictionary[1].MidiTracks.Where(t => t.Id == channel.Id).First().Name += $"{channel.Id}(Flute Rank {trackCount + 1} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
                                     if (autoEnableFlutes)
-                                        DataDictionary[1].MidiTracks.Where(t => t.Id == channel.Id).First().Active = orderedResults.ElementAt(i).Value > 0.50f;
+                                        DataDictionary[1].MidiTracks.Where(t => t.Id == channel.Id).First().Active = orderedResults.ElementAt(i).Value > autoThreshold;
                                 }
 
                             trackCount++;
@@ -601,6 +527,8 @@ namespace LuteBot.TrackSelection
                         else
                         {
                             channel.Name += $"{channel.Id}(Flute Rank {count + 1} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
+                            if (autoEnableFlutes)
+                                channel.Active = true; // Auto-enable works on tracks, not channels, which all get activated
                             if (DataDictionary.ContainsKey(0))
                                 if (DataDictionary[0].MidiChannels.Any(t => t.Id == channel.Id))
                                 {
@@ -609,6 +537,8 @@ namespace LuteBot.TrackSelection
                                         channel.Rank = i;
                                         DataDictionary[0].MidiChannels.Where(t => t.Id == channel.Id).First().Rank = i;
                                     }
+                                    if (autoEnableFlutes)
+                                        DataDictionary[0].MidiChannels.Where(t => t.Id == channel.Id).First().Active = true;
                                     DataDictionary[0].MidiChannels.Where(t => t.Id == channel.Id).First().Name += $"{channel.Id}(Flute Rank {count + 1} - {Math.Round(orderedResults.ElementAt(i).Value * 100, 2)}%)";
                                 }
                             if (DataDictionary.ContainsKey(1))
@@ -624,7 +554,70 @@ namespace LuteBot.TrackSelection
                         }
                     }
                 }
-
+                var drums = midiChannels.Values.Where(c => c.Id == 9 || c.midiInstrument == 9).Concat(midiTracks.Values.Where(c => c.tickNotes.Any(tn => tn.Value.Any(n => n.channel == 9 || midiChannels.Values.Any(mc => mc.Id == n.channel && mc.midiInstrument == 9)))).Cast<MidiChannelItem>()).ToArray();
+                var empty = midiChannels.Values.Where(c => !c.tickNotes.Any() || c.tickNotes.All(tn => !tn.Value.Any())).Concat(midiTracks.Values.Where(c => !c.tickNotes.Any() || c.tickNotes.All(tn => !tn.Value.Any())).Cast<MidiChannelItem>()).ToArray();
+                foreach (var channel in drums)
+                {
+                    channel.Active = false;
+                    channel.Name += " (Drums)";
+                    if (!channel.isTrack)
+                    {
+                        if (DataDictionary.ContainsKey(0) && DataDictionary[0].MidiChannels.Any(t => t.Id == channel.Id))
+                        {
+                            DataDictionary[0].MidiChannels.Where(t => t.Id == channel.Id).First().Active = false;
+                            DataDictionary[0].MidiChannels.Where(t => t.Id == channel.Id).First().Name = channel.Name;
+                        }
+                        if (DataDictionary.ContainsKey(1) && DataDictionary[1].MidiChannels.Any(t => t.Id == channel.Id))
+                        {
+                            DataDictionary[1].MidiChannels.Where(t => t.Id == channel.Id).First().Active = false;
+                            DataDictionary[1].MidiChannels.Where(t => t.Id == channel.Id).First().Name = channel.Name;
+                        }
+                    }
+                    else
+                    {
+                        if (DataDictionary.ContainsKey(0) && DataDictionary[0].MidiTracks.Any(t => t.Id == channel.Id))
+                        {
+                            DataDictionary[0].MidiTracks.Where(t => t.Id == channel.Id).First().Active = false;
+                            DataDictionary[0].MidiTracks.Where(t => t.Id == channel.Id).First().Name = channel.Name;
+                        }
+                        if (DataDictionary.ContainsKey(1) && DataDictionary[1].MidiTracks.Any(t => t.Id == channel.Id))
+                        {
+                            DataDictionary[1].MidiTracks.Where(t => t.Id == channel.Id).First().Active = false;
+                            DataDictionary[1].MidiTracks.Where(t => t.Id == channel.Id).First().Name = channel.Name;
+                        }
+                    }
+                }
+                foreach (var channel in empty)
+                {
+                    channel.Active = false;
+                    channel.Name += " (Empty)";
+                    if (!channel.isTrack)
+                    {
+                        if (DataDictionary.ContainsKey(0) && DataDictionary[0].MidiChannels.Any(t => t.Id == channel.Id))
+                        {
+                            DataDictionary[0].MidiChannels.Where(t => t.Id == channel.Id).First().Active = false;
+                            DataDictionary[0].MidiChannels.Where(t => t.Id == channel.Id).First().Name = channel.Name;
+                        }
+                        if (DataDictionary.ContainsKey(1) && DataDictionary[1].MidiChannels.Any(t => t.Id == channel.Id))
+                        {
+                            DataDictionary[1].MidiChannels.Where(t => t.Id == channel.Id).First().Active = false;
+                            DataDictionary[1].MidiChannels.Where(t => t.Id == channel.Id).First().Name = channel.Name;
+                        }
+                    }
+                    else
+                    {
+                        if (DataDictionary.ContainsKey(0) && DataDictionary[0].MidiTracks.Any(t => t.Id == channel.Id))
+                        {
+                            DataDictionary[0].MidiTracks.Where(t => t.Id == channel.Id).First().Active = false;
+                            DataDictionary[0].MidiTracks.Where(t => t.Id == channel.Id).First().Name = channel.Name;
+                        }
+                        if (DataDictionary.ContainsKey(1) && DataDictionary[1].MidiTracks.Any(t => t.Id == channel.Id))
+                        {
+                            DataDictionary[1].MidiTracks.Where(t => t.Id == channel.Id).First().Active = false;
+                            DataDictionary[1].MidiTracks.Where(t => t.Id == channel.Id).First().Name = channel.Name;
+                        }
+                    }
+                }
                 return orderedResults.First().Key;
             }
 
