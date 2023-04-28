@@ -38,6 +38,7 @@ namespace LuteBot.UI
             mainForm = form;
             searchBox.TextChanged += SearchBox_TextChanged;
             searchBox.KeyPress += SearchBox_KeyPress;
+            this.FormClosing += GuildLibraryForm_FormClosing;
 
             Directory.CreateDirectory(Path.Combine(appdata_PATH, songs_FOLDER));
 
@@ -47,6 +48,12 @@ namespace LuteBot.UI
                 // No need to keep backups of the log files really
                 File.Delete(Path.Combine(appdata_PATH, log_FILENAME));
             }
+        }
+
+        private void GuildLibraryForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            this.Hide();
+            e.Cancel = true;
         }
 
         private async void SearchBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -262,7 +269,7 @@ namespace LuteBot.UI
 
         private async Task PlaySongs(IEnumerable<string> paths)
         {
-            await mainForm.partitionsForm.AutoSaveFiles(paths).ConfigureAwait(false);
+            await mainForm.PartitionsForm.AutoSaveFiles(paths).ConfigureAwait(false);
         }
 
 

@@ -1,8 +1,10 @@
 ﻿using LuteBot.Config;
 using LuteBot.Core;
+using LuteBot.Core.Midi;
 using LuteBot.TrackSelection;
 using LuteBot.UI.Utils;
-
+using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Interaction;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,6 +12,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Resources.ResXFileRef;
 
@@ -18,46 +21,24 @@ namespace LuteBot.UI
 
     public partial class TrackSelectionForm : Form
     {
-        TrackSelectionManager trackSelectionManager;
+        private TrackSelectionManager trackSelectionManager;
         LuteBotForm mainForm;
 
         bool initializing = true;
 
+
         // We need only one out device, might as well use rust, but take both for now cuz why not, feels unfair
         // Though they both get updated with the same values at the same time, for what we're doing
-        public TrackSelectionForm(TrackSelectionManager trackSelectionManager, LuteBotForm mainForm)
+        public TrackSelectionForm(LuteBotForm mainForm)
         {
             this.mainForm = mainForm;
-            this.trackSelectionManager = trackSelectionManager;
+            this.trackSelectionManager = new TrackSelectionManager();
             this.Load += TrackSelectionForm_Load;
             InitializeComponent();
 
             this.SizeChanged += TrackSelectionForm_SizeChanged;
 
-            SuspendLayout();
-            Instrument.Read();
-            instrumentsBox.DisplayMember = "Name";
-            foreach (Instrument i in Instrument.Prefabs)
-                instrumentsBox.Items.Add(i);
-            instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-            ResumeLayout();
 
-
-            InitLists();
-            trackSelectionManager.autoLoadProfile = true;
-            typeof(Panel).InvokeMember("DoubleBuffered", BindingFlags.SetProperty
-            | BindingFlags.Instance | BindingFlags.NonPublic, null,
-            OffsetPanel, new object[] { true }); // Internet suggested this... 
-
-
-            IO.KB.ActionManager.NotePlayed += _mordhauOut_notePlayed;
-
-            ChannelsListBox.ContextMenuStrip = contextMenuStrip1;
-            TrackListBox.ContextMenuStrip = contextMenuStrip2;
-
-            TrackListBox.MouseDown += listBox_MouseDown;
-            TrackListBox.DragOver += listBox_DragOver;
-            TrackListBox.DragDrop += listBox_DragDrop;
         }
 
         private void TrackSelectionForm_SizeChanged(object sender, EventArgs e)
@@ -102,146 +83,174 @@ namespace LuteBot.UI
 
         private Panel pianoPanel = new Panel();
 
-        private void TrackSelectionForm_Load(object sender, EventArgs e)
+        private async void TrackSelectionForm_Load(object sender, EventArgs e)
         {
-            //panel1.AutoScroll = false;
-            //panel1.VerticalScroll.Enabled = true;
-            //panel1.VerticalScroll.Visible = true;
-            //panel1.AutoScroll = true;
-            //ScrollBarForcer.Location = new Point(OffsetPanel.Location.X, OffsetPanel.Location.Y + OffsetPanel.Height);
-            //panel1.AutoScroll = false;
-            panel1.VerticalScroll.Enabled = true;
-            panel1.VerticalScroll.Visible = true;
-            panel1.HorizontalScroll.Enabled = true;
-            panel1.HorizontalScroll.Visible = true;
-            //panel1.AutoScroll = false;
-            //this.MouseMove += new MouseEventHandler((o, ev) => OffsetPanel.Invalidate());
-            panel1.Resize += panel1_Resize;
-
-            //pianoPanel = new Panel();
-            pianoPanel.AutoSize = false;
-            pianoPanel.Height = panel1.Height - 2;
-            pianoPanel.Width = pianoWidth + 1;
-            this.Controls.Add(pianoPanel);
-            pianoPanel.Location = new Point(panel1.Location.X + 1, panel1.Location.Y + 1);
-            pianoPanel.BringToFront();
-
-            pianoPanel.Paint += new PaintEventHandler((o, ev) => DrawPiano(ev.Graphics));
-
-            var scrollHandler = new ScrollEventHandler((o, ev) =>
+            await this.InvokeAsync(() =>
             {
-                if (ev.ScrollOrientation == ScrollOrientation.VerticalScroll)
+                //panel1.AutoScroll = false;
+                //panel1.VerticalScroll.Enabled = true;
+                //panel1.VerticalScroll.Visible = true;
+                //panel1.AutoScroll = true;
+                //ScrollBarForcer.Location = new Point(OffsetPanel.Location.X, OffsetPanel.Location.Y + OffsetPanel.Height);
+                //panel1.AutoScroll = false;
+                panel1.VerticalScroll.Enabled = true;
+                panel1.VerticalScroll.Visible = true;
+                panel1.HorizontalScroll.Enabled = true;
+                panel1.HorizontalScroll.Visible = true;
+                //panel1.AutoScroll = false;
+                //this.MouseMove += new MouseEventHandler((o, ev) => OffsetPanel.Invalidate());
+                panel1.Resize += panel1_Resize;
+
+                //pianoPanel = new Panel();
+                pianoPanel.AutoSize = false;
+                pianoPanel.Height = panel1.Height - 2;
+                pianoPanel.Width = pianoWidth + 1;
+                this.Controls.Add(pianoPanel);
+                pianoPanel.Location = new Point(panel1.Location.X + 1, panel1.Location.Y + 1);
+                pianoPanel.BringToFront();
+
+                pianoPanel.Paint += new PaintEventHandler((o, ev) => DrawPiano(ev.Graphics));
+
+                SuspendLayout();
+                Instrument.Read();
+                instrumentsBox.DisplayMember = "Name";
+                foreach (Instrument i in Instrument.Prefabs)
+                    instrumentsBox.Items.Add(i);
+                instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+
+
+                typeof(Panel).InvokeMember("DoubleBuffered", BindingFlags.SetProperty
+                | BindingFlags.Instance | BindingFlags.NonPublic, null,
+                OffsetPanel, new object[] { true }); // Internet suggested this... 
+
+
+                IO.KB.ActionManager.NotePlayed += _mordhauOut_notePlayed;
+
+                ChannelsListBox.ContextMenuStrip = contextMenuStrip1;
+                TrackListBox.ContextMenuStrip = contextMenuStrip2;
+
+                TrackListBox.MouseDown += listBox_MouseDown;
+                TrackListBox.DragOver += listBox_DragOver;
+                TrackListBox.DragDrop += listBox_DragDrop;
+
+                var scrollHandler = new ScrollEventHandler((o, ev) =>
                 {
-                    DrawPiano(pianoPanel.CreateGraphics());
-                    pianoPanel.Update();
-                }
-                //DrawPianoRoll(OffsetPanel.CreateGraphics());
-                //OffsetPanel.Update();
-
-                // If it was a horizontal scroll, we should trim the channelRects we use for mouse checks
-
-                // Realistically, I should sort channelRects when I'm done making it, and then I can do some ez logic to avoid reiterating
-                // Like find the largest one in our culled set, find it in the original set, and only check ones after that
-                // Which means it should be flattened?  That's awkward though... 
-
-                // Hmm.  It's really the drawing that spikes it, though this took us from 500mb to like 400
-                // We should really be invalidating only the visible section when we update it probably
-                // If they horizontal scroll while a hoverChannel is up, then we'd want to blank them and redraw, but otherwise it'd be fine to do
-                else
-                {
-                    SetVisibleNotes();
-                    OffsetPanel.Refresh();
-                }
-            });
-
-            OffsetPanel.MouseWheel += new MouseEventHandler((o, ev) =>
-            {
-                if (hoverChannels.Count > 1)
-                {
-                    if (ev.Delta >= 120)
+                    if (ev.ScrollOrientation == ScrollOrientation.VerticalScroll)
                     {
-                        // Take whatever's at spot 0 and put it at the end
-                        var first = hoverChannels.First();
-                        hoverChannels.RemoveAt(0);
-                        hoverChannels.Add(first);
+                        DrawPiano(pianoPanel.CreateGraphics());
+                        pianoPanel.Update();
                     }
-                    else if (ev.Delta <= -120)
-                    {
-                        var first = hoverChannels.Last();
-                        hoverChannels.RemoveAt(hoverChannels.Count - 1);
-                        hoverChannels.Insert(0, first);
-                    }
+                    //DrawPianoRoll(OffsetPanel.CreateGraphics());
+                    //OffsetPanel.Update();
 
-                    // Wish we could make it not scroll... docs say the delta is cumulative, and should scroll when it's +/-120
-                    // It then should scroll SystemInformation.MouseWheelScrollLines per 120 deltas of movement
-                    (ev as HandledMouseEventArgs).Handled = true; // Does that do it? Yep
-                    OffsetPanel.Refresh();
-                }
-                else
-                {
-                    if (ModifierKeys == Keys.Control)
+                    // If it was a horizontal scroll, we should trim the channelRects we use for mouse checks
+
+                    // Realistically, I should sort channelRects when I'm done making it, and then I can do some ez logic to avoid reiterating
+                    // Like find the largest one in our culled set, find it in the original set, and only check ones after that
+                    // Which means it should be flattened?  That's awkward though... 
+
+                    // Hmm.  It's really the drawing that spikes it, though this took us from 500mb to like 400
+                    // We should really be invalidating only the visible section when we update it probably
+                    // If they horizontal scroll while a hoverChannel is up, then we'd want to blank them and redraw, but otherwise it'd be fine to do
+                    else
                     {
-                        // Zoom in/out on time scale
+                        SetVisibleNotes();
+                        OffsetPanel.Refresh();
+                    }
+                });
+
+                OffsetPanel.MouseWheel += new MouseEventHandler((o, ev) =>
+                {
+                    if (hoverChannels.Count > 1)
+                    {
                         if (ev.Delta >= 120)
                         {
-                            tickLength *= 2;
+                            // Take whatever's at spot 0 and put it at the end
+                            var first = hoverChannels.First();
+                            hoverChannels.RemoveAt(0);
+                            hoverChannels.Add(first);
                         }
                         else if (ev.Delta <= -120)
                         {
-                            tickLength /= 2;
-                            if (tickLength <= 0)
-                                tickLength = 0.01f;
+                            var first = hoverChannels.Last();
+                            hoverChannels.RemoveAt(hoverChannels.Count - 1);
+                            hoverChannels.Insert(0, first);
                         }
-                        // TODO: Scroll horizontally to where the mouse was when 'zooming'
-                        // TODO: Apply upper and lower limits
-                        ResetRowSize();
-                        SetVisibleNotes(true);
-                        (ev as HandledMouseEventArgs).Handled = true;
-                        OffsetPanel.Refresh();
-                        // Something is still not right here; we get notes cut off at both left and right side
-                        // Considering how we build them, they can't have an X < 0 so that doesn't add up unless it's just
-                        // visible notes not being correct; maybe the new scroll value isn't updated yet...?  But should be as soon as they scroll...
 
-                        // I guess, at least on the left, we're not accounting for pianoWidth
+                        // Wish we could make it not scroll... docs say the delta is cumulative, and should scroll when it's +/-120
+                        // It then should scroll SystemInformation.MouseWheelScrollLines per 120 deltas of movement
+                        (ev as HandledMouseEventArgs).Handled = true; // Does that do it? Yep
+                        OffsetPanel.Refresh();
                     }
                     else
                     {
-                        if (panel1.VerticalScroll.Visible && panel1.VerticalScroll.Enabled)
+                        if (ModifierKeys == Keys.Control)
                         {
-                            var args = new ScrollEventArgs(ScrollEventType.SmallIncrement, 0, ScrollOrientation.VerticalScroll); // We aren't really gonna use these values...
-                            scrollHandler(null, args);
+                            // Zoom in/out on time scale
+                            if (ev.Delta >= 120)
+                            {
+                                tickLength *= 2;
+                            }
+                            else if (ev.Delta <= -120)
+                            {
+                                tickLength /= 2;
+                                if (tickLength <= 0)
+                                    tickLength = 0.01f;
+                            }
+                            // TODO: Scroll horizontally to where the mouse was when 'zooming'
+                            // TODO: Apply upper and lower limits
+                            ResetRowSize();
+                            SetVisibleNotes(true);
+                            (ev as HandledMouseEventArgs).Handled = true;
+                            OffsetPanel.Refresh();
+                            // Something is still not right here; we get notes cut off at both left and right side
+                            // Considering how we build them, they can't have an X < 0 so that doesn't add up unless it's just
+                            // visible notes not being correct; maybe the new scroll value isn't updated yet...?  But should be as soon as they scroll...
+
+                            // I guess, at least on the left, we're not accounting for pianoWidth
                         }
                         else
                         {
-                            var args = new ScrollEventArgs(ScrollEventType.SmallIncrement, 0, ScrollOrientation.HorizontalScroll); // We aren't really gonna use these values...
-                            scrollHandler(null, args);
+                            if (panel1.VerticalScroll.Visible && panel1.VerticalScroll.Enabled)
+                            {
+                                var args = new ScrollEventArgs(ScrollEventType.SmallIncrement, 0, ScrollOrientation.VerticalScroll); // We aren't really gonna use these values...
+                                scrollHandler(null, args);
+                            }
+                            else
+                            {
+                                var args = new ScrollEventArgs(ScrollEventType.SmallIncrement, 0, ScrollOrientation.HorizontalScroll); // We aren't really gonna use these values...
+                                scrollHandler(null, args);
+                            }
                         }
                     }
-                }
-            }); // The OffsetPanel lets us override the scroll, and the panel1 triggers after it occurs 
-            panel1.MouseWheel += new MouseEventHandler((o, ev) =>
-            {
-                DrawPiano(pianoPanel.CreateGraphics());
-                pianoPanel.Update();
-            });
-            panel1.Scroll += scrollHandler;
+                }); // The OffsetPanel lets us override the scroll, and the panel1 triggers after it occurs 
+                panel1.MouseWheel += new MouseEventHandler((o, ev) =>
+                {
+                    DrawPiano(pianoPanel.CreateGraphics());
+                    pianoPanel.Update();
+                });
+                panel1.Scroll += scrollHandler;
 
 
-            //OffsetPanel.Left = pianoWidth;
+                //OffsetPanel.Left = pianoWidth;
 
-            //OffsetPanel.HorizontalScroll.Enabled = true;
-            OffsetPanel.AutoScroll = false;
+                //OffsetPanel.HorizontalScroll.Enabled = true;
+                OffsetPanel.AutoScroll = false;
 
-            OffsetPanel.Paint += new PaintEventHandler(DrawGraphics);
-            OffsetPanel.Resize += OffsetPanel_Resize;
-            OffsetPanel.MouseDown += OffsetPanel_MouseDown;
-            OffsetPanel.MouseUp += OffsetPanel_MouseUp;
-            OffsetPanel.MouseLeave += OffsetPanel_MouseLeave;
-            OffsetPanel.MouseCaptureChanged += OffsetPanel_MouseLeave; // These should do the same thing
-            OffsetPanel.MouseMove += OffsetPanel_MouseMove;
-            OffsetPanel.MouseEnter += OffsetPanel_MouseEnter;
+                OffsetPanel.Paint += new PaintEventHandler(DrawGraphics);
+                OffsetPanel.Resize += OffsetPanel_Resize;
+                OffsetPanel.MouseDown += OffsetPanel_MouseDown;
+                OffsetPanel.MouseUp += OffsetPanel_MouseUp;
+                OffsetPanel.MouseLeave += OffsetPanel_MouseLeave;
+                OffsetPanel.MouseCaptureChanged += OffsetPanel_MouseLeave; // These should do the same thing
+                OffsetPanel.MouseMove += OffsetPanel_MouseMove;
+                OffsetPanel.MouseEnter += OffsetPanel_MouseEnter;
 
-            TrackSelectionForm_SizeChanged(null, null); // Make it resize the listboxes on load
+                TrackSelectionForm_SizeChanged(null, null); // Make it resize the listboxes on load
+
+                ResumeLayout();
+            }).ConfigureAwait(false);
+            await InitLists().ConfigureAwait(false);
         }
 
 
@@ -1227,58 +1236,70 @@ namespace LuteBot.UI
             OffsetPanel.Refresh();
         }
 
-        public void InitLists()
+        public async Task InitLists(TrackSelectionManager tsm = null)
         {
-            SuspendLayout();
-            initializing = true;
-            songLabel.Text = Path.GetFileNameWithoutExtension(trackSelectionManager.Player.fileName);
-
-            TrackListBox.Items.Clear();
-            ChannelsListBox.Items.Clear();
-
-            foreach (MidiChannelItem channel in trackSelectionManager.MidiChannels.Values.OrderBy(c => c.Rank))
+            await this.InvokeAsync(() =>
             {
-                ChannelsListBox.Items.Add(channel, channel.Active);
-            }
-            foreach (TrackItem track in trackSelectionManager.MidiTracks.Values.OrderBy(c => c.Rank))
-            {
-                TrackListBox.Items.Add(track, track.Active);
-            }
+                if (tsm != null)
+                    trackSelectionManager = tsm;
+                else
+                    tsm = trackSelectionManager;
+                SuspendLayout();
+                initializing = true;
+                songLabel.Text = Path.GetFileNameWithoutExtension(tsm.Player.fileName);
 
-            ChannelsListBox.DisplayMember = "Name";
-            TrackListBox.DisplayMember = "Name";
+                TrackListBox.Items.Clear();
+                ChannelsListBox.Items.Clear();
 
-            instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                foreach (MidiChannelItem channel in tsm.MidiChannels.Values.OrderBy(c => c.Rank))
+                {
+                    ChannelsListBox.Items.Add(channel, channel.Active);
+                }
+                foreach (TrackItem track in tsm.MidiTracks.Values.OrderBy(c => c.Rank))
+                {
+                    TrackListBox.Items.Add(track, track.Active);
+                }
 
-            ReloadNotes(true);
+                ChannelsListBox.DisplayMember = "Name";
+                TrackListBox.DisplayMember = "Name";
 
-            //UpdateRanks();
+                instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
-            ResumeLayout();
-            Invalidate();
-            //Refresh();
-            // This is a terrible thing to do, but, there's no easy way to hook the right events to make it wait properly
-            // So after a timer, we're refreshing our OffsetPanel again
-            //Timer t = new Timer();
-            //t.Interval = 100;
-            //t.Tick += (object sender, EventArgs e) =>
-            //{
-            //    if (this.IsHandleCreated && !this.IsDisposed)
-            //        BeginInvoke((MethodInvoker)delegate
-            //        {
-            //            Refresh();
-            //            t.Dispose();
-            //        });
-            //};
-            //t.Start();
-            pianoPanel.Refresh();
-            OffsetPanel.Refresh();
-            initializing = false;
-        }
+                if (tsm.Player.dryWetFile != null)
+                {
+                    var tempoMap = tsm.Player.dryWetFile.GetTempoMap();
+                    var tempo = tempoMap.GetTempoAtTime(new MetricTimeSpan(1));
+                    var secondsPerTick = ((float)tempo.MicrosecondsPerQuarterNote / ((TicksPerQuarterNoteTimeDivision)tsm.Player.dryWetFile.TimeDivision).TicksPerQuarterNote) / 1000f;
+                    // TickLength is pixels per tick
+                    // I'd like to fit 30s into the window of about 700px
+                    tickLength = 30f / 700f * secondsPerTick;
+                }
 
-        public void TrackChangedHandler(object sender, EventArgs e)
-        {
-            InitLists();
+                ReloadNotes(true);
+
+                //UpdateRanks();
+
+                ResumeLayout();
+                Invalidate();
+                //Refresh();
+                // This is a terrible thing to do, but, there's no easy way to hook the right events to make it wait properly
+                // So after a timer, we're refreshing our OffsetPanel again
+                //Timer t = new Timer();
+                //t.Interval = 100;
+                //t.Tick += (object sender, EventArgs e) =>
+                //{
+                //    if (this.IsHandleCreated && !this.IsDisposed)
+                //        BeginInvoke((MethodInvoker)delegate
+                //        {
+                //            Refresh();
+                //            t.Dispose();
+                //        });
+                //};
+                //t.Start();
+                pianoPanel.Refresh();
+                OffsetPanel.Refresh();
+                initializing = false;
+            }).ConfigureAwait(false);
         }
 
         private void TrackSelectionForm_Closing(object sender, FormClosingEventArgs e)
@@ -1309,7 +1330,7 @@ namespace LuteBot.UI
                 await trackSelectionManager.SaveTrackManager().ConfigureAwait(false);
                 try
                 {
-                    await LuteBotForm.luteBotForm.partitionsForm.ShowPartitionSaveForm().ConfigureAwait(false);
+                    await LuteBotForm.luteBotForm.PartitionsForm.SavePartitionWithForm(trackSelectionManager).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -1318,12 +1339,12 @@ namespace LuteBot.UI
             }
         }
 
-        private void LoadProfileButton_Click(object sender, EventArgs e)
+        private async void LoadProfileButton_Click(object sender, EventArgs e)
         {
             if (trackSelectionManager.FileName != null)
             {
                 trackSelectionManager.LoadTrackManager();
-                InitLists();
+                await InitLists().ConfigureAwait(false);
             }
         }
 
@@ -1400,18 +1421,24 @@ namespace LuteBot.UI
             }
         }
 
-        private void instrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
+        private async void instrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             // If it's already the instrument we have as our property
             // Then don't re-set the values
             int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
             if (currentInstrument != instrumentsBox.SelectedIndex)
             {
-                ConfigManager.SetProperty(PropertyItem.Instrument, instrumentsBox.SelectedIndex.ToString());
-                Instrument target = (Instrument)instrumentsBox.SelectedItem;
+                await SetInstrument(currentInstrument, instrumentsBox.SelectedIndex).ConfigureAwait(false);
+            }
+        }
 
-                bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
-                ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
+        private async Task SetInstrument(int currentInstrument, int newInstrument)
+        {
+            if (Instrument.Prefabs.Count > newInstrument)
+            {
+
+                ConfigManager.SetProperty(PropertyItem.Instrument, newInstrument.ToString());
+                Instrument target = Instrument.Prefabs[newInstrument];
 
                 ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
 
@@ -1423,11 +1450,17 @@ namespace LuteBot.UI
 
                 ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
 
-                mainForm.OnInstrumentChanged(currentInstrument);
+                await InstrumentChanged(currentInstrument).ConfigureAwait(false);
             }
         }
 
-        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        public async Task InstrumentChanged(int oldInstrument)
+        {
+            trackSelectionManager.UpdateTrackSelectionForInstrument(oldInstrument);
+            await InitLists().ConfigureAwait(false);
+        }
+
+        private async void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var menuStrip = ((sender as ToolStripMenuItem).Owner) as ContextMenuStrip;
             if (menuStrip == contextMenuStrip1)
@@ -1443,15 +1476,14 @@ namespace LuteBot.UI
                 foreach (var track in trackSelectionManager.MidiTracks.Values)
                     track.Active = true;
             }
-            trackSelectionManager.ResetRequest();
-            InitLists();
+            await InitLists().ConfigureAwait(false);
             //ResetRowSize();
             //Invalidate();
             //OffsetPanel.Refresh();
 
         }
 
-        private void selectNoneToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void selectNoneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var menuStrip = ((sender as ToolStripMenuItem).Owner) as ContextMenuStrip;
             if (menuStrip == contextMenuStrip1)
@@ -1464,14 +1496,13 @@ namespace LuteBot.UI
                 foreach (var track in trackSelectionManager.MidiTracks.Values)
                     track.Active = false;
             }
-            trackSelectionManager.ResetRequest();
-            InitLists();
+            await InitLists().ConfigureAwait(false);
             //ResetRowSize();
             //Invalidate();
             //OffsetPanel.Refresh();
         }
 
-        private void selectInverseToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void selectInverseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var menuStrip = ((sender as ToolStripMenuItem).Owner) as ContextMenuStrip;
             if (menuStrip == contextMenuStrip1)
@@ -1485,8 +1516,7 @@ namespace LuteBot.UI
                 foreach (var track in trackSelectionManager.MidiTracks.Values)
                     track.Active = !track.Active;
             }
-            trackSelectionManager.ResetRequest();
-            InitLists();
+            await InitLists().ConfigureAwait(false);
             //ResetRowSize();
             //Invalidate();
             //OffsetPanel.Refresh();
@@ -1496,7 +1526,7 @@ namespace LuteBot.UI
         {
             var list = (CheckedListBox)sender;
             if (list.SelectedItem == null) return;
-            
+
             prevChecked = list.GetItemChecked(list.SelectedIndex);
             list.DoDragDrop(list.SelectedItem, DragDropEffects.Move);
         }
@@ -1531,7 +1561,44 @@ namespace LuteBot.UI
                 targetTrack = trackSelectionManager.DataDictionary[currentInstrument].MidiTracks[track.Id];
                 targetTrack.Rank = i + 1;
             }
-            trackSelectionManager.ResetRequest();
+        }
+
+        private async void invertToOtherInstrumentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var menuStrip = ((sender as ToolStripMenuItem).Owner) as ContextMenuStrip;
+            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            int targetIndex = 1;
+            if (currentInstrument == 1)
+            {
+                targetIndex = 0;
+            }
+            if (menuStrip == contextMenuStrip1)
+            {
+                if (trackSelectionManager.DataDictionary.ContainsKey(targetIndex))
+                {
+                    foreach (var channel in trackSelectionManager.MidiChannels.Values)
+                        if (channel.Id != 9)
+                        {
+                            var targetChannel = trackSelectionManager.DataDictionary[targetIndex].MidiChannels.Where(c => c.Id == channel.Id).FirstOrDefault();
+                            if (targetChannel != null)
+                                targetChannel.Active = !channel.Active;
+                        }
+                }
+            }
+            else if (menuStrip == contextMenuStrip2)
+            {
+                if (trackSelectionManager.DataDictionary.ContainsKey(targetIndex))
+                {
+                    foreach (var channel in trackSelectionManager.MidiTracks.Values)
+                        if (channel.Id != 9)
+                        {
+                            var targetChannel = trackSelectionManager.DataDictionary[targetIndex].MidiTracks.Where(c => c.Id == channel.Id).FirstOrDefault();
+                            if (targetChannel != null)
+                                targetChannel.Active = !channel.Active;
+                        }
+                }
+            }
+            await SetInstrument(currentInstrument, targetIndex).ConfigureAwait(false);
         }
     }
 

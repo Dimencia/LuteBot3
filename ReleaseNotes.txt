@@ -1,21 +1,5 @@
-Version 3.6.3
+Version 3.6.4
 
-- Fixed yet another issue with track reordering, you should re-save your partitions yet again (Neural Network also improved)
-- Fixed issue requiring you to have Flute selected in order to save flute tracks
-- Added notation for empty and drum tracks/channels, and removed them from ordering and neural network selection
-- (Hopefully) Fixed issue with opening midis saved with 3.5.5
-- Fixed issue where unconfigured midis were not automatically arranged and setup
-- Fixed issue with Neural Network training becoming unresponsive
-- Improved Neural Network training by removing drums and empty tracks/channels
-- Neural Network Pause/Resume no longer reloads or reshuffles test and training sets (if the Training form is not closed between sessions)
-- Updated default Neural Network with a newly trained one
-- Added new right click option to move selected songs to the top of the list (first page)
-
-(You can always change your Neural Network to any of the previous versions by downloading and replacing channelNeural in LuteBot files)
-(You can also train it yourself, you should usually just leave the values alone and hit train, and it will learn based on what is activated for flute on your midis)
-
-	LuteMod 2.6.3
-	- Improved playback for multiple flutes on the same track
-	- Added ~Help command
-	- Added instructions when LuteMod loads to either join a local match, or if already in a local match, to enter ~Help or ~Keybinds
-	- If LuteMod loads for the first time in a local match, automatically displays keybinds and help
+- Fixed crash when re-opening the Guild Library
+- Hopefully fixed lockups by making the entire app threadsafe
+- Multi-threaded loading and saving partitions

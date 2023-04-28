@@ -1,11 +1,15 @@
 ﻿using LuteBot.TrackSelection;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace LuteBot
 {
@@ -129,7 +133,7 @@ namespace LuteBot
         }
 
 
-        public static float[] GetNeuralInputs(this MidiChannelItem c,int channelCount,  int numChannels)
+        public static float[] GetNeuralInputs(this MidiChannelItem c, int channelCount, int numChannels)
         {
             // We'll try not normalizing 
 
@@ -147,9 +151,9 @@ namespace LuteBot
             //inputi++lNoteLength;
             inputs[i++] = channel.highestNote / 128f;
             inputs[i++] = channel.lowestNote / 128f;
-            
+
             inputs[i++] = channel.percentSongNotes;
-            
+
             //inputs[i++] = channel.midiInstrument / 128f;
             inputs[i++] = channel.avgVariation / 64f; // Doubt this ever gets above 64, which this handles
             //inputs[j * 6 + 5] = channel.numNotes;
@@ -157,6 +161,32 @@ namespace LuteBot
             inputs[i++] = channelCount / (float)numChannels;
 
             return inputs;
+        }
+
+        public static Task InvokeAsync(this Form form, Action action, bool catchExceptions = true)
+        {
+            if (form.InvokeRequired)
+            {
+                var ar = form.BeginInvoke(new MethodInvoker(async () =>
+                {
+                    try
+                    {
+                        action();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (!catchExceptions)
+                            throw;
+                        await LuteBotForm.luteBotForm.HandleError(ex, ex.Message).ConfigureAwait(false);
+                    }
+                }));
+                return Task.Factory.FromAsync(ar, form.EndInvoke);
+            }
+            else
+            {
+                action();
+                return Task.CompletedTask;
+            }
         }
     }
 }

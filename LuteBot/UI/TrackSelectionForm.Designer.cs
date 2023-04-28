@@ -54,6 +54,8 @@ namespace LuteBot.UI
             this.songLabel = new System.Windows.Forms.Label();
             this.panel1 = new LuteBot.UI.CustomBufferedPanel();
             this.OffsetPanel = new System.Windows.Forms.Panel();
+            this.invertToOtherInstrumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.invertToOtherInstrumentToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -187,9 +189,10 @@ namespace LuteBot.UI
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.selectAllToolStripMenuItem,
             this.selectNoneToolStripMenuItem,
-            this.selectInverseToolStripMenuItem});
+            this.selectInverseToolStripMenuItem,
+            this.invertToOtherInstrumentToolStripMenuItem1});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(169, 76);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(249, 128);
             // 
             // selectAllToolStripMenuItem
             // 
@@ -218,27 +221,31 @@ namespace LuteBot.UI
             this.contextMenuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
             this.toolStripMenuItem2,
-            this.toolStripMenuItem3});
+            this.toolStripMenuItem3,
+            this.invertToOtherInstrumentToolStripMenuItem});
             this.contextMenuStrip2.Name = "contextMenuStrip1";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(169, 76);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(251, 100);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(168, 24);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(250, 24);
             this.toolStripMenuItem1.Text = "Select All";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(168, 24);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(250, 24);
             this.toolStripMenuItem2.Text = "Select None";
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.selectNoneToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(168, 24);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(250, 24);
             this.toolStripMenuItem3.Text = "Select Inverse";
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.selectInverseToolStripMenuItem_Click);
             // 
             // songLabel
             // 
@@ -272,6 +279,20 @@ namespace LuteBot.UI
             this.OffsetPanel.Name = "OffsetPanel";
             this.OffsetPanel.Size = new System.Drawing.Size(684, 382);
             this.OffsetPanel.TabIndex = 16;
+            // 
+            // invertToOtherInstrumentToolStripMenuItem
+            // 
+            this.invertToOtherInstrumentToolStripMenuItem.Name = "invertToOtherInstrumentToolStripMenuItem";
+            this.invertToOtherInstrumentToolStripMenuItem.Size = new System.Drawing.Size(250, 24);
+            this.invertToOtherInstrumentToolStripMenuItem.Text = "Invert To Other Instrument";
+            this.invertToOtherInstrumentToolStripMenuItem.Click += new System.EventHandler(this.invertToOtherInstrumentToolStripMenuItem_Click);
+            // 
+            // invertToOtherInstrumentToolStripMenuItem1
+            // 
+            this.invertToOtherInstrumentToolStripMenuItem1.Name = "invertToOtherInstrumentToolStripMenuItem1";
+            this.invertToOtherInstrumentToolStripMenuItem1.Size = new System.Drawing.Size(248, 24);
+            this.invertToOtherInstrumentToolStripMenuItem1.Text = "Invert to Other Instrument";
+            this.invertToOtherInstrumentToolStripMenuItem1.Click += new System.EventHandler(this.invertToOtherInstrumentToolStripMenuItem_Click);
             // 
             // TrackSelectionForm
             // 
@@ -326,5 +347,7 @@ namespace LuteBot.UI
         private ToolStripMenuItem toolStripMenuItem2;
         private ToolStripMenuItem toolStripMenuItem3;
         private Label songLabel;
+        private ToolStripMenuItem invertToOtherInstrumentToolStripMenuItem;
+        private ToolStripMenuItem invertToOtherInstrumentToolStripMenuItem1;
     }
 }

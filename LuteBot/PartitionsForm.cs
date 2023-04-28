@@ -35,10 +35,8 @@ namespace LuteBot
 {
     public partial class PartitionsForm : Form
     {
-        public PartitionsForm(TrackSelectionManager tsm, MidiPlayer player)
+        public PartitionsForm()
         {
-            this.tsm = tsm;
-            this.player = player;
             InitializeComponent();
 
             this.FormClosing += PartitionsForm_FormClosing1;
@@ -119,9 +117,7 @@ namespace LuteBot
             Hide();
         }
 
-        private MidiPlayer player;
         public PartitionIndex index { get; private set; }
-        private TrackSelectionManager tsm;
 
         private void RefreshPartitionList()
         {
@@ -138,9 +134,9 @@ namespace LuteBot
 
         public async Task PopulateIndexListAsync()
         {
-            await LuteBotForm.luteBotForm.InvokeAsync(() =>
+            await this.InvokeAsync(() =>
             {
-                LuteBotForm.luteBotForm.partitionsForm.PopulateIndexList();
+                PopulateIndexList();
             }).ConfigureAwait(false);
         }
 
@@ -204,20 +200,34 @@ namespace LuteBot
         private async void EditItem_Click(object sender, EventArgs e)
         {
             string midiPath = Path.Combine(partitionMidiPath, listBoxPartitions.SelectedItems[0] + ".mid");
+            await LoadTrackSelectionForMidi(midiPath).ConfigureAwait(false);
+
+        }
+
+        private async Task LoadTrackSelectionForMidi(string midiPath)
+        {
+            TrackSelectionManager tsm = null;
             if (File.Exists(midiPath))
-                await LuteBotForm.luteBotForm.LoadFile(midiPath).ConfigureAwait(false);
-            else
-                await tsm.LoadSavFiles(SaveManager.SaveFilePath, (string)listBoxPartitions.SelectedItems[0]).ConfigureAwait(false);
-            if (!LuteBotForm.luteBotForm.trackSelectionForm.Visible)
             {
-                await LuteBotForm.luteBotForm.InvokeAsync(() =>
+                tsm = await LuteBotForm.luteBotForm.LoadFile(midiPath).ConfigureAwait(false);
+                if (!LuteBotForm.luteBotForm.TrackSelectionForm.Visible)
                 {
-                    Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
-                    LuteBotForm.luteBotForm.trackSelectionForm.Show();
-                    LuteBotForm.luteBotForm.trackSelectionForm.Top = coords.Y;
-                    LuteBotForm.luteBotForm.trackSelectionForm.Left = coords.X;
-                }).ConfigureAwait(false);
+                    await this.InvokeAsync(() =>
+                    {
+                        Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
+                        LuteBotForm.luteBotForm.TrackSelectionForm.Show();
+                        LuteBotForm.luteBotForm.TrackSelectionForm.Top = coords.Y;
+                        LuteBotForm.luteBotForm.TrackSelectionForm.Left = coords.X;
+                    }).ConfigureAwait(false);
+                }
+                await LuteBotForm.luteBotForm.TrackSelectionForm.InitLists(tsm).ConfigureAwait(false);
             }
+            else
+            {
+                await LuteBotForm.luteBotForm.HandleError(new Exception($"Midi file did not exist: {midiPath}"), $"Midi file did not exist: {midiPath}").ConfigureAwait(false);
+                return;
+            }
+            //await tsm.LoadSavFiles(SaveManager.SaveFilePath, (string)listBoxPartitions.SelectedItems[0]).ConfigureAwait(false);
         }
 
         private void PartitionIndexBox_DragOver(object sender, DragEventArgs e)
@@ -287,14 +297,17 @@ namespace LuteBot
 
         private async Task SelectedItemsChanged()
         {
-            await LuteBotForm.luteBotForm.InvokeAsync(async () =>
+            string filePath = null;
+            await this.InvokeAsync(() =>
             {
                 if (listBoxPartitions.SelectedIndices.Count == 0)
                 {
+
                     editSelectedButton.Enabled = false;
                     reloadSelectedButton.Enabled = false;
                     exportSelectedButton.Enabled = false;
                     renameSelectedButton.Enabled = false;
+
                 }
                 else if (listBoxPartitions.SelectedIndices.Count == 1)
                 {
@@ -302,8 +315,7 @@ namespace LuteBot
                     reloadSelectedButton.Enabled = true;
                     exportSelectedButton.Enabled = true;
                     renameSelectedButton.Enabled = true;
-                    var filePath = Path.Combine(partitionMidiPath, (string)(listBoxPartitions.SelectedItems[0]) + ".mid");
-                    await LuteBotForm.luteBotForm.LoadFile(filePath).ConfigureAwait(false);
+                    filePath = Path.Combine(partitionMidiPath, (string)(listBoxPartitions.SelectedItems[0]) + ".mid");
                 }
                 else
                 {
@@ -313,6 +325,8 @@ namespace LuteBot
                     renameSelectedButton.Enabled = false;
                 }
             }).ConfigureAwait(false);
+            if (filePath != null)
+                await LoadTrackSelectionForMidi(filePath).ConfigureAwait(false);
         }
 
         private async void PartitionIndexBox_MouseDown(object sender, MouseEventArgs e)
@@ -449,32 +463,21 @@ namespace LuteBot
 
         private LuteMod.Converter.MordhauConverter trackConverter = null;
 
-        private async void savePartitionsButton_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                await ShowPartitionSaveForm().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                await LuteBotForm.luteBotForm.HandleError(ex, "Failed to save partition").ConfigureAwait(false);
-            }
-        }
 
-        public async Task<bool> ShowPartitionSaveForm()
+        public async Task<bool> SavePartitionWithForm(TrackSelectionManager tsm)
         {
             if (tsm.MidiTracks.Values.Where(t => t.Active).Count() > 0)
             {
                 var namingForm = new TrackNamingForm(Path.GetFileNameWithoutExtension(tsm.FileName));
 
-                await LuteBotForm.luteBotForm.InvokeAsync(() =>
+                await this.InvokeAsync(() =>
                 {
                     namingForm.ShowDialog(this);
                 }).ConfigureAwait(false);
                 //await Task.Run(() =>
                 //{
                 if (namingForm.DialogResult == DialogResult.OK)
-                    return await SavePartition(namingForm.textBoxPartName.Text, namingForm.checkBoxOverwrite.Checked).ConfigureAwait(false);
+                    return await SavePartition(namingForm.textBoxPartName.Text, tsm, namingForm.checkBoxOverwrite.Checked).ConfigureAwait(false);
 
                 return false;
             }
@@ -484,46 +487,68 @@ namespace LuteBot
             }
         }
 
-        private async Task<bool> SavePartition(string name, bool overwrite = false)
+        private async Task<bool> SavePartition(string name, string filePath, bool overwrite = false)
         {
+            var tsm = await LuteBotForm.luteBotForm.LoadFile(filePath, false).ConfigureAwait(false);
+            return await SavePartition(name, tsm, overwrite).ConfigureAwait(false);
+        }
+
+        private SemaphoreSlim IndexSem = new SemaphoreSlim(1, 1);
+
+        private async Task<bool> SavePartition(string name, TrackSelectionManager tsm, bool overwrite = false)
+        {
+            // We're waiting because we access index a lot in here, and this should be relatively little processing vs loading the file
+            // ... Plus the Configuration related stuff isn't threadsafe
+
             try
             {
+                var player = tsm.Player;
                 string midiFileName = null;
-                await LuteBotForm.luteBotForm.InvokeAsync(() =>
+
+                var dryWetFile = player.dryWetFile;
+
+                //var quant = new Quantizer();
+                //var tempoMap = dryWetFile.GetTempoMap();
+                //quant.Quantize(dryWetFile.GetTimedEvents(), new SteppedGrid(new MetricTimeSpan(TimeSpan.FromSeconds(0.017))), tempoMap, new QuantizingSettings { QuantizingLevel = 1, RandomizingSettings = new RandomizingSettings { Filter = t => false } });
+
+                if (name == "Song Name" || name.Trim() == "")
                 {
-
-                    var dryWetFile = player.dryWetFile;
-
-                    //var quant = new Quantizer();
-                    //var tempoMap = dryWetFile.GetTempoMap();
-                    //quant.Quantize(dryWetFile.GetTimedEvents(), new SteppedGrid(new MetricTimeSpan(TimeSpan.FromSeconds(0.017))), tempoMap, new QuantizingSettings { QuantizingLevel = 1, RandomizingSettings = new RandomizingSettings { Filter = t => false } });
-
-                    if (name == "Song Name" || name.Trim() == "")
+                    throw new Exception("Please name your song");
+                }
+                else
+                {
+                    await IndexSem.WaitAsync().ConfigureAwait(false);
+                    try
                     {
-                        throw new Exception("Please name your song");
+                        await this.InvokeAsync(() =>
+                        {
+                            while (index.PartitionNames.Contains(name) && !overwrite)
+                            {
+                                var namingForm = new TrackNamingForm(name);
+                                namingForm.Text = "Name already exists - Enter new Song Name";
+                                namingForm.ShowDialog(this);
+                                if (namingForm.DialogResult == DialogResult.OK)
+                                {
+                                    name = namingForm.textBoxPartName.Text;
+                                    overwrite = namingForm.checkBoxOverwrite.Checked;
+                                }
+                                else
+                                {
+                                    name = null;
+                                    return;
+                                }
+                            }
+                        }).ConfigureAwait(false);
                     }
-                    else
+                    finally
                     {
-                        while (index.PartitionNames.Contains(name) && !overwrite)
+                        IndexSem.Release();
+                    }
+                    if (name != null)
+                    {
+                        while (!Regex.IsMatch(name, "^([a-zA-Z0-9][a-zA-Z0-9 -]*[a-zA-Z0-9])$"))
                         {
-                            var namingForm = new TrackNamingForm(name);
-                            namingForm.Text = "Name already exists - Enter new Song Name";
-                            namingForm.ShowDialog(this);
-                            if (namingForm.DialogResult == DialogResult.OK)
-                            {
-                                name = namingForm.textBoxPartName.Text;
-                                overwrite = namingForm.checkBoxOverwrite.Checked;
-                            }
-                            else
-                            {
-                                name = null;
-                                break;
-                            }
-
-                        }
-                        if (name != null)
-                        {
-                            while (!Regex.IsMatch(name, "^([a-zA-Z0-9][a-zA-Z0-9 -]*[a-zA-Z0-9])$"))
+                            await this.InvokeAsync(() =>
                             {
                                 var namingForm = new TrackNamingForm(name);
                                 namingForm.Text = "Name contains invalid characters - Enter new Song Name";
@@ -536,105 +561,77 @@ namespace LuteBot
                                 else
                                 {
                                     name = null;
-                                    break;
+                                    return;
                                 }
-                            }
-                            if (name != null)
+                            }).ConfigureAwait(false);
+                        }
+                        if (name != null)
+                        {
+                            await IndexSem.WaitAsync().ConfigureAwait(false);
+                            try
                             {
                                 if (overwrite && index.PartitionNames.Contains(name))
                                     index.PartitionNames.Remove(name);
 
                                 index.PartitionNames.Insert(0, name);
+                            }
+                            finally
+                            {
+                                IndexSem.Release();
+                            }
 
-                                //if (trackConverter == null)
-                                //{
-                                var converter = new LuteMod.Converter.MordhauConverter();
+                            //if (trackConverter == null)
+                            //{
+                            var converter = new LuteMod.Converter.MordhauConverter();
 
-                                int firstInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-                                // Step 1, load solo lute into track 0 - this profile should always exist
-                                // Actually, all of the first 4 instruments get loaded in, under the same ID we use in lutebot.  Convenient.
-                                for (int i = 0; i < 2; i++)
+                            int firstInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                            int oldInstrument = firstInstrument;
+                            // Step 1, load solo lute into track 0 - this profile should always exist
+                            // Actually, all of the first 4 instruments get loaded in, under the same ID we use in lutebot.  Convenient.
+                            for (int i = 0; i < 2; i++)
+                            {
+                                if (tsm.DataDictionary.ContainsKey(i))
                                 {
-                                    int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
-                                    if (tsm.DataDictionary.ContainsKey(i))
+
+                                    tsm.UpdateTrackSelectionForInstrument(oldInstrument, false, i);
+
+                                    converter.SetDivision(((TicksPerQuarterNoteTimeDivision)dryWetFile.TimeDivision).TicksPerQuarterNote);
+                                    converter.SetPartitionTempo((int)dryWetFile.GetTempoMap().GetTempoAtTime(new MetricTimeSpan(0)).MicrosecondsPerQuarterNote);
+
+                                    //converter.AddTrack(i);
+                                    //converter.FillTrack(i, player.ExtractMidiContent());
+                                    var activeTracks = tsm.MidiTracks.Values.Where(t => t.Active && t.tickNotes.Any(tn => tn.Value.Any(n => n.active && tsm.MidiChannels.ContainsKey(n.channel) && tsm.MidiChannels[n.channel].Active))).OrderBy(t => t.Rank).ToList();
+                                    for (int j = 0; j < activeTracks.Count; j++)
                                     {
+                                        var trackID = converter.AddTrack(i);
+                                        //converter.SetEnabledTracksInTrack(trackID, new List<MidiChannelItem> { activeTracks[j] });
+                                        //converter.SetEnabledMidiChannelsInTrack(trackID, tsm.MidiChannels.Values.ToList());
 
-                                        if (oldInstrument != i)
-                                        {
-                                            ConfigManager.SetProperty(PropertyItem.Instrument, i.ToString());
-                                            Instrument target = Instrument.Prefabs[i];
-
-                                            bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
-                                            ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
-                                            ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
-                                            tsm.UpdateTrackSelectionForInstrument(oldInstrument);
-                                        }
-
-                                        converter.Range = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount);
-                                        converter.LowNote = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId);
-                                        converter.LowestPlayed = ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote);
-                                        converter.IsConversionEnabled = true;
-                                        converter.SetDivision(((TicksPerQuarterNoteTimeDivision)dryWetFile.TimeDivision).TicksPerQuarterNote);
-                                        converter.SetPartitionTempo((int)dryWetFile.GetTempoMap().GetTempoAtTime(new MetricTimeSpan(0)).MicrosecondsPerQuarterNote);
-
-                                        //converter.AddTrack(i);
-                                        //converter.FillTrack(i, player.ExtractMidiContent());
-                                        var activeTracks = tsm.MidiTracks.Values.Where(t => t.Active && t.tickNotes.Any(tn => tn.Value.Any(n => n.active && tsm.MidiChannels.ContainsKey(n.channel) && tsm.MidiChannels[n.channel].Active))).OrderBy(t => t.Rank).ToList();
-                                        for (int j = 0; j < activeTracks.Count; j++)
-                                        {
-                                            var trackID = converter.AddTrack(i);
-                                            //converter.SetEnabledTracksInTrack(trackID, new List<MidiChannelItem> { activeTracks[j] });
-                                            //converter.SetEnabledMidiChannelsInTrack(trackID, tsm.MidiChannels.Values.ToList());
-
-                                            converter.FillTrack(trackID, player.ExtractMidiContent(dryWetFile, activeTracks[j].Id));
-                                        }
+                                        converter.FillTrack(trackID, player.ExtractMidiContent(dryWetFile, activeTracks[j].Id));
                                     }
+                                    oldInstrument = i;
                                 }
 
-                                SaveManager.WriteSaveFile(Path.Combine(SaveManager.SaveFilePath, name), converter.GetPartitionToString());
-                                index.SaveIndex();
-
-                                // And put the instrument back
-                                if (ConfigManager.GetIntegerProperty(PropertyItem.Instrument) != firstInstrument)
+                                await IndexSem.WaitAsync().ConfigureAwait(false);
+                                try
                                 {
-                                    int oldInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-                                    ConfigManager.SetProperty(PropertyItem.Instrument, firstInstrument.ToString());
-                                    Instrument target = Instrument.Prefabs[firstInstrument];
+                                    SaveManager.WriteSaveFile(Path.Combine(SaveManager.SaveFilePath, name), converter.GetPartitionToString());
+                                    index.SaveIndex();
 
-                                    bool soundEffects = !target.Name.StartsWith("Mordhau", true, System.Globalization.CultureInfo.InvariantCulture);
-                                    ConfigManager.SetProperty(PropertyItem.SoundEffects, soundEffects.ToString());
-                                    ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
-                                    ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
-                                    ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
-                                    ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
-                                    ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
-                                    tsm.UpdateTrackSelectionForInstrument(oldInstrument);
+                                    // And put the instrument back
+                                    tsm.UpdateTrackSelectionForInstrument(oldInstrument, false, firstInstrument);
+
+                                    await PopulateIndexListAsync().ConfigureAwait(false);
                                 }
-                                //}
-                                //else
-                                //{
-                                //    SaveManager.WriteSaveFile(SaveManager.SaveFilePath + namingForm.textBoxPartName.Text, trackConverter.GetPartitionToString());
-                                //    index.SaveIndex();
-                                //    PopulateIndexList();
-                                //    trackConverter = null;
-                                //}
-
-                                // Lastly, save the settings in a midi file with the same name, in the same folder, for ease of sharing...
-                                // TODO: Consider storing these in appdata, and providing a button to access them.  Both might get complicated if I make partition playlists
-                                // Actually... I think I will store them in appdata.
-                                
-                                //Invoke((MethodInvoker)delegate {
-                                PopulateIndexList();
-                                //});
+                                finally
+                                {
+                                    IndexSem.Release();
+                                }
                             }
                         }
                     }
-                }).ConfigureAwait(false);
+                }
                 midiFileName = Path.Combine(partitionMidiPath, name + ".mid");
                 Directory.CreateDirectory(partitionMidiPath);
                 await tsm.SaveTrackManager(midiFileName).ConfigureAwait(false); // Lutebot doesn't need this anytime soon - and shouldn't offer the option to load it until it exists anyway
@@ -681,28 +678,17 @@ namespace LuteBot
 
         public async void saveMultipleSongsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try // async void won't propagate errors, always try/catch
+            openMidiFileDialog.Title = "Auto-Convert MIDI files to Partitions";
+            if (openMidiFileDialog.ShowDialog() == DialogResult.OK)
             {
-                openMidiFileDialog.Title = "Auto-Convert MIDI files to Partitions";
-                if (openMidiFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    var filenames = openMidiFileDialog.FileNames;
-                    foreach (var f in filenames.Reverse()) // So the first ones are first again
-                    {
-                        await LuteBotForm.luteBotForm.LoadFile(f, true).ConfigureAwait(false);
-                        await SavePartition(Regex.Replace(Path.GetFileName(f).Replace(".mid", ""), "[^a-zA-Z0-9 ]", "")).ConfigureAwait(false);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
+                var filenames = openMidiFileDialog.FileNames;
+                await AutoSaveFiles(filenames).ConfigureAwait(false);
             }
         }
 
         public void trainToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var trainingForm = new NeuralNetworkForm(tsm, this);
+            var trainingForm = new NeuralNetworkForm(this);
             trainingForm.Show(this);
 
         }
@@ -800,7 +786,7 @@ namespace LuteBot
             });
         }
 
-        public async Task reloadAll(bool reorderTracks)
+        public async Task reloadAll(bool reorderTracks, bool autoEnableFlutes = false)
         {
             var filenames = listBoxPartitions.Items.Cast<string>().Reverse().ToArray();
 
@@ -816,44 +802,44 @@ namespace LuteBot
                 await AutoSaveFiles(filenames, true, true).ConfigureAwait(false);
             }
         }
-        private SemaphoreSlim saveSem = new SemaphoreSlim(1, 1);
+
         public async Task AutoSaveFiles(IEnumerable<string> filenames, bool overwrite = false, bool reorderTracks = false)
         {
             string warnings = "";
-            await LuteBotForm.luteBotForm.InvokeAsync(() =>
+            await this.InvokeAsync(() =>
             {
                 savePartitionButton.Enabled = false;
                 savePartitionButton.Text = "Processing Midis...";
             }).ConfigureAwait(false);
             try
             {
-                foreach (var f in filenames) // So the first ones are first again
+                await Task.Factory.StartNew(() =>
                 {
-                    var filePath = f;
-                    if (!Path.IsPathRooted(filePath))
-                        filePath = Path.Combine(partitionMidiPath, filePath + ".mid");
-                    if (!File.Exists(filePath))
+                    var names = filenames.Reverse().ToArray();// So the first ones are first again
+                    Parallel.ForEach(names, async f =>
                     {
-                        warnings += $"Could not reload {f} because it was saved with an old LuteBot version\n";
-                        continue;
-                    }
-                    try
-                    {
-                        await saveSem.WaitAsync().ConfigureAwait(false);
-                        await LuteBotForm.luteBotForm.LoadFile(filePath, true, reorderTracks).ConfigureAwait(false);
-                        if (player.dryWetFile != null)
-                            await SavePartition(Regex.Replace(Path.GetFileName(filePath).Replace(".mid", ""), "[^a-zA-Z0-9 ]", ""), overwrite).ConfigureAwait(false);
-
-                    }
-                    catch (Exception ex)
-                    {
-                        warnings += $"Failed to reload file {f}: {ex.Message}";
-                    }
-                    finally
-                    {
-                        saveSem.Release();
-                    }
-                }
+                        var filePath = f;
+                        if (!Path.IsPathRooted(filePath))
+                            filePath = Path.Combine(partitionMidiPath, filePath + ".mid");
+                        if (!File.Exists(filePath))
+                        {
+                            warnings += $"Could not reload {f} because it was saved with an old LuteBot version\n";
+                            return;
+                        }
+                        try
+                        {
+                            await SavePartition(Regex.Replace(Path.GetFileName(filePath).Replace(".mid", ""), "[^a-zA-Z0-9 ]", ""), filePath, overwrite).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            warnings += $"Failed to reload file {f}: {ex.Message}";
+                        }
+                    });
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                warnings += $"Failed to reload files: {ex.Message}";
             }
             finally
             {
@@ -861,7 +847,7 @@ namespace LuteBot
                 {
                     await LuteBotForm.luteBotForm.HandleError(new Exception(warnings), "Some Midis failed to reload: \n" + warnings).ConfigureAwait(false);
                 }
-                await LuteBotForm.luteBotForm.InvokeAsync(() =>
+                await this.InvokeAsync(() =>
                 {
                     savePartitionButton.Enabled = true;
                     savePartitionButton.Text = "Add Midis";
@@ -882,11 +868,11 @@ namespace LuteBot
                     await LuteBotForm.luteBotForm.HandleError(new Exception(message), message).ConfigureAwait(false);
                     return;
                 }
-                await LuteBotForm.luteBotForm.LoadFile(filePath).ConfigureAwait(false);
+                var tsm = await LuteBotForm.luteBotForm.LoadFile(filePath).ConfigureAwait(false);
 
                 try
                 {
-                    var result = await ShowPartitionSaveForm().ConfigureAwait(false);
+                    var result = await SavePartitionWithForm(tsm).ConfigureAwait(false);
                     if (result)
                     {
                         var partitionIndex = index.PartitionNames.IndexOf(indexName);

@@ -108,7 +108,7 @@ namespace LuteBot
             ConfigManager.SetProperty(PropertyItem.NoteCooldown, NoteCooldownNumeric.Value.ToString());
         }
 
-        private void InstrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
+        private async void InstrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             // If it's already the instrument we have as our property
             // Then don't re-set the values
@@ -131,7 +131,7 @@ namespace LuteBot
 
                 ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
 
-                mainForm.OnInstrumentChanged(currentInstrument);
+                await mainForm.TrackSelectionForm.InstrumentChanged(currentInstrument).ConfigureAwait(false);
             }
         }
 

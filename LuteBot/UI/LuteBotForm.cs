@@ -44,16 +44,13 @@ namespace LuteBot
         public static readonly string lutebotPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot");
         public static readonly string libraryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LuteBot", "GuildLibrary");
 
-        public TrackSelectionForm trackSelectionForm = null;
-        public PartitionsForm partitionsForm = null;
-        public GuildLibraryForm guildLibraryForm = null;
+        public TrackSelectionForm TrackSelectionForm { get; private set; } = null;
+        public PartitionsForm PartitionsForm { get; private set; } = null;
+        public GuildLibraryForm GuildLibraryForm { get; private set; } = null;
 
-        MidiPlayer player;
         public static LuteBotForm luteBotForm;
 
         public string currentTrackName { get; set; } = "";
-
-        public static TrackSelectionManager trackSelectionManager;
 
         private const string musicNameLabelHeader = "Loaded: ";
         private static string lutemodPakName = "FLuteMod_2.63.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
@@ -79,22 +76,6 @@ ModListWidgetStayTime=5.0";
         public LuteBotForm()
         {
             luteBotForm = this;
-            InitializeComponent();
-
-
-            MordhauPakPath = GetPakPath();
-            if (MordhauPakPath != ConfigManager.GetProperty(PropertyItem.MordhauPakPath))
-            {
-                ConfigManager.SetProperty(PropertyItem.MordhauPakPath, MordhauPakPath);
-                ConfigManager.SaveConfig();
-            }
-
-            trackSelectionManager = new TrackSelectionManager();
-            player = new MidiPlayer(trackSelectionManager);
-
-            this.Shown += LuteBotForm_Shown;
-
-            OpenDialogs();
             this.StartPosition = FormStartPosition.Manual;
             Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos));
             Top = coords.Y;
@@ -103,113 +84,131 @@ ModListWidgetStayTime=5.0";
             {
                 Top = coords.Y - Height;
                 Left = coords.X - Width / 2;
-                // If they weren't equal, it's at default pos, so the others should also be set to good default positions
-                if (trackSelectionForm != null)
-                {
-                    // We should always CheckPosition, just in case something goes weird, so nothing every initializes out of bounds
-                    var tsPos = WindowPositionUtils.CheckPosition(new Point(Left + Width, Top));
-                    WindowPositionUtils.UpdateBounds(PropertyItem.TrackSelectionPos, tsPos);
-                    trackSelectionForm.Location = tsPos;
-                }
-                if (partitionsForm != null)
-                {
-                    var pfPos = WindowPositionUtils.CheckPosition(new Point(Left - partitionsForm.Width, Top));
-                    WindowPositionUtils.UpdateBounds(PropertyItem.PartitionListPos, pfPos);
-                    partitionsForm.Location = pfPos;
-                }
             }
+            InitializeComponent();
 
-            // We may package this with a guild library for now.  Check for it and extract it, if so
-            var files = Directory.GetFiles(Environment.CurrentDirectory, "BGML*.zip", SearchOption.TopDirectoryOnly);
-            if (files.Length > 0)
-            {
-                Task.Run(() =>
-                {
-                    // extract to libraryPath + "\songs\"
-                    try
-                    {
-                        ZipFile.ExtractToDirectory(files[0], Path.Combine(libraryPath, "songs"));
-                        //File.Delete(files[0]);
-                    }
-                    catch (Exception e) { } // Gross I know, but no reason to do anything
-                });
-            }
-
-
-            // Try to catch issues with mismatches in configs
-            try
-            {
-                int chords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
-            }
-            catch
-            {
-                ConfigManager.SetProperty(PropertyItem.NumChords, "6");
-                ConfigManager.SaveConfig();
-            }
-
-            // Check for FirstRun, and offer the wiki link and auto-setup
-            //if (ConfigManager.GetBooleanProperty(PropertyItem.FirstRun))
-            //{
-            //    ConfigManager.SetProperty(PropertyItem.FirstRun, "False");
-            //    // TODO: A help window with... just the wiki link?
-            //    // I guess also link to the Guild's discord and put some credits there, and link to various specific wiki topics
-            //    helpToolStripMenuItem_Click(null, null);
-            //}
-            // I think I'm going to skip this; if it's a first run, they already get two popups that it set the console key, and then lutemod install
-            // The lutemod install gives them links, so, they don't need this, but the var is there if I want it later.
-
-
-            // Again, also removing the following; it's pointless, 3.3.0 was the first version that uses that config path, so it will never need to modify anything for versions below
-
-            try
-            {
-                // If it's not set, it's below 3.3; the rest is also there just for posterity so I can use it in the future
-                if (!string.IsNullOrWhiteSpace(ConfigManager.GetProperty(PropertyItem.LastVersion)))
-                {
-
-                    // Parse the version into something we can compare
-                    var firstGoodVersions = "3.6.3".Split('.');
-                    var lastversions = ConfigManager.GetProperty(PropertyItem.LastVersion).Split('.');
-                     
-                    for (int i = 0; i < firstGoodVersions.Length; i++)
-                    {
-                        // If we've run out of numbers to compare on either side and none have been less yet, or if any of the numbers are less, the version is below our target
-
-                        // I think.  Target: 3.3 vs 3.31, we ran out of numbers but we're above.  So it depends in which direction
-                        // If we run out of numbers in the target, it is not less
-                        // Target: 3.31 vs 3.3, we run out of numbers in the lastversions, so it is less.  Good.  
-
-                        if (i >= lastversions.Length || int.Parse(lastversions[i]) < int.Parse(firstGoodVersions[i]))
-                        {
-                            // I don't see how this could fail.  We know their last version and it had the prefab there
-                            // I guess if they deleted all but one prefab.  
-                            Instrument.Prefabs[1].ForbidsChords = false;
-                            // The last version ran is below the target, and changes should be applied
-                            Instrument.Write();
-
-                            // We might should messagebox to let them know, but that'd be like a third messagebox for new installs, and that's just annoying at that point
-                            InstallLuteMod(); // Update their lutemod
-                        }
-                        else if (int.Parse(lastversions[i]) > int.Parse(firstGoodVersions[i]))
-                            break; // Their last version was higher than we need
-
-                    }
-                }
-            }
-            catch
-            {
-                MessageBox.Show("Could not perform version upgrade\nYou may need to use the option to Install Lutemod\nAnd may need to delete and re-generate your configuration", "Version upgrade failed");
-            }
-            ConfigManager.SetProperty(PropertyItem.LastVersion, ConfigManager.GetVersion());
-            ConfigManager.SaveConfig();
-
-            this.Text = "LuteBot v" + ConfigManager.GetVersion();
-
+            this.Shown += LuteBotForm_Shown;
         }
 
         private async void LuteBotForm_Shown(object sender, EventArgs e)
         {
+            // I'm going to split this up so if some piece fails, it can log it and continue maybe
+            await this.InvokeAsync(() =>
+            {
+                MordhauPakPath = GetPakPath();
+
+                if (MordhauPakPath != ConfigManager.GetProperty(PropertyItem.MordhauPakPath) && IsMordhauPakPathValid())
+                {
+                    ConfigManager.SetProperty(PropertyItem.MordhauPakPath, MordhauPakPath);
+                    ConfigManager.SaveConfig();
+                }
+            }).ConfigureAwait(false);
+            await this.InvokeAsync(() =>
+            {
+                OpenDialogs();
+                this.StartPosition = FormStartPosition.Manual;
+                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos));
+                Top = coords.Y;
+                Left = coords.X; // If we have a proper saved pos, use it unaltered.  If not, we should adjust from screen center, which is what would be returned
+                if (coords != ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos))
+                {
+                    Top = coords.Y - Height;
+                    Left = coords.X - Width / 2;
+                    // If they weren't equal, it's at default pos, so the others should also be set to good default positions
+                    if (TrackSelectionForm != null)
+                    {
+                        // We should always CheckPosition, just in case something goes weird, so nothing every initializes out of bounds
+                        var tsPos = WindowPositionUtils.CheckPosition(new Point(Left + Width, Top));
+                        WindowPositionUtils.UpdateBounds(PropertyItem.TrackSelectionPos, tsPos);
+                        TrackSelectionForm.Location = tsPos;
+                    }
+                    if (PartitionsForm != null)
+                    {
+                        var pfPos = WindowPositionUtils.CheckPosition(new Point(Left - PartitionsForm.Width, Top));
+                        WindowPositionUtils.UpdateBounds(PropertyItem.PartitionListPos, pfPos);
+                        PartitionsForm.Location = pfPos;
+                    }
+                }
+            }).ConfigureAwait(false);
+
+            // Detect version changes and perform any modifications necessary to handle upgrades
+            await this.InvokeAsync(() =>
+            {
+                DetectVersionChange();
+            }).ConfigureAwait(false);
+
+            // Check for LuteBot updates
             await CheckUpdates(false).ConfigureAwait(false);
+        }
+
+
+        private class VersionChange
+        {
+            public string UpgradeVersionsBelow { get; set; }
+            public Action UpgradeAction { get; set; }
+
+        }
+
+        private static readonly VersionChange[] versionChanges = new VersionChange[]
+        {
+            new VersionChange() { UpgradeVersionsBelow = "3.6.0", UpgradeAction = () =>
+            {
+                Instrument.Prefabs[1].ForbidsChords = false;
+                Instrument.Write();
+            } }
+        };
+
+        // Is source > target, a > b?
+        private bool IsVersionGreater(string source, string target)
+        {
+            var firstGoodVersions = source.Split('.');
+            var lastversions = target.Split('.');
+
+            for (int i = 0; i < firstGoodVersions.Length; i++)
+            {
+                // If we've run out of numbers to compare on either side and none have been less yet, or if any of the numbers are less, the version is below our target
+
+                // I think.  Target: 3.3 vs 3.31, we ran out of numbers but we're above.  So it depends in which direction
+                // If we run out of numbers in the target, it is not less
+                // Target: 3.31 vs 3.3, we run out of numbers in the lastversions, so it is less.  Good.  
+
+                if (i >= lastversions.Length || int.Parse(lastversions[i]) < int.Parse(firstGoodVersions[i]))
+                {
+                    return true;
+                }
+                else if (int.Parse(lastversions[i]) > int.Parse(firstGoodVersions[i]))
+                    return false; // Their last version was higher than we need
+            }
+            return false;
+        }
+
+        private void DetectVersionChange()
+        {
+            string lastVersion;
+            if (string.IsNullOrWhiteSpace(ConfigManager.GetProperty(PropertyItem.LastVersion)))
+                lastVersion = ConfigManager.GetProperty(PropertyItem.LastVersion);
+            else
+                lastVersion = "0.0.0";
+
+            foreach (var change in versionChanges)
+            {
+                try
+                {
+                    if (IsVersionGreater(change.UpgradeVersionsBelow, lastVersion))
+                        change.UpgradeAction();
+                }
+                catch
+                {
+                    MessageBox.Show("Could not perform version upgrade\nYou may need to use the option to Install Lutemod\nAnd may need to delete and re-generate your configuration", "Version upgrade failed");
+                    throw;
+                }
+            }
+
+            if (IsVersionGreater(ConfigManager.GetVersion(), lastVersion))
+                ConfigManager.SetProperty(PropertyItem.LastVersion, ConfigManager.GetVersion());
+            ConfigManager.SaveConfig();
+
+            this.Text = "LuteBot v" + ConfigManager.GetVersion();
         }
 
         public async Task CheckUpdates(bool ignoreSettings = false)
@@ -264,7 +263,10 @@ ModListWidgetStayTime=5.0";
                                     new Dictionary<string, string>() { { "Direct Download", LatestVersion.DownloadLink }, { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }
                                     , MessageBoxButtons.YesNoCancel, "Don't ask again for minor updates"))
                                 {
-                                    installForm.ShowDialog(this);
+                                    await this.InvokeAsync(() =>
+                                    {
+                                        installForm.ShowDialog(this);
+                                    }).ConfigureAwait(false);
                                     if (installForm.DialogResult == DialogResult.Yes)
                                     {
                                         string assemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -288,14 +290,20 @@ ModListWidgetStayTime=5.0";
                         }
                         else if (updateType == PropertyItem.MajorUpdates)
                         {
-                            this.Text += $"    (Major Update Available: v{LatestVersion.Version})";
+                            await this.InvokeAsync(() =>
+                            {
+                                this.Text += $"    (Major Update Available: v{LatestVersion.Version})";
+                            }).ConfigureAwait(false);
                             if (ignoreSettings || ConfigManager.GetBooleanProperty(PropertyItem.MajorUpdates))
                             {
                                 using (var installForm = new UI.PopupForm("Update LuteBot?", $"A new major LuteBot version is available: v" + LatestVersion.Version,
                                     $"{LatestVersion.Title}\n\n{LatestVersion.Description}\n\n\n    Would you like to install it?", new Dictionary<string, string>() { { "Direct Download", LatestVersion.DownloadLink }, { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }
                                     , MessageBoxButtons.YesNoCancel, "Don't ask again for major updates"))
                                 {
-                                    installForm.ShowDialog(this);
+                                    await this.InvokeAsync(() =>
+                                    {
+                                        installForm.ShowDialog(this);
+                                    }).ConfigureAwait(false);
                                     if (installForm.DialogResult == DialogResult.Yes)
                                     {
                                         string assemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -322,7 +330,10 @@ ModListWidgetStayTime=5.0";
                             //this.Text += $"    (Up To Date)"; // Nah.  Kinda dumb.  
                             // Show them a popup, though, if they explicitly ran it, telling them they're good
                             // Just a normal one is fine
-                            MessageBox.Show("Your LuteBot is already the most recent version", "LuteBot Up To Date");
+                            await this.InvokeAsync(() =>
+                            {
+                                MessageBox.Show("Your LuteBot is already the most recent version", "LuteBot Up To Date");
+                            }).ConfigureAwait(false);
                         }
                     }
                 }
@@ -330,7 +341,12 @@ ModListWidgetStayTime=5.0";
                 {
                     using (var popup = new UI.PopupForm("Version Check/Update Failed", $"Could not determine the latest LuteBot version",
                         $"You may want to manually check for an updated version at the following link\n\n{ex.Message}\n{ex.StackTrace}", new Dictionary<string, string>() { { "LuteBot Releases", "https://github.com/Dimencia/LuteBot3/releases" }, { "The Bard's Guild Discord", "https://discord.gg/4xnJVuz" } }))
-                        popup.ShowDialog(this);
+                    {
+                        await this.InvokeAsync(() =>
+                        {
+                            popup.ShowDialog(this);
+                        }).ConfigureAwait(false);
+                    }
                 }
             }
         }
@@ -704,7 +720,7 @@ ModListWidgetStayTime=5.0";
             }
             catch (Exception e)
             {
-                MessageBox.Show($"General failure... \n{e.Message}\n{e.StackTrace}");
+                MessageBox.Show($"General failure getting Mordhau path... \n{e.Message}\n{e.StackTrace}");
             }
             var epicDefaultPath = @"C:\Program Files\Epic Games\Mordhau\Mordhau\Content\CustomPaks";
             if (IsMordhauPakPathValid(epicDefaultPath))
@@ -718,35 +734,27 @@ ModListWidgetStayTime=5.0";
             using (var inputForm = new MordhauPathInputForm(MordhauPakPath))
             {
                 inputForm.Text = title;
+
                 inputForm.ShowDialog(this);
+                inputForm.BringToFront();
+                inputForm.Focus();
 
                 if (inputForm.result == DialogResult.OK)
                 {
-                    installLuteModToolStripMenuItem.Enabled = true;
                     var result = Path.Combine(Path.GetDirectoryName(inputForm.path), "Mordhau", "Content", "CustomPaks");
                     if (IsMordhauPakPathValid(result))
                     {
                         Directory.CreateDirectory(result);
                         ConfigManager.SetProperty(PropertyItem.MordhauPakPath, result);
-                        installLuteModToolStripMenuItem.Enabled = true;
                         return result;
                     }
                     else
                     {
-                        installLuteModToolStripMenuItem.Enabled = false;
                         return GetMordhauPathFromPrompt("Entered path was invalid");
                     }
                 }
                 else
                 {
-                    if (!IsMordhauPakPathValid())
-                    {
-                        installLuteModToolStripMenuItem.Enabled = false;
-                    }
-                    else
-                    {
-                        installLuteModToolStripMenuItem.Enabled = true;
-                    }
                     return MordhauPakPath;
                 }
             }
@@ -778,46 +786,22 @@ ModListWidgetStayTime=5.0";
             }
         }
 
-        private async Task PlayerLoadCompleted(bool skipUI, bool reorderTracks = false)
+        private void PlayerLoadCompleted(TrackSelectionManager trackSelectionManager, bool reorderTracks = false)
         {
-            SuspendLayout();
+            trackSelectionManager.LoadTracks(trackSelectionManager.Player.GetMidiChannels(), trackSelectionManager.Player.GetMidiTracks());
 
-            trackSelectionManager.UnloadTracks();
-            if (player.GetType() == typeof(MidiPlayer))
-            {
-                MidiPlayer midiPlayer = player as MidiPlayer;
-                trackSelectionManager.LoadTracks(midiPlayer.GetMidiChannels(), midiPlayer.GetMidiTracks());
-                trackSelectionManager.FileName = currentTrackName;
-            }
             trackSelectionManager.LoadTrackManager(reorderTracks);
-            if (!skipUI)
-            {
-                await InvokeAsync(() =>
-                {
-                    if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated)
-                    {
-                        var tempoMap = player.dryWetFile.GetTempoMap();
-                        var tempo = tempoMap.GetTempoAtTime(new MetricTimeSpan(1));
-                        var secondsPerTick = ((float)tempo.MicrosecondsPerQuarterNote / ((TicksPerQuarterNoteTimeDivision)player.dryWetFile.TimeDivision).TicksPerQuarterNote) / 1000f;
-                        // TickLength is pixels per tick
-                        // I'd like to fit 30s into the window of about 700px
-                        trackSelectionForm.tickLength = 30f / 700f * secondsPerTick;
-                        trackSelectionForm.InitLists();
-                    }
-                }).ConfigureAwait(false);
-            }
-            ResumeLayout();
         }
 
         private void LuteBotForm_Focus(object sender, EventArgs e)
         {
-            if (trackSelectionForm != null && !trackSelectionForm.IsDisposed)
+            if (TrackSelectionForm != null && !TrackSelectionForm.IsDisposed)
             {
-                if (trackSelectionForm.WindowState == FormWindowState.Minimized)
+                if (TrackSelectionForm.WindowState == FormWindowState.Minimized)
                 {
-                    trackSelectionForm.WindowState = FormWindowState.Normal;
+                    TrackSelectionForm.WindowState = FormWindowState.Normal;
                 }
-                trackSelectionForm.Focus();
+                TrackSelectionForm.Focus();
             }
 
             this.Focus();
@@ -825,23 +809,23 @@ ModListWidgetStayTime=5.0";
 
         private void OpenDialogs()
         {
-            trackSelectionForm = new TrackSelectionForm(trackSelectionManager, this);
-            trackSelectionForm.StartPosition = FormStartPosition.Manual;
-            trackSelectionForm.Location = new Point(0, 0);
+            TrackSelectionForm = new TrackSelectionForm(this);
+            TrackSelectionForm.StartPosition = FormStartPosition.Manual;
+            TrackSelectionForm.Location = new Point(0, 0);
             if (ConfigManager.GetBooleanProperty(PropertyItem.TrackSelection))
             {
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
-                trackSelectionForm.Show();
-                trackSelectionForm.Top = coords.Y;
-                trackSelectionForm.Left = coords.X;
+                TrackSelectionForm.Show();
+                TrackSelectionForm.Top = coords.Y;
+                TrackSelectionForm.Left = coords.X;
             }
 
-            partitionsForm = new PartitionsForm(trackSelectionManager, player);
-            partitionsForm.TopLevel = false;
-            partitionsForm.FormBorderStyle = FormBorderStyle.None;
-            partitionsForm.Dock = DockStyle.Fill;
-            partitionPanel.Controls.Add(partitionsForm);
-            partitionsForm.Show();
+            PartitionsForm = new PartitionsForm();
+            PartitionsForm.TopLevel = false;
+            PartitionsForm.FormBorderStyle = FormBorderStyle.None;
+            PartitionsForm.Dock = DockStyle.Fill;
+            partitionPanel.Controls.Add(PartitionsForm);
+            PartitionsForm.Show();
         }
 
 
@@ -854,36 +838,23 @@ ModListWidgetStayTime=5.0";
         {
             WindowPositionUtils.UpdateBounds(PropertyItem.MainWindowPos, new Point() { X = Left, Y = Top });
 
-            if (trackSelectionForm != null)
+            if (TrackSelectionForm != null)
             {
-                trackSelectionForm.Close();
+                TrackSelectionForm.Close();
                 //trackSelectionForm.Dispose(); // Uncomment this after I'm done messing everything else up
             }
-            if (partitionsForm != null)
+            if (PartitionsForm != null)
             {
-                partitionsForm.Close();
-                partitionsForm.Dispose();
+                PartitionsForm.Close();
+                PartitionsForm.Dispose();
             }
             ConfigManager.SaveConfig();
             base.OnClosing(e);
         }
 
-        private async void LoadFileButton_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openMidiFileDialog = new OpenFileDialog();
-            openMidiFileDialog.DefaultExt = "mid";
-            openMidiFileDialog.Filter = "MIDI files|*.mid|All files|*.*";
-            openMidiFileDialog.Title = "Open MIDI file";
-            if (openMidiFileDialog.ShowDialog(this) == DialogResult.OK)
-            {
-                string fileName = openMidiFileDialog.FileName;
-                await LoadFile(fileName).ConfigureAwait(false);
-            }
-        }
-
         public async Task HandleError(Exception ex, string message)
         {
-            await InvokeAsync(() =>
+            await this.InvokeAsync(() =>
             {
                 splitContainer1.Panel2Collapsed = false;
                 richTextBox1.AppendText($"{Environment.NewLine} [{DateTime.Now.ToString("T")}] Error: " + message);
@@ -893,112 +864,48 @@ ModListWidgetStayTime=5.0";
         }
 
 
-        public async Task InvokeAsync(Action action)
+        public async Task<TrackSelectionManager> LoadFile(string fileName, bool reorderTracks = false)
         {
-            if (InvokeRequired)
-            {
-                await Task.CompletedTask.ConfigureAwait(false);
-                Invoke((MethodInvoker)delegate
-                {
-                    action();
-                });
-            }
-            else
-                action();
-        }
+            var trackSelectionManager = new TrackSelectionManager();
 
-
-        public async Task<bool> LoadFile(string fileName, bool skipUI = false, bool reorderTracks = false)
-        {
-            if (!skipUI)
-                await InvokeAsync(() =>
-                {
-                    partitionsForm.savePartitionButton.Enabled = false;
-                }).ConfigureAwait(false);
             try
             {
-                await player.LoadFileAsync(fileName).ConfigureAwait(false);
-                currentTrackName = fileName;
-                await PlayerLoadCompleted(skipUI, reorderTracks).ConfigureAwait(false);
-                return player.dryWetFile != null;
+                await trackSelectionManager.Player.LoadFileAsync(fileName).ConfigureAwait(false);
+                trackSelectionManager.FileName = fileName;
+                PlayerLoadCompleted(trackSelectionManager, reorderTracks);
+                return trackSelectionManager;
             }
             catch (Exception ex)
             {
                 await HandleError(ex, "Failed to load file").ConfigureAwait(false);
             }
-            finally
-            {
-                if (!skipUI)
-                    await InvokeAsync(() =>
-                    {
-                        partitionsForm.savePartitionButton.Enabled = true;
-                    }).ConfigureAwait(false);
-            }
-            return false;
+            return null;
         }
 
         private void TrackFilteringToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (trackSelectionForm == null || trackSelectionForm.IsDisposed)
+            if (TrackSelectionForm == null || TrackSelectionForm.IsDisposed)
             {
-                var midiPlayer = player as MidiPlayer;
-                trackSelectionForm = new TrackSelectionForm(trackSelectionManager, this);
+                TrackSelectionForm = new TrackSelectionForm(this);
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
-                trackSelectionForm.Top = coords.Y;
-                trackSelectionForm.Left = coords.X;
+                TrackSelectionForm.Top = coords.Y;
+                TrackSelectionForm.Left = coords.X;
             }
-            trackSelectionForm.Show();
-            trackSelectionForm.BringToFront();
-            trackSelectionForm.Focus();
+            TrackSelectionForm.Show();
+            TrackSelectionForm.BringToFront();
+            TrackSelectionForm.Focus();
         }
 
 
         private void GuildLibraryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (guildLibraryForm == null)
-                guildLibraryForm = new GuildLibraryForm(this);
-            guildLibraryForm.Show();
-            guildLibraryForm.BringToFront();
-            guildLibraryForm.Focus();
+            if (GuildLibraryForm == null)
+                GuildLibraryForm = new GuildLibraryForm(this);
+            GuildLibraryForm.Show();
+            GuildLibraryForm.BringToFront();
+            GuildLibraryForm.Focus();
         }
 
-
-        private async void ReloadButton_Click(object sender, EventArgs e)
-        {
-            // First grab the Track Filtering settings for our current track
-            // Re-load the same midi track from file
-            // And re-apply those settings
-
-            // I don't think getting the settings is that easy but we'll try
-            // Oh hey it can be.
-            try
-            {
-                var instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-                var data = trackSelectionManager.GetTrackSelectionData(instrumentId);
-                await LoadFile(currentTrackName).ConfigureAwait(false);
-                trackSelectionManager.SetTrackSelectionData(data);
-                //trackSelectionManager.SaveTrackManager(); // Don't save when we reload, that's bad.  
-                if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
-                    trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.Invalidate(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
-                Refresh();
-            }
-            catch (Exception ex)
-            {
-                await HandleError(ex, "Failed to reload file");
-            }
-        }
-
-
-        public void OnInstrumentChanged(int oldInstrument)
-        {
-            // This is called when an instrument is changed.  TrackSelectionManager should be updated with the new config values
-            // Though first we'll have to setup the data to actually have different values based on the currently selected instrument.
-            trackSelectionManager.UpdateTrackSelectionForInstrument(oldInstrument);
-            // And TrackSelectionForm should be refreshed
-            if (trackSelectionForm != null && !trackSelectionForm.IsDisposed && trackSelectionForm.IsHandleCreated) // Everything I can think to check
-                trackSelectionForm.Invoke((MethodInvoker)delegate { trackSelectionForm.InitLists(); trackSelectionForm.RefreshOffsetPanel(); }); // Invoking just in case this is on a diff thread somehow
-
-        }
 
         private void authToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1008,11 +915,11 @@ ModListWidgetStayTime=5.0";
 
         private void lutemodPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (partitionsForm == null || partitionsForm.IsDisposed)
-                partitionsForm = new PartitionsForm(trackSelectionManager, player);
-            partitionsForm.Show();
-            partitionsForm.BringToFront();
-            partitionsForm.Focus();
+            if (PartitionsForm == null || PartitionsForm.IsDisposed)
+                PartitionsForm = new PartitionsForm();
+            PartitionsForm.Show();
+            PartitionsForm.BringToFront();
+            PartitionsForm.Focus();
         }
 
         private void adjustLutemodPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1043,7 +950,7 @@ ModListWidgetStayTime=5.0";
 
         private async void checkInstallUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CheckUpdates(true); // .ConfigureAwait(false)...? Don't want to do it rn cuz I'm in the middle of a breaking refactor, don't want this breaking too
+            await CheckUpdates(true).ConfigureAwait(false);
         }
 
         private void setMordhauPathToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1054,32 +961,32 @@ ModListWidgetStayTime=5.0";
 
         private void importPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            partitionsForm.importPartitions_Click(sender, e);
+            PartitionsForm.importPartitions_Click(sender, e);
         }
 
         private void exportPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            partitionsForm.exportPartitionsToolStripMenuItem_Click(sender, e);
+            PartitionsForm.exportPartitionsToolStripMenuItem_Click(sender, e);
         }
 
         private void exportMidisToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            partitionsForm.exportMidisToolStripMenuItem_Click(sender, e);
+            PartitionsForm.exportMidisToolStripMenuItem_Click(sender, e);
         }
 
         private void openSavFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            partitionsForm.openSaveFolder_Click(sender, e);
+            PartitionsForm.openSaveFolder_Click(sender, e);
         }
 
         private void saveMultipleSongsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            partitionsForm.saveMultipleSongsToolStripMenuItem_Click(sender, e);
+            PartitionsForm.saveMultipleSongsToolStripMenuItem_Click(sender, e);
         }
 
         private void trainToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            partitionsForm.trainToolStripMenuItem_Click(sender, e);
+            PartitionsForm.trainToolStripMenuItem_Click(sender, e);
         }
 
         private void buttonConsoleToggle_Click(object sender, EventArgs e)
@@ -1089,32 +996,30 @@ ModListWidgetStayTime=5.0";
 
         private void openMidiFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            partitionsForm.openMidiFolderToolStripMenuItem_Click(sender, e);
+            PartitionsForm.openMidiFolderToolStripMenuItem_Click(sender, e);
         }
 
         new protected void Dispose()
         {
-            partitionsForm?.Dispose();
-            trackSelectionForm?.Dispose();
-            guildLibraryForm?.Dispose();
+            PartitionsForm?.Dispose();
+            TrackSelectionForm?.Dispose();
+            GuildLibraryForm?.Dispose();
             base.Dispose();
         }
 
         private async void withoutReorderingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await partitionsForm.reloadAll(false).ConfigureAwait(false);
+            await PartitionsForm.reloadAll(false).ConfigureAwait(false);
         }
 
         private async void forceAIReorderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await partitionsForm.reloadAll(true).ConfigureAwait(false);
+            await PartitionsForm.reloadAll(true).ConfigureAwait(false);
         }
 
         private async void autoEnableFlutesAbove50ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            trackSelectionManager.autoEnableFlutes = true;
-            await partitionsForm.reloadAll(true).ConfigureAwait(false);
-            trackSelectionManager.autoEnableFlutes = false;
+            await PartitionsForm.reloadAll(true, true).ConfigureAwait(false);
         }
     }
 }

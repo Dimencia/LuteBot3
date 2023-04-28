@@ -27,12 +27,12 @@ namespace LuteBot.TrackSelection
 
         private MidiChannelItem PredictedFluteChannel = null;
 
-        public Dictionary<int, MidiChannelItem> MidiChannels { get => midiChannels; private set { midiChannels = value; ResetRequest(); } }
-        public Dictionary<int, TrackItem> MidiTracks { get => midiTracks; private set { midiTracks = value; ResetRequest(); } }
-        public bool ActivateAllChannels { get => activateAllChannels; set { activateAllChannels = value; ResetRequest(); } }
-        public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; ResetRequest(); } }
-        public int NoteOffset { get => noteOffset; set { noteOffset = value; ResetRequest(); } }
-        public int NumChords { get => numChords; set { numChords = value; ResetRequest(); } }
+        public Dictionary<int, MidiChannelItem> MidiChannels { get => midiChannels; private set { midiChannels = value;  } }
+        public Dictionary<int, TrackItem> MidiTracks { get => midiTracks; private set { midiTracks = value;  } }
+        public bool ActivateAllChannels { get => activateAllChannels; set { activateAllChannels = value; } }
+        public bool ActivateAllTracks { get => activateAllTracks; set { activateAllTracks = value; } }
+        public int NoteOffset { get => noteOffset; set { noteOffset = value; } }
+        public int NumChords { get => numChords; set { numChords = value; } }
         public Dictionary<int, TrackSelectionData> DataDictionary { get; set; } = new Dictionary<int, TrackSelectionData>();
         public Dictionary<int, TrackSelectionData> OriginalDataDictionary { get; set; } = new Dictionary<int, TrackSelectionData>();
 
@@ -51,6 +51,8 @@ namespace LuteBot.TrackSelection
         public bool autoEnableFlutes = false;
         public MidiPlayer Player { get; set; }
 
+        private NeuralNetwork neural = null;
+
         public TrackSelectionManager()
         {
             midiChannels = new Dictionary<int, MidiChannelItem>();
@@ -59,6 +61,7 @@ namespace LuteBot.TrackSelection
             activateAllTracks = false;
             autoLoadProfile = true;
             numChords = ConfigManager.GetIntegerProperty(PropertyItem.NumChords);
+            Player = new MidiPlayer(this);
             UpdateTrackSelectionForInstrument(0); // Saves defaults, and also updates us in case lute wasn't the one selected
         }
 
@@ -67,8 +70,46 @@ namespace LuteBot.TrackSelection
             if (index >= 0 && index < midiChannels.Count)
             {
                 midiChannels[index].Active = active;
-                ResetRequest();
             }
+        }
+
+        public static NeuralNetwork SetupNeuralNetwork(int[] sizes = null)
+        {
+            NeuralNetwork neural;
+            bool customFile = false;
+            if (sizes == null && File.Exists(NeuralNetworkForm.savePath) && File.Exists(NeuralNetworkForm.savePath + ".config"))
+            {
+                sizes = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(NeuralNetworkForm.savePath + ".config"));
+                customFile = true;
+            }
+            if (sizes != null)
+            {
+                int numParamsPerChannel = Extensions.numParamsPerChannel;
+
+                // We can softmax all the outputs once we have them for each channel
+                // This is great, btw.  This is 'channelNeural', the only issue is that the way I handle the output gives values <0 and > 100% sometimes, but rarely...
+
+                int numNeurons = sizes.Length + 2; // They don't hand us the input or output layer
+
+                string[] activation = new string[numNeurons - 1]; // And the input layer doesn't have an activation
+                for (int n = 0; n < activation.Length; n++) // I decided not to use softmax because it gave more varied values
+                    activation[n] = "tanh";
+                int[] parameters = new int[numNeurons];
+                parameters[0] = numParamsPerChannel;
+                for (int n = 1; n < parameters.Length - 1; n++)
+                    parameters[n] = sizes[n - 1];
+                parameters[parameters.Length - 1] = 1;
+                neural = new NeuralNetwork(parameters, activation);
+                if (customFile)
+                    neural.Load(NeuralNetworkForm.savePath);
+            }
+            else
+            {
+                string[] activation = new string[] { "tanh", "tanh", "tanh" };
+                neural = new NeuralNetwork(new int[] { Extensions.numParamsPerChannel, 64, 32, 1 }, activation);
+                neural.Load(Path.Combine(AppContext.BaseDirectory, "lib", "channelNeural"));
+            }
+            return neural;
         }
 
         public void SetTrackSelectionData(TrackSelectionData data)
@@ -147,10 +188,10 @@ namespace LuteBot.TrackSelection
         }
 
 
-        public void UpdateTrackSelectionForInstrument(int oldInstrument, bool reorderTracks = false)
+        public void UpdateTrackSelectionForInstrument(int oldInstrument, bool reorderTracks = false, int? newInstrument = null)
         {
             DataDictionary[oldInstrument] = GetTrackSelectionData(oldInstrument);
-            int instrumentId = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+            int instrumentId = newInstrument ?? ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
             if (DataDictionary.ContainsKey(instrumentId))
                 SetTrackSelectionData(DataDictionary[instrumentId]);
             else if (instrumentId == 3 && DataDictionary.ContainsKey(1))
@@ -343,61 +384,15 @@ namespace LuteBot.TrackSelection
                 OriginalDataDictionary[i] = data;
             }
 
-
-            ResetRequest();
             //EventHelper();
         }
-
-
-        public SimpleML<MidiChannelItem> simpleML = null;
-        public NeuralNetwork neural = null;
 
         // Returns the channel ID of the channel most likely to be good for flute
         private MidiChannelItem GetFlutePrediction(bool reorderTracks = false)
         {
-
             if (neural == null)
-            {
-                //string[] activation = new string[] { "tanh", "leakyrelu", "softmax" }; // TODO make this an enum, what kind of madman made them strings... 
-                //neural = new NeuralNetwork(new int[] { 96, 96, 48, 16 }, activation);
-                // neural.Load("TestML");
-
-                //string[] activation = new string[] { "tanh", "softmax" };
-                //
-                //int numParamsPerChannel = 8;
-                //neural = new NeuralNetwork(new int[] { 16 * numParamsPerChannel, 64, 16 }, activation);
-                //
-                //neural.Load("v2Weights");
-
-                if (File.Exists(NeuralNetworkForm.savePath) && File.Exists(NeuralNetworkForm.savePath + ".config"))
-                {
-                    var sizes = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(NeuralNetworkForm.savePath + ".config"));
-
-                    int numParamsPerChannel = Extensions.numParamsPerChannel;
-
-                    // We can softmax all the outputs once we have them for each channel
-                    // This is great, btw.  This is 'channelNeural', the only issue is that the way I handle the output gives values <0 and > 100% sometimes, but rarely...
-
-                    int numNeurons = sizes.Length + 2; // They don't hand us the input or output layer
-
-                    string[] activation = new string[numNeurons - 1]; // And the input layer doesn't have an activation
-                    for (int n = 0; n < activation.Length; n++) // I decided not to use softmax because it gave more varied values
-                        activation[n] = "tanh";
-                    int[] parameters = new int[numNeurons];
-                    parameters[0] = numParamsPerChannel;
-                    for (int n = 1; n < parameters.Length - 1; n++)
-                        parameters[n] = sizes[n - 1];
-                    parameters[parameters.Length - 1] = 1;
-                    neural = new NeuralNetwork(parameters, activation);
-                    neural.Load(NeuralNetworkForm.savePath);
-                }
-                else
-                {
-                    string[] activation = new string[] { "tanh", "tanh", "tanh" };
-                    neural = new NeuralNetwork(new int[] { Extensions.numParamsPerChannel, 64, 32, 1 }, activation);
-                    neural.Load(Path.Combine(AppContext.BaseDirectory, "lib", "channelNeural"));
-                }
-            }
+                neural = SetupNeuralNetwork();
+            
             var activeChannels = midiChannels.Values.Where(c => c.Id != 9 && c.midiInstrument != 9 && c.tickNotes.Any(tn => tn.Value.Any())).OrderBy(c => c.Id).ToArray();
             var activeTracks = midiTracks.Values.Where(c => c.tickNotes.Any(tn => tn.Value.Any(n => n.channel != 9 && !midiChannels.Values.Any(mc => mc.Id == n.channel && mc.midiInstrument == 9)))).OrderBy(c => c.Id).ToArray();
             if (activeChannels.Length < 2)
@@ -736,230 +731,6 @@ namespace LuteBot.TrackSelection
         }
 
 
-        Regex savStartRegex = new Regex(@"\|\w*;[0-9]+\|");
-        public async Task LoadSavFiles(string directory, string songname)
-        {
-            try
-            {
-                // Sav files have this format:
-
-                //|name;tempo|{track 0}|{track 1}|
-
-                // Where each track, is a list of notes, with the format:
-
-                // tickNumber-note-NoteType
-
-                // NoteType 1 is a NoteOn, 2 is a tempo event, Off is 0 - these are LuteMod.Sequencing.NoteType 
-                int arbitraryDivision = 120;
-
-                // Annoyingly, at EOF we have some chars that may or may not be particular:     None    
-                // Many of those are invis and won't paste right...
-                // ENQ is 05... NUL is supposed to be 00
-                // It's: NULENQNULNULNULNoneNULNULNULNUL
-                // So tldr, it's NUL
-                var eofDelim = (char)0;
-                // There are of course, NULs before that too.  
-
-                // OK, it's easy, here's what we do
-                // We start with the 0 file, and find our signature, |name;tempo|.  Then go backwards until we find SavedPartitions, and store that as the start delim for this song
-                // Then we iterate all of the files, cutting out after our start delim, to the next NUL, and appending to one long string
-                // Then we easily parse that string
-
-                string startDelim;
-                var firstContent = File.ReadAllText(Path.Combine(directory, songname + "[0].sav"));
-                Match firstMatch = savStartRegex.Match(firstContent);
-                if (!firstMatch.Success)
-                    throw new Exception("Sav file was in unrecognized format");
-                var delimEndIndex = firstMatch.Index;
-
-                // Remember that substring's second param is a length
-                int startDelimStartIndex = firstContent.IndexOf("StrProperty"); // 'SavdPartition' occurs multiple times before we actually want it
-                startDelim = firstContent.Substring(startDelimStartIndex, delimEndIndex - startDelimStartIndex);
-
-                StringBuilder contentBuilder = new StringBuilder();
-
-                var bottomContent = firstContent.Substring(delimEndIndex);
-                contentBuilder.Append(bottomContent.Substring(0, bottomContent.IndexOf(eofDelim)));
-
-                int i = 1;
-                while (File.Exists(Path.Combine(directory, $"{songname}[{i}].sav")))
-                {
-                    firstContent = File.ReadAllText(Path.Combine(directory, $"{songname}[{i}].sav"));
-                    delimEndIndex = firstContent.IndexOf(startDelim) + startDelim.Length;
-                    bottomContent = firstContent.Substring(delimEndIndex);
-                    int captureLength = bottomContent.IndexOf(eofDelim);
-                    int atSymbol = bottomContent.IndexOf("@");
-                    if (atSymbol > -1 && (atSymbol < captureLength || captureLength == -1))
-                        captureLength = atSymbol;
-                    if (captureLength == -1)
-                        captureLength = bottomContent.Length;
-                    contentBuilder.Append(bottomContent.Substring(0, captureLength));
-                    i++;
-                }
-
-                string fullContent = contentBuilder.ToString();
-                // Beautiful
-
-                var trackSplit = fullContent.Split('|');
-                // Tempo is in 1, the tracks are then each in 2+, 0 is blank or stuff we don't want if it isn't
-                // The last one is also empty
-                // I guess we'll build these into MidiChannelItems, then into a TrackSelectionData, and load it
-
-                // The problem is, many things rely on the player and its tempo, which we have as our first bit of data
-                // But it's probably not a good idea to brute-force... better if we can make it into a midi and actually load it on the player
-
-                // I guess we can make a new sequencer maybe?
-                var sequence = new Sequence(arbitraryDivision) { Format = 1 };
-                int tempo = int.Parse(trackSplit[1].Split(';')[1]) * arbitraryDivision;
-                sequence.FirstTempo = tempo;
-
-                var firstTempoBuilder = new TempoChangeBuilder();
-                firstTempoBuilder.Tempo = tempo;
-                firstTempoBuilder.Build();
-
-                trackSplit = trackSplit.Skip(2).Take(trackSplit.Length - 3).ToArray();
-
-                //var metaTrack = new Track();
-                //metaTrack.Insert(0, firstTempoBuilder.Result);
-                //sequence.Add(metaTrack);
-
-                //var tsb = new TimeSignatureBuilder();
-                //tsb.Numerator = 4;
-                //tsb.Denominator = 4;
-                //tsb.Build();
-                //metaTrack.Insert(0, tsb.Result);
-                //
-                //var ksb = new KeySignatureBuilder();
-                //ksb.Key = Sanford.Multimedia.Key.CMajor;
-                //ksb.Build();
-                //metaTrack.Insert(0, ksb.Result);
-
-                sequence.Channels.Add(0);
-
-                int trackNum = 0;
-                foreach (var trackString in trackSplit)
-                {
-
-                    var track = new Track();
-
-                    if (trackNum == 0)
-                    {
-                        track.Insert(0, firstTempoBuilder.Result);
-                    }
-
-                    var noteSplit = trackString.Split(';');
-
-                    int curTick = 0;
-
-                    int prevNoteLength = arbitraryDivision;
-
-                    if (trackNum == 1) // Flute
-                        prevNoteLength = arbitraryDivision * 4; // IDK some arbitrary length
-
-                    Dictionary<int, int> activeNoteTicks = new Dictionary<int, int>();
-                    // NoteNum:TickNumber, the notes that are ongoing, so we can find collisions
-
-                    bool first = true;
-                    int curTrackNum = 0;
-                    foreach (var noteString in noteSplit)
-                    {
-                        if (first) // We don't care about the first, that's the mordhau instrument... TODO: Later map that
-                        {
-                            curTrackNum = int.Parse(noteString.Replace("#", ""));
-                            first = false;
-                            continue;
-                        }
-                        var noteValueSplit = noteString.Split('-');
-                        // 0 is the tick number, 1 is the value, 2 is the type
-
-                        int noteTrackNum = curTrackNum;
-
-                        IMidiMessage message;
-                        curTick = int.Parse(noteValueSplit[0]);
-                        if (noteValueSplit[2] == "1")
-                        {
-                            int curNote = int.Parse(noteValueSplit[1]) + Instrument.Prefabs[noteTrackNum].LowestPlayedNote;
-                            message = new ChannelMessage(ChannelCommand.NoteOn, 0, curNote, 100);
-                            track.Insert(curTick, message);
-                            track.Insert(curTick + 1, new ChannelMessage(ChannelCommand.NoteOff, 0, curNote));
-
-
-                            activeNoteTicks[curNote] = curTick;
-                        }
-                        else // This should be 7 bits per byte, little endian
-                        { // Each byte is high except the last one...?
-                            var tcb = new TempoChangeBuilder();
-                            tcb.Tempo = int.Parse(noteValueSplit[1]) * arbitraryDivision;
-                            tcb.Build();
-                            message = tcb.Result;
-                            // Well this is awkward.  The tempo we read is divided by the division
-                            // But we don't know what the division is/was
-                            track.Insert(curTick, message);
-                        }
-                    }
-
-                    string trackName = null;
-                    int instrumentId = 0;
-                    if (trackNum == 0)
-                        trackName = "Lute";
-                    else if (trackNum == 1)
-                    {
-                        trackName = "Flute";
-                        instrumentId = 73;
-                    }
-                    if (trackName != null)
-                    {
-                        track.Insert(0, new MetaMessage(MetaType.TrackName, Encoding.ASCII.GetBytes(trackName)));
-                    }
-                    if (instrumentId > 0)
-                        track.Insert(0, new ChannelMessage(ChannelCommand.ProgramChange, 0, instrumentId));
-
-                    //track.Insert(lastTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
-
-                    sequence.Add(track);
-                    //sequence.Tracks.Add(track);
-
-
-                    trackNum++;
-                }
-                //metaTrack.Insert(maxTick + 100, new MetaMessage(MetaType.EndOfTrack, new byte[0]));
-                // This is annoying
-                // There's no way to get the division back out, and I can't set it even if I could
-                // Ahhh, we can set it in the constructor... 
-                // What if it's just, 1?  
-
-                // Hmm... well, how does lutemod play it, then?  
-                // The tick values we send to lutemod already include the divison, and I think end up being directly relevant to time
-
-                // microseconds for 1 tick = tempo / division, is how it's used
-                // When we send the notes, we already divide the tempo we give it by that division
-                // So the value we send it for a tempo is how many microseconds there are in a tick
-
-                // 120bpm is default tempo, or 500,000 microseconds per beat
-                // The division specifies how many ticks there are within a beat
-                // Putting them together specifies how many microseconds there are in a tick
-
-                // If we know how many microseconds are in a tick, we can multiply it by the division to get the tempo
-                // Or divide it by the tempo to get the division.  But we know neither division nor true tempo
-
-                // We also know that whatever we tell it the tempo is, it's going to end up dividing it by whatever we tell it the division is
-                // And the result it wants is the result we have in the first place
-                // So... a division of 1 really should just kinda work, unless it's doing other weird stuff
-
-                // That, or we could pick some arbitrarily high division - and multiply our tempos we get by it, it will divide them by it later
-
-
-                string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, songname + ".mid");
-                sequence.Save(midiPath);
-
-                await LuteBotForm.luteBotForm.LoadFile(midiPath).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-
 
         public ChannelMessage FilterMidiEvent(ChannelMessage message, int trackId)
         {
@@ -1011,14 +782,7 @@ namespace LuteBot.TrackSelection
             if (midiChannels.ContainsKey(index))
             {
                 MidiChannels[index].Active = active;
-                ResetRequest();
             }
-        }
-
-        public void ResetRequest()
-        {
-            EventHandler handler = OutDeviceResetRequest;
-            handler?.Invoke(this, new EventArgs());
         }
 
         private void ToggleTrackRequestHelper(MidiChannelItem item)

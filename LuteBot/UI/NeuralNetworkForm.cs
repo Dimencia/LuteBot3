@@ -6,9 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,11 +20,9 @@ namespace LuteBot.UI
 {
     public partial class NeuralNetworkForm : Form
     {
-        private TrackSelectionManager tsm;
         private PartitionsForm pf;
-        public NeuralNetworkForm(TrackSelectionManager tsm, PartitionsForm pf)
+        public NeuralNetworkForm(PartitionsForm pf)
         {
-            this.tsm = tsm;
             this.pf = pf;
             InitializeComponent();
 
@@ -79,269 +79,57 @@ namespace LuteBot.UI
             }
         }
 
-        private Random random = new Random();
-
-        private void TrainMusicMaker(IEnumerable<MidiChannelItem[]> neuralTrainingCandidates)
-        {
-            // This is a simple implementation that will assumedly be ass because it has no memory or concept of time
-            // But the idea is to give it say, 10 notes, and ask it for the next one
-            // For each note, we give it value, deltaTick, duration, and velocity
-
-            // The output should be a value, deltaTick, duration, and velocity (nvm, we don't even track that atm)
-
-            // I kind of want to try relu or leakyrelu again; maybe it is more appropriate here?  Nah it was still totally broken
-            int numNotes = 60;
-
-            var layers = new int[] { numNotes * 3 + 1, 512, 512, 256, 256, 128, 128, 64, 64, 32, 32, 32, 32, 32, 32, 32, 32, 3 };
-            var activations = new string[] { "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh" };
-
-            var neural = new NeuralNetwork(layers, activations);
-
-
-
-
-            int numIterations = 50000;
-
-            var candidates = neuralTrainingCandidates.Select(s => s.SelectMany(c => c.tickNotes.Values.Select(nl => nl.OrderBy(n => n.note).Where((n, i) => (i == 0 || i == c.tickNotes.Count - 1 || (c.tickNotes.Count > 2 && i == c.tickNotes.Count / 2)) && n.channel != 9 && n.length > 0 && n.timeLength >= 0.005f))).SelectMany(nl => nl.GroupBy(n => n.note).Select(ng => ng.FirstOrDefault())).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray()).Where(nl => nl.Count() > numNotes).ToArray();
-
-            for (int iteration = 0; iteration < numIterations; iteration++)
-            {
-                float costTotal = 0;
-
-                Parallel.ForEach(candidates.OrderBy(n => random.NextDouble()), new ParallelOptions() { MaxDegreeOfParallelism = 12 }, notes =>
-                //foreach (var song in neuralTrainingCandidates.OrderBy(n => random.NextDouble()))
-                {
-                    // Each time we train for a song, we should skip some arbitrary percentage into it
-                    //var notes = song.SelectMany(c => c.tickNotes.Values).SelectMany(tn => tn).Where(n => n.channel != 9 && n.length > 0 && n.timeLength > 0).OrderBy(n => n.tickNumber).ToArray();
-
-                    var percentToSkip = random.NextDouble();
-                    int startPosition = (int)(notes.Length * percentToSkip);
-
-                    if (startPosition + numNotes >= notes.Length) // Note that startPos+10 is actually 11 elements, which is what we want
-                        startPosition -= numNotes;
-
-                    var notesToTrain = notes.Skip(startPosition).Take(numNotes).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray();
-                    var nextNote = notes[startPosition + numNotes];
-
-                    float[] inputs = new float[layers[0]];
-
-                    float ticksPerSecond = 0;
-                    for (int i = 0; i < notesToTrain.Length; i++)
-                    {
-                        var note = notesToTrain[i];
-
-                        // Find out how many ticks are in a second, or rather, a scalar that converts a tick duration to a time one for the current tempo
-                        ticksPerSecond = note.length / note.timeLength;
-
-                        inputs[i * 3] = (note.note - 64) / 64f;
-                        inputs[i * 3 + 1] = Math.Max(Math.Min((((note.tickNumber - notesToTrain[Math.Max(i - 1, 0)].tickNumber) / ticksPerSecond) - 1f), 1), -1);
-                        inputs[i * 3 + 2] = Math.Max(Math.Min((Math.Max(note.timeLength, 0.005f) - 1f), 1), -1);
-                    }
-                    inputs[inputs.Length - 1] = (float)percentToSkip;
-                    ticksPerSecond = nextNote.length / nextNote.timeLength;
-                    var expected = new float[] { (nextNote.note - 64) / 64f, Math.Max(Math.Min((((nextNote.tickNumber - notesToTrain[notesToTrain.Length - 1].tickNumber) / ticksPerSecond) - 1f), 1), -1), Math.Max(Math.Min((Math.Max(nextNote.timeLength, 0.005f) - 1f), 1), -1) };
-
-                    neural.BackPropagate(inputs, expected);
-                    costTotal += neural.cost;
-                });
-                Console.WriteLine($"#{iteration}: Cost - {costTotal}");
-            }
-
-            neural.Save("TestSongMaker");
-            Console.WriteLine("Done");
-        }
-
-
-        private int GetPentatonicNote(int original)
-        {
-            // Pentatonic notes are: C, D, E, G, A, C
-            // Which means they are in positions 0,2,4,7,9, then 12
-
-            // I guess one way to do that, if it's <=5 round to the nearest even... (how do you even...)
-            // and >= 6 round to the nearest higher odd
-
-            // Alternatively, we can call it 5 notes out of 12 in the octave
-            // So take original%12/12f*5 and have that go through a lookup array
-
-            int[] pentatonics = new int[] { 0, 2, 4, 7, 9 };
-            int targetIndex = (int)((original % 12) / 12f * pentatonics.Length);
-
-            return (original - original % 12) + pentatonics[targetIndex];
-        }
-
-
-        private async Task TestMusicMaker()
-        {
-            await Task.CompletedTask;
-            int numNotes = 60;
-
-            var layers = new int[] { numNotes * 3 + 1, 512, 512, 256, 256, 128, 128, 64, 64, 32, 32, 32, 32, 32, 32, 32, 32, 3 };
-            var activations = new string[] { "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh", "tanh" };
-            var neural = new NeuralNetwork(layers, activations);
-
-
-
-            neural.Load("TestSongMaker");
-
-            // Assume it has some song given to us, arbitrarily, from which we will take 10 sequential notes from somewhere random
-            // Each time it gives us an output, we append it to the end and drop the oldest
-
-            // The issue is getting this into anything... we don't know how to save midis
-            // I think the only feasible test is building a lutemod partition out of it
-
-            // But even that, maybe not, because it expects to have a midi it can copy... 
-            // Let's assume something is loaded.  Clear the tracks, and add one of our own, when we're done
-
-            var notes = tsm.MidiChannels.Values.SelectMany(c => c.tickNotes.Values.Select(nl => nl.Where((n, i) => (i == 0 || i == c.tickNotes.Count - 1 || (c.tickNotes.Count > 2 && i == c.tickNotes.Count / 2)) && n.channel != 9 && n.length > 0 && n.timeLength >= 0.005f))).SelectMany(nl => nl.GroupBy(n => n.note).Select(ng => ng.FirstOrDefault())).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray();
-            //var notes = tsm.MidiChannels.Values.SelectMany(s => s.tickNotes.Values).SelectMany(nl => nl).Where(n => n.channel != 9 && n.length > 0 && n.timeLength > 0).OrderBy(n => n.tickNumber).ToArray();
-
-            var percentToSkip = random.NextDouble();
-            int startPosition = (int)(notes.Length * percentToSkip);
-
-            if (startPosition + numNotes >= notes.Length) // Note that startPos+10 is actually 11 elements, which is what we want
-                startPosition -= numNotes;
-
-            var notesToTrain = notes.Skip(startPosition).Take(numNotes).OrderBy(n => n.tickNumber).ThenBy(n => n.note).ToArray();
-
-            float totalLength = 0;
-
-            float[] inputs = new float[layers[0]];
-
-            float ticksPerSecond = 0;
-            for (int i = 0; i < notesToTrain.Length; i++)
-            {
-                var note = notesToTrain[i];
-
-                // Find out how many ticks are in a second, or rather, a scalar that converts a tick duration to a time one for the current tempo
-                ticksPerSecond = note.length / note.timeLength;
-
-                inputs[i * 3] = (note.note - 64) / 64f;
-                inputs[i * 3 + 1] = Math.Max(Math.Min((((note.tickNumber - notesToTrain[Math.Max(i - 1, 0)].tickNumber) / ticksPerSecond) - 1f), 1), -1);
-                inputs[i * 3 + 2] = Math.Max(Math.Min((Math.Max(note.timeLength, 0.005f) - 1f), 1), -1);
-            }
-            inputs[inputs.Length - 1] = 0;
-
-            List<MidiNote> resultNotes = new List<MidiNote>();
-
-            var track = new Sanford.Multimedia.Midi.Track();
-
-            int position = 0;
-
-            float targetSecondsLength = 120f;
-            // We won't update TicksPerSecond anymore to keep it from screwing with the tempo
-
-            // Well.  It does screw with it tbh.  Maybe we should try it
-            // We can only do it after, or with a lastNoteLength
-
-            // So this is probably gonna be weird.  
-
-
-            // It is putting lots of notes in all the same spots.  I should enforce a notes per tick: 
-            // After receiving 3 notes with 0 deltaTicks, we force a position movement equal to the last one's duration
-
-            int maxNotesPerTick = 2;
-            int notesThisTick = 0;
-
-            int modulusRounding = 50;
-
-            do
-            {
-                var result = neural.FeedForward(inputs);
-
-                //int noteNum = GetPentatonicNote((int)Math.Floor(result[0] * 64f + 64));
-                int noteNum = (int)Math.Floor(result[0] * 64f + 64);
-                var durationTime = Math.Max(Math.Round((result[2] + 1) / 1f), 0.1f);
-
-                int durationTicks = (int)(durationTime * ticksPerSecond);
-                //ticksPerSecond = (float)(durationTicks / durationTime);
-
-                var deltaTick = (int)(Math.Max((result[1] + 1), 0) * ticksPerSecond);
-
-                deltaTick -= deltaTick % modulusRounding;
-
-                position += deltaTick;
-
-                if (deltaTick == 0)
-                    notesThisTick++;
-                if (notesThisTick > maxNotesPerTick)
-                {
-                    deltaTick = Math.Max(durationTicks + (durationTicks - durationTicks % modulusRounding), modulusRounding);//durationTicks;//
-                    position += deltaTick;
-                    notesThisTick = 0;
-                    totalLength += Math.Max(durationTicks + (durationTicks - durationTicks % modulusRounding), modulusRounding) / ticksPerSecond; //(float)durationTime;
-                }
-                else if (deltaTick > 0)
-                {
-                    totalLength += deltaTick / ticksPerSecond;
-                    notesThisTick = 0;
-                }
-
-                //position = Math.Max(0, position - position % 20);// rounding...?
-
-                track.Insert(position, new Sanford.Multimedia.Midi.ChannelMessage(Sanford.Multimedia.Midi.ChannelCommand.NoteOn, 0, noteNum, 100));
-                track.Insert(position + durationTicks, new Sanford.Multimedia.Midi.ChannelMessage(Sanford.Multimedia.Midi.ChannelCommand.NoteOff, 0, noteNum));
-                //totalLength += (float)durationTime;
-
-                result[0] = (noteNum - 64) / 64f;
-                result[1] = Math.Max(Math.Min(((deltaTick / ticksPerSecond) - 1f), 1), -1);
-                result[2] = (float)Math.Max(Math.Min((Math.Max(durationTime, 0.005f) - 1f), 1), -1);
-
-
-                inputs = (inputs.Skip(3).Take(inputs.Length - 3 - 1)
-                    .Concat(result)).Select((i, index) => (index - 1) % 3 == 0 ? Math.Max(i - inputs[1], 0) : i)
-                    .Concat(new float[] { totalLength / targetSecondsLength }).ToArray();
-            }
-            while (totalLength < targetSecondsLength);
-
-
-            Console.WriteLine("Done");
-        }
 
         private bool cancelled = false;
-        
+
         MidiChannelItem[][] neuralTrainingCandidates = null;
         MidiChannelItem[][] neuralTestCandidates = null;
+
+        private async Task<MidiChannelItem[]> ProcessFileForCandidates(string partitionName)
+        {
+            string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, partitionName + ".mid");
+            if (File.Exists(midiPath))
+            {
+                var tsm = await LuteBotForm.luteBotForm.LoadFile(midiPath).ConfigureAwait(false);
+                if (tsm.Player.dryWetFile != null)
+                {
+                    // To prevent it from trying to train on re-generated midis, which have incorrect lengths
+                    // Require at least 3 channels
+
+                    if (tsm.MidiChannels.Count > 2 && tsm.DataDictionary.ContainsKey(1))
+                    {
+                        var activeChannels = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id != 9 && c.midiInstrument != 9 && c.tickNotes.Any(tn => tn.Value.Any())).OrderBy(c => c.Id).ToArray();
+                        var activeTracks = tsm.DataDictionary[1].MidiTracks.Where(c => c.tickNotes.Any(tn => tn.Value.Any(n => n.channel != 9 && !tsm.DataDictionary[1].MidiChannels.Any(mc => mc.Id == n.channel && mc.midiInstrument == 9)))).OrderBy(c => c.Id).ToArray();
+                        if (activeChannels.Any(c => !c.Active) && activeChannels.Any(c => c.Active) && activeTracks.All(t => t.Active))
+                        {
+                            var tempNeuralCandidates = activeChannels;
+                            foreach (var ca in tempNeuralCandidates)
+                            {
+                                ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
+                            }
+                            return tempNeuralCandidates;
+                        }
+                        else if (activeTracks.Any(c => !c.Active) && activeTracks.Any(c => c.Active) && activeChannels.All(c => c.Active))
+                        {
+                            // If some tracks are disabled and all channels are enabled, we'll take the tracks as data
+                            // Track notes should already have discarded anything with channel 9
+                            MidiChannelItem[] tempNeuralCandidates = activeTracks;
+                            foreach (var ca in tempNeuralCandidates)
+                            { // This may not be necessary; I could probably just take the MidiTracks from DataDictionary[1] but, it seemed to give odd results like it didn't have everything
+                                ca.Active = tsm.DataDictionary[1].MidiTracks.Where(c => c.Id == ca.Id).Single().Active;
+                            }
+                            return tempNeuralCandidates;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
         private async Task TrainNetwork(int numPerfect, float percentForSuccess, int parallelism, float trainingRate, params int[] sizes)
         {
             try
             {
-                int numParamsPerChannel = Extensions.numParamsPerChannel;
-
-                // We can softmax all the outputs once we have them for each channel
-                // This is great, btw.  This is 'channelNeural', the only issue is that the way I handle the output gives values <0 and > 100% sometimes, but rarely...
-
-                int numNeurons = sizes.Length + 2; // They don't hand us the input or output layer
-
-                string[] activation = new string[numNeurons - 1]; // And the input layer doesn't have an activation
-                for (int n = 0; n < activation.Length; n++) // I decided not to use softmax because it gave more varied values
-                    activation[n] = "tanh";
-                int[] parameters = new int[numNeurons];
-                parameters[0] = numParamsPerChannel;
-                for (int n = 1; n < parameters.Length - 1; n++)
-                    parameters[n] = sizes[n - 1];
-                parameters[parameters.Length - 1] = 1;
-
-                tsm.neural = new NeuralNetwork(parameters, activation);
-                if (File.Exists(NeuralNetworkForm.savePath) && File.Exists(NeuralNetworkForm.savePath + ".config"))
-                {
-                    tsm.neural.Load(savePath);
-                }
-                tsm.neural.learningRate = trainingRate;
-                // These below work great and are the settings for 'v2Neural'
-                //string[] activation = new string[] { "tanh", "softmax" };
-                //tsm.neural = new NeuralNetwork(new int[] { 16 * numParamsPerChannel, 64, 16 }, activation);
-
-                // This is no longer necessary but, the iteration over them helps us build the other candidates and this takes basically no time so, oh well
-                tsm.simpleML = new SimpleML<MidiChannelItem>(
-                    (c => c.avgNoteLength),
-                    (c => c.maxChordSize),
-                    (c => c.totalNoteLength),
-                    (c => c.highestNote),
-                    (c => c.lowestNote),
-                    (c => c.numNotes),
-                    (c => c.Id)
-                    );
-
                 var candidates = new List<TrainingCandidate<MidiChannelItem>>();
                 var random = new Random();
 
@@ -349,67 +137,42 @@ namespace LuteBot.UI
                 if (neuralTrainingCandidates == null || neuralTestCandidates == null)
                 {
                     var neuralCandidates = new List<MidiChannelItem[]>(); // It can accept multiple correct answers
-                    BeginInvoke((MethodInvoker)delegate
+                    await this.InvokeAsync(() =>
                     {
                         progressBarTraining.Maximum = pf.index.PartitionNames.Count + 1;
                         progressBarTraining.Value = 0;
-                    });
+                    }).ConfigureAwait(false);
                     int progress = 0;
-                    foreach (var part in pf.index.PartitionNames)
+                    var partNames = pf.index.PartitionNames.ToArray();
+
+                    var tasks = new List<Task>();
+
+
+                    // I tried a thousand ways to make this faster with parallel and async, but it was only ever slower, even when batching
+                    // ... Which is weird that saving midis is so damn fast when it's parallel
+
+                    // I think basically, the heavy processing to build candidates is too much for async to handle very well
+                    // And I can't realistically load many TrackSelectionManagers at once due to memory 
+                    foreach (var part in partNames)
                     {
-                        progress++;
-                        int barProgress = progress;
-                        BeginInvoke((MethodInvoker)delegate
+                        var c = await ProcessFileForCandidates(part).ConfigureAwait(false);
+                        if (c != null)
+                            neuralCandidates.Add(c);
+                        var progressBar = Interlocked.Increment(ref progress);
+                        BeginInvoke((MethodInvoker)delegate // Intentionally not awaiting so we can continue faster
                         {
-                            progressBarTraining.Maximum = pf.index.PartitionNames.Count + 1;
-                            progressBarTraining.Value = barProgress;
+                            progressBarTraining.Value = progressBar;
                         });
-                        string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, part + ".mid");
-                        if (File.Exists(midiPath))
-                        {
-                            await LuteBotForm.luteBotForm.LoadFile(midiPath, true).ConfigureAwait(false);
-                            if (tsm.Player.dryWetFile != null)
-                            {
-                                // To prevent it from trying to train on re-generated midis, which have incorrect lengths
-                                // Require at least 3 channels
-
-                                if (tsm.MidiChannels.Count > 2 && tsm.DataDictionary.ContainsKey(1))
-                                {
-                                    var activeChannels = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id != 9 && c.midiInstrument != 9 && c.tickNotes.Any(tn => tn.Value.Any())).OrderBy(c => c.Id).ToArray();
-                                    var activeTracks = tsm.DataDictionary[1].MidiTracks.Where(c => c.tickNotes.Any(tn => tn.Value.Any(n => n.channel != 9 && !tsm.DataDictionary[1].MidiChannels.Any(mc => mc.Id == n.channel && mc.midiInstrument == 9)))).OrderBy(c => c.Id).ToArray();
-                                    if (activeChannels.Any(c => !c.Active) && activeChannels.Any(c => c.Active) && activeTracks.All(t => t.Active))
-                                    {
-                                        var tempNeuralCandidates = activeChannels;
-                                        foreach (var ca in tempNeuralCandidates)
-                                        {
-                                            ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
-                                        }
-                                        neuralCandidates.Add(tempNeuralCandidates);
-
-                                    }
-                                    else if (activeTracks.Any(c => !c.Active) && activeTracks.Any(c => c.Active) && activeChannels.All(c => c.Active))
-                                    {
-                                        // If some tracks are disabled and all channels are enabled, we'll take the tracks as data
-                                        // Track notes should already have discarded anything with channel 9
-                                        MidiChannelItem[] tempNeuralCandidates = activeTracks;
-                                        foreach (var ca in tempNeuralCandidates)
-                                        { // This may not be necessary; I could probably just take the MidiTracks from DataDictionary[1] but, it seemed to give odd results like it didn't have everything
-                                            ca.Active = tsm.DataDictionary[1].MidiTracks.Where(c => c.Id == ca.Id).Single().Active;
-                                        }
-                                        neuralCandidates.Add(tempNeuralCandidates);
-
-                                    }
-                                }
-                            }
-                        }
                     }
+
                     var orderedCandidates = neuralCandidates.OrderBy(c => random.Next());
                     var nTestCandidates = (int)(orderedCandidates.Count() * 0.3f);
                     neuralTrainingCandidates = orderedCandidates.Skip(nTestCandidates).ToArray();
                     neuralTestCandidates = orderedCandidates.Take(nTestCandidates).ToArray();
                 }
+
                 var numTestCandidates = neuralTestCandidates.Length;
-                buttonTrain.Enabled = true;
+
 
                 float costTotal = 999f;
 
@@ -418,11 +181,13 @@ namespace LuteBot.UI
 
                 BeginInvoke((MethodInvoker)delegate
                 {
+                    buttonTrain.Enabled = true;
                     richTextBox1.AppendText($"\n\nTraining neural network until all {numTestCandidates} non-training candidates are correct");
                     progressBarTraining.Maximum = numTestCandidates;
                     progressBarTraining.Value = 0;
                 });
 
+                var neural = TrackSelectionManager.SetupNeuralNetwork(sizes);
                 int i = 0;
                 int numSuccesses = 0;
                 while (numSuccesses < numPerfect && !cancelled)
@@ -485,7 +250,7 @@ namespace LuteBot.UI
                                 */
 
                                 //tsm.neural.BackPropagateRecurrent(inputs, expected);
-                                songCostTotal += tsm.neural.BackPropagate(inputs, expected);
+                                songCostTotal += neural.BackPropagate(inputs, expected);
                             }
                             if ((i + 1) % 20 == 0)
                                 lock (songCostLock)
@@ -505,7 +270,7 @@ namespace LuteBot.UI
                                 var inputs = channel.GetNeuralInputs(count++, song.Length);
                                 //var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
                                 //var neuralResults = tsm.neural.FeedForwardRecurrent(inputs);
-                                var neuralResults = tsm.neural.FeedForward(inputs);
+                                var neuralResults = neural.FeedForward(inputs);
                                 channelResults[channel] = neuralResults[0];
                             }
 
@@ -555,7 +320,7 @@ namespace LuteBot.UI
                                 //var inputs = channel.GetRecurrentInput(noteParams, maxTickNumber);
                                 //var neuralResults = tsm.neural.FeedForwardRecurrent(inputs);
                                 var inputs = channel.GetNeuralInputs(count++, song.Length);
-                                var neuralResults = tsm.neural.FeedForward(inputs);
+                                var neuralResults = neural.FeedForward(inputs);
                                 channelResults[channel] = neuralResults[0];
                             }
 
@@ -657,7 +422,7 @@ namespace LuteBot.UI
                 });
                 if (File.Exists(savePath))
                     File.Delete(savePath);
-                tsm.neural.Save(savePath);
+                neural.Save(savePath);
                 if (File.Exists(savePath + ".config"))
                     File.Delete(savePath + ".config");
                 File.WriteAllText(savePath + ".config", JsonConvert.SerializeObject(sizes));
@@ -681,7 +446,7 @@ namespace LuteBot.UI
                     var orderedResults = channelResults.OrderByDescending(kvp => kvp.Value);
 
 
-                    
+
                     //var inputs = song.GetNeuralInput();
                     //
                     //var neuralResults = tsm.neural.FeedForward(inputs);
@@ -696,7 +461,7 @@ namespace LuteBot.UI
                     //}
                     //
                     //var orderedResults = results.OrderByDescending(kvp => kvp.Value);
-                    
+
                     // Check the number of active flute channels...
                     var numFlute = song.Where(s => s.Active).Count();
                     bool correct = true;
@@ -730,12 +495,18 @@ namespace LuteBot.UI
         {
             try
             {
-                await TestMusicMaker().ConfigureAwait(false);
+                //await TestMusicMaker().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
         }
+    }
+
+    public class NeuralNetworkCandidate
+    {
+        public MidiChannelItem[][] Channels { get; set; }
+        public TrackSelectionManager TrackSelectionManager { get; set; }
     }
 }
