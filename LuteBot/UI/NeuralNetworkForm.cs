@@ -1,20 +1,7 @@
 ﻿using LuteBot.TrackSelection;
 using Newtonsoft.Json;
 using SimpleML;
-
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace LuteBot.UI
 {
@@ -34,7 +21,7 @@ namespace LuteBot.UI
             }
         }
 
-        public static string savePath = Path.Combine(LuteBotForm.lutebotPath, "CustomNetworkv2");
+        public static readonly string savePath = Path.Combine(LuteBotForm.lutebotPath, "CustomNetworkv2");
 
         private async void buttonTrain_Click(object sender, EventArgs e)
         {
@@ -90,33 +77,33 @@ namespace LuteBot.UI
             string midiPath = Path.Combine(PartitionsForm.partitionMidiPath, partitionName + ".mid");
             if (File.Exists(midiPath))
             {
-                var tsm = await LuteBotForm.luteBotForm.LoadFile(midiPath).ConfigureAwait(false);
+                var tsm = await LuteBotForm.Instance.LoadFile(midiPath).ConfigureAwait(false);
                 if (tsm.Player.dryWetFile != null)
                 {
                     // To prevent it from trying to train on re-generated midis, which have incorrect lengths
                     // Require at least 3 channels
 
-                    if (tsm.MidiChannels.Count > 2 && tsm.DataDictionary.ContainsKey(1))
+                    if (tsm.MidiChannels.Count > 2)
                     {
-                        var activeChannels = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id != 9 && c.midiInstrument != 9 && c.tickNotes.Any(tn => tn.Value.Any())).OrderBy(c => c.Id).ToArray();
-                        var activeTracks = tsm.DataDictionary[1].MidiTracks.Where(c => c.tickNotes.Any(tn => tn.Value.Any(n => n.channel != 9 && !tsm.DataDictionary[1].MidiChannels.Any(mc => mc.Id == n.channel && mc.midiInstrument == 9)))).OrderBy(c => c.Id).ToArray();
-                        if (activeChannels.Any(c => !c.Active) && activeChannels.Any(c => c.Active) && activeTracks.All(t => t.Active))
+                        var activeChannels = tsm.MidiChannels.Values.Where(c => c.Id != 9 && c.MidiInstrument != 9 && c.TickNotes.Any(tn => tn.Value.Any())).OrderBy(c => c.Id).ToArray();
+                        var activeTracks = tsm.MidiTracks.Values.Where(c => c.TickNotes.Any(tn => tn.Value.Any(n => n.channel != 9 && !tsm.MidiChannels.Values.Any(mc => mc.Id == n.channel && mc.MidiInstrument == 9)))).OrderBy(c => c.Id).ToArray();
+                        if (activeChannels.Any(c => !c.Settings[1].Active) && activeChannels.Any(c => c.Settings[1].Active) && activeTracks.All(t => t.Settings[1].Active))
                         {
                             var tempNeuralCandidates = activeChannels;
                             foreach (var ca in tempNeuralCandidates)
                             {
-                                ca.Active = tsm.DataDictionary[1].MidiChannels.Where(c => c.Id == ca.Id).Single().Active;
+                                ca.Settings[1].Active = tsm.MidiChannels.Values.Where(c => c.Id == ca.Id).Single().Settings[1].Active;
                             }
                             return tempNeuralCandidates;
                         }
-                        else if (activeTracks.Any(c => !c.Active) && activeTracks.Any(c => c.Active) && activeChannels.All(c => c.Active))
+                        else if (activeTracks.Any(c => !c.Settings[1].Active) && activeTracks.Any(c => c.Settings[1].Active) && activeChannels.All(c => c.Settings[1].Active))
                         {
                             // If some tracks are disabled and all channels are enabled, we'll take the tracks as data
                             // Track notes should already have discarded anything with channel 9
                             MidiChannelItem[] tempNeuralCandidates = activeTracks;
                             foreach (var ca in tempNeuralCandidates)
                             { // This may not be necessary; I could probably just take the MidiTracks from DataDictionary[1] but, it seemed to give odd results like it didn't have everything
-                                ca.Active = tsm.DataDictionary[1].MidiTracks.Where(c => c.Id == ca.Id).Single().Active;
+                                ca.Settings[1].Active = tsm.MidiTracks.Values.Where(c => c.Id == ca.Id).Single().Settings[1].Active;
                             }
                             return tempNeuralCandidates;
                         }
@@ -136,7 +123,6 @@ namespace LuteBot.UI
 
                 if (neuralTrainingCandidates == null || neuralTestCandidates == null)
                 {
-                    var neuralCandidates = new List<MidiChannelItem[]>(); // It can accept multiple correct answers
                     await this.InvokeAsync(() =>
                     {
                         progressBarTraining.Maximum = pf.index.PartitionNames.Count + 1;
@@ -147,25 +133,26 @@ namespace LuteBot.UI
 
                     var tasks = new List<Task>();
 
+                    var parallelNeuralCandidates = new MidiChannelItem[partNames.Length][];
 
                     // I tried a thousand ways to make this faster with parallel and async, but it was only ever slower, even when batching
                     // ... Which is weird that saving midis is so damn fast when it's parallel
 
                     // I think basically, the heavy processing to build candidates is too much for async to handle very well
                     // And I can't realistically load many TrackSelectionManagers at once due to memory 
-                    foreach (var part in partNames)
+                    await Parallel.ForEachAsync(partNames, async (part, cancel) =>
+                    //foreach (var part in partNames)
                     {
                         var c = await ProcessFileForCandidates(part).ConfigureAwait(false);
-                        if (c != null)
-                            neuralCandidates.Add(c);
                         var progressBar = Interlocked.Increment(ref progress);
+                        parallelNeuralCandidates[progressBar - 1] = c;
                         BeginInvoke((MethodInvoker)delegate // Intentionally not awaiting so we can continue faster
                         {
                             progressBarTraining.Value = progressBar;
                         });
-                    }
+                    }).ConfigureAwait(false);
 
-                    var orderedCandidates = neuralCandidates.OrderBy(c => random.Next());
+                    var orderedCandidates = parallelNeuralCandidates.Where(c => c != null).Select(c => c.OrderBy(ch => ch.Id).ToArray()).OrderBy(c => random.Next());
                     var nTestCandidates = (int)(orderedCandidates.Count() * 0.3f);
                     neuralTrainingCandidates = orderedCandidates.Skip(nTestCandidates).ToArray();
                     neuralTestCandidates = orderedCandidates.Take(nTestCandidates).ToArray();
@@ -215,7 +202,7 @@ namespace LuteBot.UI
                                 var inputs = channel.GetNeuralInputs(count++, song.Length);
                                 var expected = new float[1];
 
-                                if (channel.Active)
+                                if (channel.Settings[1].Active)
                                 {
                                     expected[0] = 0.5f;
                                 }
@@ -293,12 +280,12 @@ namespace LuteBot.UI
                             var orderedResults = results.OrderByDescending(kvp => kvp.Value);
                             */
                             // Check the number of active flute channels...
-                            var numFlute = song.Where(s => s.Active).Count();
+                            var numFlute = song.Where(s => s.Settings[1].Active).Count();
                             bool correct = true;
 
                             for (int j = 0; j < numFlute; j++)
                             {
-                                bool? existsAndCorrect = song.Where(s => s.Id == orderedResults.ElementAt(j).Key.Id).SingleOrDefault()?.Active;
+                                bool? existsAndCorrect = song.Where(s => s.Id == orderedResults.ElementAt(j).Key.Id).SingleOrDefault()?.Settings?[1]?.Active;
                                 if (!existsAndCorrect.HasValue || !existsAndCorrect.Value)
                                     correct = false;
                             }
@@ -343,12 +330,12 @@ namespace LuteBot.UI
                             var orderedResults = results.OrderByDescending(kvp => kvp.Value);
                             */
                             // Check the number of active flute channels...
-                            var numFlute = song.Where(s => s.Active).Count();
+                            var numFlute = song.Where(s => s.Settings[1].Active).Count();
                             bool correct = true;
 
                             for (int j = 0; j < numFlute; j++)
                             {
-                                bool? existsAndCorrect = song.Where(s => s.Id == orderedResults.ElementAt(j).Key.Id).SingleOrDefault()?.Active;
+                                bool? existsAndCorrect = song.Where(s => s.Id == orderedResults.ElementAt(j).Key.Id).SingleOrDefault()?.Settings?[1]?.Active;
                                 if (!existsAndCorrect.HasValue || !existsAndCorrect.Value)
                                     correct = false;
                             }

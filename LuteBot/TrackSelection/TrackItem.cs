@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace LuteBot.TrackSelection
 {
 // TODO: I'd like to just remove this entirely, but that will be real annoying; I can't just rename, and have to hunt down >36 spots to fix
-    public class TrackItem : MidiChannelItem
+    public class TrackItem : OldMidiChannelItem
     {
         public TrackItem() { isTrack = true;  }
 
@@ -18,6 +18,6 @@ namespace LuteBot.TrackSelection
 
         public TrackItem(SimpleMidiChannelItem old) : base(old) { }
 
-        public TrackItem(MidiChannelItem old) : base(old) { }
+        public TrackItem(OldMidiChannelItem old) : base(old) { }
     }
 }

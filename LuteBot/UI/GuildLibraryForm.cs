@@ -11,12 +11,12 @@ using System.IO;
 using System.Net;
 using LuteBot.Utils;
 using Lutebot.UI;
-using LuteBot.playlist;
 using System.Threading;
 using System.Text.RegularExpressions;
 using CsvHelper;
 using Newtonsoft.Json;
 using System.Net.Http;
+using LuteBot.Sequencing;
 
 namespace LuteBot.UI
 {
@@ -253,7 +253,7 @@ namespace LuteBot.UI
                     }
                     catch (Exception e)
                     {
-                        await mainForm.HandleError(e, $"Failed to download/add {song.filename} from {song.source_url}").ConfigureAwait(false);
+                        await mainForm.HandleErrorAsync(e, $"Failed to download/add {song.filename} from {song.source_url}").ConfigureAwait(false);
                         Log($"Failed to download/add {song.filename}");
                     }
                 }

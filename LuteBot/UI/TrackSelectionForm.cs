@@ -1,20 +1,13 @@
 ﻿using LuteBot.Config;
-using LuteBot.Core;
 using LuteBot.Core.Midi;
 using LuteBot.TrackSelection;
 using LuteBot.UI.Utils;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
+using System.Diagnostics.Metrics;
 using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Resources.ResXFileRef;
+using Instrument = LuteBot.UI.Utils.Instrument;
 
 namespace LuteBot.UI
 {
@@ -22,23 +15,17 @@ namespace LuteBot.UI
     public partial class TrackSelectionForm : Form
     {
         private TrackSelectionManager trackSelectionManager;
-        LuteBotForm mainForm;
 
         bool initializing = true;
+        private int instrumentId = 0;
 
-
-        // We need only one out device, might as well use rust, but take both for now cuz why not, feels unfair
-        // Though they both get updated with the same values at the same time, for what we're doing
-        public TrackSelectionForm(LuteBotForm mainForm)
+        public TrackSelectionForm()
         {
-            this.mainForm = mainForm;
-            this.trackSelectionManager = new TrackSelectionManager();
+            this.trackSelectionManager = new TrackSelectionManager(new MidiPlayer());
             this.Load += TrackSelectionForm_Load;
             InitializeComponent();
 
             this.SizeChanged += TrackSelectionForm_SizeChanged;
-
-
         }
 
         private void TrackSelectionForm_SizeChanged(object sender, EventArgs e)
@@ -112,9 +99,9 @@ namespace LuteBot.UI
                 pianoPanel.Paint += new PaintEventHandler((o, ev) => DrawPiano(ev.Graphics));
 
                 SuspendLayout();
-                Instrument.Read();
+                
                 instrumentsBox.DisplayMember = "Name";
-                foreach (Instrument i in Instrument.Prefabs)
+                foreach (Instrument i in Instrument.Prefabs.Values.OrderBy(i => i.Id))
                     instrumentsBox.Items.Add(i);
                 instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
 
@@ -123,8 +110,6 @@ namespace LuteBot.UI
                 | BindingFlags.Instance | BindingFlags.NonPublic, null,
                 OffsetPanel, new object[] { true }); // Internet suggested this... 
 
-
-                IO.KB.ActionManager.NotePlayed += _mordhauOut_notePlayed;
 
                 ChannelsListBox.ContextMenuStrip = contextMenuStrip1;
                 TrackListBox.ContextMenuStrip = contextMenuStrip2;
@@ -309,23 +294,25 @@ namespace LuteBot.UI
                     var channel = trackSelectionManager.MidiChannels[dragTarget.Id];
 
 
-                    int oldOffset = channel.offset;
+                    int oldOffset = channel.Settings[instrumentId].Offset;
 
                     if (ModifierKeys == Keys.Shift)
                     {
-                        trackSelectionManager.NoteOffset = startGlobalOffset + (int)Math.Round((double)(Math.Abs(dragStart.Y - e.Location.Y) * multiplier / pianoRowHeight) / 12) * 12;
-                        if (trackSelectionManager.NoteOffset != startGlobalOffset)
+                        var globalOffset = startOffset + (int)Math.Round((double)(Math.Abs(dragStart.Y - e.Location.Y) * multiplier / pianoRowHeight) / 12) * 12;
+                        if (globalOffset != oldOffset)
                         {
+                            foreach (var c in trackSelectionManager.GetTracksAndChannels())
+                                c.Settings[instrumentId].Offset += (globalOffset - startGlobalOffset);
                             int oldHighest = maxNote;
                             ReloadNotes(true);
                             if (maxNote == oldHighest)
-                                lastMousePosition = new Point(dragStart.X, dragStart.Y - (channel.offset - startOffset) * pianoRowHeight);
+                                lastMousePosition = new Point(dragStart.X, dragStart.Y - (channel.Settings[instrumentId].Offset - startOffset) * pianoRowHeight);
                         }
                     }
                     else
                     {
-                        channel.offset = startOffset + (int)Math.Round((double)(Math.Abs(dragStart.Y - e.Location.Y) * multiplier / pianoRowHeight) / 12) * 12;
-                        if (channel.offset != oldOffset)
+                        channel.Settings[instrumentId].Offset = startOffset + (int)Math.Round((double)(Math.Abs(dragStart.Y - e.Location.Y) * multiplier / pianoRowHeight) / 12) * 12;
+                        if (channel.Settings[instrumentId].Offset != oldOffset)
                         {
                             // Simulate a mouse position at where it should now draw...?
                             // If we're scrolled all the way up or down, we don't want it to move though
@@ -334,7 +321,7 @@ namespace LuteBot.UI
                             int oldHighest = maxNote;
                             ReloadNotes(true);
                             if (maxNote == oldHighest)
-                                lastMousePosition = new Point(dragStart.X, dragStart.Y - (channel.offset - startOffset) * pianoRowHeight);
+                                lastMousePosition = new Point(dragStart.X, dragStart.Y - (channel.Settings[instrumentId].Offset - startOffset) * pianoRowHeight);
                             //OffsetPanel.Refresh();
                             //pianoPanel.Refresh();
                         }
@@ -482,8 +469,7 @@ namespace LuteBot.UI
                     dragging = true;
                     dragStart = e.Location;
                     //if (isAdvanced)
-                    startOffset = channel.offset;
-                    startGlobalOffset = trackSelectionManager.NoteOffset;
+                    startOffset = channel.Settings[instrumentId].Offset;
                     dragTarget = channel;
                     hoverChannels.Clear();
                     hoverChannels.Add(targetChannel);
@@ -1000,8 +986,8 @@ namespace LuteBot.UI
 
             if (allNotes.Length > 0)
             {
-                minNote = allNotes.Min(n => n.note + trackSelectionManager.NoteOffset + trackSelectionManager.MidiChannels[n.channel].offset);
-                maxNote = allNotes.Max(n => n.note + trackSelectionManager.NoteOffset + trackSelectionManager.MidiChannels[n.channel].offset);
+                minNote = allNotes.Min(n => n.note + trackSelectionManager.MidiChannels[n.channel].Settings[instrumentId].Offset);
+                maxNote = allNotes.Max(n => n.note + trackSelectionManager.MidiChannels[n.channel].Settings[instrumentId].Offset);
             }
 
             numNotes = maxNote - minNote + 1 + numNotesBelow * 2;// To make it inclusive?  i.e. if min 1 and max 2, 2-1 = 1, but there's really 2 notes... 
@@ -1018,16 +1004,6 @@ namespace LuteBot.UI
             else
                 pianoPanel.Height = panel1.Height - 2;
             return;
-            if (isAdvanced) // Reset size for this new track
-            {
-                int numRows = 2; // Default
-                if (isAdvanced)
-                    numRows = 1 + trackSelectionManager.MidiChannels.Values.Where((c) => c.Active).Count();
-
-                OffsetPanel.Size = new Size(originalPanelSize.Width, originalPanelSize.Height + defaultRowHeight * (numRows - 2));
-                rowHeight = (OffsetPanel.Height - labelHeight * numRows - padding) / numRows;
-                //ScrollBarForcer.Location = new Point(OffsetPanel.Location.X, OffsetPanel.Location.Y + OffsetPanel.Height);
-            }
         }
 
         private void SetVisibleNotes(bool forceRegenerate = false)
@@ -1210,7 +1186,7 @@ namespace LuteBot.UI
         {
             int x = (int)(note.tickNumber * tickLength) + pianoWidth;
             int width = (int)Math.Max((note.length * tickLength), 1);
-            int finalNote = note.note + (trackSelectionManager.MidiChannels.ContainsKey(note.channel) ? trackSelectionManager.MidiChannels[note.channel].offset : 0) + trackSelectionManager.NoteOffset;
+            int finalNote = note.note + (trackSelectionManager.MidiChannels.ContainsKey(note.channel) ? trackSelectionManager.MidiChannels[note.channel].Settings[instrumentId].Offset : 0);
             int y = maxHeight - ((finalNote - minNote + 1 + numNotesBelow) * pianoRowHeight);
             int height = pianoRowHeight;
 
@@ -1221,7 +1197,7 @@ namespace LuteBot.UI
         private int maxNoteLength = 0;
         private void ReloadNotes(bool forceRefresh = false)
         {
-            allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Active).SelectMany(c => c.tickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks.ContainsKey(n.track) && trackSelectionManager.MidiTracks[n.track].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
+            allNotes = trackSelectionManager.MidiChannels.Values.Where(c => c.Settings[instrumentId].Active).SelectMany(c => c.TickNotes.Values).SelectMany(c => c).Where(n => trackSelectionManager.MidiTracks.ContainsKey(n.track) && trackSelectionManager.MidiTracks[n.track].Settings[instrumentId].Active).OrderBy(n => n.tickNumber).ThenBy(n => n.channel)
                 .ToArray();
             // Give it an arbitrary order to make things consistent for draw order
 
@@ -1246,24 +1222,24 @@ namespace LuteBot.UI
                     tsm = trackSelectionManager;
                 SuspendLayout();
                 initializing = true;
-                songLabel.Text = Path.GetFileNameWithoutExtension(tsm.Player.fileName);
+                songLabel.Text = Path.GetFileNameWithoutExtension(tsm.Player.FileName);
 
                 TrackListBox.Items.Clear();
                 ChannelsListBox.Items.Clear();
 
-                foreach (MidiChannelItem channel in tsm.MidiChannels.Values.OrderBy(c => c.Rank))
+                foreach (MidiChannelItem channel in tsm.MidiChannels.Values.OrderByDescending(c => c.Settings[instrumentId].Rank))
                 {
-                    ChannelsListBox.Items.Add(channel, channel.Active);
+                    ChannelsListBox.Items.Add(channel, channel.Settings[instrumentId].Active);
                 }
-                foreach (TrackItem track in tsm.MidiTracks.Values.OrderBy(c => c.Rank))
+                foreach (var track in tsm.MidiTracks.Values.OrderBy(c => c.Settings[instrumentId].Rank))
                 {
-                    TrackListBox.Items.Add(track, track.Active);
+                    TrackListBox.Items.Add(track, track.Settings[instrumentId].Active);
                 }
 
                 ChannelsListBox.DisplayMember = "Name";
                 TrackListBox.DisplayMember = "Name";
 
-                instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
+                instrumentsBox.SelectedItem = Instrument.Prefabs[instrumentId];
 
                 if (tsm.Player.dryWetFile != null)
                 {
@@ -1314,34 +1290,30 @@ namespace LuteBot.UI
         {
             if (!initializing)
             {
-                trackSelectionManager.ToggleChannelActivation(!(e.CurrentValue == CheckState.Checked), (ChannelsListBox.Items[e.Index] as MidiChannelItem).Id);
-                //Invalidate();
-                //OffsetPanel.Refresh();
-                //ResetRowSize();
-                //InitLists();
+                (ChannelsListBox.Items[e.Index] as MidiChannelItem).Settings[instrumentId].Active = (e.NewValue == CheckState.Checked);
                 ReloadNotes(true);
             }
         }
 
         private async void SongProfileSaveButton_Click(object sender, EventArgs e)
         {
-            if (trackSelectionManager.FileName != null)
+            if (trackSelectionManager.Player.FileName != null)
             {
                 await trackSelectionManager.SaveTrackManager().ConfigureAwait(false);
                 try
                 {
-                    await LuteBotForm.luteBotForm.PartitionsForm.SavePartitionWithForm(trackSelectionManager).ConfigureAwait(false);
+                    await LuteBotForm.Instance.PartitionsForm.SavePartitionWithForm(trackSelectionManager).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await LuteBotForm.luteBotForm.HandleError(ex, "Failed to save partition").ConfigureAwait(false);
+                    await LuteBotForm.Instance.HandleErrorAsync(ex, "Failed to save partition").ConfigureAwait(false);
                 }
             }
         }
 
         private async void LoadProfileButton_Click(object sender, EventArgs e)
         {
-            if (trackSelectionManager.FileName != null)
+            if (trackSelectionManager.Player.FileName != null)
             {
                 trackSelectionManager.LoadTrackManager();
                 await InitLists().ConfigureAwait(false);
@@ -1352,7 +1324,7 @@ namespace LuteBot.UI
         {
             if (!initializing)
             {
-                trackSelectionManager.ToggleTrackActivation(!(e.CurrentValue == CheckState.Checked), (TrackListBox.Items[e.Index] as MidiChannelItem).Id);
+                (TrackListBox.Items[e.Index] as MidiChannelItem).Settings[instrumentId].Active = (e.NewValue == CheckState.Checked);
                 //InitLists();
                 //ResetRowSize();
                 //Invalidate();
@@ -1375,7 +1347,7 @@ namespace LuteBot.UI
                 // Ish.  A little more complicated than that.
                 int numRows = 2; // Default
                 if (isAdvanced)
-                    numRows = 1 + trackSelectionManager.MidiChannels.Values.Where((c) => c.Active).Count();
+                    numRows = 1 + trackSelectionManager.MidiChannels.Values.Where((c) => c.Settings[instrumentId].Active).Count();
                 OffsetPanel.Size = new Size(originalPanelSize.Width, originalPanelSize.Height + rowHeight * (numRows - 2));
                 //ScrollBarForcer.Location = new Point(OffsetPanel.Location.X, OffsetPanel.Location.Y + OffsetPanel.Height);
                 //ScrollBarForcer.Visible = true;
@@ -1397,14 +1369,13 @@ namespace LuteBot.UI
 
         private void button1_Click(object sender, EventArgs e)
         {
-            trackSelectionManager.NoteOffset = 0;
             foreach (var channel in trackSelectionManager.MidiChannels.Values)
             {
-                channel.offset = 0;
+                channel.Settings[instrumentId].Offset = 0;
             }
             foreach (var track in trackSelectionManager.MidiTracks.Values)
             {
-                track.offset = 0;
+                track.Settings[instrumentId].Offset = 0;
             }
             Invalidate();
 
@@ -1423,41 +1394,14 @@ namespace LuteBot.UI
 
         private async void instrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // If it's already the instrument we have as our property
-            // Then don't re-set the values
-            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-            if (currentInstrument != instrumentsBox.SelectedIndex)
-            {
-                await SetInstrument(currentInstrument, instrumentsBox.SelectedIndex).ConfigureAwait(false);
-            }
+            await SetInstrument(((Utils.Instrument)instrumentsBox.SelectedItem).Id).ConfigureAwait(false);
         }
 
-        private async Task SetInstrument(int currentInstrument, int newInstrument)
+        public async Task SetInstrument(int newInstrumentId)
         {
-            if (Instrument.Prefabs.Count > newInstrument)
-            {
-
-                ConfigManager.SetProperty(PropertyItem.Instrument, newInstrument.ToString());
-                Instrument target = Instrument.Prefabs[newInstrument];
-
-                ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
-
-                ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
-
-                ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
-
-                ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
-
-                ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
-
-                await InstrumentChanged(currentInstrument).ConfigureAwait(false);
-            }
-        }
-
-        public async Task InstrumentChanged(int oldInstrument)
-        {
-            trackSelectionManager.UpdateTrackSelectionForInstrument(oldInstrument);
+            instrumentId = newInstrumentId;
             await InitLists().ConfigureAwait(false);
+            ReloadNotes(true);
         }
 
         private async void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1468,13 +1412,13 @@ namespace LuteBot.UI
                 foreach (var channel in trackSelectionManager.MidiChannels.Values)
                 {
                     if (channel.Id != 9)
-                        channel.Active = true;
+                        channel.Settings[instrumentId].Active = true;
                 }
             }
             else if (menuStrip == contextMenuStrip2)
             {
                 foreach (var track in trackSelectionManager.MidiTracks.Values)
-                    track.Active = true;
+                    track.Settings[instrumentId].Active = true;
             }
             await InitLists().ConfigureAwait(false);
             //ResetRowSize();
@@ -1489,12 +1433,12 @@ namespace LuteBot.UI
             if (menuStrip == contextMenuStrip1)
             {
                 foreach (var channel in trackSelectionManager.MidiChannels.Values)
-                    channel.Active = false;
+                    channel.Settings[instrumentId].Active = false;
             }
             else if (menuStrip == contextMenuStrip2)
             {
                 foreach (var track in trackSelectionManager.MidiTracks.Values)
-                    track.Active = false;
+                    track.Settings[instrumentId].Active = false;
             }
             await InitLists().ConfigureAwait(false);
             //ResetRowSize();
@@ -1509,12 +1453,12 @@ namespace LuteBot.UI
             {
                 foreach (var channel in trackSelectionManager.MidiChannels.Values)
                     if (channel.Id != 9)
-                        channel.Active = !channel.Active;
+                        channel.Settings[instrumentId].Active = !channel.Settings[instrumentId].Active;
             }
             else if (menuStrip == contextMenuStrip2)
             {
                 foreach (var track in trackSelectionManager.MidiTracks.Values)
-                    track.Active = !track.Active;
+                    track.Settings[instrumentId].Active = !track.Settings[instrumentId].Active;
             }
             await InitLists().ConfigureAwait(false);
             //ResetRowSize();
@@ -1542,7 +1486,7 @@ namespace LuteBot.UI
             Point point = list.PointToClient(new Point(e.X, e.Y));
             int index = list.IndexFromPoint(point);
             if (index < 0) index = list.Items.Count - 1;
-            object data = e.Data.GetData(typeof(TrackItem));
+            object data = e.Data.GetData(typeof(MidiChannelItem));
             list.Items.Remove(data);
             list.Items.Insert(index, data);
             list.SetItemChecked(index, prevChecked);
@@ -1552,54 +1496,14 @@ namespace LuteBot.UI
         private void UpdateRanks()
         {
             var channels = TrackListBox.Items;
-            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
             for (int i = 0; i < channels.Count; i++)
             {
-                TrackItem track = (TrackItem)channels[i];
+                var track = (MidiChannelItem)channels[i];
                 var targetTrack = trackSelectionManager.MidiTracks[track.Id];
-                targetTrack.Rank = i + 1;
-                targetTrack = trackSelectionManager.DataDictionary[currentInstrument].MidiTracks[track.Id];
-                targetTrack.Rank = i + 1;
+                targetTrack.Settings[instrumentId].Rank = i + 1;
             }
         }
 
-        private async void invertToOtherInstrumentToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var menuStrip = ((sender as ToolStripMenuItem).Owner) as ContextMenuStrip;
-            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-            int targetIndex = 1;
-            if (currentInstrument == 1)
-            {
-                targetIndex = 0;
-            }
-            if (menuStrip == contextMenuStrip1)
-            {
-                if (trackSelectionManager.DataDictionary.ContainsKey(targetIndex))
-                {
-                    foreach (var channel in trackSelectionManager.MidiChannels.Values)
-                        if (channel.Id != 9)
-                        {
-                            var targetChannel = trackSelectionManager.DataDictionary[targetIndex].MidiChannels.Where(c => c.Id == channel.Id).FirstOrDefault();
-                            if (targetChannel != null)
-                                targetChannel.Active = !channel.Active;
-                        }
-                }
-            }
-            else if (menuStrip == contextMenuStrip2)
-            {
-                if (trackSelectionManager.DataDictionary.ContainsKey(targetIndex))
-                {
-                    foreach (var channel in trackSelectionManager.MidiTracks.Values)
-                        if (channel.Id != 9)
-                        {
-                            var targetChannel = trackSelectionManager.DataDictionary[targetIndex].MidiTracks.Where(c => c.Id == channel.Id).FirstOrDefault();
-                            if (targetChannel != null)
-                                targetChannel.Active = !channel.Active;
-                        }
-                }
-            }
-            await SetInstrument(currentInstrument, targetIndex).ConfigureAwait(false);
-        }
     }
 
     public class CustomBufferedPanel : Panel

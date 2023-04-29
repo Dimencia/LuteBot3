@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LuteMod.Sequencing
+namespace LuteBot.LuteMod.Sequencing
 {
     public enum NoteType
     {

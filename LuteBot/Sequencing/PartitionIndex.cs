@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace LuteMod.Indexing
+namespace LuteBot.LuteMod.Indexing
 {
     public class PartitionIndex
     {

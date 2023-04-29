@@ -72,7 +72,7 @@ namespace LuteBot
         public static float[][] GetRecurrentInput(this MidiChannelItem channel, int noteParams, float maxTickNumber)
         {
             // Got one.  Next, build the neural inputs our way - it accepts a float[][], where each float[] is a note, and each second param is one of the params of it
-            var allNotes = channel.tickNotes.SelectMany(kvp => kvp.Value).OrderBy(n => n.tickNumber);
+            var allNotes = channel.TickNotes.SelectMany(kvp => kvp.Value).OrderBy(n => n.tickNumber);
 
             float[][] inputs = new float[allNotes.Count()][];// This really doesn't need to be jagged tho
 
@@ -88,50 +88,6 @@ namespace LuteBot
         }
 
 
-        public static float[] GetNeuralInput(this MidiChannelItem[] song)
-        {
-            float maxAvgNoteLength = song.Max(c => c.Id == 9 ? 0 : c.avgNoteLength);
-            float maxNoteLength = song.Max(c => c.Id == 9 ? 0 : c.totalNoteLength);
-            // noteLength is now in a time format, a float in seconds.  We should divide it by total song duration
-
-            // ... but we don't have that... 
-            // Welp, nvm then.  It's very hard and annoying to get that here
-
-            float maxNumNotes = song.Max(c => c.Id == 9 ? 0 : c.numNotes);
-
-            float[] inputs = new float[numParamsPerChannel * 16];
-
-            for (int j = 0; j < 16; j++)
-            {
-                var channel = song.Where(c => c.Id == j && c.Id != 9).SingleOrDefault();
-                //var channel = song.Values[j];
-
-
-                if (channel != null)
-                {
-                    //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
-                    inputs[j * numParamsPerChannel] = channel.avgNoteLength;
-                    inputs[j * numParamsPerChannel + 1] = channel.maxChordSize;
-                    inputs[j * numParamsPerChannel + 2] = (maxNoteLength > 0 ? channel.totalNoteLength / maxNoteLength : 0);
-                    //inputs[j * 6 + 2] = channel.totalNoteLength;
-                    inputs[j * numParamsPerChannel + 3] = channel.highestNote;// / 128f;
-                    inputs[j * numParamsPerChannel + 4] = channel.lowestNote;// / 128f;
-                    inputs[j * numParamsPerChannel + 5] = (maxNumNotes > 0 ? channel.numNotes / maxNumNotes : 0);
-                    //inputs[j * numParamsPerChannel + 6] = channel.Id / 16f;
-                    inputs[j * numParamsPerChannel + 6] = channel.midiInstrument;// / 128f;
-                    inputs[j * numParamsPerChannel + 7] = channel.avgVariation;
-                    //inputs[j * 6 + 5] = channel.numNotes;
-                }
-                else
-                {
-                    for (int k = 0; k < numParamsPerChannel; k++)
-                        inputs[j * numParamsPerChannel + k] = 0;
-                }
-            }
-
-            return inputs;
-        }
-
 
         public static float[] GetNeuralInputs(this MidiChannelItem c, int channelCount, int numChannels)
         {
@@ -145,19 +101,19 @@ namespace LuteBot
 
             //inputs[j * 6] = (maxAvgNoteLength > 0 ? channel.avgNoteLength / maxAvgNoteLength : 0);
             int i = 0;
-            inputs[i++] = channel.avgNoteLength;
-            inputs[i++] = channel.maxChordSize;
-            inputs[i++] = channel.percentTimePlaying;
+            inputs[i++] = channel.AvgNoteLength;
+            inputs[i++] = channel.MaxChordSize;
+            inputs[i++] = channel.PercentTimePlaying;
             //inputi++lNoteLength;
-            inputs[i++] = channel.highestNote / 128f;
-            inputs[i++] = channel.lowestNote / 128f;
+            inputs[i++] = channel.HighestNote / 128f;
+            inputs[i++] = channel.LowestNote / 128f;
 
-            inputs[i++] = channel.percentSongNotes;
+            inputs[i++] = channel.PercentSongNotes;
 
             //inputs[i++] = channel.midiInstrument / 128f;
-            inputs[i++] = channel.avgVariation / 64f; // Doubt this ever gets above 64, which this handles
+            inputs[i++] = channel.AvgVariation / 64f; // Doubt this ever gets above 64, which this handles
             //inputs[j * 6 + 5] = channel.numNotes;
-            inputs[i++] = channel.averageNote / 128f;
+            inputs[i++] = channel.AverageNote / 128f;
             inputs[i++] = channelCount / (float)numChannels;
 
             return inputs;
@@ -177,7 +133,7 @@ namespace LuteBot
                     {
                         if (!catchExceptions)
                             throw;
-                        await LuteBotForm.luteBotForm.HandleError(ex, ex.Message).ConfigureAwait(false);
+                        await LuteBotForm.Instance.HandleErrorAsync(ex, ex.Message).ConfigureAwait(false);
                     }
                 }));
                 return Task.Factory.FromAsync(ar, form.EndInvoke);

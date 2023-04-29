@@ -1,7 +1,4 @@
-﻿using LuteBot.playlist;
-using LuteBot.Playlist;
-using LuteBot.Soundboard;
-using LuteBot.TrackSelection;
+﻿using LuteBot.TrackSelection;
 using LuteBot.UI.Utils;
 
 using Newtonsoft.Json;
@@ -29,7 +26,7 @@ namespace LuteBot.IO.Files
         private static byte[] fileEnd = new byte[] { 0, 5, 0 };
 
         public static readonly string SaveFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\..\Local\Mordhau\Saved\SaveGames\";
-        private static readonly string DefaultPartitionFile = Path.Combine(Application.StartupPath, "lib", "LuteMod", "PartitionIndex");
+        private static readonly string DefaultPartitionFile = Path.Combine(Application.StartupPath, "LuteMod", "PartitionIndex");
 
         public static string ReadSavFile(string filePath)
         {
@@ -256,36 +253,6 @@ namespace LuteBot.IO.Files
                 fileNameAvaliable = true;
             }
             return fileNameAvaliable;
-        }
-
-        public static void SavePlayList(PlayList musicList)
-        {
-            Save(musicList);
-        }
-
-        public static PlayList LoadPlayList()
-        {
-            return Load<PlayList>();
-        }
-
-        public static PlayList LoadLastPlayList(string path)
-        {
-            return LoadNoDialog<PlayList>(path);
-        }
-
-        public static void SaveSoundBoard(SoundBoard soundBoard)
-        {
-            Save(soundBoard);
-        }
-
-        public static SoundBoard LoadSoundBoard()
-        {
-            return Load<SoundBoard>();
-        }
-
-        public static SoundBoard LoadLastSoundBoard(string path)
-        {
-            return LoadNoDialog<SoundBoard>(path);
         }
 
         public static async Task SaveTrackSelectionData(Dictionary<int, SimpleTrackSelectionData> data, string fileName, string targetPath = null)
@@ -646,15 +613,6 @@ namespace LuteBot.IO.Files
             string path = SaveFileDialogHelper();
             if (path != null)
             {
-                //dirty !!
-                if (typeof(T) == typeof(SoundBoard))
-                {
-                    (target as SoundBoard).Location = path;
-                }
-                if (typeof(T) == typeof(PlayList))
-                {
-                    (target as PlayList).Path = path;
-                }
                 using (var stream = File.Create(path))
                 {
                     var serializer = new DataContractSerializer(typeof(T));
@@ -677,15 +635,7 @@ namespace LuteBot.IO.Files
                     try
                     {
                         result = (T)serializer.ReadObject(stream);
-                        //dirty !!
-                        if (typeof(T) == typeof(SoundBoard))
-                        {
-                            (result as SoundBoard).Location = path;
-                        }
-                        if (typeof(T) == typeof(PlayList))
-                        {
-                            (result as PlayList).Path = path;
-                        }
+                        
                         success = true;
                     }
                     catch (Exception ex)
@@ -745,15 +695,6 @@ namespace LuteBot.IO.Files
                     try
                     {
                         result = (T)serializer.Deserialize(stream);
-                        //dirty !!
-                        if (typeof(T) == typeof(SoundBoard))
-                        {
-                            (result as SoundBoard).Location = path;
-                        }
-                        if (typeof(T) == typeof(PlayList))
-                        {
-                            (result as PlayList).Path = path;
-                        }
                     }
                     catch (Exception ex)
                     {

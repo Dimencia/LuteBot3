@@ -1,40 +1,15 @@
-﻿using Lutebot.UI;
-
-using LuteBot.Config;
+﻿using LuteBot.Config;
 using LuteBot.Core;
 using LuteBot.Core.Midi;
 using LuteBot.IO.Files;
-using LuteBot.IO.KB;
-using LuteBot.LiveInput.Midi;
-using LuteBot.OnlineSync;
-using LuteBot.playlist;
-using LuteBot.Soundboard;
 using LuteBot.TrackSelection;
 using LuteBot.UI;
 using LuteBot.UI.Utils;
-using LuteBot.Utils;
-using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Interaction;
 using Microsoft.Win32;
-
-using Sanford.Multimedia.Midi;
-
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Windows.Threading;
 
 namespace LuteBot
 {
@@ -48,7 +23,7 @@ namespace LuteBot
         public PartitionsForm PartitionsForm { get; private set; } = null;
         public GuildLibraryForm GuildLibraryForm { get; private set; } = null;
 
-        public static LuteBotForm luteBotForm;
+        public static LuteBotForm Instance { get; private set; }
 
         public string currentTrackName { get; set; } = "";
 
@@ -75,7 +50,7 @@ ModListWidgetStayTime=5.0";
 
         public LuteBotForm()
         {
-            luteBotForm = this;
+            Instance = this;
             this.StartPosition = FormStartPosition.Manual;
             Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos));
             Top = coords.Y;
@@ -95,46 +70,62 @@ ModListWidgetStayTime=5.0";
             // I'm going to split this up so if some piece fails, it can log it and continue maybe
             await this.InvokeAsync(() =>
             {
-                MordhauPakPath = GetPakPath();
+                try
+                {
+                    MordhauPakPath = GetPakPath();
 
-                if (MordhauPakPath != ConfigManager.GetProperty(PropertyItem.MordhauPakPath) && IsMordhauPakPathValid())
-                {
-                    ConfigManager.SetProperty(PropertyItem.MordhauPakPath, MordhauPakPath);
-                    ConfigManager.SaveConfig();
-                }
-            }).ConfigureAwait(false);
-            await this.InvokeAsync(() =>
-            {
-                OpenDialogs();
-                this.StartPosition = FormStartPosition.Manual;
-                Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos));
-                Top = coords.Y;
-                Left = coords.X; // If we have a proper saved pos, use it unaltered.  If not, we should adjust from screen center, which is what would be returned
-                if (coords != ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos))
-                {
-                    Top = coords.Y - Height;
-                    Left = coords.X - Width / 2;
-                    // If they weren't equal, it's at default pos, so the others should also be set to good default positions
-                    if (TrackSelectionForm != null)
+                    if (MordhauPakPath != ConfigManager.GetProperty(PropertyItem.MordhauPakPath) && IsMordhauPakPathValid())
                     {
-                        // We should always CheckPosition, just in case something goes weird, so nothing every initializes out of bounds
-                        var tsPos = WindowPositionUtils.CheckPosition(new Point(Left + Width, Top));
-                        WindowPositionUtils.UpdateBounds(PropertyItem.TrackSelectionPos, tsPos);
-                        TrackSelectionForm.Location = tsPos;
-                    }
-                    if (PartitionsForm != null)
-                    {
-                        var pfPos = WindowPositionUtils.CheckPosition(new Point(Left - PartitionsForm.Width, Top));
-                        WindowPositionUtils.UpdateBounds(PropertyItem.PartitionListPos, pfPos);
-                        PartitionsForm.Location = pfPos;
+                        ConfigManager.SetProperty(PropertyItem.MordhauPakPath, MordhauPakPath);
+                        ConfigManager.SaveConfig();
                     }
                 }
-            }).ConfigureAwait(false);
+                catch (Exception ex)
+                {
+                    HandleError(ex, "Failed to setup Mordhau Pak Path");
+                }
 
-            // Detect version changes and perform any modifications necessary to handle upgrades
-            await this.InvokeAsync(() =>
-            {
-                DetectVersionChange();
+                try
+                {
+                    OpenDialogs();
+                    this.StartPosition = FormStartPosition.Manual;
+                    Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos));
+                    Top = coords.Y;
+                    Left = coords.X; // If we have a proper saved pos, use it unaltered.  If not, we should adjust from screen center, which is what would be returned
+                    if (coords != ConfigManager.GetCoordsProperty(PropertyItem.MainWindowPos))
+                    {
+                        Top = coords.Y - Height;
+                        Left = coords.X - Width / 2;
+                        // If they weren't equal, it's at default pos, so the others should also be set to good default positions
+                        if (TrackSelectionForm != null)
+                        {
+                            // We should always CheckPosition, just in case something goes weird, so nothing every initializes out of bounds
+                            var tsPos = WindowPositionUtils.CheckPosition(new Point(Left + Width, Top));
+                            WindowPositionUtils.UpdateBounds(PropertyItem.TrackSelectionPos, tsPos);
+                            TrackSelectionForm.Location = tsPos;
+                        }
+                        if (PartitionsForm != null)
+                        {
+                            var pfPos = WindowPositionUtils.CheckPosition(new Point(Left - PartitionsForm.Width, Top));
+                            WindowPositionUtils.UpdateBounds(PropertyItem.PartitionListPos, pfPos);
+                            PartitionsForm.Location = pfPos;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    HandleError(ex, "Failed to open Dialogs...");
+                }
+                // Detect version changes and perform any modifications necessary to handle upgrades
+
+                try
+                {
+                    DetectVersionChange();
+                }
+                catch (Exception ex)
+                {
+                    HandleError(ex, "Failed to apply version changes");
+                }
             }).ConfigureAwait(false);
 
             // Check for LuteBot updates
@@ -153,8 +144,8 @@ ModListWidgetStayTime=5.0";
         {
             new VersionChange() { UpgradeVersionsBelow = "3.6.0", UpgradeAction = () =>
             {
-                Instrument.Prefabs[1].ForbidsChords = false;
-                Instrument.Write();
+                
+                Instrument.Write(true);
             } }
         };
 
@@ -473,12 +464,12 @@ ModListWidgetStayTime=5.0";
 
                 string lutemodPakTarget = Path.Combine(pakPath, lutemodPakName);
                 if (!File.Exists(lutemodPakTarget))
-                    File.Copy(Path.Combine(Application.StartupPath, "lib", "LuteMod", lutemodPakName), lutemodPakTarget);
+                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", lutemodPakName), lutemodPakTarget);
 
 
                 string loaderPakTarget = Path.Combine(pakPath, loaderPakName);
                 if (!File.Exists(loaderPakTarget))
-                    File.Copy(Path.Combine(Application.StartupPath, "lib", "LuteMod", loaderPakName), loaderPakTarget);
+                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", loaderPakName), loaderPakTarget);
             }
             catch (Exception e)
             {
@@ -599,7 +590,7 @@ ModListWidgetStayTime=5.0";
                 Directory.CreateDirectory(SaveManager.SaveFilePath); // Some people don't have one yet apparently
                                                                      // TODO: Testing on this.  Supposedly each user needs to generate their own empty PartitionIndex, but that may have just been some other bug that was fixed since?
                 if (!File.Exists(partitionIndexTarget))
-                    File.Copy(Path.Combine(Application.StartupPath, "lib", "LuteMod", partitionIndexName), partitionIndexTarget);
+                    File.Copy(Path.Combine(Application.StartupPath, "LuteMod", partitionIndexName), partitionIndexTarget);
             }
             catch (Exception e)
             {
@@ -786,13 +777,6 @@ ModListWidgetStayTime=5.0";
             }
         }
 
-        private void PlayerLoadCompleted(TrackSelectionManager trackSelectionManager, bool reorderTracks = false)
-        {
-            trackSelectionManager.LoadTracks(trackSelectionManager.Player.GetMidiChannels(), trackSelectionManager.Player.GetMidiTracks());
-
-            trackSelectionManager.LoadTrackManager(reorderTracks);
-        }
-
         private void LuteBotForm_Focus(object sender, EventArgs e)
         {
             if (TrackSelectionForm != null && !TrackSelectionForm.IsDisposed)
@@ -809,7 +793,7 @@ ModListWidgetStayTime=5.0";
 
         private void OpenDialogs()
         {
-            TrackSelectionForm = new TrackSelectionForm(this);
+            TrackSelectionForm = new TrackSelectionForm();
             TrackSelectionForm.StartPosition = FormStartPosition.Manual;
             TrackSelectionForm.Location = new Point(0, 0);
             if (ConfigManager.GetBooleanProperty(PropertyItem.TrackSelection))
@@ -831,7 +815,7 @@ ModListWidgetStayTime=5.0";
 
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (new SettingsForm(this)).ShowDialog(this);
+            (new SettingsForm()).ShowDialog(this);
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -852,32 +836,33 @@ ModListWidgetStayTime=5.0";
             base.OnClosing(e);
         }
 
-        public async Task HandleError(Exception ex, string message)
+        private void HandleError(Exception ex, string message)
+        {
+            splitContainer1.Panel2Collapsed = false;
+            richTextBox1.AppendText($"{Environment.NewLine} [{DateTime.Now.ToString("T")}] Error: " + message);
+            richTextBox1.AppendText($"{Environment.NewLine} {ex?.Message}");
+            richTextBox1.ScrollToCaret();
+        }
+
+        public async Task HandleErrorAsync(Exception ex, string message)
         {
             await this.InvokeAsync(() =>
             {
-                splitContainer1.Panel2Collapsed = false;
-                richTextBox1.AppendText($"{Environment.NewLine} [{DateTime.Now.ToString("T")}] Error: " + message);
-                richTextBox1.AppendText($"{Environment.NewLine} {ex?.Message}");
-                richTextBox1.ScrollToCaret();
+                HandleError(ex, message);
             }).ConfigureAwait(false);
         }
 
 
-        public async Task<TrackSelectionManager> LoadFile(string fileName, bool reorderTracks = false)
+        public async Task<TrackSelectionManager> LoadFile(string fileName, bool reorderTracks = false, bool autoEnableFlutes = false)
         {
-            var trackSelectionManager = new TrackSelectionManager();
-
             try
             {
-                await trackSelectionManager.Player.LoadFileAsync(fileName).ConfigureAwait(false);
-                trackSelectionManager.FileName = fileName;
-                PlayerLoadCompleted(trackSelectionManager, reorderTracks);
+                var trackSelectionManager = await new MidiPlayer().LoadFileAsync(fileName, reorderTracks, autoEnableFlutes).ConfigureAwait(false);
                 return trackSelectionManager;
             }
             catch (Exception ex)
             {
-                await HandleError(ex, "Failed to load file").ConfigureAwait(false);
+                await HandleErrorAsync(ex, "Failed to load file").ConfigureAwait(false);
             }
             return null;
         }
@@ -886,7 +871,7 @@ ModListWidgetStayTime=5.0";
         {
             if (TrackSelectionForm == null || TrackSelectionForm.IsDisposed)
             {
-                TrackSelectionForm = new TrackSelectionForm(this);
+                TrackSelectionForm = new TrackSelectionForm();
                 Point coords = WindowPositionUtils.CheckPosition(ConfigManager.GetCoordsProperty(PropertyItem.TrackSelectionPos));
                 TrackSelectionForm.Top = coords.Y;
                 TrackSelectionForm.Left = coords.X;
@@ -920,12 +905,6 @@ ModListWidgetStayTime=5.0";
             PartitionsForm.Show();
             PartitionsForm.BringToFront();
             PartitionsForm.Focus();
-        }
-
-        private void adjustLutemodPartitionsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var adjustForm = new PartitionAdjustmentForm();
-            adjustForm.Show();
         }
 
         private void installLuteModToolStripMenuItem_Click(object sender, EventArgs e)

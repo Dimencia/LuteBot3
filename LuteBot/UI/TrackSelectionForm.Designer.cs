@@ -54,8 +54,6 @@ namespace LuteBot.UI
             this.songLabel = new System.Windows.Forms.Label();
             this.panel1 = new LuteBot.UI.CustomBufferedPanel();
             this.OffsetPanel = new System.Windows.Forms.Panel();
-            this.invertToOtherInstrumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.invertToOtherInstrumentToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -67,18 +65,18 @@ namespace LuteBot.UI
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ChannelsListBox.CheckOnClick = true;
             this.ChannelsListBox.FormattingEnabled = true;
-            this.ChannelsListBox.Location = new System.Drawing.Point(16, 64);
-            this.ChannelsListBox.Margin = new System.Windows.Forms.Padding(4);
+            this.ChannelsListBox.Location = new System.Drawing.Point(16, 80);
+            this.ChannelsListBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.ChannelsListBox.Name = "ChannelsListBox";
-            this.ChannelsListBox.Size = new System.Drawing.Size(359, 191);
+            this.ChannelsListBox.Size = new System.Drawing.Size(359, 224);
             this.ChannelsListBox.TabIndex = 3;
             this.ChannelsListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ChannelListBox_ItemChecked);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(16, 36);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(16, 45);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(153, 20);
@@ -87,10 +85,10 @@ namespace LuteBot.UI
             // 
             // SongProfileSaveButton
             // 
-            this.SongProfileSaveButton.Location = new System.Drawing.Point(16, 296);
-            this.SongProfileSaveButton.Margin = new System.Windows.Forms.Padding(4);
+            this.SongProfileSaveButton.Location = new System.Drawing.Point(16, 370);
+            this.SongProfileSaveButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.SongProfileSaveButton.Name = "SongProfileSaveButton";
-            this.SongProfileSaveButton.Size = new System.Drawing.Size(214, 37);
+            this.SongProfileSaveButton.Size = new System.Drawing.Size(214, 46);
             this.SongProfileSaveButton.TabIndex = 10;
             this.SongProfileSaveButton.Text = "Save";
             this.SongProfileSaveButton.UseVisualStyleBackColor = true;
@@ -99,10 +97,10 @@ namespace LuteBot.UI
             // LoadProfileButton
             // 
             this.LoadProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.LoadProfileButton.Location = new System.Drawing.Point(523, 296);
-            this.LoadProfileButton.Margin = new System.Windows.Forms.Padding(4);
+            this.LoadProfileButton.Location = new System.Drawing.Point(523, 370);
+            this.LoadProfileButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.LoadProfileButton.Name = "LoadProfileButton";
-            this.LoadProfileButton.Size = new System.Drawing.Size(201, 37);
+            this.LoadProfileButton.Size = new System.Drawing.Size(201, 46);
             this.LoadProfileButton.TabIndex = 12;
             this.LoadProfileButton.Text = "Reload";
             this.LoadProfileButton.UseVisualStyleBackColor = true;
@@ -112,8 +110,8 @@ namespace LuteBot.UI
             // 
             this.TrackListLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.TrackListLabel.AutoSize = true;
-            this.TrackListLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TrackListLabel.Location = new System.Drawing.Point(598, 36);
+            this.TrackListLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.TrackListLabel.Location = new System.Drawing.Point(598, 45);
             this.TrackListLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.TrackListLabel.Name = "TrackListLabel";
             this.TrackListLabel.Size = new System.Drawing.Size(111, 20);
@@ -126,20 +124,20 @@ namespace LuteBot.UI
             this.TrackListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.TrackListBox.CheckOnClick = true;
             this.TrackListBox.FormattingEnabled = true;
-            this.TrackListBox.Location = new System.Drawing.Point(383, 64);
-            this.TrackListBox.Margin = new System.Windows.Forms.Padding(4);
+            this.TrackListBox.Location = new System.Drawing.Point(383, 80);
+            this.TrackListBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.TrackListBox.Name = "TrackListBox";
-            this.TrackListBox.Size = new System.Drawing.Size(341, 191);
+            this.TrackListBox.Size = new System.Drawing.Size(341, 224);
             this.TrackListBox.TabIndex = 13;
             this.TrackListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.TrackListBox_ItemCheck);
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(579, 779);
-            this.button1.Margin = new System.Windows.Forms.Padding(4);
+            this.button1.Location = new System.Drawing.Point(579, 974);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(145, 28);
+            this.button1.Size = new System.Drawing.Size(145, 35);
             this.button1.TabIndex = 19;
             this.button1.Text = "Reset Alignment";
             this.button1.UseVisualStyleBackColor = true;
@@ -148,10 +146,10 @@ namespace LuteBot.UI
             // button2
             // 
             this.button2.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.button2.Location = new System.Drawing.Point(263, 296);
-            this.button2.Margin = new System.Windows.Forms.Padding(4);
+            this.button2.Location = new System.Drawing.Point(263, 370);
+            this.button2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(220, 37);
+            this.button2.Size = new System.Drawing.Size(220, 46);
             this.button2.TabIndex = 22;
             this.button2.Text = "Save Midi As...";
             this.button2.UseVisualStyleBackColor = true;
@@ -167,9 +165,10 @@ namespace LuteBot.UI
             this.instrumentsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.instrumentsBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.instrumentsBox.FormattingEnabled = true;
-            this.instrumentsBox.Location = new System.Drawing.Point(490, 265);
+            this.instrumentsBox.Location = new System.Drawing.Point(490, 331);
+            this.instrumentsBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.instrumentsBox.Name = "instrumentsBox";
-            this.instrumentsBox.Size = new System.Drawing.Size(230, 24);
+            this.instrumentsBox.Size = new System.Drawing.Size(230, 28);
             this.instrumentsBox.TabIndex = 23;
             this.instrumentsBox.SelectedIndexChanged += new System.EventHandler(this.instrumentsBox_SelectedIndexChanged);
             // 
@@ -177,9 +176,9 @@ namespace LuteBot.UI
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(404, 270);
+            this.label3.Location = new System.Drawing.Point(404, 338);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(67, 16);
+            this.label3.Size = new System.Drawing.Size(79, 20);
             this.label3.TabIndex = 24;
             this.label3.Text = "Instrument";
             // 
@@ -189,10 +188,9 @@ namespace LuteBot.UI
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.selectAllToolStripMenuItem,
             this.selectNoneToolStripMenuItem,
-            this.selectInverseToolStripMenuItem,
-            this.invertToOtherInstrumentToolStripMenuItem1});
+            this.selectInverseToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(249, 128);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(169, 76);
             // 
             // selectAllToolStripMenuItem
             // 
@@ -221,39 +219,38 @@ namespace LuteBot.UI
             this.contextMenuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
             this.toolStripMenuItem2,
-            this.toolStripMenuItem3,
-            this.invertToOtherInstrumentToolStripMenuItem});
+            this.toolStripMenuItem3});
             this.contextMenuStrip2.Name = "contextMenuStrip1";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(251, 100);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(211, 104);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(250, 24);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(210, 24);
             this.toolStripMenuItem1.Text = "Select All";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(250, 24);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(210, 24);
             this.toolStripMenuItem2.Text = "Select None";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.selectNoneToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(250, 24);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(210, 24);
             this.toolStripMenuItem3.Text = "Select Inverse";
             this.toolStripMenuItem3.Click += new System.EventHandler(this.selectInverseToolStripMenuItem_Click);
             // 
             // songLabel
             // 
             this.songLabel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.songLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.songLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.songLabel.Location = new System.Drawing.Point(0, 0);
             this.songLabel.Name = "songLabel";
-            this.songLabel.Size = new System.Drawing.Size(737, 29);
+            this.songLabel.Size = new System.Drawing.Size(737, 36);
             this.songLabel.TabIndex = 25;
             this.songLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -265,40 +262,26 @@ namespace LuteBot.UI
             this.panel1.AutoScroll = true;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.OffsetPanel);
-            this.panel1.Location = new System.Drawing.Point(16, 341);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4);
+            this.panel1.Location = new System.Drawing.Point(16, 426);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(708, 426);
+            this.panel1.Size = new System.Drawing.Size(708, 532);
             this.panel1.TabIndex = 18;
             // 
             // OffsetPanel
             // 
             this.OffsetPanel.AutoScroll = true;
             this.OffsetPanel.Location = new System.Drawing.Point(0, 0);
-            this.OffsetPanel.Margin = new System.Windows.Forms.Padding(4);
+            this.OffsetPanel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.OffsetPanel.Name = "OffsetPanel";
-            this.OffsetPanel.Size = new System.Drawing.Size(684, 382);
+            this.OffsetPanel.Size = new System.Drawing.Size(684, 478);
             this.OffsetPanel.TabIndex = 16;
-            // 
-            // invertToOtherInstrumentToolStripMenuItem
-            // 
-            this.invertToOtherInstrumentToolStripMenuItem.Name = "invertToOtherInstrumentToolStripMenuItem";
-            this.invertToOtherInstrumentToolStripMenuItem.Size = new System.Drawing.Size(250, 24);
-            this.invertToOtherInstrumentToolStripMenuItem.Text = "Invert To Other Instrument";
-            this.invertToOtherInstrumentToolStripMenuItem.Click += new System.EventHandler(this.invertToOtherInstrumentToolStripMenuItem_Click);
-            // 
-            // invertToOtherInstrumentToolStripMenuItem1
-            // 
-            this.invertToOtherInstrumentToolStripMenuItem1.Name = "invertToOtherInstrumentToolStripMenuItem1";
-            this.invertToOtherInstrumentToolStripMenuItem1.Size = new System.Drawing.Size(248, 24);
-            this.invertToOtherInstrumentToolStripMenuItem1.Text = "Invert to Other Instrument";
-            this.invertToOtherInstrumentToolStripMenuItem1.Click += new System.EventHandler(this.invertToOtherInstrumentToolStripMenuItem_Click);
             // 
             // TrackSelectionForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(737, 817);
+            this.ClientSize = new System.Drawing.Size(737, 1021);
             this.Controls.Add(this.songLabel);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.instrumentsBox);
@@ -312,7 +295,7 @@ namespace LuteBot.UI
             this.Controls.Add(this.label1);
             this.Controls.Add(this.ChannelsListBox);
             this.DoubleBuffered = true;
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "TrackSelectionForm";
             this.Text = "Track Filtering";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TrackSelectionForm_Closing);
@@ -347,7 +330,5 @@ namespace LuteBot.UI
         private ToolStripMenuItem toolStripMenuItem2;
         private ToolStripMenuItem toolStripMenuItem3;
         private Label songLabel;
-        private ToolStripMenuItem invertToOtherInstrumentToolStripMenuItem;
-        private ToolStripMenuItem invertToOtherInstrumentToolStripMenuItem1;
     }
 }

@@ -12,10 +12,10 @@ namespace LuteBot.TrackSelection
     [DataContract]
     public class TrackSelectionData
     {
-        private List<MidiChannelItem> midiChannels;
+        private List<OldMidiChannelItem> midiChannels;
         private List<TrackItem> midiTracks;
         [DataMember]
-        public List<MidiChannelItem> MidiChannels { get => midiChannels; set => midiChannels = value; }
+        public List<OldMidiChannelItem> MidiChannels { get => midiChannels; set => midiChannels = value; }
         [DataMember]
         public List<TrackItem> MidiTracks { get => midiTracks; set => midiTracks = value; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
@@ -28,14 +28,15 @@ namespace LuteBot.TrackSelection
         [DataMember]
         public int InstrumentID { get; set; } // Added to make our save files not a dictionary
 
-        public TrackSelectionData()
+        public TrackSelectionData() { }
+        public TrackSelectionData(int instrumentId)
         {
-
+            InstrumentID = instrumentId;
         }
 
         public TrackSelectionData(TrackSelectionData oldData, int instrumentId)
         {
-            MidiChannels = oldData.MidiChannels.ConvertAll(channel => new MidiChannelItem(channel));
+            MidiChannels = oldData.MidiChannels.ConvertAll(channel => new OldMidiChannelItem(channel));
             MidiTracks = oldData.MidiTracks.ConvertAll(track => new TrackItem(track));
             if (oldData.MidiChannelOffsets != null)
             {
@@ -126,6 +127,7 @@ namespace LuteBot.TrackSelection
         public SimpleTrackSelectionData() { }
 
         // InstrumentID must be passed on instantiation; this is usually gotten as the key from the dictionary these are usually stored in
+        /*
         public SimpleTrackSelectionData(TrackSelectionData newData, int instrumentId, TrackSelectionData originalData)
         {
             // We hopefully handled this before we got here, but just in case
@@ -171,6 +173,7 @@ namespace LuteBot.TrackSelection
             NumChords = newData.NumChords;
             InstrumentID = instrumentId;
         }
+        */
 
         // This is for backwards compatibility, converting full data into fully populated Simple ones
         public SimpleTrackSelectionData(TrackSelectionData newData, int instrumentId)

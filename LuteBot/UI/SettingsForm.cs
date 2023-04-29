@@ -1,6 +1,5 @@
 ﻿using LuteBot.Config;
 using LuteBot.Core.Midi;
-using LuteBot.IO.KB;
 using LuteBot.UI.Utils;
 using Sanford.Multimedia.Midi;
 using System;
@@ -21,12 +20,10 @@ namespace LuteBot
     public partial class SettingsForm : Form
     {
         private static string GUILD_URL = "https://discord.gg/4xnJVuz";
-        private LuteBotForm mainForm;
 
-        public SettingsForm(LuteBotForm mainForm)
+        public SettingsForm()
         {
             InitializeComponent();
-            this.mainForm = mainForm;
             SetVersion();
             InitSettings();
         }
@@ -61,7 +58,7 @@ namespace LuteBot
         {
             Instrument.Read();
             instrumentsBox.DisplayMember = "Name";
-            foreach (Instrument i in Instrument.Prefabs)
+            foreach (Instrument i in Instrument.Prefabs.Values)
                 instrumentsBox.Items.Add(i);
             instrumentsBox.SelectedIndex = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
         }
@@ -108,31 +105,8 @@ namespace LuteBot
             ConfigManager.SetProperty(PropertyItem.NoteCooldown, NoteCooldownNumeric.Value.ToString());
         }
 
-        private async void InstrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void InstrumentsBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // If it's already the instrument we have as our property
-            // Then don't re-set the values
-            int currentInstrument = ConfigManager.GetIntegerProperty(PropertyItem.Instrument);
-            if (currentInstrument != instrumentsBox.SelectedIndex)
-            {
-                ConfigManager.SetProperty(PropertyItem.Instrument, instrumentsBox.SelectedIndex.ToString());
-                Instrument target = (Instrument)instrumentsBox.SelectedItem;
-
-                LowestNoteNumeric.Value = target.LowestSentNote;
-                ConfigManager.SetProperty(PropertyItem.LowestNoteId, target.LowestSentNote.ToString());
-
-                NoteCountNumeric.Value = target.NoteCount;
-                ConfigManager.SetProperty(PropertyItem.AvaliableNoteCount, target.NoteCount.ToString());
-
-                NoteCooldownNumeric.Value = target.NoteCooldown;
-                ConfigManager.SetProperty(PropertyItem.NoteCooldown, target.NoteCooldown.ToString());
-
-                ConfigManager.SetProperty(PropertyItem.LowestPlayedNote, target.LowestPlayedNote.ToString());
-
-                ConfigManager.SetProperty(PropertyItem.ForbidsChords, target.ForbidsChords.ToString());
-
-                await mainForm.TrackSelectionForm.InstrumentChanged(currentInstrument).ConfigureAwait(false);
-            }
         }
 
         private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
