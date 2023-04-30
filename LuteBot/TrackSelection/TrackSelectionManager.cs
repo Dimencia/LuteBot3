@@ -142,6 +142,7 @@ namespace LuteBot.TrackSelection
                     else
                         MidiTracks[kvp.Key] = MidiTracks[kvp.Key].WithOldSettings(kvp.Value);
                 }
+
                 SetFlutePredictions();
                 ApplyAutomaticFixes(reorderTracks, autoEnableFlutes);
             }
@@ -157,27 +158,25 @@ namespace LuteBot.TrackSelection
         {
             int rank = 0;
             var activeChannels = GetActiveChannels();
+            var activeTracks = GetActiveTracks();
             // This is a bit wasteful, but it helps ensure data isn't skewed by empty stuff
             // And hopefully at least channels or tracks, one or the other, will have at least one good instrument for each
-            bool useChannels = activeChannels.Max(c => c.FluteRating) > GetActiveTracks().Max(c => c.FluteRating) && activeChannels.Any(c => c.FluteRating < 0.50f) && activeChannels.Any(c => c.FluteRating >= 0.50f);
-            foreach (var channel in GetTracksAndChannels().OrderByDescending(c => c.FluteRating))
+            bool useChannels = activeTracks.Length < 2 || (activeChannels.Max(c => c.FluteRating) > activeTracks.Max(c => c.FluteRating) && activeChannels.Any(c => c.FluteRating < 0.50f) && activeChannels.Any(c => c.FluteRating >= 0.50f));
+            foreach (var channel in activeChannels.Concat(activeTracks).OrderByDescending(c => c.FluteRating))
             {
                 // First, make sure we have a setting for each instrument... though I think we already do...?
-                ChannelSettings defaultSettings = null;
-                if (channel.Settings.ContainsKey(0))
-                    defaultSettings = channel.Settings[0];
 
                 foreach (var instrument in Instrument.Prefabs)
                 {
                     var instrumentId = instrument.Key;
                     if (!channel.Settings.ContainsKey(instrumentId))
-                        channel.Settings[instrumentId] = defaultSettings == null ? new ChannelSettings() { InstrumentId = instrumentId } : new ChannelSettings { Active = defaultSettings.Active, InstrumentId = instrumentId, Offset = defaultSettings.Offset, Rank = defaultSettings.Rank };
+                        channel.Settings[instrumentId] = new ChannelSettings() { InstrumentId = instrumentId };
                     if (reorderTracks || channel.Settings[instrumentId].Rank == null)
                         channel.Settings[instrumentId].Rank = rank; // TODO: Will this interfere with other existing ranks?
 
                     if (autoEnable)
                     {
-                        if (useChannels != channel.IsTrack)
+                        if ((useChannels && channel.IsTrack) || (!useChannels && !channel.IsTrack))
                         {
                             channel.Settings[instrumentId].Active = true;
                         }
