@@ -169,7 +169,7 @@ namespace LuteBot.Config
 
         public static string GetVersion()
         {
-            return "3.6.3";
+            return "3.6.4";
         }
     }
 }

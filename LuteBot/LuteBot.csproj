@@ -70,7 +70,7 @@
     <None Update="LuteMod\AutoLoaderWindowsClient.pak">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="LuteMod\FLuteMod_2.63.pak">
+    <None Update="LuteMod\FLuteMod_2.64.pak">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="LuteMod\PartitionIndex[0].sav">

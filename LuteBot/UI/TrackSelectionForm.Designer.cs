@@ -61,6 +61,7 @@ namespace LuteBot.UI
             // 
             // ChannelsListBox
             // 
+            this.ChannelsListBox.AllowDrop = true;
             this.ChannelsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ChannelsListBox.CheckOnClick = true;
@@ -221,26 +222,26 @@ namespace LuteBot.UI
             this.toolStripMenuItem2,
             this.toolStripMenuItem3});
             this.contextMenuStrip2.Name = "contextMenuStrip1";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(211, 104);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(169, 76);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(210, 24);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(168, 24);
             this.toolStripMenuItem1.Text = "Select All";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(210, 24);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(168, 24);
             this.toolStripMenuItem2.Text = "Select None";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.selectNoneToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(210, 24);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(168, 24);
             this.toolStripMenuItem3.Text = "Select Inverse";
             this.toolStripMenuItem3.Click += new System.EventHandler(this.selectInverseToolStripMenuItem_Click);
             // 

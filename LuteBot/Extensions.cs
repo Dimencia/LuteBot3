@@ -69,6 +69,13 @@ namespace LuteBot
 
         public static int numParamsPerChannel = 9;
 
+        public static IEnumerable<MidiNote> GetActiveNotes(this MidiChannelItem source, TrackSelectionManager tsm)
+        {
+            return source.TickNotes.SelectMany(tn => tn.Value.Where(n => tsm.MidiChannels.ContainsKey(n.channel)
+                && tsm.MidiChannels[n.channel].Settings.Any(s => s.Value.Active)
+                && tsm.MidiTracks.ContainsKey(n.track) && tsm.MidiTracks[n.track].Settings.Any(s => s.Value.Active)));
+        }
+
         public static float[][] GetRecurrentInput(this MidiChannelItem channel, int noteParams, float maxTickNumber)
         {
             // Got one.  Next, build the neural inputs our way - it accepts a float[][], where each float[] is a note, and each second param is one of the params of it

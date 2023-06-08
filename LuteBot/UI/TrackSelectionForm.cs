@@ -38,22 +38,6 @@ namespace LuteBot.UI
             TrackListBox.Location = new Point(panel1.Location.X + panel1.Width / 2 + 4, TrackListBox.Location.Y);
         }
 
-        private void _mordhauOut_notePlayed(object sender, int channel)
-        {
-            // Mark the channel to flash and redraw the graphic (twice)
-            if (channelColors.ContainsKey(channel)) // If they have not entered advanced mode on this midi at any point, there will not be a color
-            { // And in that case there's no reason to do anything
-                var original = channelColors[channel];
-                channelColors[channel] = Color.FromArgb(Math.Min(original.R * 2, 255), Math.Min(original.G * 2, 255), Math.Min(original.B * 2, 255));
-                System.Threading.Timer t;
-                t = new System.Threading.Timer(T_Tick, channel, ConfigManager.GetIntegerProperty(PropertyItem.NoteCooldown), System.Threading.Timeout.Infinite);
-                BeginInvoke((MethodInvoker)delegate
-                {
-                    OffsetPanel.Refresh();
-                });
-            }
-        }
-
         private void T_Tick(object state)
         {
             int channel = (int)state;
@@ -117,6 +101,9 @@ namespace LuteBot.UI
                 TrackListBox.MouseDown += listBox_MouseDown;
                 TrackListBox.DragOver += listBox_DragOver;
                 TrackListBox.DragDrop += listBox_DragDrop;
+                ChannelsListBox.MouseDown += listBox_MouseDown;
+                ChannelsListBox.DragOver += listBox_DragOver;
+                ChannelsListBox.DragDrop += listBox_DragDrop;
 
                 var scrollHandler = new ScrollEventHandler((o, ev) =>
                 {
@@ -293,7 +280,6 @@ namespace LuteBot.UI
                 {
                     var channel = trackSelectionManager.MidiChannels[dragTarget.Id];
 
-
                     int oldOffset = channel.Settings[instrumentId].Offset;
 
                     if (ModifierKeys == Keys.Shift)
@@ -301,8 +287,8 @@ namespace LuteBot.UI
                         var globalOffset = startOffset + (int)Math.Round((double)(Math.Abs(dragStart.Y - e.Location.Y) * multiplier / pianoRowHeight) / 12) * 12;
                         if (globalOffset != oldOffset)
                         {
-                            foreach (var c in trackSelectionManager.GetTracksAndChannels())
-                                c.Settings[instrumentId].Offset += (globalOffset - startGlobalOffset);
+                            foreach (var c in trackSelectionManager.GetValidChannels())
+                                c.Settings[instrumentId].Offset += (globalOffset - oldOffset);
                             int oldHighest = maxNote;
                             ReloadNotes(true);
                             if (maxNote == oldHighest)
@@ -709,13 +695,13 @@ namespace LuteBot.UI
 
             // Fill in a greenish rectangle where the instrument goes
 
-            int noteCount = ConfigManager.GetIntegerProperty(PropertyItem.AvaliableNoteCount); //-1 because if noteCount is 60 and start is 0, the high note is 59
-            int highest = ConfigManager.GetIntegerProperty(PropertyItem.LowestNoteId) + ConfigManager.GetIntegerProperty(PropertyItem.LowestPlayedNote) + noteCount - 1;
+            int noteCount = Instrument.Prefabs[instrumentId].NoteCount;
+            int highest = Instrument.Prefabs[instrumentId].LowestSentNote + Instrument.Prefabs[instrumentId].LowestPlayedNote + noteCount;
 
             // Convert that highest note to a y using the same logic as everything else...
             //int translatedHighest = minNote + highest - numNotesBelow;
             int translatedi = highest - minNote + numNotesBelow;
-            int instrumentY = maxHeight - pianoRowHeight * (translatedi + 1) - panel1.VerticalScroll.Value;
+            int instrumentY = maxHeight - pianoRowHeight * (translatedi) - panel1.VerticalScroll.Value;
             int instrumentHeight = noteCount * pianoRowHeight;
             g.FillRectangle(instrumentPianoBrush, pianoX, instrumentY, pianoWidth, instrumentHeight);
 
@@ -1227,7 +1213,7 @@ namespace LuteBot.UI
                 TrackListBox.Items.Clear();
                 ChannelsListBox.Items.Clear();
 
-                foreach (MidiChannelItem channel in tsm.MidiChannels.Values.OrderByDescending(c => c.Settings[instrumentId].Rank))
+                foreach (MidiChannelItem channel in tsm.MidiChannels.Values.OrderBy(c => c.Settings[instrumentId].Rank))
                 {
                     ChannelsListBox.Items.Add(channel, channel.Settings[instrumentId].Active);
                 }
@@ -1486,21 +1472,31 @@ namespace LuteBot.UI
             Point point = list.PointToClient(new Point(e.X, e.Y));
             int index = list.IndexFromPoint(point);
             if (index < 0) index = list.Items.Count - 1;
-            object data = e.Data.GetData(typeof(MidiChannelItem));
-            list.Items.Remove(data);
-            list.Items.Insert(index, data);
-            list.SetItemChecked(index, prevChecked);
-            UpdateRanks();
+            MidiChannelItem data = e.Data.GetData(typeof(MidiChannelItem)) as MidiChannelItem;
+            if (data != null)
+            {
+                list.Items.Remove(data);
+                list.Items.Insert(index, data);
+                list.SetItemChecked(index, prevChecked);
+                UpdateRanks(data.IsTrack);
+            }
         }
 
-        private void UpdateRanks()
+        private void UpdateRanks(bool forTracks)
         {
             var channels = TrackListBox.Items;
+            if (!forTracks)
+                channels = ChannelsListBox.Items;
             for (int i = 0; i < channels.Count; i++)
             {
                 var track = (MidiChannelItem)channels[i];
-                var targetTrack = trackSelectionManager.MidiTracks[track.Id];
-                targetTrack.Settings[instrumentId].Rank = i + 1;
+                MidiChannelItem targetTrack = null;
+                if (forTracks && trackSelectionManager.MidiTracks.ContainsKey(track.Id))
+                    targetTrack = trackSelectionManager.MidiTracks[track.Id];
+                else if (!forTracks && trackSelectionManager.MidiChannels.ContainsKey(track.Id))
+                    targetTrack = trackSelectionManager.MidiChannels[track.Id];
+                if (targetTrack != null && targetTrack.Settings.ContainsKey(instrumentId))
+                    targetTrack.Settings[instrumentId].Rank = i + 1;
             }
         }
 

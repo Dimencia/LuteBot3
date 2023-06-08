@@ -1,5 +1,37 @@
 Version 3.6.4
 
+- You should probably re-save your midis again, with Reorder.  Use Clear Offsets if you have lots of old midis that are pitched too high or too low
+
+- Rewrote pretty much everything with modern .Net 7 and thread safety; should fix many crashes, improve speed and rendering, and lets me use nice new features
 - Fixed crash when re-opening the Guild Library
-- Hopefully fixed lockups by making the entire app threadsafe
+- Hopefully fixed lockups by making the entire app async
+	- So even while it's loading midis, you can select and view them, or drag more in, it's much harder to break
+- Fixed issue where auto-ordering, auto-selection, and sometimes lute settings as a whole were failing to save with the partition
 - Multi-threaded loading and saving partitions
+- Fixed some LuteBot transposition issues (it should no longer transpose at all, LuteMod does that)
+- Fixed some LuteMod transposition issues
+- Fixed/re-added making all LuteMod midis start at the first played note, with no empty space in front
+- Ordering can now be done on Channels
+- Flute auto-selection can now occur on Channels or Tracks, depending on which has the best percentages and most options
+- Added new setting on Instruments (you need to set it in `%appdata%/LuteBot/Config/Instruments.json` manually for now) to determine what percentages from the AI they should enable (when importing songs without settings, or forcing it to discard settings)
+	- Default: Lute 0% to 60%, Flute 50% to 100%
+- Added option to ignore old offsets when resaving
+- Removed Rust instruments
+- Normalized Flute Percentage results displays
+- Added right click menu to move the selected Partition(s) to the top of the list
+- When saving for LuteMod, chooses either channels or tracks for ordering, depending on which one has the most valid channels/tracks unchecked
+	So if you're checking and unchecking things in Tracks, the order of Tracks is what matters, and vice versa
+		
+
+LuteMod 2.6.4
+	- Fixed issue with transposing low and high notes
+	- Fixed issue with note duplication being probably completely broken before
+		Duplicated notes are added before removal of old notes and at very low priority, so they should only play if nothing else is playing
+	- Fixed issue with note copying not respecting track order and prioritizing backwards, and deleting duplicate notes
+	- Fixed issue with not properly detecting the owner of a chat message
+	- Turned on Duplication by default, it normalizes volume a bit and otherwise doesn't interfere
+	- Startup message now instructs you to start a local match to configure LuteMod (or to enter ~Help if already in a local match)
+	
+			
+Note: If something is wrong with the LuteBot changes, you can copy LuteMod 2.64 into your CustomPaks folder to keep its updates
+If you don't like the neural network, you can always replace the `channelNeural` file near your LuteBot.exe to an older version, or train your own

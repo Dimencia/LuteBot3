@@ -94,7 +94,7 @@ namespace LuteBot.TrackSelection
             await SaveManager.SaveTrackSelectionData(simpleDataDictionary, Player.FileName, filename).ConfigureAwait(false);
         }
 
-        public void LoadTrackManager(bool reorderTracks = false, bool autoEnableFlutes = false)
+        public void LoadTrackManager(bool reorderTracks = false, bool autoEnableFlutes = false, bool clearOffsets = false)
         {
             // Meant to be called after the file has been loaded, to load settings from the file
             var simpleDataDict = SaveManager.LoadTrackSelectionData(Player.FileName);
@@ -144,7 +144,7 @@ namespace LuteBot.TrackSelection
                 }
 
                 SetFlutePredictions();
-                ApplyAutomaticFixes(reorderTracks, autoEnableFlutes);
+                ApplyAutomaticFixes(reorderTracks, autoEnableFlutes, clearOffsets);
             }
             else
             {
@@ -154,15 +154,20 @@ namespace LuteBot.TrackSelection
 
         }
 
-        public void ApplyAutomaticFixes(bool reorderTracks = false, bool autoEnable = false)
+        public static bool ShouldUseChannels(MidiChannelItem[] activeChannels, MidiChannelItem[] activeTracks)
+        {
+            return activeTracks.Length < 2 || (activeChannels.Max(c => c.FluteRating) > activeTracks.Max(c => c.FluteRating) && activeChannels.Any(c => c.FluteRating < 0.50f) && activeChannels.Any(c => c.FluteRating >= 0.50f));
+        }
+
+        public void ApplyAutomaticFixes(bool reorderTracks = false, bool autoEnable = false, bool clearOffsets = false)
         {
             int rank = 0;
-            var activeChannels = GetActiveChannels();
-            var activeTracks = GetActiveTracks();
+            var activeChannels = GetValidChannels();
+            var activeTracks = GetValidTracks();
             // This is a bit wasteful, but it helps ensure data isn't skewed by empty stuff
             // And hopefully at least channels or tracks, one or the other, will have at least one good instrument for each
-            bool useChannels = activeTracks.Length < 2 || (activeChannels.Max(c => c.FluteRating) > activeTracks.Max(c => c.FluteRating) && activeChannels.Any(c => c.FluteRating < 0.50f) && activeChannels.Any(c => c.FluteRating >= 0.50f));
-            foreach (var channel in activeChannels.Concat(activeTracks).OrderByDescending(c => c.FluteRating))
+            bool useChannels = ShouldUseChannels(activeChannels, activeTracks);
+            foreach (var channel in MidiChannels.Values.Concat(MidiTracks.Values).OrderByDescending(c => c.FluteRating))
             {
                 // First, make sure we have a setting for each instrument... though I think we already do...?
 
@@ -171,21 +176,32 @@ namespace LuteBot.TrackSelection
                     var instrumentId = instrument.Key;
                     if (!channel.Settings.ContainsKey(instrumentId))
                         channel.Settings[instrumentId] = new ChannelSettings() { InstrumentId = instrumentId };
-                    if (reorderTracks || channel.Settings[instrumentId].Rank == null)
-                        channel.Settings[instrumentId].Rank = rank; // TODO: Will this interfere with other existing ranks?
 
-                    if (autoEnable)
+                    if (clearOffsets)
+                        channel.Settings[instrumentId].Offset = 0;
+
+                    if (channel.IsTrack && !activeTracks.Any(t => t.Id == channel.Id))
+                        channel.Settings[instrument.Value.Id].Active = false;
+                    else if (!channel.IsTrack && !activeChannels.Any(t => t.Id == channel.Id))
+                        channel.Settings[instrument.Value.Id].Active = false;
+                    else
                     {
-                        if ((useChannels && channel.IsTrack) || (!useChannels && !channel.IsTrack))
+                        if (reorderTracks || channel.Settings[instrumentId].Rank == null)
+                            channel.Settings[instrumentId].Rank = rank; // TODO: Will this interfere with other existing ranks?
+
+                        if (autoEnable)
                         {
-                            channel.Settings[instrumentId].Active = true;
-                        }
-                        else
-                        {
-                            if (channel.FluteRating >= instrument.Value.AIMinimum && channel.FluteRating <= instrument.Value.AIMaximum)
+                            if ((useChannels && channel.IsTrack) || (!useChannels && !channel.IsTrack))
+                            {
                                 channel.Settings[instrumentId].Active = true;
+                            }
                             else
-                                channel.Settings[instrumentId].Active = false;
+                            {
+                                if (channel.FluteRating >= instrument.Value.AIMinimum && channel.FluteRating <= instrument.Value.AIMaximum)
+                                    channel.Settings[instrumentId].Active = true;
+                                else
+                                    channel.Settings[instrumentId].Active = false;
+                            }
                         }
                     }
                 }
@@ -200,11 +216,11 @@ namespace LuteBot.TrackSelection
             MidiTracks = midiTracks ?? new Dictionary<int, MidiChannelItem>();
         }
 
-        private MidiChannelItem[] GetActiveChannels()
+        public MidiChannelItem[] GetValidChannels()
         {
             return MidiChannels.Values.Where(c => c.Id != 9 && c.MidiInstrument != 9 && c.TickNotes.Any(tn => tn.Value.Any())).OrderBy(c => c.Id).ToArray();
         }
-        private MidiChannelItem[] GetActiveTracks()
+        public MidiChannelItem[] GetValidTracks()
         {
             return MidiTracks.Values.Where(c => c.TickNotes.Any(tn => tn.Value.Any(n => n.channel != 9 && !MidiChannels.Values.Any(mc => mc.Id == n.channel && mc.MidiInstrument == 9)))).OrderBy(c => c.Id).ToArray();
         }
@@ -215,8 +231,8 @@ namespace LuteBot.TrackSelection
             // TODO: Load the neural settings only once from file, but still make one network per prediction for threadsafety
             var neural = SetupNeuralNetwork();
 
-            var activeChannels = GetActiveChannels();
-            var activeTracks = GetActiveTracks();
+            var activeChannels = GetValidChannels();
+            var activeTracks = GetValidTracks();
 
             Dictionary<MidiChannelItem, float> channelResults = new Dictionary<MidiChannelItem, float>();
 

@@ -28,7 +28,7 @@ namespace LuteBot
         public string currentTrackName { get; set; } = "";
 
         private const string musicNameLabelHeader = "Loaded: ";
-        private static string lutemodPakName = "FLuteMod_2.63.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string lutemodPakName = "FLuteMod_2.64.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
 
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
@@ -853,11 +853,11 @@ ModListWidgetStayTime=5.0";
         }
 
 
-        public async Task<TrackSelectionManager> LoadFile(string fileName, bool reorderTracks = false, bool autoEnableFlutes = false)
+        public async Task<TrackSelectionManager> LoadFile(string fileName, bool reorderTracks = false, bool autoEnableFlutes = false, bool clearOffsets = false)
         {
             try
             {
-                var trackSelectionManager = await new MidiPlayer().LoadFileAsync(fileName, reorderTracks, autoEnableFlutes).ConfigureAwait(false);
+                var trackSelectionManager = await new MidiPlayer().LoadFileAsync(fileName, reorderTracks, autoEnableFlutes, clearOffsets).ConfigureAwait(false);
                 return trackSelectionManager;
             }
             catch (Exception ex)
@@ -999,6 +999,11 @@ ModListWidgetStayTime=5.0";
         private async void autoEnableFlutesAbove50ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             await PartitionsForm.reloadAll(true, true).ConfigureAwait(false);
+        }
+
+        private async void clearSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await PartitionsForm.reloadAll(true, false, true).ConfigureAwait(false);
         }
     }
 }

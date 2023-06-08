@@ -50,6 +50,7 @@ namespace LuteBot
             this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reSaveAllPartitionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.forceAIReorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoEnableFlutesAbove50ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.withoutReorderingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,7 +66,7 @@ namespace LuteBot
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.partitionPanel = new System.Windows.Forms.Panel();
-            this.autoEnableFlutesAbove50ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.consoleDisplayPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -205,11 +206,19 @@ namespace LuteBot
             // forceAIReorderToolStripMenuItem
             // 
             this.forceAIReorderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.autoEnableFlutesAbove50ToolStripMenuItem});
+            this.autoEnableFlutesAbove50ToolStripMenuItem,
+            this.clearSettingsToolStripMenuItem});
             this.forceAIReorderToolStripMenuItem.Name = "forceAIReorderToolStripMenuItem";
             this.forceAIReorderToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.forceAIReorderToolStripMenuItem.Text = "Force AI Reorder";
             this.forceAIReorderToolStripMenuItem.Click += new System.EventHandler(this.forceAIReorderToolStripMenuItem_Click);
+            // 
+            // autoEnableFlutesAbove50ToolStripMenuItem
+            // 
+            this.autoEnableFlutesAbove50ToolStripMenuItem.Name = "autoEnableFlutesAbove50ToolStripMenuItem";
+            this.autoEnableFlutesAbove50ToolStripMenuItem.Size = new System.Drawing.Size(306, 26);
+            this.autoEnableFlutesAbove50ToolStripMenuItem.Text = "Clear Offsets, Auto Enable Flutes";
+            this.autoEnableFlutesAbove50ToolStripMenuItem.Click += new System.EventHandler(this.autoEnableFlutesAbove50ToolStripMenuItem_Click);
             // 
             // withoutReorderingToolStripMenuItem
             // 
@@ -282,9 +291,10 @@ namespace LuteBot
             this.buttonConsoleToggle.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Gray;
             this.buttonConsoleToggle.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.buttonConsoleToggle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonConsoleToggle.Location = new System.Drawing.Point(0, 582);
+            this.buttonConsoleToggle.Location = new System.Drawing.Point(0, 734);
+            this.buttonConsoleToggle.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.buttonConsoleToggle.Name = "buttonConsoleToggle";
-            this.buttonConsoleToggle.Size = new System.Drawing.Size(626, 23);
+            this.buttonConsoleToggle.Size = new System.Drawing.Size(626, 29);
             this.buttonConsoleToggle.TabIndex = 14;
             this.buttonConsoleToggle.Text = "Console";
             this.buttonConsoleToggle.UseVisualStyleBackColor = true;
@@ -295,18 +305,20 @@ namespace LuteBot
             this.consoleDisplayPanel.Controls.Add(this.richTextBox1);
             this.consoleDisplayPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.consoleDisplayPanel.Location = new System.Drawing.Point(0, 0);
+            this.consoleDisplayPanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.consoleDisplayPanel.Name = "consoleDisplayPanel";
-            this.consoleDisplayPanel.Size = new System.Drawing.Size(150, 46);
+            this.consoleDisplayPanel.Size = new System.Drawing.Size(150, 58);
             this.consoleDisplayPanel.TabIndex = 0;
             // 
             // richTextBox1
             // 
             this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBox1.Location = new System.Drawing.Point(0, 0);
+            this.richTextBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
             this.richTextBox1.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBox1.Size = new System.Drawing.Size(150, 46);
+            this.richTextBox1.Size = new System.Drawing.Size(150, 58);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
@@ -314,6 +326,7 @@ namespace LuteBot
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 28);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -326,38 +339,40 @@ namespace LuteBot
             // 
             this.splitContainer1.Panel2.Controls.Add(this.consoleDisplayPanel);
             this.splitContainer1.Panel2Collapsed = true;
-            this.splitContainer1.Size = new System.Drawing.Size(626, 605);
+            this.splitContainer1.Size = new System.Drawing.Size(626, 763);
             this.splitContainer1.SplitterDistance = 447;
+            this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 0;
             // 
             // partitionPanel
             // 
             this.partitionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.partitionPanel.Location = new System.Drawing.Point(0, 0);
+            this.partitionPanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.partitionPanel.Name = "partitionPanel";
-            this.partitionPanel.Size = new System.Drawing.Size(626, 582);
+            this.partitionPanel.Size = new System.Drawing.Size(626, 734);
             this.partitionPanel.TabIndex = 15;
             // 
-            // autoEnableFlutesAbove50ToolStripMenuItem
+            // clearSettingsToolStripMenuItem
             // 
-            this.autoEnableFlutesAbove50ToolStripMenuItem.Name = "autoEnableFlutesAbove50ToolStripMenuItem";
-            this.autoEnableFlutesAbove50ToolStripMenuItem.Size = new System.Drawing.Size(294, 26);
-            this.autoEnableFlutesAbove50ToolStripMenuItem.Text = "Auto Enable Flutes Above 50%";
-            this.autoEnableFlutesAbove50ToolStripMenuItem.Click += new System.EventHandler(this.autoEnableFlutesAbove50ToolStripMenuItem_Click);
+            this.clearSettingsToolStripMenuItem.Name = "clearSettingsToolStripMenuItem";
+            this.clearSettingsToolStripMenuItem.Size = new System.Drawing.Size(306, 26);
+            this.clearSettingsToolStripMenuItem.Text = "Clear Offsets";
+            this.clearSettingsToolStripMenuItem.Click += new System.EventHandler(this.clearSettingsToolStripMenuItem_Click);
             // 
             // LuteBotForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(626, 633);
+            this.ClientSize = new System.Drawing.Size(626, 791);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(600, 500);
+            this.MinimumSize = new System.Drawing.Size(600, 613);
             this.Name = "LuteBotForm";
             this.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.Text = "LuteBot";
@@ -408,6 +423,7 @@ namespace LuteBot
         private ToolStripMenuItem forceAIReorderToolStripMenuItem;
         private ToolStripMenuItem withoutReorderingToolStripMenuItem;
         private ToolStripMenuItem autoEnableFlutesAbove50ToolStripMenuItem;
+        private ToolStripMenuItem clearSettingsToolStripMenuItem;
     }
 }
 

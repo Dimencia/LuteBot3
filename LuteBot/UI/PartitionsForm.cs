@@ -468,9 +468,9 @@ namespace LuteBot
             }
         }
 
-        private async Task<bool> SavePartition(string name, string filePath, bool overwrite = false, bool reorderTracks = false, bool autoEnableFlutes = false)
+        private async Task<bool> SavePartition(string name, string filePath, bool overwrite = false, bool reorderTracks = false, bool autoEnableFlutes = false, bool clearOffsets = false)
         {
-            var tsm = await LuteBotForm.Instance.LoadFile(filePath, reorderTracks, autoEnableFlutes).ConfigureAwait(false);
+            var tsm = await LuteBotForm.Instance.LoadFile(filePath, reorderTracks, autoEnableFlutes, clearOffsets).ConfigureAwait(false);
             return await SavePartition(name, tsm, overwrite).ConfigureAwait(false);
         }
 
@@ -552,14 +552,31 @@ namespace LuteBot
                             converter.SetDivision(((TicksPerQuarterNoteTimeDivision)dryWetFile.TimeDivision).TicksPerQuarterNote);
                             converter.SetPartitionTempo((int)dryWetFile.GetTempoMap().GetTempoAtTime(new MetricTimeSpan(0)).MicrosecondsPerQuarterNote);
                             converter.IsConversionEnabled = false;
+                            var validChannels = tsm.GetValidChannels();
+                            var validTracks = tsm.GetValidTracks();
+                            
+                            // We'll use whichever one has the most fidelity for ordering
+                            bool useChannels = TrackSelectionManager.ShouldUseChannels(validChannels, validTracks);
+
+                            MidiChannelItem[] channels;
+                            if (useChannels)
+                            {
+                                channels = validChannels;
+                            }
+                            else
+                            {
+                                channels = validTracks;
+                            }
+                            // Find the lowest tick for a valid note
+                            var lowestTick = validChannels.Concat(validTracks).SelectMany(c => c.GetActiveNotes(tsm)).Min(n => n.tickNumber);
+                            
                             foreach (var instrument in Instrument.Prefabs)
                             {
-                                var activeTracks = tsm.MidiTracks.Values.Where(t => t.Settings[instrument.Value.Id].Active && t.TickNotes.Any(tn => tn.Value.Any(n => n.active && tsm.MidiChannels.ContainsKey(n.channel) && tsm.MidiChannels[n.channel].Settings[instrument.Value.Id].Active))).OrderBy(t => t.Settings[instrument.Value.Id].Rank).ToList();
-                                for (int j = 0; j < activeTracks.Count; j++)
+                                foreach(var channel in channels.OrderBy(c => c.Settings[instrument.Value.Id].Rank))
                                 {
                                     var trackID = converter.AddTrack(instrument.Value.Id);
 
-                                    converter.FillTrack(trackID, instrument.Value, player.ExtractMidiContent(tsm, instrument.Value.Id, activeTracks[j].Id));
+                                    converter.FillTrack(trackID, instrument.Value, player.ExtractMidiContent(tsm, channel, instrument.Value.Id, lowestTick));
                                 }
                             }
 
@@ -735,11 +752,11 @@ namespace LuteBot
             }
         }
 
-        public async Task reloadAll(bool reorderTracks, bool autoEnableFlutes = false)
+        public async Task reloadAll(bool reorderTracks, bool autoEnableFlutes = false, bool clearOffsets = false)
         {
             var filenames = listBoxPartitions.Items.Cast<string>().Reverse().ToArray();
 
-            await AutoSaveFiles(filenames, true, reorderTracks, autoEnableFlutes).ConfigureAwait(false);
+            await AutoSaveFiles(filenames, true, reorderTracks, autoEnableFlutes, clearOffsets).ConfigureAwait(false);
         }
 
         private async void reloadSelectedButton_Click(object sender, EventArgs e)
@@ -752,7 +769,12 @@ namespace LuteBot
             }
         }
 
-        public async Task AutoSaveFiles(IEnumerable<string> filenames, bool overwrite = false, bool reorderTracks = false, bool autoEnableFlutes = false)
+        private string GetPartitionNameFromPath(string filePath)
+        {
+            return Regex.Replace(Path.GetFileName(filePath).Replace(".mid", ""), "[^a-zA-Z0-9 -]", "").TrimStart('-',' ').TrimEnd('-',' ');
+        }
+
+        public async Task AutoSaveFiles(IEnumerable<string> filenames, bool overwrite = false, bool reorderTracks = false, bool autoEnableFlutes = false, bool clearOffsets = false)
         {
             await this.InvokeAsync(() =>
             {
@@ -774,7 +796,7 @@ namespace LuteBot
                     }
                     try
                     {
-                        await SavePartition(Regex.Replace(Path.GetFileName(filePath).Replace(".mid", ""), "[^a-zA-Z0-9 ]", ""), filePath, overwrite, reorderTracks, autoEnableFlutes).ConfigureAwait(false);
+                        await SavePartition(GetPartitionNameFromPath(filePath), filePath, overwrite, reorderTracks, autoEnableFlutes, clearOffsets).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
