@@ -1,6 +1,12 @@
 Version 3.6.4
 
-- You should probably re-save your midis again, with Reorder.  Use Clear Offsets if you have lots of old midis that are pitched too high or too low
+*Warning:* This is a 'beta' version, probably less stable than most.  Backup your midis before doing any bulk re-saving, and be aware that Voice is broken in the included LuteMod 2.6.9 (but it has many other improvements)
+
+Basically I got caught up in work stuff before I could finish this completely, but it could be months before I mess with it again, and in the meantime you probably want the fixes, even with the caveats
+
+- If previously all your songs sounded bad, you should probably re-save your midis again, with Reorder, using the LuteMod menu at the top of LuteBot.  .  Use Clear Offsets if you have lots of old midis that are pitched too high or too low
+	- *Warning:* Something about this can sometimes make songs just be completely off-pitch, but I couldn't find out how or why.  Only use this if they already sound bad, and I think using Clear Offsets should resolve that issue (most songs sound fine at the default octaves, in recent lutebot versions that transpose better)
+	- Also it seems like if you adjust the position of any track or channel and re-save it, that also seems to fix it... if it happens
 
 - Rewrote pretty much everything with modern .Net 7 and thread safety; should fix many crashes, improve speed and rendering, and lets me use nice new features
 - Fixed crash when re-opening the Guild Library
@@ -9,22 +15,22 @@ Version 3.6.4
 - Fixed issue where auto-ordering, auto-selection, and sometimes lute settings as a whole were failing to save with the partition
 - Multi-threaded loading and saving partitions
 - Fixed some LuteBot transposition issues (it should no longer transpose at all, LuteMod does that)
-- Fixed some LuteMod transposition issues
-- Fixed/re-added making all LuteMod midis start at the first played note, with no empty space in front
+- Fixed some LuteMod transposition issues maybe (*Warning:* Something is still wrong with it.  Notes that are too low sometimes get transposed out of key...?  IDK.  But it's better than before, I think)
+- All partitions saved for LuteMod (with this version of LuteBot or above) now start at the first note, with no whitespace in front
 - Ordering can now be done on Channels
 - Flute auto-selection can now occur on Channels or Tracks, depending on which has the best percentages and most options
-- Added new setting on Instruments (you need to set it in `%appdata%/LuteBot/Config/Instruments.json` manually for now) to determine what percentages from the AI they should enable (when importing songs without settings, or forcing it to discard settings)
-	- Default: Lute 0% to 60%, Flute 50% to 100%
+- Added new setting on Instruments (you need to set it in `%appdata%/LuteBot/Config/Instruments.json` manually, if you want to change it, for now) to determine what percentages from the AI they should enable (when importing songs without settings, or forcing it to discard settings)
+	- Default: Lute 0% to 60%, Flute 50% to 100%; allows some overlap and usually does a decent job of splitting things
 - Added option to ignore old offsets when resaving
 - Removed Rust instruments
-- Normalized Flute Percentage results displays
+- Normalized Flute Percentage result displays (Not sure I love these, it's a bit less informative when the highest is always "100%")
 - Added right click menu to move the selected Partition(s) to the top of the list
 - When saving for LuteMod, chooses either channels or tracks for ordering, depending on which one has the most valid channels/tracks unchecked
-	So if you're checking and unchecking things in Tracks, the order of Tracks is what matters, and vice versa
+	So if you're checking and unchecking things in Tracks, the order of Tracks is what matters, and vice versa.  If you use both, it will only respect ordering of the one with the most entries modified... which is complicated, so avoid doing both for now.  Modify only tracks, or only channels
 		
 
 LuteMod 2.6.9
-	- Fixed issue with transposing low and high notes
+	- Fixed issue with transposing low and high notes (sort of; low notes still get weird sometimes)
 	- Fixed issues with note duplication and copying
 	- Fixed issue with note copying not respecting track order and prioritizing backwards
 	- Fixed accidentally deleting duplicate notes

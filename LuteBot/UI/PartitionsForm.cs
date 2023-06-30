@@ -203,18 +203,18 @@ namespace LuteBot
                     }).ConfigureAwait(false);
                 }
                 await LuteBotForm.Instance.TrackSelectionForm.InitLists(tsm).ConfigureAwait(false);
-                await this.InvokeAsync(() =>
-                {
-                    try
-                    {
-                        var test = new TestPianoRollForm(tsm);
-                        test.Show();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.Write(ex);
-                    }
-                }).ConfigureAwait(false);
+                //await this.InvokeAsync(() =>
+                //{
+                //    try
+                //    {
+                //        var test = new TestPianoRollForm(tsm);
+                //        test.Show();
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        Console.Write(ex);
+                //    }
+                //}).ConfigureAwait(false);
                 
             }
             else
