@@ -23,15 +23,14 @@ Version 3.6.4
 	So if you're checking and unchecking things in Tracks, the order of Tracks is what matters, and vice versa
 		
 
-LuteMod 2.6.4
+LuteMod 2.6.9
 	- Fixed issue with transposing low and high notes
-	- Fixed issue with note duplication being probably completely broken before
-		Duplicated notes are added before removal of old notes and at very low priority, so they should only play if nothing else is playing
-	- Fixed issue with note copying not respecting track order and prioritizing backwards, and deleting duplicate notes
+	- Fixed issues with note duplication and copying
+	- Fixed issue with note copying not respecting track order and prioritizing backwards
+	- Fixed accidentally deleting duplicate notes
 	- Fixed issue with not properly detecting the owner of a chat message
-	- Turned on Duplication by default, it normalizes volume a bit and otherwise doesn't interfere
 	- Startup message now instructs you to start a local match to configure LuteMod (or to enter ~Help if already in a local match)
-	
+	- Broke Voice - woops.  It was nerfed in the recent patch anyway, this will do for now
 			
-Note: If something is wrong with the LuteBot changes, you can copy LuteMod 2.64 into your CustomPaks folder to keep its updates
+Note: If something is wrong with the LuteBot changes, you can copy LuteMod 2.69 into your CustomPaks folder to keep its updates
 If you don't like the neural network, you can always replace the `channelNeural` file near your LuteBot.exe to an older version, or train your own

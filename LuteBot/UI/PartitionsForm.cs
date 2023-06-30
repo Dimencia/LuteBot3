@@ -11,6 +11,7 @@ using System.IO.Compression;
 using System.Diagnostics;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
+using LuteBot.UI.PianoRoll;
 
 namespace LuteBot
 {
@@ -202,6 +203,19 @@ namespace LuteBot
                     }).ConfigureAwait(false);
                 }
                 await LuteBotForm.Instance.TrackSelectionForm.InitLists(tsm).ConfigureAwait(false);
+                await this.InvokeAsync(() =>
+                {
+                    try
+                    {
+                        var test = new TestPianoRollForm(tsm);
+                        test.Show();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Write(ex);
+                    }
+                }).ConfigureAwait(false);
+                
             }
             else
             {
@@ -307,7 +321,9 @@ namespace LuteBot
                 }
             }).ConfigureAwait(false);
             if (filePath != null)
+            {
                 await LoadTrackSelectionForMidi(filePath).ConfigureAwait(false);
+            }
         }
 
         private async void PartitionIndexBox_MouseDown(object sender, MouseEventArgs e)
