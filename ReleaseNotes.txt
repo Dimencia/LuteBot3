@@ -1,8 +1,10 @@
 Version 3.6.4
 
-*Warning:* This is a 'beta' version, probably less stable than most.  Backup your midis before doing any bulk re-saving, and be aware that Voice is broken in the included LuteMod 2.6.9 (but it has many other improvements)
+*Warning:* This is a 'beta' version of LuteBot, probably less stable than most.  Backup your midis before doing any bulk re-saving, and be aware that Voice is broken in the included LuteMod 2.6.9 (but it has many other improvements)
+(The LuteMod version is pretty solid, though, except the broken voice and issue with mirror-duplication... but I haven't really finalized it, there may still be some debug stuff in there)
 
-Basically I got caught up in work stuff before I could finish this completely, but it could be months before I mess with it again, and in the meantime you probably want the fixes, even with the caveats
+Basically I got caught up in work stuff before I could finish this completely and then stopped wanting to code in my free time for a bit, and it could be months before I mess with it again.
+So I figured I should release what I have, because I've been using it and it's definitely an improvement in a lot of ways, and it works reasonably well for me.  So you guys might want it, even if it's a little unpolished
 
 - If previously all your songs sounded bad, you should probably re-save your midis again, with Reorder, using the LuteMod menu at the top of LuteBot.  .  Use Clear Offsets if you have lots of old midis that are pitched too high or too low
 	- *Warning:* Something about this can sometimes make songs just be completely off-pitch, but I couldn't find out how or why.  Only use this if they already sound bad, and I think using Clear Offsets should resolve that issue (most songs sound fine at the default octaves, in recent lutebot versions that transpose better)
@@ -28,15 +30,19 @@ Basically I got caught up in work stuff before I could finish this completely, b
 - When saving for LuteMod, chooses either channels or tracks for ordering, depending on which one has the most valid channels/tracks unchecked
 	So if you're checking and unchecking things in Tracks, the order of Tracks is what matters, and vice versa.  If you use both, it will only respect ordering of the one with the most entries modified... which is complicated, so avoid doing both for now.  Modify only tracks, or only channels
 		
-
-LuteMod 2.6.9
-	- Fixed issue with transposing low and high notes (sort of; low notes still get weird sometimes)
-	- Fixed issues with note duplication and copying
+LuteMod 2.6.4
+	- Fixed issue with transposing low and high notes, I think (sort of; low notes still get weird sometimes)
+	- Fixed issue with note duplication being probably completely broken before
+	- Made duplicated notes have the same priority they started with, ensuring duplicate makes your songs twice as loud (Note: they may be less complex while duplicating, but it's usually worth it)
 	- Fixed issue with note copying not respecting track order and prioritizing backwards
 	- Fixed accidentally deleting duplicate notes
 	- Fixed issue with not properly detecting the owner of a chat message
+	- Turned on Duplication by default, it normalizes volume a bit and otherwise doesn't interfere
 	- Startup message now instructs you to start a local match to configure LuteMod (or to enter ~Help if already in a local match)
-	- Broke Voice - woops.  It was nerfed in the recent patch anyway, this will do for now
+	- *Warning:* Bug: If Duplication is on for two of the same instrument during mirroring, it will duplicate the last played note endlessly.  Turn it off for lute, if you're mirroring and you have two lutes
+		- This isn't fixed yet in 2.6.9 either...
+	- Bug: - Broke Voice - woops.  It was nerfed in the recent patch anyway, this will do for now
+
 			
-Note: If something is wrong with the LuteBot changes, you can copy LuteMod 2.69 into your CustomPaks folder to keep its updates
+Note: If something is wrong with the LuteBot changes but you want the LuteMod changes, you can copy LuteMod 2.69 into your CustomPaks folder to keep its updates
 If you don't like the neural network, you can always replace the `channelNeural` file near your LuteBot.exe to an older version, or train your own
