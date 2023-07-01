@@ -35,8 +35,8 @@ jobs:
           uses: thedoctor0/zip-release@0.7.1
           with:
             type: 'zip'
-            filename: '$GITHUB_WORKSPACE/LuteBot${{steps.versionReader.outputs.VERSION}}.zip'
-            directory: 'LuteBot/bin/Release/net7.0-windows'
+            filename: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
+            path: 'LuteBot/bin/Release/net7.0-windows'
             exclusions: '*.git* /*node_modules/* .editorconfig *.application'
 
         - name: Create github Release
