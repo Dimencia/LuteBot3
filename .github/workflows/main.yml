@@ -30,13 +30,14 @@ jobs:
 
         - name: Build Solution
           run: dotnet build LuteBot.sln --configuration Release --no-restore
-        - name: Remove app file
-          run: del LuteBot/bin/Release/net7.0-windows/LuteBot.application
 
-        - name: Zip Solution
-          uses: montudor/action-zip@v1
+        - name: Archive Release
+          uses: thedoctor0/zip-release@0.7.1
           with:
-            args: zip -qq -r LuteBot${{steps.versionReader.outputs.VERSION}}.zip LuteBot/bin/Release/net7.0-windows
+            type: 'zip'
+            filename: 'LuteBot${{steps.versionReader.outputs.VERSION}}.zip'
+            directory: 'LuteBot/bin/Release/net7.0-windows'
+            exclusions: '*.git* /*node_modules/* .editorconfig *.application'
 
         - name: Create github Release
           id: create_release
