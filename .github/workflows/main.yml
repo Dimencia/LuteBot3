@@ -21,15 +21,15 @@ jobs:
           run: |
             set /p Version=<Version.txt
             echo ::set-output name=VERSION::%Version%
-
-        - name: Restore Packages
-          run: nuget restore LuteBot.sln
           
         - name: Restore Solution
           run: dotnet restore LuteBot.sln
+          
+        - name: Restore Packages
+          run: nuget restore LuteBot.sln
 
         - name: Build Solution
-          run: dotnet build LuteBot.sln
+          run: dotnet build LuteBot.sln --configuration Release --no-restore
         - name: Remove app file
           run: del LuteBot/bin/Release/net7.0-windows/LuteBot.application
 
