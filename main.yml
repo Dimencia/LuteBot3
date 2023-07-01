@@ -6,10 +6,12 @@ jobs:
         runs-on: windows-latest
         steps:
         - name: Checkout
-          uses: actions/checkout@v2
-
-        - name: Setup MSBuild
-          uses: microsoft/setup-msbuild@v1
+          - uses: actions/checkout@v3
+          
+        - name: Setup .Net
+          uses: actions/setup-dotnet@v3
+          with:
+            dotnet-version: '7.0'
 
         - name: Setup NuGet
           uses: NuGet/setup-nuget@v1.0.5
@@ -27,14 +29,13 @@ jobs:
           run: nuget restore LuteBot.sln
 
         - name: Build Solution
-          run: |
-            msbuild.exe LuteBot.sln /p:platform="Any CPU" /p:configuration="Release"
-            del LuteBot/bin/Release/LuteBot.application
+          run: dotnet build LuteBot.sln
+          run: del LuteBot/bin/Release/net7.0-windows/LuteBot.application
 
         - name: Zip Solution
           uses: montudor/action-zip@v1
           with:
-            args: zip -qq -r LuteBot${{steps.versionReader.outputs.VERSION}}.zip LuteBot/bin/Release
+            args: zip -qq -r LuteBot${{steps.versionReader.outputs.VERSION}}.zip LuteBot/bin/Release/net7.0-windows
 
         - name: Create github Release
           id: create_release
