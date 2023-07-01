@@ -6,7 +6,7 @@ jobs:
         runs-on: windows-latest
         steps:
         - name: Checkout
-          - uses: actions/checkout@v3
+          uses: actions/checkout@v3
           
         - name: Setup .Net
           uses: actions/setup-dotnet@v3
@@ -30,6 +30,7 @@ jobs:
 
         - name: Build Solution
           run: dotnet build LuteBot.sln
+        - name: Remove app file
           run: del LuteBot/bin/Release/net7.0-windows/LuteBot.application
 
         - name: Zip Solution
