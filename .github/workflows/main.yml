@@ -15,18 +15,18 @@ jobs:
 
         - name: Navigate to Workspace
           run: cd $GITHUB_WORKSPACE
-
-        - name: Get version
-          id: versionReader
-          run: |
-            set /p Version=<Version.txt
-            echo ::set-output name=VERSION::%Version%
           
         - name: Restore Solution
           run: dotnet restore LuteBot.sln
           
         - name: Restore Packages
           run: nuget restore LuteBot.sln
+
+        - name: Get version
+          id: versionReader
+          run: |
+            set /p Version=<Version.txt
+            echo ::set-output name=VERSION::%Version%
 
         - name: Build Solution
           run: dotnet build LuteBot.sln --configuration Release --no-restore
