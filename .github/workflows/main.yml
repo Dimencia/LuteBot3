@@ -1,16 +1,17 @@
 on:
     push:
         branches: [master]
-         
 jobs:
     build:
-        runs-on: windows-2019
+        runs-on: windows-latest
         steps:
         - name: Checkout
-          uses: actions/checkout@v2
-
-        - name: Setup MSBuild
-          uses: microsoft/setup-msbuild@v1
+          - uses: actions/checkout@v3
+          
+        - name: Setup .Net
+          uses: actions/setup-dotnet@v3
+          with:
+            dotnet-version: '7.0'
 
         - name: Setup NuGet
           uses: NuGet/setup-nuget@v1.0.5
@@ -19,43 +20,22 @@ jobs:
           run: cd $GITHUB_WORKSPACE
 
         - name: Get version
-          id: getv
-          run: echo "::set-output name=version::$(Get-Content Version.txt)"
-
-           
-        - name: Create Code Signing Certificate
+          id: versionReader
           run: |
-            New-Item -ItemType directory -Path certificate
-            Set-Content -Path certificate\certificate.txt -Value '${{ secrets.SIGNINGKEY }}'
-            certutil -decode certificate\certificate.txt certificate\certificate.pfx
+            set /p Version=<Version.txt
+            echo ::set-output name=VERSION::%Version%
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
 
         - name: Build Solution
-          run: |
-            echo Version: ${{ steps.getv.outputs.version }}
-            msbuild.exe LuteBot.sln /p:platform="Any CPU" /p:configuration="Release"
-            
-        - name: Code Sign SimpleML
-          run: |
-            & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /f certificate\certificate.pfx /p '${{ secrets.CERTIFICATE_PASS }}' /t http://timestamp.comodoca.com/authenticode LuteBot\bin\Release\lib\SimpleML.dll
-            
-        - name: Code Sign LuteBot
-          run: |
-            & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /f certificate\certificate.pfx /p '${{ secrets.CERTIFICATE_PASS }}' /t http://timestamp.comodoca.com/authenticode LuteBot\bin\Release\LuteBot.exe
-
-        - name: Code Sign Updater
-          run: |
-            & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /f certificate\certificate.pfx /p '${{ secrets.CERTIFICATE_PASS }}' /t http://timestamp.comodoca.com/authenticode LuteBot\bin\Release\LuteBotUpdater.exe
+          run: dotnet build LuteBot.sln
+          run: del LuteBot/bin/Release/net7.0-windows/LuteBot.application
 
         - name: Zip Solution
-          uses: thedoctor0/zip-release@main
+          uses: montudor/action-zip@v1
           with:
-            directory: LuteBot/bin/Release
-            type: zip
-            filename: "./LuteBot.${{ steps.getv.outputs.version }}.zip"
-            exclusions: "*.pdb /app.publish/* *.application"
+            args: zip -qq -r LuteBot${{steps.versionReader.outputs.VERSION}}.zip LuteBot/bin/Release/net7.0-windows
 
         - name: Create github Release
           id: create_release
@@ -63,21 +43,19 @@ jobs:
           env: 
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
-              tag_name: v${{ steps.getv.outputs.version }}
-              release_name: LuteBot v${{ steps.getv.outputs.version }}
+              tag_name: v${{ steps.versionReader.outputs.VERSION }}
+              release_name: LuteBot v${{ steps.versionReader.outputs.VERSION }}
               draft: true
               prerelease: false
-              body_path: ReleaseNotes.txt
         - name: Upload release
           uses: actions/upload-release-asset@v1.0.1
           env: 
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
               upload_url: ${{ steps.create_release.outputs.upload_url }}
-              asset_path: LuteBot/bin/Release/LuteBot.${{ steps.getv.outputs.version }}.zip
-              asset_name: LuteBot.${{ steps.getv.outputs.version }}.zip
+              asset_path: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
+              asset_name: LuteBot${{steps.versionReader.outputs.VERSION}}.zip
               asset_content_type: application/zip
-
         - name: Publish release
           uses: eregon/publish-release@v1
           env:
