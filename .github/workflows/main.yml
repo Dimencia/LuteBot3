@@ -13,9 +13,6 @@ jobs:
           with:
             dotnet-version: '7.0'
 
-        - name: Setup NuGet
-          uses: NuGet/setup-nuget@v1.0.5
-
         - name: Navigate to Workspace
           run: cd $GITHUB_WORKSPACE
 
