@@ -24,6 +24,9 @@ jobs:
 
         - name: Restore Packages
           run: nuget restore LuteBot.sln
+          
+        - name: Restore Solution
+          run: dotnet restore LuteBot.sln
 
         - name: Build Solution
           run: dotnet build LuteBot.sln
