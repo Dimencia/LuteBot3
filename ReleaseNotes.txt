@@ -1,3 +1,6 @@
+Version 3.6.5
+- Fixed issue with wrong lutemod version making installs fail
+
 Version 3.6.4
 
 *Warning:* This is a 'beta' version of LuteBot, probably less stable than most.  Backup your midis before doing any bulk re-saving, and be aware that Voice is broken in the included LuteMod 2.6.9 (but it has many other improvements)
@@ -40,7 +43,6 @@ LuteMod 2.6.4
 	- Turned on Duplication by default, it normalizes volume a bit and otherwise doesn't interfere
 	- Startup message now instructs you to start a local match to configure LuteMod (or to enter ~Help if already in a local match)
 	- *Warning:* Bug: If Duplication is on for two of the same instrument during mirroring, it will duplicate the last played note endlessly.  Turn it off for lute, if you're mirroring and you have two lutes
-		- This isn't fixed yet in 2.6.9 either...
 	- Bug: - Broke Voice - woops.  It was nerfed in the recent patch anyway, this will do for now
 
 			

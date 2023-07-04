@@ -28,7 +28,7 @@ namespace LuteBot
         public string currentTrackName { get; set; } = "";
 
         private const string musicNameLabelHeader = "Loaded: ";
-        private static string lutemodPakName = "FLuteMod_2.64.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
+        private static string lutemodPakName = "FLuteMod_2.69.pak"; // TODO: Get this dynamically or something.  Really, get the file itself from github, but this will do for now
 
         private static string loaderPakName = "AutoLoaderWindowsClient.pak";
         private static string partitionIndexName = "PartitionIndex[0].sav";
